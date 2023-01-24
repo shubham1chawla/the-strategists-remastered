@@ -1,14 +1,21 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import "./App.css";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+
+import Login from "./components/Login";
+import Dashboard from "./components/Dashboard";
+import NotFound from "./components/NotFound";
 
 function App() {
   return (
-    <div className="App">
-      <h1 className="text-3xl font-bold underline">
-        Hello world!
-      </h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="login" element={<Login />} />
+        <Route path="" element={<Navigate to="/dashboard" />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
