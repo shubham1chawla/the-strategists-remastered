@@ -1,17 +1,11 @@
-import React, { Component } from "react";
+import React from "react";
 
-class NotFound extends Component {
-  static propTypes: {};
-
-  render() {
+const NotFound = () => {
     return (
       <div>
         <h1>Oops Page Not Found</h1>
       </div>
     );
-  }
 }
-
-NotFound.propTypes = {};
 
 export default NotFound;
