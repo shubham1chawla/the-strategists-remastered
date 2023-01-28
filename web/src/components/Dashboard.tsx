@@ -1,5 +1,5 @@
 import React from "react";
-import { Typography } from 'antd';
+import { Typography } from "antd";
 
 const { Text } = Typography;
 
@@ -10,7 +10,9 @@ type DashboardProps = {
 const Dashboard = ({ user }: DashboardProps) => {
   return (
     <div>
-        <h5>Hello <Text mark>{user}</Text>! This is Dashboard Component</h5>
+      <h5>
+        Hello <Text mark>{user}</Text>! This is Dashboard Component
+      </h5>
     </div>
   );
 };
