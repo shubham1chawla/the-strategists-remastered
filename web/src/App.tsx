@@ -6,7 +6,6 @@ import Dashboard from "./components/Dashboard";
 import Login from "./components/Login";
 import NotFound from "./components/NotFound";
 
-
 const App = () => {
   return (
     <BrowserRouter>
