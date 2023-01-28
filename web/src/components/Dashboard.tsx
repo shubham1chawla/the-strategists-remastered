@@ -1,4 +1,7 @@
 import React from "react";
+import { Typography } from 'antd';
+
+const { Text } = Typography;
 
 type DashboardProps = {
   user: string;
@@ -7,7 +10,7 @@ type DashboardProps = {
 const Dashboard = ({ user }: DashboardProps) => {
   return (
     <div>
-        <h1>Hello <span className="text-red-700">{user}</span>! This is Dashboard Component</h1>
+        <h5>Hello <Text mark>{user}</Text>! This is Dashboard Component</h5>
     </div>
   );
 };
