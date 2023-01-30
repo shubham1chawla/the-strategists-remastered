@@ -1,10 +1,10 @@
-import React from "react";
-import "./App.css";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import React from 'react';
+import './App.css';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
-import Dashboard from "./components/Dashboard";
-import Login from "./components/Login";
-import NotFound from "./components/NotFound";
+import Dashboard from './components/Dashboard';
+import Login from './components/Login';
+import NotFound from './components/NotFound';
 
 const App = () => {
   return (
