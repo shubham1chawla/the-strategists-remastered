@@ -1,20 +1,31 @@
 import React from 'react';
-import { Typography } from 'antd';
+import { Col, Row } from 'antd';
+import Map from './Map';
+import PlayerDashboard from './PlayerDashboard';
 
-const { Text } = Typography;
-
-type DashboardProps = {
-  user: string;
+const Dashboard = () => {
+  return (
+    <Row style={dashboardContainer}>
+      <Col style={mapStyle} flex="75%">
+        <Map />
+      </Col>
+      <Col style={dashboardStyle} flex="25%">
+        <PlayerDashboard />
+      </Col>
+    </Row>
+  );
 };
 
-const Dashboard = ({ user }: DashboardProps) => {
-  return (
-    <div>
-      <h5>
-        Hello <Text mark>{user}</Text>! This is Dashboard Component
-      </h5>
-    </div>
-  );
+const mapStyle: React.CSSProperties = {
+  backgroundColor: '#3ba0e9',
+};
+
+const dashboardStyle: React.CSSProperties = {
+  backgroundColor: '#7dbcea',
+};
+
+const dashboardContainer: React.CSSProperties = {
+  height: '100vh',
 };
 
 export default Dashboard;
