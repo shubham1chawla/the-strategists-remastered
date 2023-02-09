@@ -16,7 +16,7 @@ import lombok.Data;
 @Table(name = "cheats")
 public class Cheat {
 
-	enum Type {
+	public enum Type {
 		CASH, MOVE, LIFE;
 	}
 

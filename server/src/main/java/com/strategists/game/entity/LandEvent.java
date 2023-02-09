@@ -1,7 +1,8 @@
 package com.strategists.game.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.AssociationOverride;
-import javax.persistence.AssociationOverrides;
 import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
@@ -14,14 +15,11 @@ import lombok.Data;
 @Data
 @Entity
 @Table(name = "lands_events")
-@AssociationOverrides({
-		//
-		@AssociationOverride(name = "pk.land", joinColumns = @JoinColumn(name = "landId")),
-		//
-		@AssociationOverride(name = "pk.event", joinColumns = @JoinColumn(name = "eventId"))
-		//
-})
-public class LandEvent {
+@AssociationOverride(name = "pk.land", joinColumns = @JoinColumn(name = "landId"))
+@AssociationOverride(name = "pk.event", joinColumns = @JoinColumn(name = "eventId"))
+public class LandEvent implements Serializable {
+
+	private static final long serialVersionUID = -458918820184295751L;
 
 	@EmbeddedId
 	private LandEventId pk = new LandEventId();
@@ -40,6 +38,16 @@ public class LandEvent {
 	@Transient
 	public Event getEvent() {
 		return pk.getEvent();
+	}
+
+	@Transient
+	public Long getLandId() {
+		return getLand().getId();
+	}
+
+	@Transient
+	public Long getEventId() {
+		return getEvent().getId();
 	}
 
 }
