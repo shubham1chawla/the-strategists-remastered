@@ -80,7 +80,7 @@ public class Player implements Serializable {
 	@Transient
 	public double getNetWorth() {
 		return cash + (Objects.isNull(playerLands) ? 0d
-				: playerLands.stream().mapToDouble(pl -> pl.getLand().getMarketValue() + (pl.getOwnership() / 100))
+				: playerLands.stream().mapToDouble(pl -> pl.getLand().getMarketValue() * (pl.getOwnership() / 100))
 						.sum());
 	}
 
