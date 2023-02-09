@@ -1,5 +1,7 @@
 package com.strategists.game.entity;
 
+import java.io.Serializable;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -9,6 +11,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,13 +21,15 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @Table(name = "logs")
-public class Log {
+public class Log implements Serializable {
+
+	private static final long serialVersionUID = -6960667863521865520L;
 
 	@AllArgsConstructor
 	enum Type {
 
 		// Player 1 bought 10% of Land 1 for $200.
-		BUY("%s bought %s% of %s for $%s."),
+		BUY("%s bought %s%% of %s for $%s."),
 
 		// Player 1 paid $100 rent to Player 2 for Land 1.
 		RENT("%s paid $%s rent to %s for %s."),
@@ -81,6 +87,7 @@ public class Log {
 		}
 	}
 
+	@JsonValue
 	public String toString() {
 		switch (type) {
 		case BUY:
@@ -127,7 +134,7 @@ public class Log {
 	}
 
 	public static Log ofTrade(String releaser, double percent, String land, String receiver, double amount) {
-		return new Log(Type.TRADE, releaser, Double.toHexString(percent), land, receiver, Double.toString(amount));
+		return new Log(Type.TRADE, releaser, Double.toString(percent), land, receiver, Double.toString(amount));
 	}
 
 }
