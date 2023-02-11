@@ -19,14 +19,18 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.springframework.util.Assert;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @Entity
+@NoArgsConstructor
 @Table(name = "players")
 public class Player implements Serializable {
 
@@ -36,6 +40,14 @@ public class Player implements Serializable {
 		ACTIVE, DEAD, JAIL;
 	}
 
+	public Player(String username, double cash) {
+		Assert.hasText(username, "Username can't be empty!");
+		Assert.isTrue(cash > 0, "Cash can't be negative!");
+
+		this.username = username;
+		this.cash = cash;
+	}
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -43,21 +55,21 @@ public class Player implements Serializable {
 	@Column(nullable = false, unique = true)
 	private String username;
 
-	@Column(nullable = false)
-	private Integer index;
-
 	@Column(nullable = false, precision = 2)
 	private Double cash;
 
-	@Column(nullable = false, columnDefinition = "VARCHAR(6) DEFAULT 'ACTIVE'")
+	@Column(nullable = true, columnDefinition = "INTEGER DEFAULT 0")
+	private Integer index = 0;
+
+	@Column(nullable = true, columnDefinition = "VARCHAR(6) DEFAULT 'ACTIVE'")
 	@Enumerated(EnumType.STRING)
-	private State state;
+	private State state = State.ACTIVE;
 
-	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
-	private boolean turn;
+	@Column(nullable = true, columnDefinition = "BOOLEAN DEFAULT FALSE")
+	private boolean turn = false;
 
-	@Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
-	private Integer remainingJailLife;
+	@Column(nullable = true, columnDefinition = "INTEGER DEFAULT 0")
+	private Integer remainingJailLife = 0;
 
 	@JsonProperty("investments")
 	@JsonIgnoreProperties({ "pk", "player", "land", "playerId" })
