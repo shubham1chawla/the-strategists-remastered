@@ -10,4 +10,8 @@ public interface LandService {
 
 	int getCount();
 
+	Land getLandByIndex(int index);
+	
+	void hostEvent(long landId, long eventId, int life, int level);
+
 }

@@ -19,5 +19,7 @@ public interface PlayerService {
 	void movePlayer(int move);
 
 	void nextPlayer();
+	
+	void buyLand(double ownership);
 
 }

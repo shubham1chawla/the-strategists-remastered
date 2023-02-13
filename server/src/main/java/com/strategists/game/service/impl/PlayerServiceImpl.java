@@ -3,15 +3,17 @@ package com.strategists.game.service.impl;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
+import com.strategists.game.entity.Player.State;
 import com.strategists.game.repository.PlayerRepository;
-import com.strategists.game.service.GameService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 
@@ -29,9 +31,6 @@ public class PlayerServiceImpl implements PlayerService {
 	@Autowired
 	private LandService landService;
 
-	@Autowired
-	private GameService gameService;
-
 	@Override
 	public List<Player> getPlayers() {
 		return playerRepository.findAll();
@@ -39,8 +38,6 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Override
 	public Player addPlayer(String username, double cash) {
-		Assert.state(gameService.isLobbyState(), "Can't add players to active game!");
-
 		log.info("Checking if {} username exists...", username);
 		Assert.isTrue(!playerRepository.existsByUsername(username), username + " username already exists!");
 
@@ -50,15 +47,12 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Override
 	public void kickPlayer(long id) {
-		Assert.state(gameService.isLobbyState(), "Can't kick players in active game!");
-
 		try {
 			playerRepository.deleteById(id);
+			log.info("Kicked player with ID: {}", id);
 		} catch (EmptyResultDataAccessException ex) {
 			// suppress exception
 		}
-
-		log.info("Kicked player with ID: {}", id);
 	}
 
 	@Override
@@ -99,7 +93,7 @@ public class PlayerServiceImpl implements PlayerService {
 		Assert.state(playerRepository.existsByTurn(true), "No player has the turn!");
 
 		log.info("Assigning turn to the next player...");
-		final List<Player> players = getPlayers();
+		final List<Player> players = playerRepository.findByStateIn(Set.of(State.ACTIVE, State.JAIL));
 		int index = -1;
 		for (int i = 0; i < players.size(); i++) {
 			final Player player = players.get(i);
@@ -116,6 +110,21 @@ public class PlayerServiceImpl implements PlayerService {
 		playerRepository.save(player);
 
 		log.info("Assigned turn to {}.", player.getUsername());
+	}
+
+	@Override
+	public void buyLand(double ownership) {
+		final Player player = getCurrentPlayer();
+		final Land land = landService.getLandByIndex(player.getIndex());
+		final double buyAmount = land.getMarketValue() * (ownership / 100);
+
+		Assert.isTrue(land.getTotalOwnership() + ownership <= 100, "Can't buy more than 100% of a land!");
+		Assert.isTrue(player.getCash() > buyAmount, "You don't have enough cash to buy this land!");
+
+		player.addLand(land, ownership, buyAmount);
+		playerRepository.save(player);
+
+		log.info("Player {} invested in {}.", player.getUsername(), land.getName());
 	}
 
 }
