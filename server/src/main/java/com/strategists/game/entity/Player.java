@@ -1,10 +1,9 @@
 package com.strategists.game.entity;
 
 import java.io.Serializable;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -20,6 +19,7 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -55,6 +55,11 @@ public class Player implements Serializable {
 	@Column(nullable = false, unique = true)
 	private String username;
 
+	/**
+	 * Player's cash will be dynamically calculated based on their investments.
+	 * Check {@link Player#getCash()} for details.
+	 */
+	@JsonIgnore
 	@Column(nullable = false, precision = 2)
 	private Double cash;
 
@@ -71,29 +76,36 @@ public class Player implements Serializable {
 	@Column(nullable = true, columnDefinition = "INTEGER DEFAULT 0")
 	private Integer remainingJailLife = 0;
 
-	@JsonProperty("investments")
+	@JsonProperty("lands")
 	@JsonIgnoreProperties({ "pk", "player", "land", "playerId" })
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.player", cascade = CascadeType.ALL)
 	private List<PlayerLand> playerLands;
 
 	/**
-	 * This field is not accessible by default. It's made public when an API call
-	 * explicitly ask for a player's investments.
+	 * Transient field that calculate player's current cash based on their
+	 * investments.
 	 * 
 	 * @return
 	 */
-	@JsonIgnore
+	@JsonProperty("cash")
 	@Transient
-	public List<Land> getInvestments() {
-		return Objects.isNull(playerLands) ? Collections.emptyList()
-				: playerLands.stream().map(PlayerLand::getLand).collect(Collectors.toList());
+	public double getCash() {
+		return cash - (CollectionUtils.isEmpty(playerLands) ? 0d
+				: playerLands.stream().mapToDouble(PlayerLand::getBuyAmount).sum());
 	}
 
 	@Transient
 	public double getNetWorth() {
-		return cash + (Objects.isNull(playerLands) ? 0d
+		return getCash() + (CollectionUtils.isEmpty(playerLands) ? 0d
 				: playerLands.stream().mapToDouble(pl -> pl.getLand().getMarketValue() * (pl.getOwnership() / 100))
 						.sum());
+	}
+
+	public void addLand(Land land, double ownership, double buyAmount) {
+		if (Objects.isNull(playerLands)) {
+			this.playerLands = new ArrayList<>();
+		}
+		this.playerLands.add(new PlayerLand(this, land, ownership, buyAmount));
 	}
 
 }

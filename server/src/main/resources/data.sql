@@ -1,8 +1,3 @@
-INSERT INTO LOGS (TYPE, VAL1, VAL2, VAL3, VAL4, VAL5)
-VALUES
-('BUY', 'SHUBHAM', '10.0', 'One', '200', null),
-('JAIL', 'UJJWAL', null, null, null, null);
-
 INSERT INTO CHEATS (CODE, TYPE, AMOUNT, LIFE) 
 VALUES 
 ('CASH100', 'CASH', 100, 3),
@@ -22,9 +17,3 @@ VALUES
 ('Earthquake', -2),
 ('FIFA', 4),
 ('Magic', 5);
-
-INSERT INTO LANDS_EVENTS (LAND_ID, EVENT_ID, LIFE, LEVEL)
-VALUES
-(1, 2, 7, 8),
-(3, 3, 5, 10),
-(4, 4, 10, 8);

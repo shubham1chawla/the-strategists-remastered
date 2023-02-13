@@ -1,10 +1,9 @@
 package com.strategists.game.entity;
 
 import java.io.Serializable;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -63,7 +62,7 @@ public class Land implements Serializable {
 	@Column(nullable = false, precision = 2)
 	private Double baseValue;
 
-	@JsonProperty("owners")
+	@JsonProperty("players")
 	@JsonIgnoreProperties({ "pk", "player", "land", "landId" })
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.land", cascade = CascadeType.ALL)
 	private List<PlayerLand> playerLands;
@@ -72,19 +71,6 @@ public class Land implements Serializable {
 	@JsonIgnoreProperties({ "pk", "land", "event", "landId" })
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.land", cascade = CascadeType.ALL)
 	private List<LandEvent> landEvents;
-
-	/**
-	 * This field is not accessible by default. It's made public when an API call
-	 * explicitly ask for a land's owners.
-	 * 
-	 * @return
-	 */
-	@JsonIgnore
-	@Transient
-	public List<Player> getOwners() {
-		return Objects.isNull(playerLands) ? Collections.emptyList()
-				: playerLands.stream().map(PlayerLand::getPlayer).collect(Collectors.toList());
-	}
 
 	@Transient
 	public double getMarketValue() {
@@ -108,6 +94,13 @@ public class Land implements Serializable {
 		return Objects.isNull(landEvents) ? 0d
 				: landEvents.stream()
 						.mapToDouble(le -> DAMPENER * le.getEvent().getFactor() * le.getLevel() * le.getLife()).sum();
+	}
+
+	public void addEvent(Event event, int life, int level) {
+		if (Objects.isNull(landEvents)) {
+			this.landEvents = new ArrayList<>();
+		}
+		this.landEvents.add(new LandEvent(this, event, life, level));
 	}
 
 }
