@@ -2,15 +2,18 @@ import React from 'react';
 import { Col, Row } from 'antd';
 import Map from './Map';
 import PlayerDashboard from './PlayerDashboard';
+import AdminDashboard from './AdminDashboard';
+import { useSelector } from 'react-redux';
 
 const Dashboard = () => {
+  const isAdmin = useSelector((state: any) => state.game.user === 'admin');
   return (
     <Row style={dashboardContainer}>
       <Col style={mapStyle} flex="75%">
         <Map />
       </Col>
       <Col style={dashboardStyle} flex="25%">
-        <PlayerDashboard />
+        {isAdmin ? <AdminDashboard /> : <PlayerDashboard />}
       </Col>
     </Row>
   );
