@@ -27,6 +27,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.val;
 
 @Data
 @Entity
@@ -76,6 +78,7 @@ public class Player implements Serializable {
 	@Column(nullable = true, columnDefinition = "INTEGER DEFAULT 0")
 	private Integer remainingJailLife = 0;
 
+	@ToString.Exclude
 	@JsonProperty("lands")
 	@JsonIgnoreProperties({ "pk", "player", "land", "playerId" })
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.player", cascade = CascadeType.ALL)
@@ -102,10 +105,14 @@ public class Player implements Serializable {
 	}
 
 	public void addLand(Land land, double ownership, double buyAmount) {
-		if (Objects.isNull(playerLands)) {
-			this.playerLands = new ArrayList<>();
+		playerLands = Objects.isNull(playerLands) ? new ArrayList<>() : playerLands;
+		val opt = playerLands.stream().filter(pl -> Objects.equals(pl.getLandId(), land.getId())).findFirst();
+		if (opt.isEmpty()) {
+			playerLands.add(new PlayerLand(this, land, ownership, buyAmount));
+			return;
 		}
-		this.playerLands.add(new PlayerLand(this, land, ownership, buyAmount));
+		opt.get().setOwnership(opt.get().getOwnership() + ownership);
+		opt.get().setBuyAmount(opt.get().getBuyAmount() + buyAmount);
 	}
 
 }

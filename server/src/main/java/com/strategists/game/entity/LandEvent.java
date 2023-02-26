@@ -10,8 +10,6 @@ import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.springframework.util.Assert;
-
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,6 +23,9 @@ public class LandEvent implements Serializable {
 
 	private static final long serialVersionUID = -458918820184295751L;
 
+	private static final int MAX_LIFE = 10;
+	private static final int MAX_LEVEL = 10;
+
 	@EmbeddedId
 	private LandEventId pk = new LandEventId();
 
@@ -36,12 +37,8 @@ public class LandEvent implements Serializable {
 
 	public LandEvent(Land land, Event event, int life, int level) {
 		this.pk = new LandEventId(land, event);
-
-		Assert.isTrue(life > 0 && life <= 10, "Life should be between 1 and 10!");
-		Assert.isTrue(level > 0 && level <= 10, "Level should be between 1 and 10!");
-
-		this.life = life;
-		this.level = level;
+		setLife(life);
+		setLevel(level);
 	}
 
 	@Transient
@@ -62,6 +59,14 @@ public class LandEvent implements Serializable {
 	@Transient
 	public Long getEventId() {
 		return getEvent().getId();
+	}
+
+	public void setLife(int life) {
+		this.life = Math.max(0, Math.min(life, MAX_LIFE));
+	}
+
+	public void setLevel(int level) {
+		this.level = Math.max(0, Math.min(level, MAX_LEVEL));
 	}
 
 }

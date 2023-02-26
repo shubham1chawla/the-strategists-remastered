@@ -27,7 +27,6 @@ public class PlayerController {
 	private class Keys {
 		private static final String USERNAME = "username";
 		private static final String CASH = "cash";
-		private static final String ID = "id";
 		private static final String OWNERSHIP = "ownership";
 	}
 
@@ -51,7 +50,7 @@ public class PlayerController {
 	@DeleteMapping
 	public void kickPlayer(@RequestBody Map<String, Object> map) {
 		Assert.state(gameService.isLobbyState(), "Can't kick players in active game!");
-		playerService.kickPlayer(Integer.toUnsignedLong((int) map.get(Keys.ID)));
+		playerService.kickPlayer((String) map.get(Keys.USERNAME));
 	}
 
 	@PostMapping("/{playerId}/lands")
