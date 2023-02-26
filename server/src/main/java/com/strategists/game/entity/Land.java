@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.Data;
+import lombok.ToString;
+import lombok.val;
 
 @Data
 @Entity
@@ -62,11 +64,13 @@ public class Land implements Serializable {
 	@Column(nullable = false, precision = 2)
 	private Double baseValue;
 
+	@ToString.Exclude
 	@JsonProperty("players")
 	@JsonIgnoreProperties({ "pk", "player", "land", "landId" })
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.land", cascade = CascadeType.ALL)
 	private List<PlayerLand> playerLands;
 
+	@ToString.Exclude
 	@JsonProperty("events")
 	@JsonIgnoreProperties({ "pk", "land", "event", "landId" })
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.land", cascade = CascadeType.ALL)
@@ -97,10 +101,14 @@ public class Land implements Serializable {
 	}
 
 	public void addEvent(Event event, int life, int level) {
-		if (Objects.isNull(landEvents)) {
-			this.landEvents = new ArrayList<>();
+		landEvents = Objects.isNull(landEvents) ? new ArrayList<>() : landEvents;
+		val opt = landEvents.stream().filter(le -> Objects.equals(le.getEventId(), event.getId())).findFirst();
+		if (opt.isEmpty()) {
+			landEvents.add(new LandEvent(this, event, life, level));
+			return;
 		}
-		this.landEvents.add(new LandEvent(this, event, life, level));
+		opt.get().setLife(opt.get().getLife() + life);
+		opt.get().setLevel(level);
 	}
 
 }

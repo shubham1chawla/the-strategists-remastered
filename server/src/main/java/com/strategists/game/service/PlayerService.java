@@ -8,9 +8,11 @@ public interface PlayerService {
 
 	List<Player> getPlayers();
 
+	Player getPlayerById(long id);
+
 	Player addPlayer(String username, double cash);
 
-	void kickPlayer(long id);
+	void kickPlayer(String username);
 
 	void assignTurn();
 
@@ -19,7 +21,7 @@ public interface PlayerService {
 	void movePlayer(int move);
 
 	void nextPlayer();
-	
+
 	void buyLand(double ownership);
 
 }

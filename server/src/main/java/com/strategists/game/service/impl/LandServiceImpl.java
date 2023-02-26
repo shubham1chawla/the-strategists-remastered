@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import com.strategists.game.entity.Activity.Type;
+import com.strategists.game.aop.ActivityMapping;
 import com.strategists.game.entity.Event;
 import com.strategists.game.entity.Land;
 import com.strategists.game.repository.LandRepository;
@@ -45,6 +47,15 @@ public class LandServiceImpl implements LandService {
 	}
 
 	@Override
+	public Land getLandById(long id) {
+		Optional<Land> opt = landRepository.findById(id);
+		Assert.isTrue(opt.isPresent(), "No land found with ID: " + id);
+
+		log.info("Found land: {}", opt.get());
+		return opt.get();
+	}
+
+	@Override
 	public int getCount() {
 		return count;
 	}
@@ -55,6 +66,7 @@ public class LandServiceImpl implements LandService {
 	}
 
 	@Override
+	@ActivityMapping(Type.EVENT)
 	public void hostEvent(long landId, long eventId, int life, int level) {
 		final Optional<Land> opt = landRepository.findById(landId);
 		Assert.isTrue(opt.isPresent(), "No land associated with ID: " + landId);
