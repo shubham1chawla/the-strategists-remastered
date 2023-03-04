@@ -1,0 +1,19 @@
+INSERT INTO CHEATS (CODE, TYPE, AMOUNT, LIFE) 
+VALUES 
+('CASH100', 'CASH', 100, 3),
+('MOVE10', 'MOVE', 10, 2),
+('LIFE500', 'LIFE', 500, 1);
+
+INSERT INTO LANDS (NAME, X, Y, SENSITIVITY, BASE_VALUE)
+VALUES
+('One', 100, 150, 2, 450.0),
+('Two', 150, 300, 1, 250.0),
+('Three', 500, 675, 5, 300.0),
+('Four', 250, 900, 2, 450.0);
+
+INSERT INTO EVENTS (NAME, FACTOR)
+VALUES
+('Endemic', -4),
+('Earthquake', -2),
+('FIFA', 4),
+('Magic', 5);
