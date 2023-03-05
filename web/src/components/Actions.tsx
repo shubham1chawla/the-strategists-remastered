@@ -3,7 +3,7 @@ import React from 'react';
 const Actions = () => {
   return (
     <div>
-      <h1>This is Actions Component</h1>
+      <h2>This is Actions Component</h2>
     </div>
   );
 };

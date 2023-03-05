@@ -1,12 +1,14 @@
 import React from 'react';
-import Feed from './Feed';
+import Activity from './Activity';
 import Actions from './Actions';
+
+const actionContainerHeight = 100;
 
 const PlayerDashboard = () => {
   return (
     <div style={playerDashboardContainer}>
-      <div style={feedContainer}>
-        <Feed />
+      <div style={activityContainer}>
+        <Activity />
       </div>
       <div style={actionContainer}>
         <Actions />
@@ -15,15 +17,15 @@ const PlayerDashboard = () => {
   );
 };
 
-const feedContainer: React.CSSProperties = {
-  backgroundColor: '#3ba0bc',
-  flexGrow: 1,
+const activityContainer: React.CSSProperties = {
+  backgroundColor: '#191a24',
+  height: `calc(100vh - ${actionContainerHeight}px)`,
 };
 
 const actionContainer: React.CSSProperties = {
-  backgroundColor: '#7dbcbc',
+  backgroundColor: '#393c4f',
   marginTop: 'auto',
-  height: '100px',
+  height: `${actionContainerHeight}px`,
 };
 
 const playerDashboardContainer: React.CSSProperties = {
