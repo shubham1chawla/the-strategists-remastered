@@ -20,7 +20,7 @@ const Dashboard = () => {
 };
 
 const mapStyle: React.CSSProperties = {
-  backgroundColor: '#3ba0e9',
+  backgroundColor: '#1b1c27',
 };
 
 const dashboardStyle: React.CSSProperties = {
