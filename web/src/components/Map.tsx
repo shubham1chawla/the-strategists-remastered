@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useEffect, useState } from 'react';
 
 const Map = () => {
   const [lands, setLands] = useState<any[]>([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8090/api/lands').then((res) => {
+    axios.get('/api/lands').then((res) => {
       setLands(res.data);
     });
   }, []);
