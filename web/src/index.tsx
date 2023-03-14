@@ -1,19 +1,14 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
+import { createRoot } from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import axios from 'axios';
 
-axios.defaults.baseURL = process.env.REACT_APP_BE_URL;
-
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
+createRoot(document.getElementById('root') as HTMLElement).render(
+  /**
+   * React StrictMode renders components twice on dev server
+   *
+   * https://stackoverflow.com/questions/60618844/react-hooks-useeffect-is-called-twice-even-if-an-empty-array-is-used-as-an-ar
+   */
+  <App />
 );
 
 // If you want to start measuring performance in your app, pass a function

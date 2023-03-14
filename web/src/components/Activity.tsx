@@ -1,12 +1,12 @@
-import React, { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { List } from 'antd';
 import axios from 'axios';
 
 const Activity = () => {
-  const [data, setData] = React.useState([]);
+  const [data, setData] = useState([]);
 
   useEffect(() => {
-    axios.get('http://localhost:8090/api/activities').then((res) => {
+    axios.get('/api/activities').then((res) => {
       setData(res.data);
     });
   }, []);

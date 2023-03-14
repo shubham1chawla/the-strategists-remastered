@@ -19,7 +19,7 @@ const PlayerDashboard = () => {
 
 const activityContainer: React.CSSProperties = {
   backgroundColor: '#191a24',
-  height: `calc(100vh - ${actionContainerHeight}px)`,
+  height: `calc(100% - ${actionContainerHeight}px)`,
 };
 
 const actionContainer: React.CSSProperties = {
@@ -29,7 +29,7 @@ const actionContainer: React.CSSProperties = {
 };
 
 const playerDashboardContainer: React.CSSProperties = {
-  height: '100vh',
+  height: '100%',
   display: 'flex',
   flexDirection: 'column',
 };
