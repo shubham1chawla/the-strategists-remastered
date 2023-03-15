@@ -1,13 +1,14 @@
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 createRoot(document.getElementById('root') as HTMLElement).render(
-  <StrictMode>
-    <App />
-  </StrictMode>
+  /**
+   * React StrictMode renders components twice on dev server
+   *
+   * https://stackoverflow.com/questions/60618844/react-hooks-useeffect-is-called-twice-even-if-an-empty-array-is-used-as-an-ar
+   */
+  <App />
 );
 
 // If you want to start measuring performance in your app, pass a function
