@@ -13,3 +13,18 @@ h2 {
   text-align: center;
   line-height: 72px;
 }
+
+.ant-tabs-nav {
+  display: flex;
+}
+.ant-tabs-nav .ant-tabs-tab {
+  flex-grow: 1;
+  margin-right: 0;
+  width: 100%;
+  text-align: center;
+  color: #fafafa;
+}
+
+.ant-form-item {
+  margin-bottom: 8px;
+}
