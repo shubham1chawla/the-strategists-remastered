@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { Col, Row } from 'antd';
 import Map from './Map';
 import PlayerDashboard from './PlayerDashboard';
@@ -19,15 +19,15 @@ const Dashboard = () => {
   );
 };
 
-const mapStyle: React.CSSProperties = {
+const mapStyle: CSSProperties = {
   backgroundColor: '#1b1c27',
 };
 
-const dashboardStyle: React.CSSProperties = {
+const dashboardStyle: CSSProperties = {
   backgroundColor: '#7dbcea',
 };
 
-const dashboardContainer: React.CSSProperties = {
+const dashboardContainer: CSSProperties = {
   height: '100vh',
 };
 

@@ -44,7 +44,7 @@ public class PlayerController {
 	@PostMapping
 	public Player addPlayer(@RequestBody Map<String, Object> body) {
 		Assert.state(gameService.isLobbyState(), "Can't add players to active game!");
-		return playerService.addPlayer((String) body.get(Keys.USERNAME), (double) body.get(Keys.CASH));
+		return playerService.addPlayer((String) body.get(Keys.USERNAME), Double.parseDouble(body.get(Keys.CASH).toString()));
 	}
 
 	@DeleteMapping

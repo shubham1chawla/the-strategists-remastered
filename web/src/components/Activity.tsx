@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import { List } from 'antd';
 import axios from 'axios';
 
@@ -25,14 +25,14 @@ const Activity = () => {
   );
 };
 
-const listContainer: React.CSSProperties = {
+const listContainer: CSSProperties = {
   paddingTop: 0,
   padding: '0px 20px',
   overflowY: 'scroll',
   maxHeight: 'calc(100vh - 172px)',
 };
 
-const list: React.CSSProperties = {
+const list: CSSProperties = {
   color: '#fafafa',
   borderBlockEndColor: '#434343',
   fontSize: 16,

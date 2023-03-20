@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { Tabs } from 'antd';
 import type { TabsProps } from 'antd';
+import AdminLobby from './AdminLobby';
 
 const AdminDashboard = () => {
   const onChange = (key: string) => {
@@ -11,7 +12,7 @@ const AdminDashboard = () => {
     {
       key: '1',
       label: `Lobby`,
-      children: `Content of Tab Lobby`,
+      children: <AdminLobby />,
     },
     {
       key: '2',
@@ -27,15 +28,22 @@ const AdminDashboard = () => {
 
   return (
     <div style={adminDashboardContainer}>
-      <Tabs centered defaultActiveKey="1" items={items} onChange={onChange} />
+      <Tabs
+        centered
+        defaultActiveKey="1"
+        size="middle"
+        items={items}
+        onChange={onChange}
+      />
     </div>
   );
 };
 
-const adminDashboardContainer: React.CSSProperties = {
+const adminDashboardContainer: CSSProperties = {
   height: '100vh',
   display: 'flex',
   flexDirection: 'column',
+  backgroundColor: '#191a24',
 };
 
 export default AdminDashboard;
