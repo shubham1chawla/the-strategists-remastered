@@ -1,8 +1,8 @@
 import { ADD_PLAYER } from './lobbyTypes';
-import { REMOVE_PLAYER } from './lobbyTypes';
+import { KICK_PLAYER } from './lobbyTypes';
 
 export interface Player {
-  name: string;
+  username: string;
   cash: number;
 }
 
@@ -22,11 +22,11 @@ const lobbyReducer = (state: LobbyState = initialState, action: any) => {
         players: [...state.players, action.payload],
       };
 
-    case REMOVE_PLAYER:
+    case KICK_PLAYER:
       return {
         ...state,
         players: state.players.filter(
-          (player) => player.name !== action.payload.name
+          (player) => player.username !== action.payload.username
         ),
       };
 

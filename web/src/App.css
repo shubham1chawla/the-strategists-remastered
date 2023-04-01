@@ -17,6 +17,7 @@ h2 {
 .ant-tabs-nav {
   display: flex;
 }
+
 .ant-tabs-nav .ant-tabs-tab {
   flex-grow: 1;
   margin-right: 0;

@@ -2,9 +2,10 @@ import React, { CSSProperties, useEffect } from 'react';
 import { Button, Divider, Form, Input, InputNumber, List } from 'antd';
 import { CloseCircleOutlined } from '@ant-design/icons';
 import { useDispatch, useSelector } from 'react-redux';
-import { addPlayer, removePlayer } from '../redux/admin/lobby/lobbyActions';
+import { addPlayer, kickPlayer } from '../redux/admin/lobby/lobbyActions';
 import { Player } from '../redux/admin/lobby/lobbyReducer';
 import axios from 'axios';
+import { list } from '../StylingConstants';
 
 const AdminLobby = () => {
   const dispatch = useDispatch();
@@ -14,34 +15,32 @@ const AdminLobby = () => {
   useEffect(() => {
     axios.get('/api/players').then(async (res) => {
       await res.data.forEach((player: any) => {
-        dispatch(addPlayer({ name: player.username, cash: player.cash }));
+        dispatch(addPlayer({ username: player.username, cash: player.cash }));
       });
     });
   }, []);
 
-  const deleteFromList = async (item: Player) => {
-    console.log(item);
+  const removePlayer = async (item: Player) => {
     await axios
       .delete('/api/players', {
         data: {
-          username: item.name,
+          username: item.username,
         },
       })
       .then(() => {
-        dispatch(removePlayer(item));
+        dispatch(kickPlayer(item));
       });
   };
 
   const onFinish = async (values: any) => {
-    console.log('Success:', values);
     const player: Player = {
-      name: values.name,
+      username: values.username,
       cash: values.cash,
     };
     await axios
       .post('/api/players', {
-        username: player.name,
-        cash: player.coins,
+        username: player.username,
+        cash: player.cash,
       })
       .then((response) => {
         dispatch(addPlayer(player));
@@ -50,7 +49,7 @@ const AdminLobby = () => {
   };
 
   const onFinishFailed = (errorInfo: any) => {
-    console.log('Failed:', errorInfo);
+    console.error('Failed:', errorInfo);
   };
 
   return (
@@ -67,8 +66,8 @@ const AdminLobby = () => {
         >
           <div style={{ display: 'flex', flexDirection: 'row', width: '100%' }}>
             <div style={{ flex: '70%', marginRight: 8 }}>
-              <Form.Item name="name">
-                <Input size="middle" placeholder="Name" />
+              <Form.Item name="username">
+                <Input size="middle" placeholder="Username" />
               </Form.Item>
             </div>
             <div style={{ flex: '30%' }}>
@@ -117,7 +116,7 @@ const AdminLobby = () => {
                 <CloseCircleOutlined
                   onClick={(e) => {
                     e.stopPropagation();
-                    deleteFromList(item);
+                    removePlayer(item);
                   }}
                   style={{
                     fontSize: '20px',
@@ -127,7 +126,7 @@ const AdminLobby = () => {
                 />
               }
             >
-              {item.name}
+              {item.username}
             </List.Item>
           )}
         />
@@ -140,12 +139,6 @@ const lobbyFormContainer: CSSProperties = {
   display: 'flex',
   justifyContent: 'center',
   width: '100%',
-};
-
-const list: CSSProperties = {
-  color: '#fafafa',
-  borderBlockEndColor: '#434343',
-  fontSize: 16,
 };
 
 export default AdminLobby;
