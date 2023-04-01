@@ -1,5 +1,5 @@
 import { ADD_PLAYER } from './lobbyTypes';
-import { REMOVE_PLAYER } from './lobbyTypes';
+import { KICK_PLAYER } from './lobbyTypes';
 import { Player } from './lobbyReducer';
 
 export const addPlayer = (player: Player) => {
@@ -9,9 +9,9 @@ export const addPlayer = (player: Player) => {
   };
 };
 
-export const removePlayer = (player: Player) => {
+export const kickPlayer = (player: Player) => {
   return {
-    type: REMOVE_PLAYER,
+    type: KICK_PLAYER,
     payload: player,
   };
 };

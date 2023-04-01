@@ -1,6 +1,7 @@
 import { CSSProperties, useEffect, useState } from 'react';
 import { List } from 'antd';
 import axios from 'axios';
+import { list } from '../StylingConstants';
 
 const Activity = () => {
   const [data, setData] = useState([]);
@@ -30,12 +31,6 @@ const listContainer: CSSProperties = {
   padding: '0px 20px',
   overflowY: 'scroll',
   maxHeight: 'calc(100vh - 172px)',
-};
-
-const list: CSSProperties = {
-  color: '#fafafa',
-  borderBlockEndColor: '#434343',
-  fontSize: 16,
 };
 
 export default Activity;
