@@ -1,7 +1,6 @@
 package com.strategists.game.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -13,22 +12,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.strategists.game.entity.Player;
+import com.strategists.game.request.AddPlayerRequest;
+import com.strategists.game.request.BuyLandRequest;
+import com.strategists.game.request.KickPlayerRequest;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.PlayerService;
-
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
 
 @RestController
 @RequestMapping("/api/players")
 public class PlayerController {
-
-	@NoArgsConstructor(access = AccessLevel.PRIVATE)
-	private class Keys {
-		private static final String USERNAME = "username";
-		private static final String CASH = "cash";
-		private static final String OWNERSHIP = "ownership";
-	}
 
 	@Autowired
 	private GameService gameService;
@@ -42,21 +34,21 @@ public class PlayerController {
 	}
 
 	@PostMapping
-	public Player addPlayer(@RequestBody Map<String, Object> body) {
+	public Player addPlayer(@RequestBody AddPlayerRequest request) {
 		Assert.state(gameService.isLobbyState(), "Can't add players to active game!");
-		return playerService.addPlayer((String) body.get(Keys.USERNAME), Double.parseDouble(body.get(Keys.CASH).toString()));
+		return playerService.addPlayer(request.getUsername(), request.getCash());
 	}
 
 	@DeleteMapping
-	public void kickPlayer(@RequestBody Map<String, Object> map) {
+	public void kickPlayer(@RequestBody KickPlayerRequest request) {
 		Assert.state(gameService.isLobbyState(), "Can't kick players in active game!");
-		playerService.kickPlayer((String) map.get(Keys.USERNAME));
+		playerService.kickPlayer(request.getUsername());
 	}
 
 	@PostMapping("/{playerId}/lands")
-	public void buyLand(@RequestBody Map<String, Object> map) {
+	public void buyLand(@RequestBody BuyLandRequest request) {
 		Assert.state(gameService.isActiveState(), "You need an active game to buy land!");
-		playerService.buyLand((double) map.get(Keys.OWNERSHIP));
+		playerService.buyLand(request.getOwnership());
 	}
 
 }

@@ -9,7 +9,10 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
+import com.strategists.game.request.CreateCheatRequest;
+
 import lombok.Data;
+import lombok.val;
 
 @Data
 @Entity
@@ -36,5 +39,14 @@ public class Cheat {
 
 	@Column(nullable = false)
 	private Integer life;
+
+	public static Cheat fromRequest(CreateCheatRequest request) {
+		val cheat = new Cheat();
+		cheat.setCode(request.getCode());
+		cheat.setType(request.getType());
+		cheat.setAmount(request.getAmount());
+		cheat.setLife(request.getLife());
+		return cheat;
+	}
 
 }

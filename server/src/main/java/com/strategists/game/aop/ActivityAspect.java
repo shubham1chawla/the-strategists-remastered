@@ -35,7 +35,7 @@ public class ActivityAspect {
 	private LandService landService;
 
 	@After("@annotation(mapping)")
-	public void postActivityAdvice(JoinPoint joinPoint, ActivityMapping mapping) throws Throwable {
+	public Activity postActivityAdvice(JoinPoint joinPoint, ActivityMapping mapping) throws Throwable {
 		log.info("Logging activity of type: {}", mapping.value());
 		Activity activity = null;
 		switch (mapping.value()) {
@@ -53,9 +53,9 @@ public class ActivityAspect {
 			break;
 		default:
 			log.warn("Unsupported Activity Type: {}", mapping.value());
-			return;
+			return null;
 		}
-		activityRepository.save(activity);
+		return activityRepository.save(activity);
 	}
 
 	private Activity createBuyActivity(Object[] args) {
