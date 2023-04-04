@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.strategists.game.entity.Cheat;
 import com.strategists.game.repository.CheatRepository;
+import com.strategists.game.request.CreateCheatRequest;
 
 @RestController
 @RequestMapping("/api/cheats")
@@ -27,8 +28,8 @@ public class CheatController {
 	}
 
 	@PostMapping
-	public Cheat createCheat(@RequestBody Cheat cheat) {
-		return cheatRepository.save(cheat);
+	public Cheat createCheat(@RequestBody CreateCheatRequest request) {
+		return cheatRepository.save(Cheat.fromRequest(request));
 	}
 
 	@DeleteMapping("/{id}")

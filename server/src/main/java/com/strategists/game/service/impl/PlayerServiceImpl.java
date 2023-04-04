@@ -11,8 +11,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.aop.ActivityMapping;
+import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.Player.State;
 import com.strategists.game.repository.PlayerRepository;
