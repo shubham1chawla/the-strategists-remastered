@@ -1,10 +1,8 @@
 import { combineReducers } from 'redux';
-import gameReducer from './game/gameReducer';
-import lobbyReducer from './admin/lobby/lobbyReducer';
+import { lobbyReducer } from './lobby';
+import { userReducer } from './user';
 
-const rootReducer = combineReducers({
-  game: gameReducer,
+export const rootReducer = combineReducers({
   lobby: lobbyReducer,
+  user: userReducer,
 });
-
-export default rootReducer;

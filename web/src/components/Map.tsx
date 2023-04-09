@@ -79,7 +79,7 @@ const updateMap = (cy: Core, lands: any[]): void => {
   cy.fit(undefined, Number.MAX_VALUE);
 };
 
-const Map = () => {
+export const Map = () => {
   const [lands, setLands] = useState<any[]>([]);
 
   useEffect(() => {
@@ -104,5 +104,3 @@ const Map = () => {
     <div style={{ height: '100%', width: 'calc(100% - 1px)' }} id="cy"></div>
   );
 };
-
-export default Map;

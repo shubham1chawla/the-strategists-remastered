@@ -3,7 +3,7 @@ import { List } from 'antd';
 import axios from 'axios';
 import { list } from '../StylingConstants';
 
-const Activity = () => {
+export const Activity = () => {
   const [data, setData] = useState([]);
 
   useEffect(() => {
@@ -32,5 +32,3 @@ const listContainer: CSSProperties = {
   overflowY: 'scroll',
   maxHeight: 'calc(100vh - 172px)',
 };
-
-export default Activity;
