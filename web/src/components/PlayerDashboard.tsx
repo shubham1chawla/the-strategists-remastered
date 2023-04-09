@@ -1,10 +1,9 @@
-import React from 'react';
-import Activity from './Activity';
-import Actions from './Actions';
+import { CSSProperties } from 'react';
+import { Actions, Activity } from '.';
 
-const actionContainerHeight = 100;
+const ACTION_CONTAINER_HEIGHT = 100;
 
-const PlayerDashboard = () => {
+export const PlayerDashboard = () => {
   return (
     <div style={playerDashboardContainer}>
       <div style={activityContainer}>
@@ -17,21 +16,19 @@ const PlayerDashboard = () => {
   );
 };
 
-const activityContainer: React.CSSProperties = {
+const activityContainer: CSSProperties = {
   backgroundColor: '#191a24',
-  height: `calc(100% - ${actionContainerHeight}px)`,
+  height: `calc(100% - ${ACTION_CONTAINER_HEIGHT}px)`,
 };
 
-const actionContainer: React.CSSProperties = {
+const actionContainer: CSSProperties = {
   backgroundColor: '#393c4f',
   marginTop: 'auto',
-  height: `${actionContainerHeight}px`,
+  height: `${ACTION_CONTAINER_HEIGHT}px`,
 };
 
-const playerDashboardContainer: React.CSSProperties = {
+const playerDashboardContainer: CSSProperties = {
   height: '100%',
   display: 'flex',
   flexDirection: 'column',
 };
-
-export default PlayerDashboard;

@@ -1,20 +1,19 @@
-import React from 'react';
 import { Button } from 'antd';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../redux/game/gameActions';
+import { setUser } from '../redux/user';
 import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
+export const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   function goToAdminDashboard() {
-    dispatch(setUser('admin'));
+    dispatch(setUser({ type: 'admin', username: 'Admin' }));
     navigate('/dashboard');
   }
 
   function goToPlayerDashboard() {
-    dispatch(setUser('player'));
+    dispatch(setUser({ type: 'player', username: 'Unknown' }));
     navigate('/dashboard');
   }
 
@@ -25,5 +24,3 @@ const Login = () => {
     </div>
   );
 };
-
-export default Login;

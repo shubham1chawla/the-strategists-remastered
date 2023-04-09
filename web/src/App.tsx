@@ -1,15 +1,11 @@
-import React from 'react';
 import './App.css';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-
-import Dashboard from './components/Dashboard';
-import Login from './components/Login';
-import NotFound from './components/NotFound';
+import { Dashboard, Login, NotFound } from './components';
 import { Provider } from 'react-redux';
-import store from './redux/store';
+import { store } from './redux';
 import { ConfigProvider } from 'antd';
 
-const App = () => {
+export const App = () => {
   return (
     <ConfigProvider
       theme={{
@@ -32,5 +28,3 @@ const App = () => {
     </ConfigProvider>
   );
 };
-
-export default App;

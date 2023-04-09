@@ -1,18 +1,14 @@
-import React, { CSSProperties } from 'react';
+import { CSSProperties } from 'react';
 import { Tabs } from 'antd';
 import type { TabsProps } from 'antd';
-import AdminLobby from './AdminLobby';
+import { Lobby } from '.';
 
-const AdminDashboard = () => {
-  const onChange = (key: string) => {
-    console.log(key);
-  };
-
+export const AdminDashboard = () => {
   const items: TabsProps['items'] = [
     {
       key: '1',
       label: `Lobby`,
-      children: <AdminLobby />,
+      children: <Lobby />,
     },
     {
       key: '2',
@@ -28,13 +24,7 @@ const AdminDashboard = () => {
 
   return (
     <div style={adminDashboardContainer}>
-      <Tabs
-        centered
-        defaultActiveKey="1"
-        size="middle"
-        items={items}
-        onChange={onChange}
-      />
+      <Tabs centered defaultActiveKey="1" size="middle" items={items} />
     </div>
   );
 };
@@ -45,5 +35,3 @@ const adminDashboardContainer: CSSProperties = {
   flexDirection: 'column',
   backgroundColor: '#191a24',
 };
-
-export default AdminDashboard;
