@@ -1,7 +1,7 @@
-import { CSSProperties, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { List } from 'antd';
+import { CoffeeOutlined } from '@ant-design/icons';
 import axios from 'axios';
-import { list } from '../StylingConstants';
 
 export const Activity = () => {
   const [data, setData] = useState([]);
@@ -13,22 +13,18 @@ export const Activity = () => {
   }, []);
 
   return (
-    <div>
-      <h2>Activity</h2>
-      <div style={listContainer}>
-        <List
-          size="large"
-          dataSource={data}
-          renderItem={(item) => <List.Item style={list}>{item}</List.Item>}
-        />
-      </div>
+    <div className="strategists-activity">
+      <header>
+        <CoffeeOutlined /> Activity
+      </header>
+      <List
+        className="strategists-list"
+        size="large"
+        dataSource={data}
+        renderItem={(feed) => (
+          <List.Item className="strategists-list__item">{feed}</List.Item>
+        )}
+      />
     </div>
   );
-};
-
-const listContainer: CSSProperties = {
-  paddingTop: 0,
-  padding: '0px 20px',
-  overflowY: 'scroll',
-  maxHeight: 'calc(100vh - 172px)',
 };

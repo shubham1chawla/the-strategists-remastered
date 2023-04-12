@@ -100,7 +100,5 @@ export const Map = () => {
     });
   }, []);
 
-  return (
-    <div style={{ height: '100%', width: 'calc(100% - 1px)' }} id="cy"></div>
-  );
+  return <div className="strategists-map" id="cy"></div>;
 };
