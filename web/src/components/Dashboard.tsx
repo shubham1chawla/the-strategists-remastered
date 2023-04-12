@@ -1,6 +1,6 @@
-import { CSSProperties, useEffect } from 'react';
-import { Col, Row } from 'antd';
-import { AdminDashboard, Map, PlayerDashboard } from '.';
+import { useEffect } from 'react';
+import { Col, Row, Tabs, TabsProps } from 'antd';
+import { Actions, Activity, Lobby, Map } from '.';
 import { useDispatch, useSelector } from 'react-redux';
 import { addPlayer, kickPlayer, Player } from '../redux';
 import axios from 'axios';
@@ -38,25 +38,46 @@ export const Dashboard = () => {
   }, [dispatch, username]);
 
   return (
-    <Row style={dashboardContainer}>
-      <Col style={mapStyle} flex="75%">
-        <Map />
+    <Row className="strategists-dashboard">
+      <Col className="strategists-dashboard__left-section" flex="30%">
+        {type === 'admin' ? renderAdminPanel() : renderPlayerPanel()}
       </Col>
-      <Col style={dashboardStyle} flex="25%">
-        {type === 'admin' ? <AdminDashboard /> : <PlayerDashboard />}
+      <Col className="strategists-dashboard__right-section" flex="70%">
+        <Map />
       </Col>
     </Row>
   );
 };
 
-const mapStyle: CSSProperties = {
-  backgroundColor: '#1b1c27',
+const renderAdminPanel = () => {
+  const items: TabsProps['items'] = [
+    {
+      key: '1',
+      label: `Lobby`,
+      children: <Lobby />,
+      className: 'strategists-lobby',
+    },
+    {
+      key: '2',
+      label: `Feed`,
+      children: <Activity />,
+      className: 'strategists-activity',
+    },
+    {
+      key: '3',
+      label: `Events`,
+      children: `Content of Tab Events`,
+    },
+  ];
+
+  return <Tabs centered defaultActiveKey="1" size="large" items={items} />;
 };
 
-const dashboardStyle: CSSProperties = {
-  backgroundColor: '#7dbcea',
-};
-
-const dashboardContainer: CSSProperties = {
-  height: '100vh',
+const renderPlayerPanel = () => {
+  return (
+    <div className="strategists-player-panel">
+      <Activity />
+      <Actions />
+    </div>
+  );
 };
