@@ -52,10 +52,10 @@ const renderAddPlayerForm = (form: FormInstance<any>) => {
       onFinishFailed={addPlayerFailed}
       autoComplete="off"
     >
-      <Form.Item name="username">
+      <Form.Item name="username" className="strategists-lobby__form__username">
         <Input size="large" placeholder="Username" />
       </Form.Item>
-      <Form.Item name="cash">
+      <Form.Item name="cash" className="strategists-lobby__form__cash">
         <InputNumber
           placeholder="Cash"
           size="large"
@@ -63,7 +63,7 @@ const renderAddPlayerForm = (form: FormInstance<any>) => {
           max={MAX_CASH_AMOUNT}
         />
       </Form.Item>
-      <Form.Item>
+      <Form.Item className="strategists-lobby__form__button">
         <Button type="primary" htmlType="submit" size="large">
           <UserAddOutlined /> Add Players
         </Button>
@@ -84,9 +84,6 @@ const renderLobbyPlayers = (players: Player[]) => {
     kickPlayer(player);
   };
 
-  if (players.length === 0) {
-    return '';
-  }
   return (
     <div className="strategists-lobby__list">
       <header>

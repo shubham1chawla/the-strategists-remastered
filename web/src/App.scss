@@ -132,15 +132,23 @@ header {
     padding: 24px 24px 0 24px;
 
     // Username field
-    :nth-child(1) {
+    &__username {
       flex-basis: calc(75% - var(--base-unit-size));
       margin: 0;
+
+      input {
+        color: var(--dark-color);
+      }
     }
 
     // Cash field
-    :nth-child(2) {
+    &__cash {
       flex-basis: 25%;
       margin: 0;
+
+      input {
+        color: var(--dark-color) !important;
+      }
 
       // Overriding antd number input class
       .ant-input-number {
@@ -149,7 +157,7 @@ header {
     }
 
     // Add button
-    :nth-child(3) {
+    &__button {
       flex-basis: 100%;
       margin-top: var(--base-unit-size);
 
