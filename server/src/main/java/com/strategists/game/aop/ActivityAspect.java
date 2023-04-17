@@ -11,6 +11,8 @@ import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.service.EventService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
+import com.strategists.game.service.UpdateService;
+import com.strategists.game.update.NewActivityUpdatePayload;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -34,8 +36,11 @@ public class ActivityAspect {
 	@Autowired
 	private LandService landService;
 
+	@Autowired
+	private UpdateService updateService;
+
 	@After("@annotation(mapping)")
-	public Activity postActivityAdvice(JoinPoint joinPoint, ActivityMapping mapping) throws Throwable {
+	public void postActivityAdvice(JoinPoint joinPoint, ActivityMapping mapping) {
 		log.info("Logging activity of type: {}", mapping.value());
 		Activity activity = null;
 		switch (mapping.value()) {
@@ -53,9 +58,10 @@ public class ActivityAspect {
 			break;
 		default:
 			log.warn("Unsupported Activity Type: {}", mapping.value());
-			return null;
+			return;
 		}
-		return activityRepository.save(activity);
+		activity = activityRepository.save(activity);
+		updateService.sendUpdate(new NewActivityUpdatePayload(activity));
 	}
 
 	private Activity createBuyActivity(Object[] args) {

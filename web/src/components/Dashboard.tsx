@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
-import { Col, Row, Tabs, TabsProps } from 'antd';
+import { Col, Row, Tabs, TabsProps, notification } from 'antd';
 import { Actions, Activity, Lobby, Map } from '.';
 import { useDispatch, useSelector } from 'react-redux';
-import { addPlayer, kickPlayer, Player } from '../redux';
+import { ActivityActions, LobbyActions, Player } from '../redux';
 import axios from 'axios';
 
 export const Dashboard = () => {
@@ -13,7 +13,7 @@ export const Dashboard = () => {
     // Updating players list
     axios.get('/api/players').then(async ({ data }) => {
       await data.forEach((player: Player) => {
-        dispatch(addPlayer(player));
+        dispatch(LobbyActions.addPlayer(player));
       });
     });
 
@@ -25,10 +25,14 @@ export const Dashboard = () => {
       const { type, data } = JSON.parse(message.data);
       switch (type) {
         case 'JOIN':
-          dispatch(addPlayer(data));
+          dispatch(LobbyActions.addPlayer(data));
           break;
         case 'KICK':
-          dispatch(kickPlayer(data));
+          dispatch(LobbyActions.kickPlayer(data));
+          break;
+        case 'NEW':
+          dispatch(ActivityActions.addActivity(data));
+          notification.open({ message: data });
           break;
         default:
           console.warn(`Unsupported update type: ${type}`);
@@ -59,7 +63,7 @@ const renderAdminPanel = () => {
     },
     {
       key: '2',
-      label: `Feed`,
+      label: `Activities`,
       children: <Activity />,
       className: 'strategists-activity',
     },
@@ -69,7 +73,6 @@ const renderAdminPanel = () => {
       children: `Content of Tab Events`,
     },
   ];
-
   return <Tabs centered defaultActiveKey="1" size="large" items={items} />;
 };
 

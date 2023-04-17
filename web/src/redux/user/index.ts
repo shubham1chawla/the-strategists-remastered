@@ -1,3 +1,2 @@
-export * from './userActions';
-export * from './userReducer';
-export * from './userTypes';
+export * from './actions';
+export * from './reducer';

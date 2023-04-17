@@ -1,19 +1,19 @@
 import { Button } from 'antd';
 import { useDispatch } from 'react-redux';
-import { setUser } from '../redux/user';
 import { useNavigate } from 'react-router-dom';
+import { UserActions } from '../redux';
 
 export const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   function goToAdminDashboard() {
-    dispatch(setUser({ type: 'admin', username: 'Admin' }));
+    dispatch(UserActions.setUser({ type: 'admin', username: 'Admin' }));
     navigate('/dashboard');
   }
 
   function goToPlayerDashboard() {
-    dispatch(setUser({ type: 'player', username: 'Unknown' }));
+    dispatch(UserActions.setUser({ type: 'player', username: 'Unknown' }));
     navigate('/dashboard');
   }
 
