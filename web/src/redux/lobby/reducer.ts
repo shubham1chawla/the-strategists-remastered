@@ -1,4 +1,4 @@
-import { ADD_PLAYER, KICK_PLAYER } from '.';
+import { LobbyActions } from '.';
 
 export interface Player {
   id: number;
@@ -23,19 +23,18 @@ export const lobbyReducer = (
   state: LobbyState = initialState,
   action: any
 ): LobbyState => {
-  switch (action.type) {
-    case ADD_PLAYER:
+  const { type, payload } = action;
+  switch (type) {
+    case LobbyActions.Types.ADD_PLAYER:
       return {
         ...state,
-        players: [...state.players, action.payload],
+        players: [...state.players, payload],
       };
 
-    case KICK_PLAYER:
+    case LobbyActions.Types.KICK_PLAYER:
       return {
         ...state,
-        players: state.players.filter(
-          (player) => player.username !== action.payload
-        ),
+        players: state.players.filter((player) => player.username !== payload),
       };
 
     default:

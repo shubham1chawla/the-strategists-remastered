@@ -28,6 +28,9 @@ public class Activity implements Serializable {
 	@AllArgsConstructor
 	public enum Type {
 
+		// Used only for sending UI update
+		NEW(""),
+
 		// Lord gave Player 1 a bonus of $100 after completing one turn.
 		BONUS("%s gave %s a bonus of $%s after completing one turn."),
 
