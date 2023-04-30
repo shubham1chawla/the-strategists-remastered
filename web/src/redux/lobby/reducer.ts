@@ -11,12 +11,25 @@ export interface Player {
   cash: number;
 }
 
+export interface Land {
+  id: number;
+  name: string;
+  x: number;
+  y: number;
+  marketValue: number;
+  totalOwnership: number;
+  players: Player[];
+  events: any[];
+}
+
 interface LobbyState {
   players: Player[];
+  lands: Land[];
 }
 
 const initialState: LobbyState = {
   players: [],
+  lands: [],
 };
 
 export const lobbyReducer = (
@@ -35,6 +48,12 @@ export const lobbyReducer = (
       return {
         ...state,
         players: state.players.filter((player) => player.username !== payload),
+      };
+
+    case LobbyActions.Types.SET_LANDS:
+      return {
+        ...state,
+        lands: [...payload],
       };
 
     default:
