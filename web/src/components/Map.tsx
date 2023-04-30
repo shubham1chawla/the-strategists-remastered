@@ -1,6 +1,13 @@
-import axios from 'axios';
-import cytoscape, { Core, CytoscapeOptions, Stylesheet } from 'cytoscape';
-import { useEffect, useState } from 'react';
+import cytoscape, {
+  Core,
+  CytoscapeOptions,
+  EventObjectNode,
+  Stylesheet,
+} from 'cytoscape';
+import { useEffect, useRef } from 'react';
+import { useSelector } from 'react-redux';
+import { strategistsColors } from '../App';
+import { Land } from '../redux';
 
 const baseOptions: CytoscapeOptions = {
   autolock: true,
@@ -36,17 +43,21 @@ const baseStyles: Stylesheet[] = [
   },
 ];
 
-const updateMap = (cy: Core, lands: any[]): void => {
+const updateMap = (cy: Core, lands: Land[]): void => {
+  if (!cy || !lands.length) {
+    return;
+  }
+
   // clearing previous nodes and edges
   cy.remove(cy.elements());
 
   // adding lands' nodes
   lands.forEach((land) => {
     cy.add({
-      data: { land, name: land.name, id: land.id },
+      data: { name: land.name, id: land.id } as any,
       position: { x: land.x, y: land.y },
       selectable: false,
-      classes: 'node',
+      classes: land.name === 'Prison' ? 'prison' : 'node',
     });
   });
 
@@ -80,25 +91,34 @@ const updateMap = (cy: Core, lands: any[]): void => {
 };
 
 export const Map = () => {
-  const [lands, setLands] = useState<any[]>([]);
+  const { lands } = useSelector((state: any) => state.lobby);
+  const container = useRef<HTMLDivElement>(null);
+
+  const onNodeClick = (event: EventObjectNode): void => {
+    alert(event.target.data());
+  };
 
   useEffect(() => {
-    // Fetching lands data from the server
-    axios.get('/api/lands').then(({ data }) => {
-      // updating the state
-      setLands(data);
-
-      // Setting up map elements
-      updateMap(cy, data);
-    });
+    // Creating dynamic style for Prison node
+    const prisonStyle: Stylesheet = {
+      selector: '.prison',
+      style: {
+        shape: 'pentagon',
+        backgroundColor: strategistsColors['--accent-color'],
+      },
+    };
 
     // Setting up cytoscape
     const cy = cytoscape({
-      container: document.getElementById('cy'),
+      container: container.current,
       ...baseOptions,
-      style: [...baseStyles],
+      style: [...baseStyles, prisonStyle],
     });
-  }, []);
+    cy.on('click', 'node', onNodeClick);
 
-  return <div className="strategists-map" id="cy"></div>;
+    // Setting up map elements
+    updateMap(cy, lands);
+  }, [lands]);
+
+  return <div ref={container} className="strategists-map"></div>;
 };

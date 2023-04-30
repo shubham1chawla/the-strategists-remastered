@@ -10,12 +10,22 @@ export const Dashboard = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Updating players list
+    // Updating players
     axios.get('/api/players').then(async ({ data }) => {
       await data.forEach((player: Player) => {
         dispatch(LobbyActions.addPlayer(player));
       });
     });
+
+    // Updating activities
+    axios
+      .get('/api/activities')
+      .then(({ data }) => dispatch(ActivityActions.setActivities(data)));
+
+    // Updating lands
+    axios
+      .get('/api/lands')
+      .then(({ data }) => dispatch(LobbyActions.setLands(data)));
 
     // Setting up SSE for updates
     const updates = new EventSource(
