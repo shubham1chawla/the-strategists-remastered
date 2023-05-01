@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Col, Row, Tabs, TabsProps, notification } from 'antd';
 import { Actions, Activity, Lobby, Map } from '.';
 import { useDispatch, useSelector } from 'react-redux';
-import { ActivityActions, LobbyActions, Player, State } from '../redux';
+import { ActivityActions, LobbyActions, State } from '../redux';
 import axios from 'axios';
 
 export const Dashboard = () => {
@@ -11,11 +11,9 @@ export const Dashboard = () => {
 
   useEffect(() => {
     // Updating players
-    axios.get('/api/players').then(async ({ data }) => {
-      await data.forEach((player: Player) => {
-        dispatch(LobbyActions.addPlayer(player));
-      });
-    });
+    axios
+      .get('/api/players')
+      .then(({ data }) => dispatch(LobbyActions.setPlayers(data)));
 
     // Updating activities
     axios
