@@ -1,12 +1,10 @@
 import { useSelector } from 'react-redux';
 import { List } from 'antd';
 import { CoffeeOutlined } from '@ant-design/icons';
-import { ActivityState } from '../redux';
+import { State } from '../redux';
 
 export const Activity = () => {
-  const activities: ActivityState = useSelector(
-    (state: any) => state.activities
-  );
+  const activities = useSelector((state: State) => state.activities);
 
   return (
     <div className="strategists-activity">

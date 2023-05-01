@@ -22,7 +22,7 @@ export interface Land {
   events: any[];
 }
 
-interface LobbyState {
+export interface LobbyState {
   players: Player[];
   lands: Land[];
 }

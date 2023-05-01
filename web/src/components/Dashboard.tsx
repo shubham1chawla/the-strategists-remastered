@@ -2,11 +2,11 @@ import { useEffect } from 'react';
 import { Col, Row, Tabs, TabsProps, notification } from 'antd';
 import { Actions, Activity, Lobby, Map } from '.';
 import { useDispatch, useSelector } from 'react-redux';
-import { ActivityActions, LobbyActions, Player } from '../redux';
+import { ActivityActions, LobbyActions, Player, State } from '../redux';
 import axios from 'axios';
 
 export const Dashboard = () => {
-  const { username, type } = useSelector((state: any) => state.user);
+  const { username, type } = useSelector((state: State) => state.user);
   const dispatch = useDispatch();
 
   useEffect(() => {

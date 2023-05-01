@@ -7,7 +7,7 @@ import cytoscape, {
 import { useEffect, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { strategistsColors } from '../App';
-import { Land } from '../redux';
+import { Land, Player, State } from '../redux';
 
 const baseOptions: CytoscapeOptions = {
   autolock: true,
@@ -36,14 +36,23 @@ const baseStyles: Stylesheet[] = [
   {
     selector: 'edge',
     style: {
-      width: 2,
+      width: 1,
       'curve-style': 'bezier',
       'target-arrow-shape': 'triangle',
     },
   },
+  {
+    selector: '.player-edge',
+    style: {
+      width: 1,
+      'curve-style': 'unbundled-bezier',
+      'target-arrow-shape': 'triangle',
+      'line-style': 'dashed',
+    },
+  },
 ];
 
-const updateMap = (cy: Core, lands: Land[]): void => {
+const updateMap = (cy: Core, lands: Land[], players: Player[]): void => {
   if (!cy || !lands.length) {
     return;
   }
@@ -87,11 +96,38 @@ const updateMap = (cy: Core, lands: Land[]): void => {
     classes: 'edge',
   });
 
+  // finding players per index
+  const counts = Array(lands.length).fill(0);
+  players.forEach((player) => counts[player.index]++);
+
+  // adding players
+  players.forEach((player) => {
+    // adding player's node
+    const land = lands[player.index];
+    cy.add({
+      data: { name: player.username, id: player.username } as any,
+      position: { x: land.x - counts[player.index]-- * 100, y: land.y - 100 },
+      selectable: false,
+      classes: 'player',
+    });
+
+    // adding player's edge
+    cy.add({
+      data: {
+        id: `${player.username}->${land.id}`,
+        source: player.username,
+        target: lands[player.index].id,
+      },
+      selectable: false,
+      classes: 'player-edge',
+    });
+  });
+
   cy.fit(undefined, Number.MAX_VALUE);
 };
 
 export const Map = () => {
-  const { lands } = useSelector((state: any) => state.lobby);
+  const { players, lands } = useSelector((state: State) => state.lobby);
   const container = useRef<HTMLDivElement>(null);
 
   const onNodeClick = (event: EventObjectNode): void => {
@@ -100,25 +136,34 @@ export const Map = () => {
 
   useEffect(() => {
     // Creating dynamic style for Prison node
-    const prisonStyle: Stylesheet = {
-      selector: '.prison',
-      style: {
-        shape: 'pentagon',
-        backgroundColor: strategistsColors['--accent-color'],
+    const dynamicStyles: Stylesheet[] = [
+      {
+        selector: '.prison',
+        style: {
+          shape: 'pentagon',
+          backgroundColor: strategistsColors['--accent-color'],
+        },
       },
-    };
+      {
+        selector: '.player',
+        style: {
+          shape: 'triangle',
+          backgroundColor: strategistsColors['--accent-color'],
+        },
+      },
+    ];
 
     // Setting up cytoscape
     const cy = cytoscape({
       container: container.current,
       ...baseOptions,
-      style: [...baseStyles, prisonStyle],
+      style: [...baseStyles, ...dynamicStyles],
     });
     cy.on('click', 'node', onNodeClick);
 
     // Setting up map elements
-    updateMap(cy, lands);
-  }, [lands]);
+    updateMap(cy, lands, players);
+  }, [players, lands]);
 
   return <div ref={container} className="strategists-map"></div>;
 };

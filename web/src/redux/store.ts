@@ -1,9 +1,15 @@
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension';
-import { lobbyReducer } from './lobby';
-import { userReducer } from './user';
-import { activityReducer } from './activity';
+import { LobbyState, lobbyReducer } from './lobby';
+import { UserState, userReducer } from './user';
+import { ActivityState, activityReducer } from './activity';
 import logger from 'redux-logger';
+
+export interface State {
+  activities: ActivityState;
+  lobby: LobbyState;
+  user: UserState;
+}
 
 export const store = createStore(
   combineReducers({
