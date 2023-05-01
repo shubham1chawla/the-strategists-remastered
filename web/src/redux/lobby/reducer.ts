@@ -38,6 +38,12 @@ export const lobbyReducer = (
 ): LobbyState => {
   const { type, payload } = action;
   switch (type) {
+    case LobbyActions.Types.SET_PLAYERS:
+      return {
+        ...state,
+        players: [...payload],
+      };
+
     case LobbyActions.Types.ADD_PLAYER:
       return {
         ...state,
