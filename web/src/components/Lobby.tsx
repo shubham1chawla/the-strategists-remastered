@@ -8,14 +8,14 @@ import {
   UserOutlined,
 } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
-import { Player } from '../redux';
+import { Player, State } from '../redux';
 import axios from 'axios';
 
 const MIN_CASH_AMOUNT = 100;
 const MAX_CASH_AMOUNT = 9999;
 
 export const Lobby = () => {
-  const players = useSelector((state: any) => state.lobby.players);
+  const { players } = useSelector((state: State) => state.lobby);
   const [form] = Form.useForm();
 
   return (
