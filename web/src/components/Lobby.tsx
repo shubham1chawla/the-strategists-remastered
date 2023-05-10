@@ -2,10 +2,10 @@ import { MouseEvent } from 'react';
 import { Button, Form, FormInstance, Input, InputNumber, List } from 'antd';
 import {
   CloseCircleOutlined,
-  DollarOutlined,
   TeamOutlined,
   UserAddOutlined,
   UserOutlined,
+  WalletOutlined,
 } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { Player, State } from '../redux';
@@ -108,7 +108,7 @@ const renderLobbyPlayers = (players: Player[]) => {
                 <UserOutlined /> {player.username}
               </div>
               <div>
-                <DollarOutlined /> {player.netWorth}
+                <WalletOutlined /> {player.netWorth}
               </div>
             </div>
           </List.Item>

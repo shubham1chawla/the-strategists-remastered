@@ -1,5 +1,17 @@
 import { LobbyActions } from '.';
 
+export interface PlayerLand {
+  landId?: number;
+  playerId?: number;
+  ownership: number;
+  buyAmount: number;
+
+  // fields for frontend state linking only
+  // these are not part of backend entities
+  land?: Land;
+  player?: Player;
+}
+
 export interface Player {
   id: number;
   username: string;
@@ -9,6 +21,7 @@ export interface Player {
   remainingJailLife: number;
   netWorth: number;
   cash: number;
+  lands: PlayerLand[];
 }
 
 export interface Land {
@@ -18,7 +31,7 @@ export interface Land {
   y: number;
   marketValue: number;
   totalOwnership: number;
-  players: Player[];
+  players: PlayerLand[];
   events: any[];
 }
 

@@ -6,4 +6,6 @@ public interface GameService {
 
 	boolean isLobbyState();
 
+	void start();
+
 }

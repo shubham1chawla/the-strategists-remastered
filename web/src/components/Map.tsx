@@ -4,10 +4,11 @@ import cytoscape, {
   EventObjectNode,
   Stylesheet,
 } from 'cytoscape';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { strategistsColors } from '../App';
 import { Land, Player, State } from '../redux';
+import { MapModal, MapModalProps } from '.';
 
 const baseOptions: CytoscapeOptions = {
   autolock: true,
@@ -63,7 +64,7 @@ const updateMap = (cy: Core, lands: Land[], players: Player[]): void => {
   // adding lands' nodes
   lands.forEach((land) => {
     cy.add({
-      data: { name: land.name, id: land.id } as any,
+      data: { land, name: land.name, id: land.id } as any,
       position: { x: land.x, y: land.y },
       selectable: false,
       classes: land.name === 'Prison' ? 'prison' : 'node',
@@ -105,7 +106,7 @@ const updateMap = (cy: Core, lands: Land[], players: Player[]): void => {
     // adding player's node
     const land = lands[player.index];
     cy.add({
-      data: { name: player.username, id: player.username } as any,
+      data: { player, name: player.username, id: player.username } as any,
       position: { x: land.x - counts[player.index]-- * 100, y: land.y - 100 },
       selectable: false,
       classes: 'player',
@@ -129,13 +130,10 @@ const updateMap = (cy: Core, lands: Land[], players: Player[]): void => {
 export const Map = () => {
   const { players, lands } = useSelector((state: State) => state.lobby);
   const container = useRef<HTMLDivElement>(null);
-
-  const onNodeClick = (event: EventObjectNode): void => {
-    alert(event.target.data());
-  };
+  const [props, setProps] = useState<MapModalProps | null>(null);
 
   useEffect(() => {
-    // Creating dynamic style for Prison node
+    // creating dynamic style for Prison node
     const dynamicStyles: Stylesheet[] = [
       {
         selector: '.prison',
@@ -153,17 +151,31 @@ export const Map = () => {
       },
     ];
 
-    // Setting up cytoscape
+    // setting up cytoscape
     const cy = cytoscape({
       container: container.current,
       ...baseOptions,
       style: [...baseStyles, ...dynamicStyles],
     });
-    cy.on('click', 'node', onNodeClick);
 
-    // Setting up map elements
+    // adding onclick hook for map modal
+    cy.on('click', 'node', (event: EventObjectNode) => {
+      const { player, land } = event.target.data();
+      setProps({
+        type: player ? 'player' : 'land',
+        id: player?.id || land?.id,
+        onCancel: () => setProps(null),
+      });
+    });
+
+    // setting up map elements
     updateMap(cy, lands, players);
   }, [players, lands]);
 
-  return <div ref={container} className="strategists-map"></div>;
+  return (
+    <>
+      <MapModal {...props} />
+      <div ref={container} className="strategists-map"></div>
+    </>
+  );
 };
