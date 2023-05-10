@@ -37,6 +37,22 @@ header {
   line-height: var(--strategists-header-height);
 }
 
+button.ant-btn-primary {
+  background-color: var(--accent-color) !important;
+
+  &:active {
+    background-color: var(--accent-color) !important;
+  }
+
+  &:hover {
+    background-color: var(--accent-color-hover) !important;
+  }
+
+  &:focus-visible {
+    outline-color: var(--accent-color-hover) !important;
+  }
+}
+
 .strategists-list {
   // Overriding font size of items in antd list
   &__item {
@@ -88,11 +104,6 @@ header {
     height: calc(100% - var(--strategists-header-height));
     overflow-y: scroll;
   }
-}
-
-// ----- ACTIONS COMPONENT'S CSS DEFINED BELOW ----- //
-
-.strategists-actions {
 }
 
 // ----- LOBBY COMPONENT'S CSS DEFINED BELOW ----- //
@@ -174,4 +185,16 @@ header {
 .strategists-map {
   height: 100%;
   width: 100%;
+
+  &__modal {
+    &__title {
+      color: var(--dark-color) !important;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .ant-table-cell {
+      color: var(--dark-color) !important;
+    }
+  }
 }

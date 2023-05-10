@@ -13,6 +13,7 @@ export const strategistsColors = {
   '--dark-color': '#18191a',
   '--dark-color-rgb': '24, 25, 26',
   '--accent-color': '#eb3b5a',
+  '--accent-color-hover': '#f7657b',
 };
 
 export const App = () => {
