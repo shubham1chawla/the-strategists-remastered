@@ -117,16 +117,45 @@ button.ant-btn-primary {
     // 140px = add player form's height
     height: calc(100% - 140px);
 
-    .strategists-list {
+    &__players {
       height: calc(100% - var(--strategists-header-height));
       overflow-y: scroll;
 
-      .strategists-list__item {
-        // Styling kick button in Lobby component
-        &__kick-button {
+      .ant-empty-description {
+        color: var(--text-color);
+      }
+
+      &__player {
+        &__kick {
           color: var(--accent-color);
           cursor: pointer;
           font-size: var(--text-font-size);
+        }
+
+        &__content {
+          display: flex;
+          width: 100%;
+
+          &__info {
+            display: flex;
+            flex-direction: column;
+            flex-basis: 50%;
+          }
+
+          &__password {
+            display: none;
+            cursor: pointer;
+            font-family: monospace;
+            font-size: var(--text-font-size);
+            text-align: center;
+            margin: auto 0;
+            padding: var(--base-unit-size);
+          }
+        }
+
+        // Hovering row will reveal player's password div
+        &:hover .strategists-lobby__list__players__player__content__password {
+          display: block;
         }
       }
     }
