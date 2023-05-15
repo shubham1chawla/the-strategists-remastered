@@ -3,6 +3,8 @@ package com.strategists.game.service.impl;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import javax.transaction.Transactional;
 
@@ -27,6 +29,7 @@ import lombok.extern.log4j.Log4j2;
 public class PlayerServiceImpl implements PlayerService {
 
 	private static final Random RANDOM = new Random();
+	private static final int PASSWORD_LENGTH = 4;
 
 	@Autowired
 	private PlayerRepository playerRepository;
@@ -54,8 +57,12 @@ public class PlayerServiceImpl implements PlayerService {
 		log.info("Checking if {} username exists...", username);
 		Assert.isTrue(!playerRepository.existsByUsername(username), username + " username already exists!");
 
+		// generating password
+		val password = IntStream.range(0, PASSWORD_LENGTH).map(i -> 10).map(RANDOM::nextInt).mapToObj(Integer::toString)
+				.collect(Collectors.joining());
+
 		log.info("Creating player with {} username", username);
-		return playerRepository.save(new Player(username, cash));
+		return playerRepository.save(new Player(username, cash, password));
 	}
 
 	@Override

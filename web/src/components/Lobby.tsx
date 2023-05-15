@@ -1,8 +1,10 @@
-import { MouseEvent } from 'react';
-import { Button, Form, FormInstance, Input, InputNumber, List } from 'antd';
+import { MouseEvent, useState } from 'react';
+import { Button, Form, Input, InputNumber, List } from 'antd';
 import {
   CloseCircleOutlined,
+  LockOutlined,
   TeamOutlined,
+  UnlockOutlined,
   UserAddOutlined,
   UserOutlined,
   WalletOutlined,
@@ -14,33 +16,24 @@ import axios from 'axios';
 const MIN_CASH_AMOUNT = 100;
 const MAX_CASH_AMOUNT = 9999;
 
-export const Lobby = () => {
-  const { players } = useSelector((state: State) => state.lobby);
+interface Password {
+  value: string;
+  show: boolean;
+}
+
+export const Lobby = () => (
+  <>
+    {LobbyPlayers()}
+    {AddPlayerForm()}
+  </>
+);
+
+const AddPlayerForm = () => {
   const [form] = Form.useForm();
 
-  return (
-    <>
-      {
-        // Rendering Players
-        renderLobbyPlayers(players)
-      }
-      {
-        // Rendering Add Player form
-        renderAddPlayerForm(form)
-      }
-    </>
-  );
-};
-
-const renderAddPlayerForm = (form: FormInstance<any>) => {
   const addPlayer = async ({ username, cash }: Player) => {
-    await axios.post('/api/players', { username, cash }).then(() => {
-      form.resetFields();
-    });
-  };
-
-  const addPlayerFailed = (errorInfo: any) => {
-    console.error('Failed:', errorInfo);
+    await axios.post('/api/players', { username, cash });
+    form.resetFields();
   };
 
   return (
@@ -49,7 +42,7 @@ const renderAddPlayerForm = (form: FormInstance<any>) => {
       form={form}
       name="basic"
       onFinish={addPlayer}
-      onFinishFailed={addPlayerFailed}
+      onFinishFailed={(event) => console.error(event)}
       autoComplete="off"
     >
       <Form.Item name="username" className="strategists-lobby__form__username">
@@ -72,16 +65,43 @@ const renderAddPlayerForm = (form: FormInstance<any>) => {
   );
 };
 
-const renderLobbyPlayers = (players: Player[]) => {
-  const kickPlayer = async ({ username }: Player) => {
-    await axios.delete('/api/players', {
-      data: { username },
-    });
+const LobbyPlayers = () => {
+  const { players } = useSelector((state: State) => state.lobby);
+  const [passwords, setPasswords] = useState<Map<number, Password>>(new Map());
+
+  const kickPlayer = (event: MouseEvent, { username }: Player) => {
+    event.stopPropagation();
+    axios.delete('/api/players', { data: { username } });
   };
 
-  const onKickClick = (e: MouseEvent, player: Player) => {
-    e.stopPropagation();
-    kickPlayer(player);
+  const showPassword = async ({ id }: Player) => {
+    let password = passwords.get(id);
+    if (!password) {
+      const { data } = await axios.get(`/api/players/${id}/password`);
+      password = { value: data, show: true };
+    }
+    setPasswords(new Map(passwords.set(id, { ...password, show: true })));
+  };
+
+  const hidePassword = ({ id }: Player) => {
+    const password = passwords.get(id);
+    if (!password) {
+      return;
+    }
+    setPasswords(new Map(passwords.set(id, { ...password, show: false })));
+  };
+
+  const renderPassword = ({ id }: Player) => {
+    const password = passwords.get(id);
+    return password && password.show ? (
+      <>
+        <UnlockOutlined /> {password.value}
+      </>
+    ) : (
+      <>
+        <LockOutlined /> ****
+      </>
+    );
   };
 
   return (
@@ -90,25 +110,37 @@ const renderLobbyPlayers = (players: Player[]) => {
         <TeamOutlined /> Joined Players
       </header>
       <List
-        className="strategists-list"
+        className="strategists-list strategists-lobby__list__players"
         size="large"
         dataSource={players}
         renderItem={(player: Player) => (
           <List.Item
-            className="strategists-list__item"
+            className="strategists-list__item strategists-lobby__list__players__player"
             extra={
               <CloseCircleOutlined
-                className="strategists-list__item__kick-button"
-                onClick={(e) => onKickClick(e, player)}
+                className="strategists-lobby__list__players__player__kick"
+                onClick={(event) => kickPlayer(event, player)}
               />
             }
           >
-            <div>
-              <div>
-                <UserOutlined /> {player.username}
+            <div
+              onMouseLeave={() => hidePassword(player)}
+              className="strategists-lobby__list__players__player__content"
+            >
+              <div className="strategists-lobby__list__players__player__content__info">
+                <span>
+                  <UserOutlined /> {player.username}
+                </span>
+                <span>
+                  <WalletOutlined /> {player.netWorth}
+                </span>
               </div>
-              <div>
-                <WalletOutlined /> {player.netWorth}
+              <div
+                className="strategists-lobby__list__players__player__content__password"
+                onMouseDown={() => showPassword(player)}
+                onMouseUp={() => hidePassword(player)}
+              >
+                {renderPassword(player)}
               </div>
             </div>
           </List.Item>

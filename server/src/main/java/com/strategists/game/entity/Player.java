@@ -42,12 +42,14 @@ public class Player implements Serializable {
 		ACTIVE, DEAD, JAIL;
 	}
 
-	public Player(String username, double cash) {
+	public Player(String username, double cash, String password) {
 		Assert.hasText(username, "Username can't be empty!");
 		Assert.isTrue(cash > 0, "Cash can't be negative!");
+		Assert.hasText(password, "Password can't be empty!");
 
 		this.username = username;
 		this.cash = cash;
+		this.password = password;
 	}
 
 	@Id
@@ -56,6 +58,10 @@ public class Player implements Serializable {
 
 	@Column(nullable = false, unique = true)
 	private String username;
+
+	@JsonIgnore
+	@Column(nullable = false, unique = false)
+	private String password;
 
 	/**
 	 * Player's cash will be dynamically calculated based on their investments.
