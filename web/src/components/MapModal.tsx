@@ -103,11 +103,5 @@ const renderTable = (player?: Player, land?: Land) => {
     }
   );
 
-  return (
-    <Table
-      className="strategists-map__modal__table"
-      dataSource={dataSource}
-      columns={columns}
-    ></Table>
-  );
+  return <Table dataSource={dataSource} columns={columns}></Table>;
 };

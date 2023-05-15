@@ -4,6 +4,7 @@ Please refer to the documentation before contributing - https://getbem.com/
 */
 
 // ----- SHARED CSS DEFINED BELOW ----- //
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@100;300;500&display=swap');
 
 * {
   margin: 0;
@@ -14,12 +15,10 @@ Please refer to the documentation before contributing - https://getbem.com/
   // Color variables are defined in App.tsx
 
   --base-unit-size: 1.2rem;
-  --text-font-size: calc(1.5 * var(--base-unit-size));
-  --heading-font-size: calc(2 * var(--base-unit-size));
-  --strategists-header-height: calc(6 * var(--base-unit-size));
+  --strategists-nav-height: calc(6 * var(--base-unit-size));
 
-  // Total height - large ant-tabs-nav height - margin-bottom
-  --strategists-tab-body-height: calc(100vh - 57.14px - 16px);
+  // large ant-list-item height
+  --ant-lg-padding: 24px;
 
   // Allows us to use rems, 62.5% = 1 rem = 10px
   font-size: 62.5%;
@@ -29,42 +28,55 @@ body {
   height: 100vh;
   width: 100%;
   color: var(--text-color);
+  background-color: var(--dark-color);
+  font-weight: 300;
 }
 
-header {
-  text-align: center;
-  font-size: var(--heading-font-size);
-  line-height: var(--strategists-header-height);
-}
+nav.strategists-nav {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  height: var(--strategists-nav-height);
+  padding: 0px var(--ant-lg-padding);
+  width: 100%;
+  box-sizing: border-box;
+  justify-content: space-between;
 
-button.ant-btn-primary {
-  background-color: var(--accent-color) !important;
-
-  &:active {
-    background-color: var(--accent-color) !important;
-  }
-
-  &:hover {
-    background-color: var(--accent-color-hover) !important;
-  }
-
-  &:focus-visible {
-    outline-color: var(--accent-color-hover) !important;
+  header.strategists-header {
+    display: flex;
+    align-items: center;
+    flex-basis: 80%;
   }
 }
 
-.strategists-list {
-  // Overriding font size of items in antd list
-  &__item {
-    font-size: var(--text-font-size);
+h1.strategists-logo {
+  display: inline;
+  text-transform: uppercase;
+  font-size: 3.2rem;
+
+  span {
+    font-size: inherit;
+    font-weight: 100;
   }
+
+  strong {
+    font-weight: 500;
+  }
+}
+
+.strategists-tab-body {
+  // Total height - large ant-tabs-nav height - header's height - bottom's margin
+  height: calc(100vh - 57.14px - 72px - 16px) !important;
+}
+
+.strategists-empty {
+  color: var(--text-color);
 }
 
 // ----- DASHBOARD COMPONENT'S CSS DEFINED BELOW ----- //
 
 .strategists-dashboard {
   height: 100vh;
-  background-color: var(--dark-color);
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 2000 1500'%3E%3Cdefs%3E%3Crect stroke='%2318191A' stroke-width='.5' width='1' height='1' id='s'/%3E%3Cpattern id='a' width='3' height='3' patternUnits='userSpaceOnUse' patternTransform='scale(50) translate(-980 -735)'%3E%3Cuse fill='%232b2c2c' href='%23s' y='2'/%3E%3Cuse fill='%232b2c2c' href='%23s' x='1' y='2'/%3E%3Cuse fill='%23383939' href='%23s' x='2' y='2'/%3E%3Cuse fill='%23383939' href='%23s'/%3E%3Cuse fill='%23434343' href='%23s' x='2'/%3E%3Cuse fill='%23434343' href='%23s' x='1' y='1'/%3E%3C/pattern%3E%3Cpattern id='b' width='7' height='11' patternUnits='userSpaceOnUse' patternTransform='scale(50) translate(-980 -735)'%3E%3Cg fill='%234c4c4c'%3E%3Cuse href='%23s'/%3E%3Cuse href='%23s' y='5' /%3E%3Cuse href='%23s' x='1' y='10'/%3E%3Cuse href='%23s' x='2' y='1'/%3E%3Cuse href='%23s' x='2' y='4'/%3E%3Cuse href='%23s' x='3' y='8'/%3E%3Cuse href='%23s' x='4' y='3'/%3E%3Cuse href='%23s' x='4' y='7'/%3E%3Cuse href='%23s' x='5' y='2'/%3E%3Cuse href='%23s' x='5' y='6'/%3E%3Cuse href='%23s' x='6' y='9'/%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='h' width='5' height='13' patternUnits='userSpaceOnUse' patternTransform='scale(50) translate(-980 -735)'%3E%3Cg fill='%234c4c4c'%3E%3Cuse href='%23s' y='5'/%3E%3Cuse href='%23s' y='8'/%3E%3Cuse href='%23s' x='1' y='1'/%3E%3Cuse href='%23s' x='1' y='9'/%3E%3Cuse href='%23s' x='1' y='12'/%3E%3Cuse href='%23s' x='2'/%3E%3Cuse href='%23s' x='2' y='4'/%3E%3Cuse href='%23s' x='3' y='2'/%3E%3Cuse href='%23s' x='3' y='6'/%3E%3Cuse href='%23s' x='3' y='11'/%3E%3Cuse href='%23s' x='4' y='3'/%3E%3Cuse href='%23s' x='4' y='7'/%3E%3Cuse href='%23s' x='4' y='10'/%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='c' width='17' height='13' patternUnits='userSpaceOnUse' patternTransform='scale(50) translate(-980 -735)'%3E%3Cg fill='%23545454'%3E%3Cuse href='%23s' y='11'/%3E%3Cuse href='%23s' x='2' y='9'/%3E%3Cuse href='%23s' x='5' y='12'/%3E%3Cuse href='%23s' x='9' y='4'/%3E%3Cuse href='%23s' x='12' y='1'/%3E%3Cuse href='%23s' x='16' y='6'/%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='d' width='19' height='17' patternUnits='userSpaceOnUse' patternTransform='scale(50) translate(-980 -735)'%3E%3Cg fill='%2318191A'%3E%3Cuse href='%23s' y='9'/%3E%3Cuse href='%23s' x='16' y='5'/%3E%3Cuse href='%23s' x='14' y='2'/%3E%3Cuse href='%23s' x='11' y='11'/%3E%3Cuse href='%23s' x='6' y='14'/%3E%3C/g%3E%3Cg fill='%235b5b5c'%3E%3Cuse href='%23s' x='3' y='13'/%3E%3Cuse href='%23s' x='9' y='7'/%3E%3Cuse href='%23s' x='13' y='10'/%3E%3Cuse href='%23s' x='15' y='4'/%3E%3Cuse href='%23s' x='18' y='1'/%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='e' width='47' height='53' patternUnits='userSpaceOnUse' patternTransform='scale(50) translate(-980 -735)'%3E%3Cg fill='%23EB3B5A'%3E%3Cuse href='%23s' x='2' y='5'/%3E%3Cuse href='%23s' x='16' y='38'/%3E%3Cuse href='%23s' x='46' y='42'/%3E%3Cuse href='%23s' x='29' y='20'/%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='f' width='59' height='71' patternUnits='userSpaceOnUse' patternTransform='scale(50) translate(-980 -735)'%3E%3Cg fill='%23EB3B5A'%3E%3Cuse href='%23s' x='33' y='13'/%3E%3Cuse href='%23s' x='27' y='54'/%3E%3Cuse href='%23s' x='55' y='55'/%3E%3C/g%3E%3C/pattern%3E%3Cpattern id='g' width='139' height='97' patternUnits='userSpaceOnUse' patternTransform='scale(50) translate(-980 -735)'%3E%3Cg fill='%23EB3B5A'%3E%3Cuse href='%23s' x='11' y='8'/%3E%3Cuse href='%23s' x='51' y='13'/%3E%3Cuse href='%23s' x='17' y='73'/%3E%3Cuse href='%23s' x='99' y='57'/%3E%3C/g%3E%3C/pattern%3E%3C/defs%3E%3Crect fill='url(%23a)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23b)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23h)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23c)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23d)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23e)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23f)' width='100%25' height='100%25'/%3E%3Crect fill='url(%23g)' width='100%25' height='100%25'/%3E%3C/svg%3E");
   background-attachment: fixed;
   background-size: cover;
@@ -81,7 +93,7 @@ button.ant-btn-primary {
 }
 
 .strategists-player-panel {
-  height: 100%;
+  height: calc(100% - var(--strategists-nav-height));
 
   // This height will be changed once actions component is finalized
   --strategists-actions-height: 140px;
@@ -98,12 +110,8 @@ button.ant-btn-primary {
 // ----- ACTIVITY COMPONENT'S CSS DEFINED BELOW ----- //
 
 .strategists-activity {
-  height: var(--strategists-tab-body-height);
-
-  .strategists-list {
-    height: calc(100% - var(--strategists-header-height));
-    overflow-y: scroll;
-  }
+  height: 100%;
+  overflow-y: scroll;
 }
 
 // ----- LOBBY COMPONENT'S CSS DEFINED BELOW ----- //
@@ -111,50 +119,45 @@ button.ant-btn-primary {
 .strategists-lobby {
   display: flex;
   flex-direction: column;
-  height: var(--strategists-tab-body-height);
 
-  &__list {
+  &__players {
     // 140px = add player form's height
     height: calc(100% - 140px);
+    overflow-y: scroll;
 
-    &__players {
-      height: calc(100% - var(--strategists-header-height));
-      overflow-y: scroll;
-
-      .ant-empty-description {
-        color: var(--text-color);
+    &__player {
+      &__kick {
+        display: none;
       }
 
-      &__player {
-        &__kick {
-          color: var(--accent-color);
-          cursor: pointer;
-          font-size: var(--text-font-size);
-        }
+      &__content {
+        display: flex;
+        width: 100%;
 
-        &__content {
+        &__info {
           display: flex;
-          width: 100%;
-
-          &__info {
-            display: flex;
-            flex-direction: column;
-            flex-basis: 50%;
-          }
-
-          &__password {
-            display: none;
-            cursor: pointer;
-            font-family: monospace;
-            font-size: var(--text-font-size);
-            text-align: center;
-            margin: auto 0;
-            padding: var(--base-unit-size);
-          }
+          flex-direction: column;
+          flex-basis: 50%;
+          margin: auto 0;
+          padding: var(--base-unit-size);
         }
 
-        // Hovering row will reveal player's password div
-        &:hover .strategists-lobby__list__players__player__content__password {
+        &__password {
+          display: none;
+          cursor: pointer;
+          font-family: monospace;
+          text-align: center;
+          margin: auto 0;
+          padding: var(--base-unit-size);
+        }
+      }
+
+      // Hovering row will reveal player's password div & kick button
+      &:hover .strategists-lobby__players__player {
+        &__content__password {
+          display: block;
+        }
+        &__kick {
           display: block;
         }
       }
@@ -166,29 +169,18 @@ button.ant-btn-primary {
     flex-wrap: wrap;
     width: 100%;
     column-gap: var(--base-unit-size);
-
-    // Matching the ant-list-lg padding
-    // Setting it manually because antd doesn't use css variable for it
-    padding: 24px 24px 0 24px;
+    padding: var(--ant-lg-padding) var(--ant-lg-padding) 0 var(--ant-lg-padding);
 
     // Username field
     &__username {
       flex-basis: calc(75% - var(--base-unit-size));
       margin: 0;
-
-      input {
-        color: var(--dark-color);
-      }
     }
 
     // Cash field
     &__cash {
       flex-basis: 25%;
       margin: 0;
-
-      input {
-        color: var(--dark-color) !important;
-      }
 
       // Overriding antd number input class
       .ant-input-number {
@@ -197,7 +189,7 @@ button.ant-btn-primary {
     }
 
     // Add button
-    &__button {
+    &__add {
       flex-basis: 100%;
       margin-top: var(--base-unit-size);
 
@@ -217,13 +209,18 @@ button.ant-btn-primary {
 
   &__modal {
     &__title {
-      color: var(--dark-color) !important;
       display: flex;
       flex-direction: column;
     }
-
-    .ant-table-cell {
-      color: var(--dark-color) !important;
-    }
   }
+}
+
+// ----- GLOBAL ANTD OVERRIDES DEFINED BELOW ----- //
+
+.ant-btn-primary {
+  box-shadow: none;
+}
+
+.ant-modal-close {
+  color: var(--text-color) !important;
 }
