@@ -1,14 +1,16 @@
-import './App.scss';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Dashboard, Login, NotFound } from './components';
 import { Provider } from 'react-redux';
 import { store } from './redux';
 import { ConfigProvider } from 'antd';
+import { CoffeeOutlined } from '@ant-design/icons';
+import './App.scss';
 
 /**
  * Theme colors are defined here, all CSS classes should refer to these variables.
  */
-export const strategistsColors = {
+export const CssVariables = {
+  '--font-family': `'IBM Plex Sans', sans-serif`,
   '--text-color': '#f5f6fa',
   '--dark-color': '#18191a',
   '--dark-color-rgb': '24, 25, 26',
@@ -18,17 +20,28 @@ export const strategistsColors = {
 
 export const App = () => {
   // Setting up theme colors
-  for (const [key, value] of Object.entries(strategistsColors)) {
+  for (const [key, value] of Object.entries(CssVariables)) {
     document.documentElement.style.setProperty(key, value);
   }
 
   return (
     <ConfigProvider
+      renderEmpty={() => (
+        <span className="strategists-empty">
+          <CoffeeOutlined /> Nothing to show here!
+        </span>
+      )}
       theme={{
         token: {
-          colorPrimary: strategistsColors['--accent-color'],
-          colorText: strategistsColors['--text-color'],
-          fontFamily: 'system-ui',
+          borderRadius: 4,
+          colorBgBase: CssVariables['--dark-color'],
+          colorWhite: CssVariables['--text-color'],
+          colorPrimary: CssVariables['--accent-color'],
+          colorBorder: CssVariables['--accent-color'],
+          colorBgContainer: 'transparent',
+          colorText: CssVariables['--text-color'],
+          colorTextPlaceholder: CssVariables['--text-color'],
+          fontFamily: CssVariables['--font-family'],
         },
       }}
     >

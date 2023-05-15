@@ -1,6 +1,7 @@
 export * from './Actions';
 export * from './Activity';
 export * from './Dashboard';
+export * from './Logo';
 export * from './Lobby';
 export * from './Login';
 export * from './Map';

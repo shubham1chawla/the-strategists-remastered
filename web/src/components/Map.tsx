@@ -6,7 +6,7 @@ import cytoscape, {
 } from 'cytoscape';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { strategistsColors } from '../App';
+import { CssVariables } from '../App';
 import { Land, Player, State } from '../redux';
 import { MapModal, MapModalProps } from '.';
 
@@ -139,14 +139,14 @@ export const Map = () => {
         selector: '.prison',
         style: {
           shape: 'pentagon',
-          backgroundColor: strategistsColors['--accent-color'],
+          backgroundColor: CssVariables['--accent-color'],
         },
       },
       {
         selector: '.player',
         style: {
           shape: 'triangle',
-          backgroundColor: strategistsColors['--accent-color'],
+          backgroundColor: CssVariables['--accent-color'],
         },
       },
     ];

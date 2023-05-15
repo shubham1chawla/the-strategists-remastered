@@ -1,11 +1,10 @@
 import { MouseEvent, useState } from 'react';
-import { Button, Form, Input, InputNumber, List } from 'antd';
+import { Button, Form, Input, InputNumber, List, Tooltip } from 'antd';
 import {
-  CloseCircleOutlined,
   LockOutlined,
-  TeamOutlined,
   UnlockOutlined,
   UserAddOutlined,
+  UserDeleteOutlined,
   UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
@@ -27,43 +26,6 @@ export const Lobby = () => (
     {AddPlayerForm()}
   </>
 );
-
-const AddPlayerForm = () => {
-  const [form] = Form.useForm();
-
-  const addPlayer = async ({ username, cash }: Player) => {
-    await axios.post('/api/players', { username, cash });
-    form.resetFields();
-  };
-
-  return (
-    <Form
-      className="strategists-lobby__form"
-      form={form}
-      name="basic"
-      onFinish={addPlayer}
-      onFinishFailed={(event) => console.error(event)}
-      autoComplete="off"
-    >
-      <Form.Item name="username" className="strategists-lobby__form__username">
-        <Input size="large" placeholder="Username" />
-      </Form.Item>
-      <Form.Item name="cash" className="strategists-lobby__form__cash">
-        <InputNumber
-          placeholder="Cash"
-          size="large"
-          min={MIN_CASH_AMOUNT}
-          max={MAX_CASH_AMOUNT}
-        />
-      </Form.Item>
-      <Form.Item className="strategists-lobby__form__button">
-        <Button type="primary" htmlType="submit" size="large">
-          <UserAddOutlined /> Add Players
-        </Button>
-      </Form.Item>
-    </Form>
-  );
-};
 
 const LobbyPlayers = () => {
   const { players } = useSelector((state: State) => state.lobby);
@@ -105,47 +67,88 @@ const LobbyPlayers = () => {
   };
 
   return (
-    <div className="strategists-lobby__list">
-      <header>
-        <TeamOutlined /> Joined Players
-      </header>
-      <List
-        className="strategists-list strategists-lobby__list__players"
-        size="large"
-        dataSource={players}
-        renderItem={(player: Player) => (
-          <List.Item
-            className="strategists-list__item strategists-lobby__list__players__player"
-            extra={
-              <CloseCircleOutlined
-                className="strategists-lobby__list__players__player__kick"
+    <List
+      className="strategists-lobby__players"
+      size="large"
+      dataSource={players}
+      renderItem={(player: Player) => (
+        <List.Item
+          className="strategists-lobby__players__player"
+          extra={
+            <Tooltip title={`Kick ${player.username} out!`}>
+              <Button
+                className="strategists-lobby__players__player__kick"
+                type="text"
+                shape="circle"
                 onClick={(event) => kickPlayer(event, player)}
+                icon={<UserDeleteOutlined />}
               />
-            }
+            </Tooltip>
+          }
+        >
+          <div
+            onMouseLeave={() => hidePassword(player)}
+            className="strategists-lobby__players__player__content"
           >
+            <div className="strategists-lobby__players__player__content__info">
+              <span>
+                <UserOutlined /> {player.username}
+              </span>
+              <span>
+                <WalletOutlined /> {player.netWorth}
+              </span>
+            </div>
             <div
-              onMouseLeave={() => hidePassword(player)}
-              className="strategists-lobby__list__players__player__content"
+              className="strategists-lobby__players__player__content__password"
+              onMouseDown={() => showPassword(player)}
+              onMouseUp={() => hidePassword(player)}
             >
-              <div className="strategists-lobby__list__players__player__content__info">
-                <span>
-                  <UserOutlined /> {player.username}
-                </span>
-                <span>
-                  <WalletOutlined /> {player.netWorth}
-                </span>
-              </div>
-              <div
-                className="strategists-lobby__list__players__player__content__password"
-                onMouseDown={() => showPassword(player)}
-                onMouseUp={() => hidePassword(player)}
+              <Tooltip
+                title={`Hold down to reveal ${player.username}'s password`}
               >
                 {renderPassword(player)}
-              </div>
+              </Tooltip>
             </div>
-          </List.Item>
-        )}
-      />
-    </div>
+          </div>
+        </List.Item>
+      )}
+    />
+  );
+};
+
+const AddPlayerForm = () => {
+  const [form] = Form.useForm();
+
+  const addPlayer = async ({ username, cash }: Player) => {
+    await axios.post('/api/players', { username, cash });
+    form.resetFields();
+  };
+
+  return (
+    <Form
+      className="strategists-lobby__form"
+      form={form}
+      name="basic"
+      onFinish={addPlayer}
+      onFinishFailed={(event) => console.error(event)}
+      autoComplete="off"
+    >
+      <Form.Item name="username" className="strategists-lobby__form__username">
+        <Input size="large" placeholder="Username" />
+      </Form.Item>
+      <Form.Item name="cash" className="strategists-lobby__form__cash">
+        <InputNumber
+          placeholder="Cash"
+          size="large"
+          min={MIN_CASH_AMOUNT}
+          max={MAX_CASH_AMOUNT}
+        />
+      </Form.Item>
+      <Form.Item className="strategists-lobby__form__add">
+        <Button type="primary" htmlType="submit" size="large">
+          <UserAddOutlined /> Add Players
+        </Button>
+      </Form.Item>
+    </Form>
   );
 };
