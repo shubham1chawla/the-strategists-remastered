@@ -2,41 +2,34 @@ package com.strategists.game.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
+import com.strategists.game.aop.ActivityMapping;
+import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.PlayerService;
 
 @Service
 public class GameServiceImpl implements GameService {
 
-	private enum State {
-		ACTIVE, LOBBY
-	}
-
 	@Autowired
 	private PlayerService playerService;
 
-	private State state = State.LOBBY;
-
 	@Override
-	public boolean isActiveState() {
-		return state == State.ACTIVE;
+	public State getState() {
+		return playerService.isTurnAssigned() ? State.ACTIVE : State.LOBBY;
 	}
 
 	@Override
-	public boolean isLobbyState() {
-		return state == State.LOBBY;
+	public boolean isState(State state) {
+		return getState().equals(state);
 	}
 
 	@Override
+	@ActivityMapping(Type.START)
 	public void start() {
-
-		// Setting game's state to ACTIVE
-		state = State.ACTIVE;
-
-		// Assigning turn to a player
+		Assert.isTrue(playerService.getCount() > 0, "No players added!");
 		playerService.assignTurn();
-
 	}
 
 }

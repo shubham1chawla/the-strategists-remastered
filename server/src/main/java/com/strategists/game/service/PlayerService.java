@@ -6,6 +6,8 @@ import com.strategists.game.entity.Player;
 
 public interface PlayerService {
 
+	long getCount();
+
 	List<Player> getPlayers();
 
 	Player getPlayerById(long id);
@@ -13,6 +15,8 @@ public interface PlayerService {
 	Player addPlayer(String username, double cash);
 
 	void kickPlayer(String username);
+
+	boolean isTurnAssigned();
 
 	void assignTurn();
 

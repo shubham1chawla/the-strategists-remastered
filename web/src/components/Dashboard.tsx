@@ -1,10 +1,17 @@
-import { useEffect } from 'react';
+import { Dispatch, useEffect } from 'react';
 import { Button, Col, Row, Tabs, TabsProps, Tooltip, notification } from 'antd';
 import { Actions, Activity, Logo, Lobby, Map } from '.';
 import { useDispatch, useSelector } from 'react-redux';
 import { ActivityActions, LobbyActions, State } from '../redux';
-import { LogoutOutlined, RocketFilled } from '@ant-design/icons';
+import { FireOutlined, LogoutOutlined, RocketFilled } from '@ant-design/icons';
 import axios from 'axios';
+
+const getCalls = {
+  '/api/players': LobbyActions.setPlayers, // Updating players
+  '/api/activities': ActivityActions.setActivities, // Updating players
+  '/api/lands': LobbyActions.setLands, // Updating lands
+  '/api/game': LobbyActions.setState, // Updating state
+};
 
 export const Dashboard = () => {
   const { username, type } = useSelector((state: State) => state.user);
@@ -12,20 +19,10 @@ export const Dashboard = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    // Updating players
-    axios
-      .get('/api/players')
-      .then(({ data }) => dispatch(LobbyActions.setPlayers(data)));
-
-    // Updating activities
-    axios
-      .get('/api/activities')
-      .then(({ data }) => dispatch(ActivityActions.setActivities(data)));
-
-    // Updating lands
-    axios
-      .get('/api/lands')
-      .then(({ data }) => dispatch(LobbyActions.setLands(data)));
+    // Syncing game's state
+    for (const [api, action] of Object.entries(getCalls)) {
+      axios.get(api).then(({ data }) => dispatch(action(data)));
+    }
 
     // Setting up SSE for updates
     const updates = new EventSource(
@@ -55,7 +52,7 @@ export const Dashboard = () => {
     <Row className="strategists-dashboard">
       {contextHolder}
       <Col className="strategists-dashboard__left-section" flex="30%">
-        {Navigation(type)}
+        {Navigation(type, dispatch)}
         {type === 'admin' ? AdminPanel() : PlayerPanel()}
       </Col>
       <Col className="strategists-dashboard__right-section" flex="70%">
@@ -65,7 +62,15 @@ export const Dashboard = () => {
   );
 };
 
-const Navigation = (type: 'admin' | 'player') => {
+const Navigation = (type: 'admin' | 'player', dispatch: Dispatch<any>) => {
+  const { state, players } = useSelector((state: State) => state.lobby);
+
+  const start = async () => {
+    if (state === 'active') return;
+    await axios.put('/api/game/start');
+    dispatch(LobbyActions.setState('active'));
+  };
+
   return (
     <nav className="strategists-nav">
       <header className="strategists-header">
@@ -80,9 +85,22 @@ const Navigation = (type: 'admin' | 'player') => {
         <Logo />
       </header>
       {type === 'admin' ? (
-        <Tooltip title="Start the game!">
-          <Button type="primary" htmlType="submit">
-            <RocketFilled />
+        <Tooltip
+          title={
+            !players.length
+              ? 'Add players to start The Strategists!'
+              : state === 'active'
+              ? 'The Strategists in progress!'
+              : 'Start The Strategists!'
+          }
+        >
+          <Button
+            disabled={state === 'active' || !players.length}
+            type="primary"
+            htmlType="submit"
+            onClick={() => start()}
+          >
+            {state === 'active' ? <FireOutlined /> : <RocketFilled />}
           </Button>
         </Tooltip>
       ) : null}

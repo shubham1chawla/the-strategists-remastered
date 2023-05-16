@@ -1,7 +1,7 @@
 package com.strategists.game.aop;
 
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -22,7 +22,7 @@ import lombok.extern.log4j.Log4j2;
 @Component
 public class ActivityAspect {
 
-	private static final String ADMIN_NAME = "Admin";
+	private static final String ADMIN_NAME = "Creator";
 
 	@Autowired
 	private ActivityRepository activityRepository;
@@ -39,8 +39,14 @@ public class ActivityAspect {
 	@Autowired
 	private UpdateService updateService;
 
-	@After("@annotation(mapping)")
-	public void postActivityAdvice(JoinPoint joinPoint, ActivityMapping mapping) {
+	@Around("@annotation(mapping)")
+	public void postActivityAdvice(ProceedingJoinPoint joinPoint, ActivityMapping mapping) throws Throwable {
+		try {
+			joinPoint.proceed();
+		} catch (Throwable ex) {
+			log.error("Unable to log activity of type: {}", mapping.value(), ex);
+			throw ex;
+		}
 		log.info("Logging activity of type: {}", mapping.value());
 		Activity activity = null;
 		switch (mapping.value()) {
@@ -56,12 +62,14 @@ public class ActivityAspect {
 		case KICK:
 			activity = createKickActivity(joinPoint.getArgs());
 			break;
+		case START:
+			activity = createStartActivity();
+			break;
 		default:
 			log.warn("Unsupported Activity Type: {}", mapping.value());
 			return;
 		}
-		activity = activityRepository.save(activity);
-		updateService.sendUpdate(new NewActivityUpdatePayload(activity));
+		updateService.sendUpdate(new NewActivityUpdatePayload(activityRepository.save(activity)));
 	}
 
 	private Activity createBuyActivity(Object[] args) {
@@ -83,6 +91,10 @@ public class ActivityAspect {
 
 	private Activity createKickActivity(Object[] args) {
 		return Activity.ofKick(ADMIN_NAME, (String) args[0]);
+	}
+
+	private Activity createStartActivity() {
+		return Activity.ofStart(ADMIN_NAME);
 	}
 
 }

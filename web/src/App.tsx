@@ -37,6 +37,7 @@ export const App = () => {
           colorBgBase: CssVariables['--dark-color'],
           colorWhite: CssVariables['--text-color'],
           colorPrimary: CssVariables['--accent-color'],
+          colorTextDisabled: CssVariables['--accent-color'],
           colorBorder: CssVariables['--accent-color'],
           colorBgContainer: 'transparent',
           colorText: CssVariables['--text-color'],

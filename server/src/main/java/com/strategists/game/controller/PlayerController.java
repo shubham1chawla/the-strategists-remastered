@@ -17,6 +17,7 @@ import com.strategists.game.request.AddPlayerRequest;
 import com.strategists.game.request.BuyLandRequest;
 import com.strategists.game.request.KickPlayerRequest;
 import com.strategists.game.service.GameService;
+import com.strategists.game.service.GameService.State;
 import com.strategists.game.service.PlayerService;
 
 @RestController
@@ -41,19 +42,19 @@ public class PlayerController {
 
 	@PostMapping
 	public Player addPlayer(@RequestBody AddPlayerRequest request) {
-		Assert.state(gameService.isLobbyState(), "Can't add players to active game!");
+		Assert.state(gameService.isState(State.LOBBY), "Can't add players to active game!");
 		return playerService.addPlayer(request.getUsername(), request.getCash());
 	}
 
 	@DeleteMapping
 	public void kickPlayer(@RequestBody KickPlayerRequest request) {
-		Assert.state(gameService.isLobbyState(), "Can't kick players in active game!");
+		Assert.state(gameService.isState(State.LOBBY), "Can't kick players in active game!");
 		playerService.kickPlayer(request.getUsername());
 	}
 
 	@PostMapping("/{playerId}/lands")
 	public void buyLand(@RequestBody BuyLandRequest request) {
-		Assert.state(gameService.isActiveState(), "You need an active game to buy land!");
+		Assert.state(gameService.isState(State.ACTIVE), "You need an active game to buy land!");
 		playerService.buyLand(request.getOwnership());
 	}
 

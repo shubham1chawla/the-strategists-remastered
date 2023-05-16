@@ -55,6 +55,9 @@ public class Activity implements Serializable {
 		// Player 1 paid $100 rent to Player 2 for Land 1.
 		RENT("%s paid $%s rent to %s for %s."),
 
+		// Admin started The Strategists!
+		START("%s started The Strategists!"),
+
 		// Player 1 traded 50% of Land 1 with Player 2 for $100.
 		TRADE("%s traded %s% of %s with %s for $%s.");
 
@@ -115,6 +118,8 @@ public class Activity implements Serializable {
 			return String.format(type.format, val1, val2);
 		case RENT:
 			return String.format(type.format, val1, val2, val3, val4);
+		case START:
+			return String.format(type.format, val1);
 		case TRADE:
 			return String.format(type.format, val1, val2, val3, val4, val5);
 		default:
@@ -152,6 +157,10 @@ public class Activity implements Serializable {
 
 	public static Activity ofRent(String payer, double amount, String payee, String land) {
 		return new Activity(Type.RENT, payer, Double.toString(amount), payee, land);
+	}
+
+	public static Activity ofStart(String admin) {
+		return new Activity(Type.START, admin);
 	}
 
 	public static Activity ofTrade(String releaser, double percent, String land, String receiver, double amount) {

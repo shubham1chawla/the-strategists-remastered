@@ -15,6 +15,7 @@ import com.strategists.game.entity.Land;
 import com.strategists.game.request.HostEventRequest;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.LandService;
+import com.strategists.game.service.GameService.State;
 
 @RestController
 @RequestMapping("/api/lands")
@@ -33,7 +34,7 @@ public class LandController {
 
 	@PostMapping("/{landId}/events")
 	public void hostEvent(@PathVariable long landId, @RequestBody HostEventRequest request) {
-		Assert.isTrue(gameService.isActiveState(), "You need an active game to host events!");
+		Assert.isTrue(gameService.isState(State.ACTIVE), "You need an active game to host events!");
 		landService.hostEvent(landId, request.getEventId(), request.getLife(), request.getLevel());
 	}
 

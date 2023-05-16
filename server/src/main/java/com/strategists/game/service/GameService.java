@@ -1,10 +1,24 @@
 package com.strategists.game.service;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 public interface GameService {
 
-	boolean isActiveState();
+	@Getter
+	@AllArgsConstructor
+	enum State {
+		LOBBY("lobby"), ACTIVE("active");
 
-	boolean isLobbyState();
+		@JsonValue
+		String value;
+	}
+
+	State getState();
+
+	boolean isState(State state);
 
 	void start();
 

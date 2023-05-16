@@ -38,11 +38,13 @@ export interface Land {
 export interface LobbyState {
   players: Player[];
   lands: Land[];
+  state: 'lobby' | 'active';
 }
 
 const initialState: LobbyState = {
   players: [],
   lands: [],
+  state: 'lobby',
 };
 
 export const lobbyReducer = (
@@ -73,6 +75,12 @@ export const lobbyReducer = (
       return {
         ...state,
         lands: [...payload],
+      };
+
+    case LobbyActions.Types.SET_STATE:
+      return {
+        ...state,
+        state: payload,
       };
 
     default:
