@@ -57,6 +57,15 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
+	public Player getPlayerByUsername(String username) {
+		val opt = playerRepository.findByUsername(username);
+		Assert.isTrue(opt.isPresent(), "No player found with username: " + username);
+
+		log.info("Found player: {}", opt.get());
+		return opt.get();
+	}
+
+	@Override
 	@ActivityMapping(Type.JOIN)
 	public Player addPlayer(String username, double cash) {
 		log.info("Checking if {} username exists...", username);

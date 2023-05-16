@@ -126,28 +126,39 @@ const AddPlayerForm = () => {
 
   return (
     <Form
-      className="strategists-lobby__form"
+      layout="inline"
       form={form}
       name="basic"
+      className="strategists-lobby__form"
       onFinish={addPlayer}
       onFinishFailed={(event) => console.error(event)}
       autoComplete="off"
     >
-      <Form.Item name="username" className="strategists-lobby__form__username">
-        <Input size="large" placeholder="Username" />
+      <Form.Item
+        name="username"
+        rules={[{ required: true, message: `Username required!` }]}
+      >
+        <Input size="large" placeholder="Username" prefix={<UserOutlined />} />
       </Form.Item>
-      <Form.Item name="cash" className="strategists-lobby__form__cash">
+      <Form.Item
+        name="cash"
+        rules={[{ required: true, message: `Cash required!` }]}
+      >
         <InputNumber
           placeholder="Cash"
           size="large"
           min={MIN_CASH_AMOUNT}
           max={MAX_CASH_AMOUNT}
+          prefix={<WalletOutlined />}
         />
       </Form.Item>
-      <Form.Item className="strategists-lobby__form__add">
-        <Button type="primary" htmlType="submit" size="large">
-          <UserAddOutlined /> Add Players
-        </Button>
+      <Form.Item>
+        <Button
+          type="primary"
+          htmlType="submit"
+          size="large"
+          icon={<UserAddOutlined />}
+        />
       </Form.Item>
     </Form>
   );
