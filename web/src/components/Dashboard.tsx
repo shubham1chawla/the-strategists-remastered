@@ -1,8 +1,9 @@
 import { Dispatch, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button, Col, Row, Tabs, TabsProps, Tooltip, notification } from 'antd';
 import { Actions, Activity, Logo, Lobby, Map } from '.';
 import { useDispatch, useSelector } from 'react-redux';
-import { ActivityActions, LobbyActions, State } from '../redux';
+import { ActivityActions, LobbyActions, State, UserActions } from '../redux';
 import { FireOutlined, LogoutOutlined, RocketFilled } from '@ant-design/icons';
 import axios from 'axios';
 
@@ -17,8 +18,15 @@ export const Dashboard = () => {
   const { username, type } = useSelector((state: State) => state.user);
   const [api, contextHolder] = notification.useNotification();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
+    // Checking if player is logged in
+    if (!username) {
+      navigate('/login');
+      return;
+    }
+
     // Syncing game's state
     for (const [api, action] of Object.entries(getCalls)) {
       axios.get(api).then(({ data }) => dispatch(action(data)));
@@ -46,19 +54,21 @@ export const Dashboard = () => {
       }
     };
     updates.onerror = console.error;
-  }, [dispatch, username, api]);
+  }, [dispatch, navigate, username, api]);
 
   return (
-    <Row className="strategists-dashboard">
+    <>
       {contextHolder}
-      <Col className="strategists-dashboard__left-section" flex="30%">
-        {Navigation(type, dispatch)}
-        {type === 'admin' ? AdminPanel() : PlayerPanel()}
-      </Col>
-      <Col className="strategists-dashboard__right-section" flex="70%">
-        <Map />
-      </Col>
-    </Row>
+      <Row className="strategists-dashboard strategists-wallpaper">
+        <Col className="strategists-glossy" flex="30%">
+          {Navigation(type, dispatch)}
+          {type === 'admin' ? AdminPanel() : PlayerPanel()}
+        </Col>
+        <Col flex="70%">
+          <Map />
+        </Col>
+      </Row>
+    </>
   );
 };
 
@@ -80,6 +90,7 @@ const Navigation = (type: 'admin' | 'player', dispatch: Dispatch<any>) => {
             type="text"
             shape="circle"
             icon={<LogoutOutlined />}
+            onClick={() => dispatch(UserActions.unsetUser())}
           />
         </Tooltip>
         <Logo />

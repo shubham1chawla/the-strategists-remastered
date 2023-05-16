@@ -4,6 +4,7 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.strategists.game.entity.Activity;
@@ -22,7 +23,8 @@ import lombok.extern.log4j.Log4j2;
 @Component
 public class ActivityAspect {
 
-	private static final String ADMIN_NAME = "Creator";
+	@Value("${strategists.admin.username}")
+	private String adminUsername;
 
 	@Autowired
 	private ActivityRepository activityRepository;
@@ -82,7 +84,7 @@ public class ActivityAspect {
 	private Activity createEventActivity(Object[] args) {
 		val l = landService.getLandById((long) args[0]);
 		val e = eventService.getEventById((long) args[1]);
-		return Activity.ofEvent(ADMIN_NAME, e.getName(), l.getName(), (int) args[2]);
+		return Activity.ofEvent(adminUsername, e.getName(), l.getName(), (int) args[2]);
 	}
 
 	private Activity createJoinActivity(Object[] args) {
@@ -90,11 +92,11 @@ public class ActivityAspect {
 	}
 
 	private Activity createKickActivity(Object[] args) {
-		return Activity.ofKick(ADMIN_NAME, (String) args[0]);
+		return Activity.ofKick(adminUsername, (String) args[0]);
 	}
 
 	private Activity createStartActivity() {
-		return Activity.ofStart(ADMIN_NAME);
+		return Activity.ofStart(adminUsername);
 	}
 
 }

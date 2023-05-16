@@ -12,6 +12,8 @@ public interface PlayerService {
 
 	Player getPlayerById(long id);
 
+	Player getPlayerByUsername(String username);
+
 	Player addPlayer(String username, double cash);
 
 	void kickPlayer(String username);

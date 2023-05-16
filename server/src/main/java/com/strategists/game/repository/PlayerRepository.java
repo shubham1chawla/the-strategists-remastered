@@ -13,12 +13,14 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
 
 	boolean existsByUsername(String username);
 
+	Optional<Player> findByUsername(String username);
+
+	void deleteByUsername(String username);
+
 	boolean existsByTurn(boolean turn);
 
 	Optional<Player> findByTurn(boolean turn);
 
 	List<Player> findByStateIn(Set<State> states);
-
-	void deleteByUsername(String username);
 
 }

@@ -3,3 +3,7 @@ spring:
     name: strategists-service
   profiles:
     active: dev
+strategists:
+  admin:
+    username: Creator
+    password: 9999

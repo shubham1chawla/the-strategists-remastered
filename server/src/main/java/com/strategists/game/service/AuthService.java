@@ -5,21 +5,17 @@ import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-public interface GameService {
+public interface AuthService {
 
 	@Getter
 	@AllArgsConstructor
-	enum State {
-		LOBBY("lobby"), ACTIVE("active");
+	enum Type {
+		ADMIN("admin"), PLAYER("player");
 
 		@JsonValue
 		private String value;
 	}
 
-	State getState();
-
-	boolean isState(State state);
-
-	void start();
+	Type authenticate(String username, String password);
 
 }
