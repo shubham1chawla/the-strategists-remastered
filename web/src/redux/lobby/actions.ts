@@ -6,6 +6,7 @@ export namespace LobbyActions {
     ADD_PLAYER: 'ADD_PLAYER',
     KICK_PLAYER: 'KICK_PLAYER',
     SET_LANDS: 'SET_LANDS',
+    SET_STATE: 'SET_STATE',
   };
 
   export const setPlayers = (players: Player[]) => {
@@ -33,6 +34,13 @@ export namespace LobbyActions {
     return {
       type: Types.SET_LANDS,
       payload: lands,
+    };
+  };
+
+  export const setState = (state: 'lobby' | 'active') => {
+    return {
+      type: Types.SET_STATE,
+      payload: state,
     };
   };
 }

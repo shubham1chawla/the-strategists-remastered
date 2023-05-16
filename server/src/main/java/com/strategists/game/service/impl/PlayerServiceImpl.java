@@ -38,6 +38,11 @@ public class PlayerServiceImpl implements PlayerService {
 	private LandService landService;
 
 	@Override
+	public long getCount() {
+		return playerRepository.count();
+	}
+
+	@Override
 	public List<Player> getPlayers() {
 		return playerRepository.findAll();
 	}
@@ -78,8 +83,13 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
+	public boolean isTurnAssigned() {
+		return playerRepository.existsByTurn(true);
+	}
+
+	@Override
 	public void assignTurn() {
-		Assert.state(!playerRepository.existsByTurn(true), "Turn already assigned!");
+		Assert.state(!isTurnAssigned(), "Turn already assigned!");
 
 		log.info("Randomly assigning turn to a player...");
 		val players = getPlayers();
@@ -111,7 +121,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Override
 	public void nextPlayer() {
-		Assert.state(playerRepository.existsByTurn(true), "No player has the turn!");
+		Assert.state(isTurnAssigned(), "No player has the turn!");
 
 		log.info("Assigning turn to the next player...");
 		val players = playerRepository.findByStateIn(Set.of(State.ACTIVE, State.JAIL));
