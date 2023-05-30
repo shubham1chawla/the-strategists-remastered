@@ -1,14 +1,14 @@
 package com.strategists.game.aop;
 
-import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.AfterReturning;
+import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.strategists.game.entity.Player;
 import com.strategists.game.service.UpdateService;
+import com.strategists.game.update.AbstractUpdatePayload;
 import com.strategists.game.update.JoinPlayerUpdatePayload;
 import com.strategists.game.update.KickPlayerUpdatePayload;
 
@@ -22,16 +22,29 @@ public class UpdateAspect {
 	@Autowired
 	private UpdateService updateService;
 
-	@AfterReturning(value = "execution(* com.strategists.game.service.impl.PlayerServiceImpl.addPlayer(String, double))", returning = "player")
-	public void postJoinPlayerAdvice(JoinPoint joinPoint, Player player) {
-		log.info("Sending Join Player update to everyone.");
-		updateService.sendUpdate(new JoinPlayerUpdatePayload(player));
-	}
-
-	@After("execution(* com.strategists.game.service.impl.PlayerServiceImpl.kickPlayer(String))")
-	public void postKickPlayerAdvice(JoinPoint joinPoint) {
-		log.info("Sending Kick Player update to everyone.");
-		updateService.sendUpdate(new KickPlayerUpdatePayload((String) joinPoint.getArgs()[0]));
+	@Around("@annotation(mapping)")
+	public void advice(ProceedingJoinPoint joinPoint, UpdateMapping mapping) throws Throwable {
+		Object obj = null;
+		try {
+			obj = joinPoint.proceed();
+		} catch (Throwable ex) {
+			log.error("Unable to update activity of type: {}", mapping.value(), ex);
+			throw ex;
+		}
+		log.info("Updating activity of type: {}", mapping.value());
+		AbstractUpdatePayload<?> payload = null;
+		switch (mapping.value()) {
+		case JOIN:
+			payload = new JoinPlayerUpdatePayload((Player) obj);
+			break;
+		case KICK:
+			payload = new KickPlayerUpdatePayload((String) joinPoint.getArgs()[0]);
+			break;
+		default:
+			log.warn("Unsupported Activity Type: {}", mapping.value());
+			return;
+		}
+		updateService.sendUpdate(payload);
 	}
 
 }
