@@ -39,7 +39,10 @@ export const Login = () => {
         navigate('/dashboard');
       })
       .catch(({ response }) => {
-        const { message } = response?.data as { message: string };
+        const message =
+          response.status === 404
+            ? 'Incorrect credentials!'
+            : 'Something went wrong, please try again later!';
         api.error({ message });
         setLoading(false);
       });
@@ -60,7 +63,11 @@ export const Login = () => {
             className="strategists-login__card__form"
             form={form}
             onFinish={loginPlayer}
-            onFinishFailed={(event) => console.error(event)}
+            onFinishFailed={({ errorFields }) => {
+              errorFields.forEach((field) =>
+                api.error({ message: field.errors[0] })
+              );
+            }}
             autoComplete="off"
           >
             <Space.Compact size="large">
