@@ -9,14 +9,14 @@ export const userReducer = (state = initialState(), action: any): UserState => {
   const { type, payload } = action;
   switch (type) {
     case UserActions.Types.SET_USER:
-      localStorage.setItem('user', JSON.stringify(payload));
+      sessionStorage.setItem('user', JSON.stringify(payload));
       return {
         ...state,
         ...payload,
       };
 
     case UserActions.Types.UNSET_USER:
-      localStorage.removeItem('user');
+      sessionStorage.removeItem('user');
       return initialState();
 
     default:
@@ -25,6 +25,6 @@ export const userReducer = (state = initialState(), action: any): UserState => {
 };
 
 const initialState = (): UserState => {
-  const json = localStorage.getItem('user');
+  const json = sessionStorage.getItem('user');
   return json ? JSON.parse(json) : { type: 'player' };
 };

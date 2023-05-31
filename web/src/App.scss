@@ -100,6 +100,10 @@ h1.strategists-logo {
 
     &__form {
       margin: auto;
+
+      .ant-input-suffix .anticon {
+        color: var(--text-color);
+      }
     }
   }
 }
@@ -113,15 +117,51 @@ h1.strategists-logo {
 .strategists-player-panel {
   height: calc(100% - var(--strategists-nav-height));
 
-  // This height will be changed once actions component is finalized
-  --strategists-actions-height: 140px;
-
   .strategists-activity {
-    height: calc(100% - var(--strategists-actions-height));
+    height: calc(100% - 40px - 2 * var(--ant-lg-padding));
   }
 
   .strategists-actions {
-    height: var(--strategists-actions-height);
+    box-sizing: border-box;
+    padding: var(--ant-lg-padding);
+  }
+}
+
+// ----- ACTIONS COMPONENT'S CSS DEFINED BELOW ----- //
+
+.strategists-actions {
+  &__modal {
+    &__title {
+      display: flex;
+      flex-direction: column;
+    }
+
+    &__body {
+      text-align: center;
+
+      .ant-statistic-title {
+        color: var(--text-color);
+      }
+    }
+  }
+
+  // Displaying waiting prompt inside the button
+  button {
+    width: 100%;
+  }
+
+  .ant-space-compact {
+    width: 100%;
+
+    // Overriding invest's button css
+    button:nth-of-type(1) {
+      flex-basis: 60%;
+    }
+
+    // Overriding skip's button css
+    button:nth-of-type(2) {
+      flex-basis: calc(40% - 40px);
+    }
   }
 }
 
@@ -183,7 +223,23 @@ h1.strategists-logo {
   }
 
   &__form {
-    margin: auto;
+    box-sizing: border-box;
+    padding: var(--ant-lg-padding);
+
+    .ant-space-compact {
+      width: 100%;
+
+      // Overriding username's input css
+      .ant-input-affix-wrapper {
+        flex-basis: 60%;
+      }
+
+      // Overriding cash's input css
+      .ant-input-number-affix-wrapper {
+        flex-basis: calc(40% - 40px);
+        border-radius: 0px;
+      }
+    }
   }
 }
 

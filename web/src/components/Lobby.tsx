@@ -1,5 +1,5 @@
 import { MouseEvent, useState } from 'react';
-import { Button, Form, Input, InputNumber, List, Tooltip } from 'antd';
+import { Button, Form, Input, InputNumber, List, Space, Tooltip } from 'antd';
 import {
   LockOutlined,
   UnlockOutlined,
@@ -117,6 +117,7 @@ const LobbyPlayers = () => {
 };
 
 const AddPlayerForm = () => {
+  const { state } = useSelector((state: State) => state.lobby);
   const [form] = Form.useForm();
 
   const addPlayer = async ({ username, cash }: Player) => {
@@ -134,32 +135,48 @@ const AddPlayerForm = () => {
       onFinishFailed={(event) => console.error(event)}
       autoComplete="off"
     >
-      <Form.Item
-        name="username"
-        rules={[{ required: true, message: `Username required!` }]}
+      <Tooltip
+        title={
+          state === 'active'
+            ? `The Strategists in session, you can't add players now!`
+            : null
+        }
       >
-        <Input size="large" placeholder="Username" prefix={<UserOutlined />} />
-      </Form.Item>
-      <Form.Item
-        name="cash"
-        rules={[{ required: true, message: `Cash required!` }]}
-      >
-        <InputNumber
-          placeholder="Cash"
-          size="large"
-          min={MIN_CASH_AMOUNT}
-          max={MAX_CASH_AMOUNT}
-          prefix={<WalletOutlined />}
-        />
-      </Form.Item>
-      <Form.Item>
-        <Button
-          type="primary"
-          htmlType="submit"
-          size="large"
-          icon={<UserAddOutlined />}
-        />
-      </Form.Item>
+        <Space.Compact size="large">
+          <Form.Item
+            noStyle
+            name="username"
+            rules={[{ required: true, message: `Username required!` }]}
+          >
+            <Input
+              disabled={state === 'active'}
+              placeholder="Username"
+              prefix={<UserOutlined />}
+            />
+          </Form.Item>
+          <Form.Item
+            noStyle
+            name="cash"
+            rules={[{ required: true, message: `Cash required!` }]}
+          >
+            <InputNumber
+              disabled={state === 'active'}
+              placeholder="Cash"
+              min={MIN_CASH_AMOUNT}
+              max={MAX_CASH_AMOUNT}
+              prefix={<WalletOutlined />}
+            />
+          </Form.Item>
+          <Form.Item noStyle>
+            <Button
+              disabled={state === 'active'}
+              type="primary"
+              htmlType="submit"
+              icon={<UserAddOutlined />}
+            />
+          </Form.Item>
+        </Space.Compact>
+      </Tooltip>
     </Form>
   );
 };

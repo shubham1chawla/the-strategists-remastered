@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Divider, Form, Input, notification } from 'antd';
+import { Button, Divider, Form, Input, Space, notification } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { State, UserActions } from '../redux';
@@ -63,36 +63,33 @@ export const Login = () => {
             onFinishFailed={(event) => console.error(event)}
             autoComplete="off"
           >
-            <Form.Item
-              name="username"
-              rules={[{ required: true, message: 'Username required!' }]}
-            >
-              <Input
-                size="large"
-                prefix={<UserOutlined />}
-                placeholder="Username"
-              />
-            </Form.Item>
-            <Form.Item
-              name="password"
-              rules={[{ required: true, message: 'Password required!' }]}
-            >
-              <Input
-                type="password"
-                placeholder="Password"
-                size="large"
-                prefix={<LockOutlined />}
-              />
-            </Form.Item>
-            <Form.Item>
-              <Button
-                type="primary"
-                htmlType="submit"
-                size="large"
-                loading={loading}
-                icon={<LoginOutlined />}
-              />
-            </Form.Item>
+            <Space.Compact size="large">
+              <Form.Item
+                noStyle
+                name="username"
+                rules={[{ required: true, message: 'Username required!' }]}
+              >
+                <Input prefix={<UserOutlined />} placeholder="Username" />
+              </Form.Item>
+              <Form.Item
+                noStyle
+                name="password"
+                rules={[{ required: true, message: 'Password required!' }]}
+              >
+                <Input.Password
+                  placeholder="Password"
+                  prefix={<LockOutlined />}
+                />
+              </Form.Item>
+              <Form.Item noStyle>
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  icon={<LoginOutlined />}
+                />
+              </Form.Item>
+            </Space.Compact>
           </Form>
           <br />
           <Divider>
