@@ -156,12 +156,16 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	@ActivityMapping(Type.BUY)
-	public void buyLand(double ownership) {
+	@UpdateMapping(Type.INVEST)
+	@ActivityMapping(Type.INVEST)
+	public void invest(long playerId, long landId, double ownership) {
 		val player = getCurrentPlayer();
-		val land = landService.getLandByIndex(player.getIndex());
-		val buyAmount = land.getMarketValue() * (ownership / 100);
+		Assert.state(player.getId().equals(playerId), "Requesting player is not the current player!");
 
+		val land = landService.getLandByIndex(player.getIndex());
+		Assert.state(land.getId().equals(landId), "Current player is not at the requested land!");
+
+		val buyAmount = land.getMarketValue() * (ownership / 100);
 		Assert.isTrue(land.getTotalOwnership() + ownership <= 100, "Can't buy more than 100% of a land!");
 		Assert.isTrue(player.getCash() > buyAmount, "You don't have enough cash to buy this land!");
 

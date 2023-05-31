@@ -34,14 +34,14 @@ public class Activity implements Serializable {
 		// Lord gave Player 1 a bonus of $100 after completing one turn.
 		BONUS("%s gave %s a bonus of $%s after completing one turn."),
 
-		// Player 1 bought 10% of Land 1 for $200.
-		BUY("%s bought %s%% of %s for $%s."),
-
 		// Player 1 applied a cheat!
 		CHEAT("%s applied a cheat!"),
 
 		// Admin caused Event 1 at Land 1 for 10 turns!
 		EVENT("%s caused %s at %s for %s turns!"),
+
+		// Player 1 invested in 10% of Land 1.
+		INVEST("%s invested in %s%% of %s"),
 
 		// Player 1 just got arrested!
 		JAIL("%s just got arrested!"),
@@ -104,12 +104,12 @@ public class Activity implements Serializable {
 		switch (type) {
 		case BONUS:
 			return String.format(type.format, val1, val2, val3);
-		case BUY:
-			return String.format(type.format, val1, val2, val3, val4);
 		case CHEAT:
 			return String.format(type.format, val1);
 		case EVENT:
 			return String.format(type.format, val1, val2, val3, val4);
+		case INVEST:
+			return String.format(type.format, val1, val2, val3);
 		case JAIL:
 			return String.format(type.format, val1);
 		case JOIN:
@@ -131,16 +131,16 @@ public class Activity implements Serializable {
 		return new Activity(Type.BONUS, admin, player, Double.toString(amount));
 	}
 
-	public static Activity ofBuy(String buyer, double ownership, String land, double amount) {
-		return new Activity(Type.BUY, buyer, Double.toString(ownership), land, Double.toString(amount));
-	}
-
 	public static Activity ofCheat(String player) {
 		return new Activity(Type.CHEAT, player);
 	}
 
 	public static Activity ofEvent(String admin, String event, String land, int turns) {
 		return new Activity(Type.EVENT, admin, event, land, Integer.toString(turns));
+	}
+
+	public static Activity ofInvest(String buyer, double ownership, String land) {
+		return new Activity(Type.INVEST, buyer, Double.toString(ownership), land);
 	}
 
 	public static Activity ofJail(String player) {

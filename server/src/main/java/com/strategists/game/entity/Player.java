@@ -60,6 +60,7 @@ public class Player implements Serializable {
 	private String username;
 
 	@JsonIgnore
+	@ToString.Exclude
 	@Column(nullable = false, unique = false)
 	private String password;
 

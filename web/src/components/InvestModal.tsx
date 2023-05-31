@@ -20,7 +20,7 @@ export interface InvestModalProps {
 export const InvestModal = (props: InvestModalProps) => {
   const { open, player, land, investText, onCancel } = props;
   const [ownership, setOwnership] = useState(0);
-  if (!player || !land || !investText || !onCancel) {
+  if (!open || !player || !land || !investText || !onCancel) {
     return null;
   }
 
@@ -33,7 +33,10 @@ export const InvestModal = (props: InvestModalProps) => {
   );
 
   const invest = async () => {
-    await axios.post(`/api/players/${player.id}/lands`, { ownership });
+    await axios.post(`/api/players/${player.id}/lands`, {
+      landId: land.id,
+      ownership,
+    });
     setOwnership(0);
     onCancel();
   };
@@ -46,7 +49,7 @@ export const InvestModal = (props: InvestModalProps) => {
           {investText}
           <Space>
             <small>
-              <WalletOutlined /> {player?.cash} balance
+              <WalletOutlined /> {player.cash} balance
             </small>
             <small>
               <PieChartOutlined /> {maxAvailOwnership}% available

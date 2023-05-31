@@ -5,8 +5,10 @@ export namespace LobbyActions {
     SET_PLAYERS: 'SET_PLAYERS',
     ADD_PLAYER: 'ADD_PLAYER',
     KICK_PLAYER: 'KICK_PLAYER',
+    PATCH_PLAYERS: 'PATCH_PLAYERS',
     SET_LANDS: 'SET_LANDS',
     SET_STATE: 'SET_STATE',
+    PATCH_LANDS: 'PATCH_LANDS',
   };
 
   export const setPlayers = (players: Player[]) => {
@@ -30,6 +32,13 @@ export namespace LobbyActions {
     };
   };
 
+  export const patchPlayers = (players: Player[]) => {
+    return {
+      type: Types.PATCH_PLAYERS,
+      payload: players,
+    };
+  };
+
   export const setLands = (lands: Land[]) => {
     return {
       type: Types.SET_LANDS,
@@ -41,6 +50,13 @@ export namespace LobbyActions {
     return {
       type: Types.SET_STATE,
       payload: state,
+    };
+  };
+
+  export const patchLands = (lands: Land[]) => {
+    return {
+      type: Types.PATCH_LANDS,
+      payload: lands,
     };
   };
 }

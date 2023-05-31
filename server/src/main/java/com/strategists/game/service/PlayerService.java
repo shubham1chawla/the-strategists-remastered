@@ -28,6 +28,6 @@ public interface PlayerService {
 
 	void nextPlayer();
 
-	void buyLand(double ownership);
+	void invest(long playerId, long landId, double ownership);
 
 }

@@ -185,7 +185,7 @@ h1.strategists-logo {
 
     &__player {
       &__kick {
-        display: none;
+        display: none !important;
       }
 
       &__content {
@@ -216,7 +216,7 @@ h1.strategists-logo {
           display: block;
         }
         &__kick {
-          display: block;
+          display: block !important;
         }
       }
     }

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.strategists.game.entity.Player;
 import com.strategists.game.request.AddPlayerRequest;
-import com.strategists.game.request.BuyLandRequest;
+import com.strategists.game.request.InvestmentRequest;
 import com.strategists.game.request.KickPlayerRequest;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.GameService.State;
@@ -53,9 +53,9 @@ public class PlayerController {
 	}
 
 	@PostMapping("/{playerId}/lands")
-	public void buyLand(@RequestBody BuyLandRequest request) {
+	public void buyLand(@PathVariable Long playerId, @RequestBody InvestmentRequest request) {
 		Assert.state(gameService.isState(State.ACTIVE), "You need an active game to buy land!");
-		playerService.buyLand(request.getOwnership());
+		playerService.invest(playerId, request.getLandId(), request.getOwnership());
 	}
 
 }
