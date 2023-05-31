@@ -71,6 +71,20 @@ export const lobbyReducer = (
         players: state.players.filter((player) => player.username !== payload),
       };
 
+    case LobbyActions.Types.PATCH_PLAYERS: {
+      const patches = new Map<number, Player>();
+      for (const player of (payload as Player[]) || []) {
+        patches.set(player.id, player);
+      }
+      return {
+        ...state,
+        players: state.players.map((player) => {
+          const patch = patches.get(player.id);
+          return patch ? patch : player;
+        }),
+      };
+    }
+
     case LobbyActions.Types.SET_LANDS:
       return {
         ...state,
@@ -82,6 +96,20 @@ export const lobbyReducer = (
         ...state,
         state: payload,
       };
+
+    case LobbyActions.Types.PATCH_LANDS: {
+      const patches = new Map<number, Land>();
+      for (const land of (payload as Land[]) || []) {
+        patches.set(land.id, land);
+      }
+      return {
+        ...state,
+        lands: state.lands.map((land) => {
+          const patch = patches.get(land.id);
+          return patch ? patch : land;
+        }),
+      };
+    }
 
     default:
       return state;

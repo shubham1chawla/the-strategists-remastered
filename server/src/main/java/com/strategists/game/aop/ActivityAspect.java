@@ -52,11 +52,11 @@ public class ActivityAspect {
 		log.info("Logging activity of type: {}", mapping.value());
 		Activity activity = null;
 		switch (mapping.value()) {
-		case BUY:
-			activity = createBuyActivity(joinPoint.getArgs());
-			break;
 		case EVENT:
 			activity = createEventActivity(joinPoint.getArgs());
+			break;
+		case INVEST:
+			activity = createInvestActivity(joinPoint.getArgs());
 			break;
 		case JOIN:
 			activity = createJoinActivity(joinPoint.getArgs());
@@ -74,17 +74,16 @@ public class ActivityAspect {
 		updateService.sendUpdate(new NewActivityUpdatePayload(activityRepository.save(activity)));
 	}
 
-	private Activity createBuyActivity(Object[] args) {
-		val p = playerService.getCurrentPlayer();
-		val l = landService.getLandByIndex(p.getIndex());
-		val pl = p.getPlayerLands().get(p.getPlayerLands().size() - 1);
-		return Activity.ofBuy(p.getUsername(), (double) args[0], l.getName(), pl.getBuyAmount());
-	}
-
 	private Activity createEventActivity(Object[] args) {
 		val l = landService.getLandById((long) args[0]);
 		val e = eventService.getEventById((long) args[1]);
 		return Activity.ofEvent(adminUsername, e.getName(), l.getName(), (int) args[2]);
+	}
+
+	private Activity createInvestActivity(Object[] args) {
+		val p = playerService.getCurrentPlayer();
+		val l = landService.getLandByIndex(p.getIndex());
+		return Activity.ofInvest(p.getUsername(), (double) args[2], l.getName());
 	}
 
 	private Activity createJoinActivity(Object[] args) {

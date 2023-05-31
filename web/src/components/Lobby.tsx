@@ -20,14 +20,17 @@ interface Password {
   show: boolean;
 }
 
-export const Lobby = () => (
-  <>
-    {LobbyPlayers()}
-    {AddPlayerForm()}
-  </>
-);
+export const Lobby = () => {
+  const { state } = useSelector((state: State) => state.lobby);
+  return (
+    <>
+      {LobbyPlayers(state)}
+      {AddPlayerForm(state)}
+    </>
+  );
+};
 
-const LobbyPlayers = () => {
+const LobbyPlayers = (state: 'lobby' | 'active') => {
   const { players } = useSelector((state: State) => state.lobby);
   const [passwords, setPasswords] = useState<Map<number, Password>>(new Map());
 
@@ -75,8 +78,15 @@ const LobbyPlayers = () => {
         <List.Item
           className="strategists-lobby__players__player"
           extra={
-            <Tooltip title={`Kick ${player.username} out!`}>
+            <Tooltip
+              title={
+                state === 'active'
+                  ? `The Strategists in session, you can't kick ${player.username} now!`
+                  : `Kick ${player.username} out!`
+              }
+            >
               <Button
+                disabled={state === 'active'}
                 className="strategists-lobby__players__player__kick"
                 type="text"
                 shape="circle"
@@ -116,8 +126,7 @@ const LobbyPlayers = () => {
   );
 };
 
-const AddPlayerForm = () => {
-  const { state } = useSelector((state: State) => state.lobby);
+const AddPlayerForm = (state: 'lobby' | 'active') => {
   const [form] = Form.useForm();
 
   const addPlayer = async ({ username, cash }: Player) => {

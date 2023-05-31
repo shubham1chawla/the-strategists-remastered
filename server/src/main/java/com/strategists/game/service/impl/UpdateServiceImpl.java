@@ -12,7 +12,6 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import com.strategists.game.service.UpdateService;
 import com.strategists.game.update.AbstractUpdatePayload;
 
-import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -25,13 +24,7 @@ public class UpdateServiceImpl implements UpdateService {
 
 	@Override
 	public SseEmitter registerEmitter(String username) {
-		emitters.computeIfPresent(username, (u, e) -> {
-			e.complete();
-			return e;
-		});
-		val emitter = new SseEmitter(-1L);
-		emitter.onCompletion(() -> emitters.remove(username));
-		emitters.put(username, emitter);
+		emitters.computeIfAbsent(username, key -> new SseEmitter(-1L));
 		return emitters.get(username);
 	}
 

@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.strategists.game.aop.ActivityMapping;
+import com.strategists.game.aop.UpdateMapping;
 import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.PlayerService;
@@ -26,6 +27,7 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
+	@UpdateMapping(Type.START)
 	@ActivityMapping(Type.START)
 	public void start() {
 		Assert.isTrue(playerService.getCount() > 0, "No players added!");

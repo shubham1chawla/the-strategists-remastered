@@ -1,6 +1,6 @@
 import { Dispatch, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button, Col, Row, Tabs, TabsProps, Tooltip, notification } from 'antd';
+import { Button, Col, Row, Tabs, Tooltip, notification } from 'antd';
 import { Actions, Activity, Logo, Lobby, Map } from '.';
 import { useDispatch, useSelector } from 'react-redux';
 import { ActivityActions, LobbyActions, State, UserActions } from '../redux';
@@ -19,6 +19,11 @@ export const Dashboard = () => {
   const [api, contextHolder] = notification.useNotification();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const alertUser = (event: any) => {
+    event.preventDefault();
+    return (event.returnValue = '');
+  };
 
   useEffect(() => {
     // Checking if player is logged in
@@ -39,6 +44,11 @@ export const Dashboard = () => {
     updates.onmessage = (message: MessageEvent<any>) => {
       const { type, data } = JSON.parse(message.data);
       switch (type) {
+        case 'INVEST':
+          const { land, players } = data;
+          dispatch(LobbyActions.patchLands([land]));
+          dispatch(LobbyActions.patchPlayers(players));
+          break;
         case 'JOIN':
           dispatch(LobbyActions.addPlayer(data));
           break;
@@ -49,11 +59,26 @@ export const Dashboard = () => {
           dispatch(ActivityActions.addActivity(data));
           api.open({ message: data });
           break;
+        case 'START':
+          dispatch(LobbyActions.patchPlayers([data]));
+          break;
         default:
           console.warn(`Unsupported update type: ${type}`);
       }
     };
     updates.onerror = console.error;
+
+    // Dashboard component's unmount event
+    window.addEventListener('beforeunload', alertUser);
+    return () => {
+      // Closing Event Stream for the current user
+      updates.onmessage = null;
+      updates.onerror = null;
+      updates.close();
+
+      // Removing listener if user logouts
+      window.removeEventListener('beforeunload', alertUser);
+    };
   }, [dispatch, navigate, username, api]);
 
   return (
@@ -120,26 +145,32 @@ const Navigation = (type: 'admin' | 'player', dispatch: Dispatch<any>) => {
 };
 
 const AdminPanel = () => {
-  const items: TabsProps['items'] = [
-    {
-      key: '1',
-      label: `Lobby`,
-      children: <Lobby />,
-      className: 'strategists-tab-body strategists-lobby',
-    },
-    {
-      key: '2',
-      label: `Activities`,
-      children: <Activity />,
-      className: 'strategists-tab-body strategists-activity',
-    },
-    {
-      key: '3',
-      label: `Events`,
-      children: `Content of Tab Events`,
-    },
-  ];
-  return <Tabs centered defaultActiveKey="1" size="large" items={items} />;
+  return (
+    <Tabs
+      centered
+      defaultActiveKey="1"
+      size="large"
+      items={[
+        {
+          key: '1',
+          label: `Lobby`,
+          children: <Lobby />,
+          className: 'strategists-tab-body strategists-lobby',
+        },
+        {
+          key: '2',
+          label: `Activities`,
+          children: <Activity />,
+          className: 'strategists-tab-body strategists-activity',
+        },
+        {
+          key: '3',
+          label: `Events`,
+          children: `Content of Tab Events`,
+        },
+      ]}
+    />
+  );
 };
 
 const PlayerPanel = () => {
