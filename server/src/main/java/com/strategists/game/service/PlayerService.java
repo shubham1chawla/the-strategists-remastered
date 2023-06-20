@@ -26,7 +26,13 @@ public interface PlayerService {
 
 	void movePlayer(int move);
 
-	void nextPlayer();
+	/**
+	 * Assigns turn to the next player in sequence. The API returns the current and
+	 * previous player references for activity and notification purposes.
+	 * 
+	 * @return Current and previous player respectively.
+	 */
+	List<Player> nextPlayer();
 
 	void invest(long playerId, long landId, double ownership);
 

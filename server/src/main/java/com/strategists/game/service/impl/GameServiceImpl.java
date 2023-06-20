@@ -34,4 +34,12 @@ public class GameServiceImpl implements GameService {
 		playerService.assignTurn();
 	}
 
+	@Override
+	public void next() {
+
+		// Assigning turn to next player
+		playerService.nextPlayer();
+
+	}
+
 }

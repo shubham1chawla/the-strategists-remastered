@@ -1,5 +1,6 @@
 package com.strategists.game.aop;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -18,6 +19,7 @@ import com.strategists.game.update.InvestmentUpdatePayload;
 import com.strategists.game.update.JoinPlayerUpdatePayload;
 import com.strategists.game.update.KickPlayerUpdatePayload;
 import com.strategists.game.update.StartUpdatePayload;
+import com.strategists.game.update.TurnUpdatePayload;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -37,7 +39,7 @@ public class UpdateAspect {
 	private UpdateService updateService;
 
 	@Around("@annotation(mapping)")
-	public void advice(ProceedingJoinPoint joinPoint, UpdateMapping mapping) throws Throwable {
+	public Object advice(ProceedingJoinPoint joinPoint, UpdateMapping mapping) throws Throwable {
 		Object obj = null;
 		try {
 			obj = joinPoint.proceed();
@@ -60,11 +62,15 @@ public class UpdateAspect {
 		case START:
 			payload = new StartUpdatePayload(playerService.getCurrentPlayer());
 			break;
+		case TURN:
+			payload = createTurnUpdatePayload(obj);
+			break;
 		default:
 			log.warn("Unsupported Activity Type: {}", mapping.value());
-			return;
+			return obj;
 		}
 		updateService.sendUpdate(payload);
+		return obj;
 	}
 
 	private InvestmentUpdatePayload createInvestmentUpdatePayload(Object... args) {
@@ -78,6 +84,11 @@ public class UpdateAspect {
 		val players = land.getPlayerLands().stream().map(PlayerLand::getPlayer).collect(Collectors.toList());
 
 		return new InvestmentUpdatePayload(land, players);
+	}
+
+	private TurnUpdatePayload createTurnUpdatePayload(Object obj) {
+		val players = (List<?>) obj;
+		return new TurnUpdatePayload((Player) players.get(0), (Player) players.get(1));
 	}
 
 }

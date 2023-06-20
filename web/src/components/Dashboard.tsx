@@ -62,6 +62,9 @@ export const Dashboard = () => {
         case 'START':
           dispatch(LobbyActions.patchPlayers([data]));
           break;
+        case 'TURN':
+          dispatch(LobbyActions.patchPlayers(data));
+          break;
         default:
           console.warn(`Unsupported update type: ${type}`);
       }

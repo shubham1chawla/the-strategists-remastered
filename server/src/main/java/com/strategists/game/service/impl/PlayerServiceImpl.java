@@ -132,27 +132,34 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	public void nextPlayer() {
+	@UpdateMapping(Type.TURN)
+	@ActivityMapping(Type.TURN)
+	public List<Player> nextPlayer() {
 		Assert.state(isTurnAssigned(), "No player has the turn!");
 
 		log.info("Assigning turn to the next player...");
+
 		val players = playerRepository.findByStateIn(Set.of(State.ACTIVE, State.JAIL));
+		Player prev = null;
+		Player curr = null;
 		int index = -1;
+
 		for (int i = 0; i < players.size(); i++) {
 			val player = players.get(i);
 			if (player.isTurn()) {
 				player.setTurn(false);
-				playerRepository.save(player);
+				prev = playerRepository.save(player);
 				index = i;
 				break;
 			}
 		}
 
-		val player = players.get(index + 1 < players.size() ? index + 1 : 0);
-		player.setTurn(true);
-		playerRepository.save(player);
+		curr = players.get(index + 1 < players.size() ? index + 1 : 0);
+		curr.setTurn(true);
+		curr = playerRepository.save(curr);
 
-		log.info("Assigned turn to {}.", player.getUsername());
+		log.info("Assigned turn to {}.", curr.getUsername());
+		return List.of(curr, prev);
 	}
 
 	@Override

@@ -39,6 +39,9 @@ export const InvestModal = (props: InvestModalProps) => {
     });
     setOwnership(0);
     onCancel();
+
+    // Ending player's turn after investing in any land
+    axios.put('/api/game/next');
   };
 
   return (

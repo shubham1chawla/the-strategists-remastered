@@ -28,4 +28,10 @@ public class GameController {
 		gameService.start();
 	}
 
+	@PutMapping("/next")
+	public void next() {
+		Assert.state(gameService.isState(State.ACTIVE), "Game not started yet!");
+		gameService.next();
+	}
+
 }

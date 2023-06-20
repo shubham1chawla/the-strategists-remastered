@@ -59,7 +59,10 @@ public class Activity implements Serializable {
 		START("%s started The Strategists!"),
 
 		// Player 1 traded 50% of Land 1 with Player 2 for $100.
-		TRADE("%s traded %s% of %s with %s for $%s.");
+		TRADE("%s traded %s% of %s with %s for $%s."),
+
+		// Player 1 passed turn to Player 2
+		TURN("%s passed turn to %s.");
 
 		private String format;
 	}
@@ -122,6 +125,8 @@ public class Activity implements Serializable {
 			return String.format(type.format, val1);
 		case TRADE:
 			return String.format(type.format, val1, val2, val3, val4, val5);
+		case TURN:
+			return String.format(type.format, val1, val2);
 		default:
 			throw new IllegalStateException(type + " is not a valid Log Type!");
 		}
@@ -165,6 +170,10 @@ public class Activity implements Serializable {
 
 	public static Activity ofTrade(String releaser, double percent, String land, String receiver, double amount) {
 		return new Activity(Type.TRADE, releaser, Double.toString(percent), land, receiver, Double.toString(amount));
+	}
+
+	public static Activity ofTurn(String from, String to) {
+		return new Activity(Type.TURN, from, to);
 	}
 
 }
