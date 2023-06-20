@@ -1,5 +1,7 @@
 package com.strategists.game.aop;
 
+import java.util.List;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -8,6 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.strategists.game.entity.Activity;
+import com.strategists.game.entity.Player;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.service.EventService;
 import com.strategists.game.service.LandService;
@@ -42,9 +45,10 @@ public class ActivityAspect {
 	private UpdateService updateService;
 
 	@Around("@annotation(mapping)")
-	public void postActivityAdvice(ProceedingJoinPoint joinPoint, ActivityMapping mapping) throws Throwable {
+	public Object advice(ProceedingJoinPoint joinPoint, ActivityMapping mapping) throws Throwable {
+		Object obj = null;
 		try {
-			joinPoint.proceed();
+			obj = joinPoint.proceed();
 		} catch (Throwable ex) {
 			log.error("Unable to log activity of type: {}", mapping.value(), ex);
 			throw ex;
@@ -67,11 +71,15 @@ public class ActivityAspect {
 		case START:
 			activity = createStartActivity();
 			break;
+		case TURN:
+			activity = createTurnActivity(obj);
+			break;
 		default:
 			log.warn("Unsupported Activity Type: {}", mapping.value());
-			return;
+			return obj;
 		}
 		updateService.sendUpdate(new NewActivityUpdatePayload(activityRepository.save(activity)));
+		return obj;
 	}
 
 	private Activity createEventActivity(Object[] args) {
@@ -96,6 +104,13 @@ public class ActivityAspect {
 
 	private Activity createStartActivity() {
 		return Activity.ofStart(adminUsername);
+	}
+
+	private Activity createTurnActivity(Object obj) {
+		val players = (List<?>) obj;
+		val curr = (Player) players.get(0);
+		val prev = (Player) players.get(1);
+		return Activity.ofTurn(prev.getUsername(), curr.getUsername());
 	}
 
 }

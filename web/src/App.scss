@@ -112,6 +112,11 @@ h1.strategists-logo {
 
 .strategists-dashboard {
   height: 100vh;
+
+  // Forcing ant-col to respect parent's height constraints
+  .ant-col {
+    height: 100%;
+  }
 }
 
 .strategists-player-panel {

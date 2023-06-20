@@ -22,4 +22,6 @@ public interface GameService {
 
 	void start();
 
+	void next();
+
 }

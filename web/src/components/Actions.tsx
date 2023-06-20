@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { State } from '../redux';
 import { InvestModal } from '.';
+import axios from 'axios';
 
 export const Actions = () => {
   const { players, lands } = useSelector((state: State) => state.lobby);
@@ -55,7 +56,12 @@ export const Actions = () => {
               >
                 {investText}
               </Button>
-              <Button icon={<StepForwardOutlined />}>Skip</Button>
+              <Button
+                icon={<StepForwardOutlined />}
+                onClick={() => axios.put('/api/game/next')}
+              >
+                Skip
+              </Button>
               <Dropdown
                 menu={{
                   items: [
