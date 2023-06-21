@@ -42,7 +42,7 @@ export const Dashboard = () => {
       `${process.env.REACT_APP_API_BASE_URL}/api/updates/${username}`
     );
     updates.onmessage = (message: MessageEvent<any>) => {
-      const { type, data } = JSON.parse(message.data);
+      const { type, data, activity } = JSON.parse(message.data);
       switch (type) {
         case 'INVEST':
           const { land, players } = data;
@@ -55,9 +55,8 @@ export const Dashboard = () => {
         case 'KICK':
           dispatch(LobbyActions.kickPlayer(data));
           break;
-        case 'NEW':
-          dispatch(ActivityActions.addActivity(data));
-          api.open({ message: data });
+        case 'MOVE':
+          dispatch(LobbyActions.patchPlayers([data]));
           break;
         case 'START':
           dispatch(LobbyActions.patchPlayers([data]));
@@ -68,6 +67,8 @@ export const Dashboard = () => {
         default:
           console.warn(`Unsupported update type: ${type}`);
       }
+      dispatch(ActivityActions.addActivity(activity));
+      api.open({ message: activity });
     };
     updates.onerror = console.error;
 

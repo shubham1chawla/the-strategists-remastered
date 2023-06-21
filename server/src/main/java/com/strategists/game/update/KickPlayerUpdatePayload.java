@@ -1,6 +1,6 @@
 package com.strategists.game.update;
 
-import com.strategists.game.entity.Activity.Type;
+import com.strategists.game.entity.Activity;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -9,8 +9,8 @@ import lombok.Getter;
 @EqualsAndHashCode(callSuper = true)
 public class KickPlayerUpdatePayload extends AbstractUpdatePayload<String> {
 
-	public KickPlayerUpdatePayload(String username) {
-		super(Type.KICK, username);
+	public KickPlayerUpdatePayload(Activity activity, String username) {
+		super(activity, username);
 	}
 
 }

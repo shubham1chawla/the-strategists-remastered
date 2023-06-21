@@ -1,5 +1,6 @@
 package com.strategists.game.update;
 
+import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Activity.Type;
 
 import lombok.AllArgsConstructor;
@@ -9,7 +10,11 @@ import lombok.Getter;
 @AllArgsConstructor
 public abstract class AbstractUpdatePayload<T> {
 
-	private Type type;
+	private Activity activity;
 	private T data;
+
+	public Type getType() {
+		return activity.getType();
+	}
 
 }

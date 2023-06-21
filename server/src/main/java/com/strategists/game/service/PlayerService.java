@@ -24,7 +24,7 @@ public interface PlayerService {
 
 	Player getCurrentPlayer();
 
-	void movePlayer(int move);
+	Player movePlayer(int move);
 
 	/**
 	 * Assigns turn to the next player in sequence. The API returns the current and
