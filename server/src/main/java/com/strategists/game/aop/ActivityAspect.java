@@ -1,6 +1,7 @@
 package com.strategists.game.aop;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -11,12 +12,18 @@ import org.springframework.stereotype.Component;
 
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Player;
+import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.repository.ActivityRepository;
-import com.strategists.game.service.EventService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 import com.strategists.game.service.UpdateService;
-import com.strategists.game.update.NewActivityUpdatePayload;
+import com.strategists.game.update.AbstractUpdatePayload;
+import com.strategists.game.update.InvestmentUpdatePayload;
+import com.strategists.game.update.JoinPlayerUpdatePayload;
+import com.strategists.game.update.KickPlayerUpdatePayload;
+import com.strategists.game.update.MoveUpdatePayload;
+import com.strategists.game.update.StartUpdatePayload;
+import com.strategists.game.update.TurnUpdatePayload;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -33,9 +40,6 @@ public class ActivityAspect {
 	private ActivityRepository activityRepository;
 
 	@Autowired
-	private EventService eventService;
-
-	@Autowired
 	private PlayerService playerService;
 
 	@Autowired
@@ -45,72 +49,97 @@ public class ActivityAspect {
 	private UpdateService updateService;
 
 	@Around("@annotation(mapping)")
-	public Object advice(ProceedingJoinPoint joinPoint, ActivityMapping mapping) throws Throwable {
+	public void advice(ProceedingJoinPoint joinPoint, ActivityMapping mapping) throws Throwable {
 		Object obj = null;
 		try {
 			obj = joinPoint.proceed();
 		} catch (Throwable ex) {
-			log.error("Unable to log activity of type: {}", mapping.value(), ex);
+			log.error("Unable to log & update activity of type: {}", mapping.value(), ex);
 			throw ex;
 		}
-		log.info("Logging activity of type: {}", mapping.value());
-		Activity activity = null;
+		log.info("Logging & updating activity of type: {}", mapping.value());
+		AbstractUpdatePayload<?> payload = null;
 		switch (mapping.value()) {
-		case EVENT:
-			activity = createEventActivity(joinPoint.getArgs());
-			break;
 		case INVEST:
-			activity = createInvestActivity(joinPoint.getArgs());
+			payload = handleInvestActivity(joinPoint.getArgs());
 			break;
 		case JOIN:
-			activity = createJoinActivity(joinPoint.getArgs());
+			payload = handleJoinPlayerActivity(obj);
 			break;
 		case KICK:
-			activity = createKickActivity(joinPoint.getArgs());
+			payload = handleKickPlayerActivity(joinPoint.getArgs());
+			break;
+		case MOVE:
+			payload = handleMoveActivity(obj);
 			break;
 		case START:
-			activity = createStartActivity();
+			payload = handleStartActivity();
 			break;
 		case TURN:
-			activity = createTurnActivity(obj);
+			payload = handleTurnActivity(obj);
 			break;
 		default:
 			log.warn("Unsupported Activity Type: {}", mapping.value());
-			return obj;
+			return;
 		}
-		updateService.sendUpdate(new NewActivityUpdatePayload(activityRepository.save(activity)));
-		return obj;
+		updateService.sendUpdate(payload);
 	}
 
-	private Activity createEventActivity(Object[] args) {
-		val l = landService.getLandById((long) args[0]);
-		val e = eventService.getEventById((long) args[1]);
-		return Activity.ofEvent(adminUsername, e.getName(), l.getName(), (int) args[2]);
+	private InvestmentUpdatePayload handleInvestActivity(Object... args) {
+		val curr = playerService.getCurrentPlayer();
+		val land = landService.getLandByIndex(curr.getIndex());
+
+		/*
+		 * Updating all the players that are linked with this land. Each player's
+		 * net-worth is tied with the market value of the land, therefore investment in
+		 * this land will boost each investors' net-worth.
+		 */
+		val players = land.getPlayerLands().stream().map(PlayerLand::getPlayer).collect(Collectors.toList());
+
+		// Creating activity for investment
+		val activity = activityRepository.save(Activity.ofInvest(curr.getUsername(), (double) args[2], land.getName()));
+
+		return new InvestmentUpdatePayload(activity, land, players);
 	}
 
-	private Activity createInvestActivity(Object[] args) {
-		val p = playerService.getCurrentPlayer();
-		val l = landService.getLandByIndex(p.getIndex());
-		return Activity.ofInvest(p.getUsername(), (double) args[2], l.getName());
+	private JoinPlayerUpdatePayload handleJoinPlayerActivity(Object obj) {
+		val player = (Player) obj;
+
+		// Creating activity for join
+		val activity = activityRepository.save(Activity.ofJoin(player.getUsername(), player.getCash()));
+
+		return new JoinPlayerUpdatePayload(activity, player);
 	}
 
-	private Activity createJoinActivity(Object[] args) {
-		return Activity.ofJoin((String) args[0], (double) args[1]);
+	private KickPlayerUpdatePayload handleKickPlayerActivity(Object[] args) {
+		val activity = activityRepository.save(Activity.ofKick(adminUsername, (String) args[0]));
+		return new KickPlayerUpdatePayload(activity, (String) args[0]);
 	}
 
-	private Activity createKickActivity(Object[] args) {
-		return Activity.ofKick(adminUsername, (String) args[0]);
+	private MoveUpdatePayload handleMoveActivity(Object obj) {
+		val player = (Player) obj;
+		val land = landService.getLandByIndex(player.getIndex());
+
+		// Creating activity for move
+		val activity = activityRepository.save(Activity.ofMove(player.getUsername(), land.getName()));
+
+		return new MoveUpdatePayload(activity, player);
 	}
 
-	private Activity createStartActivity() {
-		return Activity.ofStart(adminUsername);
+	private StartUpdatePayload handleStartActivity() {
+		val activity = activityRepository.save(Activity.ofStart(adminUsername));
+		return new StartUpdatePayload(activity, playerService.getCurrentPlayer());
 	}
 
-	private Activity createTurnActivity(Object obj) {
+	private TurnUpdatePayload handleTurnActivity(Object obj) {
 		val players = (List<?>) obj;
 		val curr = (Player) players.get(0);
 		val prev = (Player) players.get(1);
-		return Activity.ofTurn(prev.getUsername(), curr.getUsername());
+
+		// Creating activity for turn
+		val activity = activityRepository.save(Activity.ofTurn(prev.getUsername(), curr.getUsername()));
+
+		return new TurnUpdatePayload(activity, curr, prev);
 	}
 
 }

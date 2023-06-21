@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.strategists.game.aop.ActivityMapping;
-import com.strategists.game.aop.UpdateMapping;
 import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.Player.State;
@@ -67,7 +66,6 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	@UpdateMapping(Type.JOIN)
 	@ActivityMapping(Type.JOIN)
 	public Player addPlayer(String username, double cash) {
 		log.info("Checking if {} username exists...", username);
@@ -83,7 +81,6 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Override
 	@Transactional
-	@UpdateMapping(Type.KICK)
 	@ActivityMapping(Type.KICK)
 	public void kickPlayer(String username) {
 		try {
@@ -121,18 +118,18 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	public void movePlayer(int move) {
+	@ActivityMapping(Type.MOVE)
+	public Player movePlayer(int move) {
 		val count = landService.getCount();
 
 		val player = getCurrentPlayer();
 		player.setIndex(player.getIndex() + move < count ? player.getIndex() + move : player.getIndex() + move - count);
-		playerRepository.save(player);
 
 		log.info("Moved {} to index: {}", player.getUsername(), player.getIndex());
+		return playerRepository.save(player);
 	}
 
 	@Override
-	@UpdateMapping(Type.TURN)
 	@ActivityMapping(Type.TURN)
 	public List<Player> nextPlayer() {
 		Assert.state(isTurnAssigned(), "No player has the turn!");
@@ -163,7 +160,6 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	@UpdateMapping(Type.INVEST)
 	@ActivityMapping(Type.INVEST)
 	public void invest(long playerId, long landId, double ownership) {
 		val player = getCurrentPlayer();

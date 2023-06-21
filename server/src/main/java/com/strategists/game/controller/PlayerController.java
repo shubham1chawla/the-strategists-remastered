@@ -53,7 +53,7 @@ public class PlayerController {
 	}
 
 	@PostMapping("/{playerId}/lands")
-	public void buyLand(@PathVariable Long playerId, @RequestBody InvestmentRequest request) {
+	public void invest(@PathVariable Long playerId, @RequestBody InvestmentRequest request) {
 		Assert.state(gameService.isState(State.ACTIVE), "You need an active game to buy land!");
 		playerService.invest(playerId, request.getLandId(), request.getOwnership());
 	}

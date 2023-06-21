@@ -1,6 +1,6 @@
 package com.strategists.game.update;
 
-import com.strategists.game.entity.Activity.Type;
+import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Player;
 
 import lombok.EqualsAndHashCode;
@@ -10,8 +10,8 @@ import lombok.Getter;
 @EqualsAndHashCode(callSuper = true)
 public class JoinPlayerUpdatePayload extends AbstractUpdatePayload<Player> {
 
-	public JoinPlayerUpdatePayload(Player player) {
-		super(Type.JOIN, player);
+	public JoinPlayerUpdatePayload(Activity activity, Player player) {
+		super(activity, player);
 	}
 
 }

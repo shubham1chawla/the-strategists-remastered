@@ -28,9 +28,6 @@ public class Activity implements Serializable {
 	@AllArgsConstructor
 	public enum Type {
 
-		// Used only for sending UI update
-		NEW(""),
-
 		// Lord gave Player 1 a bonus of $100 after completing one turn.
 		BONUS("%s gave %s a bonus of $%s after completing one turn."),
 
@@ -51,6 +48,9 @@ public class Activity implements Serializable {
 
 		// Admin kicked Player 1 out!
 		KICK("%s kicked %s out!"),
+
+		// Player 1 moved to Land 1
+		MOVE("%s moved to %s."),
 
 		// Player 1 paid $100 rent to Player 2 for Land 1.
 		RENT("%s paid $%s rent to %s for %s."),
@@ -119,6 +119,8 @@ public class Activity implements Serializable {
 			return String.format(type.format, val1, val2);
 		case KICK:
 			return String.format(type.format, val1, val2);
+		case MOVE:
+			return String.format(type.format, val1, val2);
 		case RENT:
 			return String.format(type.format, val1, val2, val3, val4);
 		case START:
@@ -158,6 +160,10 @@ public class Activity implements Serializable {
 
 	public static Activity ofKick(String admin, String player) {
 		return new Activity(Type.KICK, admin, player);
+	}
+
+	public static Activity ofMove(String player, String land) {
+		return new Activity(Type.MOVE, player, land);
 	}
 
 	public static Activity ofRent(String payer, double amount, String payee, String land) {
