@@ -3,7 +3,6 @@ package com.strategists.game.service.impl;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.PostConstruct;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
@@ -25,6 +24,12 @@ import lombok.extern.log4j.Log4j2;
 @Service
 public class LandServiceImpl implements LandService {
 
+	/*
+	 * Since we update player's entity with player-land information after any
+	 * investment, we need to refresh land's entity to reflect updated information
+	 * in current transactional session, subsequent calls will reflect updated
+	 * information regardless.
+	 */
 	@PersistenceContext
 	private EntityManager em;
 
@@ -33,18 +38,6 @@ public class LandServiceImpl implements LandService {
 
 	@Autowired
 	private EventService eventService;
-
-	/**
-	 * Caching the count of lands to avoid DB calls on runtime. We can't cache the
-	 * entire list of lands as many of its fields are transient and subject to
-	 * change.
-	 */
-	private Integer count;
-
-	@PostConstruct
-	public void setup() {
-		count = (int) landRepository.count();
-	}
 
 	@Override
 	public List<Land> getLands() {
@@ -57,12 +50,6 @@ public class LandServiceImpl implements LandService {
 		Optional<Land> opt = landRepository.findById(id);
 		Assert.isTrue(opt.isPresent(), "No land found with ID: " + id);
 
-		/*
-		 * Since we update player's entity with player-land information after any
-		 * investment, we need to refresh land's entity to reflect updated information
-		 * in current transactional session, subsequent calls will reflect updated
-		 * information regardless.
-		 */
 		val land = opt.get();
 		em.refresh(land);
 
@@ -72,12 +59,17 @@ public class LandServiceImpl implements LandService {
 
 	@Override
 	public int getCount() {
-		return count;
+		return (int) landRepository.count();
 	}
 
 	@Override
+	@Transactional
 	public Land getLandByIndex(int index) {
-		return getLands().get(index);
+		val land = getLands().get(index);
+		em.refresh(land);
+
+		log.info("Found land: {}", land);
+		return land;
 	}
 
 	@Override

@@ -103,5 +103,7 @@ const renderTable = (player?: Player, land?: Land) => {
     }
   );
 
-  return <Table dataSource={dataSource} columns={columns}></Table>;
+  return (
+    <Table pagination={false} dataSource={dataSource} columns={columns}></Table>
+  );
 };
