@@ -3,6 +3,7 @@ package com.strategists.game.service.impl;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -15,7 +16,9 @@ import com.strategists.game.service.PlayerService;
 public class GameServiceImpl implements GameService {
 
 	private static final Random RANDOM = new Random();
-	private static final int DICE_SIZE = 6;
+
+	@Value("${strategists.game.dice-size}")
+	private Integer diceSize;
 
 	@Autowired
 	private PlayerService playerService;
@@ -44,7 +47,7 @@ public class GameServiceImpl implements GameService {
 		playerService.nextPlayer();
 
 		// Moving the current player to a new position
-		playerService.movePlayer(RANDOM.nextInt(DICE_SIZE) + 1);
+		playerService.movePlayer(RANDOM.nextInt(diceSize) + 1);
 
 	}
 

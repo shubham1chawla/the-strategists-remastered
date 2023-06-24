@@ -7,3 +7,5 @@ strategists:
   admin:
     username: Creator
     password: 9999
+  game:
+    dice-size: 6
