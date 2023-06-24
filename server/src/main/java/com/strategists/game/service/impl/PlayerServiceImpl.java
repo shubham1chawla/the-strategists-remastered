@@ -120,10 +120,8 @@ public class PlayerServiceImpl implements PlayerService {
 	@Override
 	@ActivityMapping(Type.MOVE)
 	public Player movePlayer(int move) {
-		val count = landService.getCount();
-
 		val player = getCurrentPlayer();
-		player.setIndex(player.getIndex() + move < count ? player.getIndex() + move : player.getIndex() + move - count);
+		player.setIndex((player.getIndex() + move) % landService.getCount());
 
 		log.info("Moved {} to index: {}", player.getUsername(), player.getIndex());
 		return playerRepository.save(player);
