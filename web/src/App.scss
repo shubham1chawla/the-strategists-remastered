@@ -175,6 +175,13 @@ h1.strategists-logo {
 .strategists-activity {
   height: 100%;
   overflow-y: scroll;
+  padding: var(--ant-lg-padding);
+  padding-bottom: 0;
+
+  // Removing the extra space ant applies to the last element in timeline
+  .ant-timeline-item-last .ant-timeline-item-content {
+    min-height: auto;
+  }
 }
 
 // ----- LOBBY COMPONENT'S CSS DEFINED BELOW ----- //

@@ -1,7 +1,7 @@
 import { Dispatch, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Col, Row, Tabs, Tooltip, notification } from 'antd';
-import { Actions, Activity, Logo, Lobby, Map } from '.';
+import { Actions, ActivityTimeline, Logo, Lobby, Map } from '.';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ActivityActions,
@@ -169,9 +169,9 @@ const AdminPanel = () => {
         },
         {
           key: '2',
-          label: `Activities`,
-          children: <Activity />,
-          className: 'strategists-tab-body strategists-activity',
+          label: `Timeline`,
+          children: <ActivityTimeline />,
+          className: 'strategists-tab-body',
         },
         {
           key: '3',
@@ -186,7 +186,7 @@ const AdminPanel = () => {
 const PlayerPanel = () => {
   return (
     <div className="strategists-player-panel">
-      <Activity />
+      <ActivityTimeline />
       <Actions />
     </div>
   );
