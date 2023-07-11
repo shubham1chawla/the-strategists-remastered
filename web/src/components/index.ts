@@ -1,5 +1,5 @@
 export * from './Actions';
-export * from './Activity';
+export * from './ActivityTimeline';
 export * from './Dashboard';
 export * from './InvestModal';
 export * from './Lobby';
