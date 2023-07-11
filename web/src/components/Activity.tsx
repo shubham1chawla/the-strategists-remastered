@@ -1,6 +1,6 @@
 import { useSelector } from 'react-redux';
 import { List } from 'antd';
-import { State } from '../redux';
+import { State, parseActivity } from '../redux';
 import { LineOutlined } from '@ant-design/icons';
 
 export const Activity = () => {
@@ -13,7 +13,7 @@ export const Activity = () => {
       dataSource={activities}
       renderItem={(activity) => (
         <List.Item>
-          <LineOutlined /> {activity}
+          <LineOutlined /> {parseActivity(activity)}
         </List.Item>
       )}
     />

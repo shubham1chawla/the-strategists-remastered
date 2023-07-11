@@ -11,9 +11,6 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,46 +22,8 @@ public class Activity implements Serializable {
 
 	private static final long serialVersionUID = -6960667863521865520L;
 
-	@AllArgsConstructor
 	public enum Type {
-
-		// Lord gave Player 1 a bonus of $100 after completing one turn.
-		BONUS("%s gave %s a bonus of $%s after completing one turn."),
-
-		// Player 1 applied a cheat!
-		CHEAT("%s applied a cheat!"),
-
-		// Admin caused Event 1 at Land 1 for 10 turns!
-		EVENT("%s caused %s at %s for %s turns!"),
-
-		// Player 1 invested in 10% of Land 1.
-		INVEST("%s invested in %s%% of %s"),
-
-		// Player 1 just got arrested!
-		JAIL("%s just got arrested!"),
-
-		// Player 1 joined the game with 100 cash.
-		JOIN("%s joined the game with %s cash."),
-
-		// Admin kicked Player 1 out!
-		KICK("%s kicked %s out!"),
-
-		// Player 1 moved to Land 1
-		MOVE("%s moved to %s."),
-
-		// Player 1 paid $100 rent to Player 2 for Land 1.
-		RENT("%s paid $%s rent to %s for %s."),
-
-		// Admin started The Strategists!
-		START("%s started The Strategists!"),
-
-		// Player 1 traded 50% of Land 1 with Player 2 for $100.
-		TRADE("%s traded %s% of %s with %s for $%s."),
-
-		// Player 1 passed turn to Player 2
-		TURN("%s passed turn to %s.");
-
-		private String format;
+		BONUS, CHEAT, EVENT, INVEST, JAIL, JOIN, KICK, MOVE, RENT, START, TRADE, TURN;
 	}
 
 	@Id
@@ -99,38 +58,6 @@ public class Activity implements Serializable {
 		this.val5 = values.length > 4 ? values[4] : null;
 		if (values.length > 5) {
 			throw new IllegalArgumentException("More than 5 values are not supported!");
-		}
-	}
-
-	@JsonValue
-	public String toString() {
-		switch (type) {
-		case BONUS:
-			return String.format(type.format, val1, val2, val3);
-		case CHEAT:
-			return String.format(type.format, val1);
-		case EVENT:
-			return String.format(type.format, val1, val2, val3, val4);
-		case INVEST:
-			return String.format(type.format, val1, val2, val3);
-		case JAIL:
-			return String.format(type.format, val1);
-		case JOIN:
-			return String.format(type.format, val1, val2);
-		case KICK:
-			return String.format(type.format, val1, val2);
-		case MOVE:
-			return String.format(type.format, val1, val2);
-		case RENT:
-			return String.format(type.format, val1, val2, val3, val4);
-		case START:
-			return String.format(type.format, val1);
-		case TRADE:
-			return String.format(type.format, val1, val2, val3, val4, val5);
-		case TURN:
-			return String.format(type.format, val1, val2);
-		default:
-			throw new IllegalStateException(type + " is not a valid Log Type!");
 		}
 	}
 
