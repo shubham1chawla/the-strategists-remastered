@@ -15,7 +15,15 @@ Please refer to the documentation before contributing - https://getbem.com/
   // Color variables are defined in App.tsx
 
   --base-unit-size: 1.2rem;
+
+  // height of navbar set manually
   --strategists-nav-height: calc(6 * var(--base-unit-size));
+
+  // height of ant buttons and padding calculated
+  --strategists-actions-height: calc(40px + 2 * var(--ant-lg-padding));
+
+  // height of card, text, and padding calculated
+  --strategists-stats-height: 112.85px;
 
   // large ant-list-item height
   --ant-lg-padding: 24px;
@@ -123,12 +131,30 @@ h1.strategists-logo {
   height: calc(100% - var(--strategists-nav-height));
 
   .strategists-activity {
-    height: calc(100% - 40px - 2 * var(--ant-lg-padding));
+    height: calc(
+      100% - var(--strategists-actions-height) - var(--strategists-stats-height)
+    );
   }
 
   .strategists-actions {
     box-sizing: border-box;
     padding: var(--ant-lg-padding);
+  }
+}
+
+// ----- STATS COMPONENT'S CSS DEFINED BELOW ----- //
+
+.strategists-stats {
+  &__username {
+    padding: 0 var(--ant-lg-padding);
+  }
+
+  .ant-divider {
+    margin: 0;
+  }
+
+  .ant-card-body {
+    padding: calc(var(--ant-lg-padding) * 0.5) var(--ant-lg-padding);
   }
 }
 
@@ -139,14 +165,6 @@ h1.strategists-logo {
     &__title {
       display: flex;
       flex-direction: column;
-    }
-
-    &__body {
-      text-align: center;
-
-      .ant-statistic-title {
-        color: var(--text-color);
-      }
     }
   }
 
@@ -207,6 +225,7 @@ h1.strategists-logo {
         &__info {
           display: flex;
           flex-direction: column;
+          row-gap: calc(0.25 * var(--ant-lg-padding));
           flex-basis: 50%;
           margin: auto 0;
           padding: var(--base-unit-size);
@@ -280,5 +299,9 @@ h1.strategists-logo {
 }
 
 .ant-notification-notice-close {
+  color: var(--text-color) !important;
+}
+
+.ant-statistic-title {
   color: var(--text-color) !important;
 }

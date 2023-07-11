@@ -44,7 +44,7 @@ export const Actions = () => {
             type="primary"
             icon={<LoadingOutlined />}
           >
-            Waiting for your turn
+            {players.find((p) => p.turn)?.username}'s turn to invest
           </Button>
         ) : (
           <>

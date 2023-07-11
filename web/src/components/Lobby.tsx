@@ -1,5 +1,14 @@
 import { MouseEvent, useState } from 'react';
-import { Button, Form, Input, InputNumber, List, Space, Tooltip } from 'antd';
+import {
+  Button,
+  Divider,
+  Form,
+  Input,
+  InputNumber,
+  List,
+  Space,
+  Tooltip,
+} from 'antd';
 import {
   LockOutlined,
   UnlockOutlined,
@@ -7,6 +16,7 @@ import {
   UserDeleteOutlined,
   UserOutlined,
   WalletOutlined,
+  StockOutlined,
 } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { Player, State } from '../redux';
@@ -105,7 +115,13 @@ const LobbyPlayers = (state: 'lobby' | 'active') => {
                 <UserOutlined /> {player.username}
               </span>
               <span>
-                <WalletOutlined /> {player.netWorth}
+                <Tooltip title={<>{player.username}'s cash</>}>
+                  <WalletOutlined /> {player.cash}
+                </Tooltip>
+                <Divider type="vertical" />
+                <Tooltip title={<>{player.username}'s net worth</>}>
+                  <StockOutlined /> {player.netWorth}
+                </Tooltip>
               </span>
             </div>
             <div
