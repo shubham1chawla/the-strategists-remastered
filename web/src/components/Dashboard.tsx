@@ -1,7 +1,7 @@
 import { Dispatch, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button, Col, Row, Tabs, Tooltip, notification } from 'antd';
-import { Actions, ActivityTimeline, Logo, Lobby, Map } from '.';
+import { Actions, ActivityTimeline, Logo, Lobby, Map, Stats } from '.';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ActivityActions,
@@ -186,6 +186,7 @@ const AdminPanel = () => {
 const PlayerPanel = () => {
   return (
     <div className="strategists-player-panel">
+      <Stats />
       <ActivityTimeline />
       <Actions />
     </div>

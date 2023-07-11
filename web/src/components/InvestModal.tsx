@@ -3,8 +3,9 @@ import {
   PieChartOutlined,
   RiseOutlined,
   WalletOutlined,
+  DollarCircleOutlined,
 } from '@ant-design/icons';
-import { Card, Divider, Modal, Row, Slider, Space, Statistic } from 'antd';
+import { Card, Col, Divider, Modal, Row, Slider, Space, Statistic } from 'antd';
 import { useState } from 'react';
 import { Land, Player } from '../redux';
 import axios from 'axios';
@@ -52,10 +53,11 @@ export const InvestModal = (props: InvestModalProps) => {
           {investText}
           <Space>
             <small>
-              <WalletOutlined /> {player.cash} balance
+              <WalletOutlined /> {player.cash} cash available
             </small>
+            <Divider type="vertical" />
             <small>
-              <PieChartOutlined /> {maxAvailOwnership}% available
+              <PieChartOutlined /> {maxAvailOwnership}% shares available
             </small>
           </Space>
         </div>
@@ -74,24 +76,28 @@ export const InvestModal = (props: InvestModalProps) => {
     >
       <Divider />
       <main className="strategists-actions__modal__body">
-        <Row justify="center">
-          <Card bordered={false}>
-            <Statistic
-              title="Proposed Ownership"
-              value={ownership}
-              precision={0}
-              prefix={<RiseOutlined />}
-              suffix="%"
-            />
-          </Card>
-          <Card bordered={false}>
-            <Statistic
-              title="Investment Amount"
-              value={userInvestAmount}
-              precision={2}
-              prefix={<WalletOutlined />}
-            />
-          </Card>
+        <Row>
+          <Col span={12}>
+            <Card bordered={false}>
+              <Statistic
+                title="Proposed Ownership"
+                value={ownership}
+                precision={0}
+                prefix={<RiseOutlined />}
+                suffix="%"
+              />
+            </Card>
+          </Col>
+          <Col span={12}>
+            <Card bordered={false}>
+              <Statistic
+                title="Cost of Investment"
+                value={userInvestAmount}
+                precision={2}
+                prefix={<DollarCircleOutlined />}
+              />
+            </Card>
+          </Col>
         </Row>
         <Slider
           defaultValue={ownership}

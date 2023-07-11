@@ -1,4 +1,9 @@
-import { HomeOutlined, UserOutlined, WalletOutlined } from '@ant-design/icons';
+import {
+  HomeOutlined,
+  UserOutlined,
+  StockOutlined,
+  DollarCircleOutlined,
+} from '@ant-design/icons';
 import { Divider, Modal, Table } from 'antd';
 import { Land, Player, PlayerLand, State } from '../redux';
 import { ColumnsType } from 'antd/es/table';
@@ -47,15 +52,22 @@ export const MapModal = (props: MapModalProps) => {
 };
 
 const renderTitle = (player?: Player, land?: Land) => {
+  const title = player
+    ? `${player.username}'s Portfolio`
+    : `${land?.name}'s Investments`;
+  const subtitle = player ? (
+    <>
+      <StockOutlined /> {player.netWorth} current net worth
+    </>
+  ) : (
+    <>
+      <DollarCircleOutlined /> {land?.marketValue} current market value
+    </>
+  );
   return (
     <div className="strategists-map__modal__title">
-      <span>
-        {player?.username || land?.name}'s{' '}
-        {player ? 'investments' : 'distribution'}
-      </span>
-      <small>
-        <WalletOutlined /> {player?.netWorth || land?.marketValue}
-      </small>
+      <span>{title}</span>
+      <small>{subtitle}</small>
     </div>
   );
 };
@@ -85,7 +97,7 @@ const renderTable = (player?: Player, land?: Land) => {
       key: 'buyAmount',
       render: (value) => (
         <span>
-          <WalletOutlined /> {value}
+          <DollarCircleOutlined /> {value}
         </span>
       ),
     },
