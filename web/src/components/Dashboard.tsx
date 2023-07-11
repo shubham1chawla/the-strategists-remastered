@@ -3,7 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Col, Row, Tabs, Tooltip, notification } from 'antd';
 import { Actions, Activity, Logo, Lobby, Map } from '.';
 import { useDispatch, useSelector } from 'react-redux';
-import { ActivityActions, LobbyActions, State, UserActions } from '../redux';
+import {
+  ActivityActions,
+  LobbyActions,
+  State,
+  UserActions,
+  parseActivity,
+} from '../redux';
 import { FireOutlined, LogoutOutlined, RocketFilled } from '@ant-design/icons';
 import axios from 'axios';
 
@@ -68,7 +74,7 @@ export const Dashboard = () => {
           console.warn(`Unsupported update type: ${type}`);
       }
       dispatch(ActivityActions.addActivity(activity));
-      api.open({ message: activity });
+      api.open({ message: parseActivity(activity) });
     };
     updates.onerror = console.error;
 
