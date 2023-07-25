@@ -1,66 +1,65 @@
-import cytoscape, {
-  Core,
-  CytoscapeOptions,
-  EventObjectNode,
-  Stylesheet,
-} from 'cytoscape';
-import { useEffect, useRef, useState } from 'react';
+import cytoscape, { Core, EventObjectNode, Stylesheet } from 'cytoscape';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CssVariables } from '../App';
 import { Land, Player, State } from '../redux';
 import { MapModal, MapModalProps } from '.';
 
-const baseOptions: CytoscapeOptions = {
-  autolock: true,
-  userPanningEnabled: true,
-  userZoomingEnabled: true,
-  maxZoom: 1.5,
-  minZoom: 0.75,
-  boxSelectionEnabled: false,
-  pixelRatio: 'auto',
-  layout: {
-    name: 'preset',
-  },
+const prepareStyles = (): Stylesheet[] => {
+  return [
+    {
+      selector: 'node',
+      style: {
+        width: 20,
+        height: 20,
+        shape: 'ellipse',
+        color: CssVariables['--text-color'],
+        label: 'data(name)',
+        'text-margin-x': 10,
+        'text-halign': 'right',
+        'text-valign': 'center',
+        'text-background-color': CssVariables['--dark-color'],
+        'text-background-opacity': 1,
+        'text-background-padding': '4px',
+      },
+    },
+    {
+      selector: '.prison',
+      style: {
+        shape: 'pentagon',
+        backgroundColor: CssVariables['--accent-color'],
+      },
+    },
+    {
+      selector: '.player',
+      style: {
+        shape: 'triangle',
+        color: CssVariables['--accent-color'],
+        backgroundColor: CssVariables['--accent-color'],
+        'font-weight': 'bold',
+      },
+    },
+    {
+      selector: '.land-edge',
+      style: {
+        width: 2,
+        'curve-style': 'bezier',
+        'target-arrow-shape': 'triangle',
+      },
+    },
+    {
+      selector: '.player-edge',
+      style: {
+        width: 2,
+        'curve-style': 'unbundled-bezier',
+        'target-arrow-shape': 'triangle',
+        'line-style': 'dashed',
+      },
+    },
+  ];
 };
 
-const baseStyles: Stylesheet[] = [
-  {
-    selector: 'node',
-    style: {
-      width: 20,
-      height: 20,
-      shape: 'ellipse',
-      color: 'white',
-      label: 'data(name)',
-    },
-  },
-  {
-    selector: 'edge',
-    style: {
-      width: 1,
-      'curve-style': 'bezier',
-      'target-arrow-shape': 'triangle',
-    },
-  },
-  {
-    selector: '.player-edge',
-    style: {
-      width: 1,
-      'curve-style': 'unbundled-bezier',
-      'target-arrow-shape': 'triangle',
-      'line-style': 'dashed',
-    },
-  },
-];
-
-const updateMap = (cy: Core, lands: Land[], players: Player[]): void => {
-  if (!cy || !lands.length) {
-    return;
-  }
-
-  // clearing previous nodes and edges
-  cy.remove(cy.elements());
-
+const prepareLands = (cy: Core, lands: Land[]): void => {
   // adding lands' nodes
   lands.forEach((land) => {
     cy.add({
@@ -82,7 +81,7 @@ const updateMap = (cy: Core, lands: Land[], players: Player[]): void => {
         target: curr.id,
       },
       selectable: false,
-      classes: 'edge',
+      classes: 'land-edge',
     });
   }
 
@@ -94,9 +93,11 @@ const updateMap = (cy: Core, lands: Land[], players: Player[]): void => {
       target: lands[0].id,
     },
     selectable: false,
-    classes: 'edge',
+    classes: 'land-edge',
   });
+};
 
+const preparePlayers = (cy: Core, lands: Land[], players: Player[]): void => {
   // finding players per index
   const counts = Array(lands.length).fill(0);
   players.forEach((player) => counts[player.index]++);
@@ -105,9 +106,9 @@ const updateMap = (cy: Core, lands: Land[], players: Player[]): void => {
   players.forEach((player) => {
     // adding player's node
     const land = lands[player.index];
-    cy.add({
+    const node = cy.add({
       data: { player, name: player.username, id: player.username } as any,
-      position: { x: land.x - counts[player.index]-- * 100, y: land.y - 100 },
+      position: { x: land.x - counts[player.index]-- * 120, y: land.y - 50 },
       selectable: false,
       classes: 'player',
     });
@@ -122,8 +123,41 @@ const updateMap = (cy: Core, lands: Land[], players: Player[]): void => {
       selectable: false,
       classes: 'player-edge',
     });
-  });
 
+    // No need to animate waiting players
+    if (!player.turn) {
+      return;
+    }
+
+    // preparing blink animation for current player
+    const animation = node.animation({
+      duration: 500,
+      easing: 'ease',
+      position: node.position(),
+      renderedPosition: node.position(),
+      style: {
+        backgroundColor: CssVariables['--text-color'],
+      },
+    });
+
+    // creating callback for animation to replay alternatingly
+    const callback = (): Promise<any> =>
+      animation.play().reverse().play().promise('complete').then(callback);
+    callback();
+  });
+};
+
+const prepareMap = (cy: Core, lands: Land[], players: Player[]): void => {
+  // clearing previous nodes and edges
+  cy.remove(cy.elements());
+
+  // adding land nodes and edges
+  prepareLands(cy, lands);
+
+  // adding player nodes and edges
+  preparePlayers(cy, lands, players);
+
+  // adjusting zoom
   cy.fit(undefined, Number.MAX_VALUE);
 };
 
@@ -132,30 +166,24 @@ export const Map = () => {
   const container = useRef<HTMLDivElement>(null);
   const [props, setProps] = useState<MapModalProps | null>(null);
 
+  // memoizing styles since they won't change
+  const style = useMemo(prepareStyles, []);
+
   useEffect(() => {
-    // creating dynamic style for Prison node
-    const dynamicStyles: Stylesheet[] = [
-      {
-        selector: '.prison',
-        style: {
-          shape: 'pentagon',
-          backgroundColor: CssVariables['--accent-color'],
-        },
-      },
-      {
-        selector: '.player',
-        style: {
-          shape: 'triangle',
-          backgroundColor: CssVariables['--accent-color'],
-        },
-      },
-    ];
+    if (!lands.length) {
+      return;
+    }
 
     // setting up cytoscape
     const cy = cytoscape({
+      autolock: true,
+      maxZoom: 1.5,
+      minZoom: 0.75,
+      layout: {
+        name: 'preset',
+      },
+      style,
       container: container.current,
-      ...baseOptions,
-      style: [...baseStyles, ...dynamicStyles],
     });
 
     // adding onclick hook for map modal
@@ -169,8 +197,8 @@ export const Map = () => {
     });
 
     // setting up map elements
-    updateMap(cy, lands, players);
-  }, [players, lands]);
+    prepareMap(cy, lands, players);
+  }, [style, players, lands]);
 
   return (
     <>
