@@ -1,4 +1,9 @@
-import cytoscape, { Core, EventObjectNode, Stylesheet } from 'cytoscape';
+import cytoscape, {
+  Core,
+  EventObjectNode,
+  Position,
+  Stylesheet,
+} from 'cytoscape';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CssVariables } from '../App';
@@ -15,9 +20,9 @@ const prepareStyles = (): Stylesheet[] => {
         shape: 'ellipse',
         color: CssVariables['--text-color'],
         label: 'data(name)',
-        'text-margin-x': 10,
-        'text-halign': 'right',
-        'text-valign': 'center',
+        'text-margin-y': -10,
+        'text-halign': 'center',
+        'text-valign': 'top',
         'text-background-color': CssVariables['--dark-color'],
         'text-background-opacity': 1,
         'text-background-padding': '4px',
@@ -97,6 +102,17 @@ const prepareLands = (cy: Core, lands: Land[]): void => {
   });
 };
 
+const calculateMiddle = (lands: Land[]): Position => {
+  const middle = { x: 0, y: 0 };
+  lands.forEach((land) => {
+    middle.x += land.x;
+    middle.y += land.y;
+  });
+  middle.x /= lands.length;
+  middle.y /= lands.length;
+  return middle;
+};
+
 const preparePlayers = (cy: Core, lands: Land[], players: Player[]): void => {
   // finding players per index
   const counts = Array(lands.length).fill(0);
@@ -104,11 +120,22 @@ const preparePlayers = (cy: Core, lands: Land[], players: Player[]): void => {
 
   // adding players
   players.forEach((player) => {
-    // adding player's node
+    // player's current land
     const land = lands[player.index];
+
+    // calculating middle of adjusting lands
+    const middle = calculateMiddle([
+      lands[player.index - 1 < 0 ? lands.length - 1 : player.index - 1],
+      land,
+      lands[player.index + 1 === lands.length ? 0 : player.index + 1],
+    ]);
+
     const node = cy.add({
       data: { player, name: player.username, id: player.username } as any,
-      position: { x: land.x - counts[player.index]-- * 120, y: land.y - 50 },
+      position: {
+        x: land.x + (land.x > middle.x ? 1 : -1) * counts[player.index]-- * 60,
+        y: land.y + (land.y > middle.y ? 1 : -1) * 60,
+      },
       selectable: false,
       classes: 'player',
     });
@@ -118,7 +145,7 @@ const preparePlayers = (cy: Core, lands: Land[], players: Player[]): void => {
       data: {
         id: `${player.username}->${land.id}`,
         source: player.username,
-        target: lands[player.index].id,
+        target: land.id,
       },
       selectable: false,
       classes: 'player-edge',
