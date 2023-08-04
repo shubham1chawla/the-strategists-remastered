@@ -132,19 +132,11 @@ public class Player implements Serializable {
 		opt.get().setBuyAmount(opt.get().getBuyAmount() + buyAmount);
 	}
 
-	/**
-	 * Adds {@link Rent} to appropriate list based on the sign of rent amount.
-	 * 
-	 * @param player     {@link Player} from or to rent is received or paid
-	 * @param land       {@link Land} for which rent is paid
-	 * @param rentAmount Rent amount based on which appropriate list is determined
-	 */
-	public void addRent(Player player, Land land, double rentAmount) {
-		receivedRents = rentAmount > 0 && CollectionUtils.isEmpty(receivedRents) ? new ArrayList<>() : receivedRents;
-		paidRents = rentAmount < 0 && CollectionUtils.isEmpty(paidRents) ? new ArrayList<>() : paidRents;
-
-		val rent = new Rent(rentAmount > 0 ? player : this, rentAmount > 0 ? this : player, land, Math.abs(rentAmount));
-		(rentAmount > 0 ? receivedRents : paidRents).add(rent);
+	public void addRent(Rent rent) {
+		if (Objects.isNull(receivedRents)) {
+			receivedRents = new ArrayList<>();
+		}
+		receivedRents.add(rent);
 	}
 
 	private static <T> double sum(List<T> list, ToDoubleFunction<T> mapper) {

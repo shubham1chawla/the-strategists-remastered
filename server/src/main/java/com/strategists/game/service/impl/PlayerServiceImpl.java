@@ -194,18 +194,22 @@ public class PlayerServiceImpl implements PlayerService {
 	@Transactional
 	@ActivityMapping(Type.RENT)
 	public void payRent(Rent rent) {
-		val sourcePlayer = rent.getSourcePlayer();
-		val targetPlayer = rent.getTargetPlayer();
+		val source = rent.getSourcePlayer();
+		val target = rent.getTargetPlayer();
+		val land = rent.getLand();
+		val amount = rent.getRentAmount();
 
 		/*
 		 * Adding rent instance to target player only to ensure that there is only rent
 		 * entry in the database.
 		 */
-		targetPlayer.addRent(sourcePlayer, rent.getLand(), rent.getRentAmount());
-		playerRepository.save(targetPlayer);
+		target.addRent(rent);
+		playerRepository.save(target);
 
 		// Refreshing source player's entity to reflect correct cash
-		em.refresh(sourcePlayer);
+		em.refresh(source);
+
+		log.info("{} paid {} rent to {} for {}", source.getUsername(), amount, target.getUsername(), land.getName());
 	}
 
 }
