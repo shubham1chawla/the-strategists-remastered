@@ -125,9 +125,9 @@ const preparePlayers = (cy: Core, lands: Land[], players: Player[]): void => {
 
     // calculating middle of adjusting lands
     const middle = calculateMiddle([
-      lands[player.index - 1 < 0 ? lands.length - 1 : player.index - 1],
+      lands[(player.index - 1 + lands.length) % lands.length],
       land,
-      lands[player.index + 1 === lands.length ? 0 : player.index + 1],
+      lands[(player.index + 1) % lands.length],
     ]);
 
     const node = cy.add({
