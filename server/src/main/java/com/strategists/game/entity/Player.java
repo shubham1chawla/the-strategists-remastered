@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.ToDoubleFunction;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -91,24 +92,33 @@ public class Player implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.player", cascade = CascadeType.ALL)
 	private List<PlayerLand> playerLands;
 
+	@ToString.Exclude
+	@JsonIgnore
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "targetPlayer", cascade = CascadeType.ALL)
+	private List<Rent> receivedRents;
+
+	@ToString.Exclude
+	@JsonIgnore
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "sourcePlayer", cascade = CascadeType.ALL)
+	private List<Rent> paidRents;
+
 	/**
 	 * Transient field that calculate player's current cash based on their
-	 * investments.
+	 * investments and rents.
 	 * 
 	 * @return
 	 */
 	@JsonProperty("cash")
 	@Transient
 	public double getCash() {
-		return cash - (CollectionUtils.isEmpty(playerLands) ? 0d
-				: playerLands.stream().mapToDouble(PlayerLand::getBuyAmount).sum());
+		val credits = cash + sum(receivedRents, Rent::getRentAmount);
+		val debits = sum(paidRents, Rent::getRentAmount) + sum(playerLands, PlayerLand::getBuyAmount);
+		return credits - debits;
 	}
 
 	@Transient
 	public double getNetWorth() {
-		return getCash() + (CollectionUtils.isEmpty(playerLands) ? 0d
-				: playerLands.stream().mapToDouble(pl -> pl.getLand().getMarketValue() * (pl.getOwnership() / 100))
-						.sum());
+		return getCash() + sum(playerLands, pl -> pl.getLand().getMarketValue() * (pl.getOwnership() / 100));
 	}
 
 	public void addLand(Land land, double ownership, double buyAmount) {
@@ -120,6 +130,25 @@ public class Player implements Serializable {
 		}
 		opt.get().setOwnership(opt.get().getOwnership() + ownership);
 		opt.get().setBuyAmount(opt.get().getBuyAmount() + buyAmount);
+	}
+
+	/**
+	 * Adds {@link Rent} to appropriate list based on the sign of rent amount.
+	 * 
+	 * @param player     {@link Player} from or to rent is received or paid
+	 * @param land       {@link Land} for which rent is paid
+	 * @param rentAmount Rent amount based on which appropriate list is determined
+	 */
+	public void addRent(Player player, Land land, double rentAmount) {
+		receivedRents = rentAmount > 0 && CollectionUtils.isEmpty(receivedRents) ? new ArrayList<>() : receivedRents;
+		paidRents = rentAmount < 0 && CollectionUtils.isEmpty(paidRents) ? new ArrayList<>() : paidRents;
+
+		val rent = new Rent(rentAmount > 0 ? player : this, rentAmount > 0 ? this : player, land, Math.abs(rentAmount));
+		(rentAmount > 0 ? receivedRents : paidRents).add(rent);
+	}
+
+	private static <T> double sum(List<T> list, ToDoubleFunction<T> mapper) {
+		return CollectionUtils.isEmpty(list) ? 0d : list.stream().mapToDouble(mapper).sum();
 	}
 
 }

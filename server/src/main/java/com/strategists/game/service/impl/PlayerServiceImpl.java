@@ -6,9 +6,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -17,6 +20,7 @@ import com.strategists.game.aop.ActivityMapping;
 import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.Player.State;
+import com.strategists.game.entity.Rent;
 import com.strategists.game.repository.PlayerRepository;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
@@ -29,7 +33,17 @@ import lombok.extern.log4j.Log4j2;
 public class PlayerServiceImpl implements PlayerService {
 
 	private static final Random RANDOM = new Random();
-	private static final int PASSWORD_LENGTH = 4;
+
+	/*
+	 * Since target player adds rent to its entity, we must refresh the source
+	 * player's entity to reflect financial details for the current thread.
+	 * Subsequent calls will reflect updated information regardless.
+	 */
+	@PersistenceContext
+	private EntityManager em;
+
+	@Value("${strategists.game.password-length}")
+	private Integer passwordLength;
 
 	@Autowired
 	private PlayerRepository playerRepository;
@@ -72,7 +86,7 @@ public class PlayerServiceImpl implements PlayerService {
 		Assert.isTrue(!playerRepository.existsByUsername(username), username + " username already exists!");
 
 		// generating password
-		val password = IntStream.range(0, PASSWORD_LENGTH).map(i -> 10).map(RANDOM::nextInt).mapToObj(Integer::toString)
+		val password = IntStream.range(0, passwordLength).map(i -> 10).map(RANDOM::nextInt).mapToObj(Integer::toString)
 				.collect(Collectors.joining());
 
 		log.info("Creating player with {} username", username);
@@ -174,6 +188,24 @@ public class PlayerServiceImpl implements PlayerService {
 		playerRepository.save(player);
 
 		log.info("Player {} invested in {}.", player.getUsername(), land.getName());
+	}
+
+	@Override
+	@Transactional
+	@ActivityMapping(Type.RENT)
+	public void payRent(Rent rent) {
+		val sourcePlayer = rent.getSourcePlayer();
+		val targetPlayer = rent.getTargetPlayer();
+
+		/*
+		 * Adding rent instance to target player only to ensure that there is only rent
+		 * entry in the database.
+		 */
+		targetPlayer.addRent(sourcePlayer, rent.getLand(), rent.getRentAmount());
+		playerRepository.save(targetPlayer);
+
+		// Refreshing source player's entity to reflect correct cash
+		em.refresh(sourcePlayer);
 	}
 
 }

@@ -64,6 +64,9 @@ export const Dashboard = () => {
         case 'MOVE':
           dispatch(LobbyActions.patchPlayers([data]));
           break;
+        case 'RENT':
+          dispatch(LobbyActions.patchPlayers(data));
+          break;
         case 'START':
           dispatch(LobbyActions.patchPlayers([data]));
           break;

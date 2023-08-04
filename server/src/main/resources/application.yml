@@ -8,4 +8,6 @@ strategists:
     username: Creator
     password: 9999
   game:
+    password-length: 4
     dice-size: 6
+    rent-factor: 0.2
