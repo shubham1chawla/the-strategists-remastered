@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
+import com.strategists.game.entity.Rent;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
@@ -22,6 +23,7 @@ import com.strategists.game.update.InvestmentUpdatePayload;
 import com.strategists.game.update.JoinPlayerUpdatePayload;
 import com.strategists.game.update.KickPlayerUpdatePayload;
 import com.strategists.game.update.MoveUpdatePayload;
+import com.strategists.game.update.RentUpdatePayload;
 import com.strategists.game.update.StartUpdatePayload;
 import com.strategists.game.update.TurnUpdatePayload;
 
@@ -49,7 +51,7 @@ public class ActivityAspect {
 	private UpdateService updateService;
 
 	@Around("@annotation(mapping)")
-	public void advice(ProceedingJoinPoint joinPoint, ActivityMapping mapping) throws Throwable {
+	public Object advice(ProceedingJoinPoint joinPoint, ActivityMapping mapping) throws Throwable {
 		Object obj = null;
 		try {
 			obj = joinPoint.proceed();
@@ -72,6 +74,9 @@ public class ActivityAspect {
 		case MOVE:
 			payload = handleMoveActivity(obj);
 			break;
+		case RENT:
+			payload = handleRentActivity(joinPoint.getArgs());
+			break;
 		case START:
 			payload = handleStartActivity();
 			break;
@@ -80,9 +85,10 @@ public class ActivityAspect {
 			break;
 		default:
 			log.warn("Unsupported Activity Type: {}", mapping.value());
-			return;
+			return obj;
 		}
 		updateService.sendUpdate(payload);
+		return obj;
 	}
 
 	private InvestmentUpdatePayload handleInvestActivity(Object... args) {
@@ -124,6 +130,20 @@ public class ActivityAspect {
 		val activity = activityRepository.save(Activity.ofMove(player.getUsername(), land.getName()));
 
 		return new MoveUpdatePayload(activity, player);
+	}
+
+	private RentUpdatePayload handleRentActivity(Object[] args) {
+		val rent = (Rent) args[0];
+		val sourcePlayer = rent.getSourcePlayer();
+		val targetPlayer = rent.getTargetPlayer();
+		val land = rent.getLand();
+		val rentAmount = rent.getRentAmount();
+
+		// Creating activity for rent
+		val activity = activityRepository.save(
+				Activity.ofRent(sourcePlayer.getUsername(), rentAmount, targetPlayer.getUsername(), land.getName()));
+
+		return new RentUpdatePayload(activity, List.of(sourcePlayer, targetPlayer));
 	}
 
 	private StartUpdatePayload handleStartActivity() {

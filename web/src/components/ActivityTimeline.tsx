@@ -4,8 +4,9 @@ import { Activity, State, parseActivity } from '../redux';
 import {
   CheckOutlined,
   DoubleRightOutlined,
+  FallOutlined,
   FireOutlined,
-  StockOutlined,
+  RiseOutlined,
   UserAddOutlined,
 } from '@ant-design/icons';
 import { ReactNode } from 'react';
@@ -28,11 +29,13 @@ export const ActivityTimeline = () => {
 const getIcon = ({ type }: Activity): ReactNode | undefined => {
   switch (type) {
     case 'INVEST':
-      return <StockOutlined />;
+      return <RiseOutlined />;
     case 'JOIN':
       return <UserAddOutlined />;
     case 'MOVE':
       return <DoubleRightOutlined />;
+    case 'RENT':
+      return <FallOutlined />;
     case 'START':
       return <FireOutlined />;
     case 'TURN':

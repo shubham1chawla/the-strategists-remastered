@@ -3,6 +3,7 @@ package com.strategists.game.service;
 import java.util.List;
 
 import com.strategists.game.entity.Player;
+import com.strategists.game.entity.Rent;
 
 public interface PlayerService {
 
@@ -35,5 +36,7 @@ public interface PlayerService {
 	List<Player> nextPlayer();
 
 	void invest(long playerId, long landId, double ownership);
+	
+	void payRent(Rent rent);
 
 }

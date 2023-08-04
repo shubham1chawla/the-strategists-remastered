@@ -1,5 +1,6 @@
 package com.strategists.game.service.impl;
 
+import java.util.Objects;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,8 +10,13 @@ import org.springframework.util.Assert;
 
 import com.strategists.game.aop.ActivityMapping;
 import com.strategists.game.entity.Activity.Type;
+import com.strategists.game.entity.PlayerLand;
+import com.strategists.game.entity.Rent;
 import com.strategists.game.service.GameService;
+import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
+
+import lombok.val;
 
 @Service
 public class GameServiceImpl implements GameService {
@@ -20,8 +26,14 @@ public class GameServiceImpl implements GameService {
 	@Value("${strategists.game.dice-size}")
 	private Integer diceSize;
 
+	@Value("${strategists.game.rent-factor}")
+	private Double rentFactor;
+
 	@Autowired
 	private PlayerService playerService;
+
+	@Autowired
+	private LandService landService;
 
 	@Override
 	public State getState() {
@@ -47,7 +59,22 @@ public class GameServiceImpl implements GameService {
 		playerService.nextPlayer();
 
 		// Moving the current player to a new position
-		playerService.movePlayer(RANDOM.nextInt(diceSize) + 1);
+		val player = playerService.movePlayer(RANDOM.nextInt(diceSize) + 1);
+		val land = landService.getLandByIndex(player.getIndex());
+
+		// Paying rent to players
+		for (PlayerLand pl : land.getPlayerLands()) {
+			val targetPlayer = pl.getPlayer();
+
+			// Avoiding self rent payment
+			if (Objects.equals(targetPlayer.getId(), player.getId())) {
+				continue;
+			}
+
+			// Paying rent to target player
+			val rentAmount = rentFactor * (pl.getOwnership() / 100) * land.getMarketValue();
+			playerService.payRent(new Rent(player, targetPlayer, land, rentAmount));
+		}
 
 	}
 
