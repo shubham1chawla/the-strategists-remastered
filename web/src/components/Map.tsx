@@ -120,6 +120,11 @@ const preparePlayers = (cy: Core, lands: Land[], players: Player[]): void => {
 
   // adding players
   players.forEach((player) => {
+    // Checking if player is active
+    if (player.state === 'BANKRUPT') {
+      return;
+    }
+
     // player's current land
     const land = lands[player.index];
 

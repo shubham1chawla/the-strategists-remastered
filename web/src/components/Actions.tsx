@@ -1,4 +1,5 @@
 import {
+  AuditOutlined,
   EllipsisOutlined,
   LoadingOutlined,
   StepForwardOutlined,
@@ -7,7 +8,7 @@ import {
 import { Button, Dropdown, Space } from 'antd';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { State } from '../redux';
+import { Player, State } from '../redux';
 import { InvestModal } from '.';
 import axios from 'axios';
 
@@ -20,6 +21,7 @@ export const Actions = () => {
 
   // finding user in lobby's players
   const player = players.find((p) => p.username === username);
+  const turnPlayer = players.find((p) => p.turn);
   const land = player ? lands[player.index] : undefined;
 
   useEffect(() => {
@@ -37,48 +39,55 @@ export const Actions = () => {
         onCancel={() => setShowModal(false)}
       />
       <div className="strategists-actions">
-        {disabled ? (
-          <Button
-            disabled
-            size="large"
-            type="primary"
-            icon={<LoadingOutlined />}
-          >
-            {players.find((p) => p.turn)?.username}'s turn to invest
-          </Button>
-        ) : (
-          <>
-            <Space.Compact size="large">
-              <Button
-                type="primary"
-                icon={<StockOutlined />}
-                onClick={() => setShowModal(true)}
-              >
-                {investText}
-              </Button>
-              <Button
-                icon={<StepForwardOutlined />}
-                onClick={() => axios.put('/api/game/next')}
-              >
-                Skip
-              </Button>
-              <Dropdown
-                menu={{
-                  items: [
-                    {
-                      key: '1',
-                      label: 'Apply Cheat',
-                    },
-                  ],
-                }}
-                trigger={['click']}
-              >
-                <Button icon={<EllipsisOutlined />} />
-              </Dropdown>
-            </Space.Compact>
-          </>
-        )}
+        {player?.state === 'BANKRUPT'
+          ? renderBankurptButton()
+          : disabled
+          ? renderDisabledButton(turnPlayer)
+          : renderActionButtons(investText, () => setShowModal(true))}
       </div>
     </>
   );
 };
+
+const renderBankurptButton = () => (
+  <Button disabled size="large" type="primary" icon={<AuditOutlined />}>
+    You are declared bankrupt!
+  </Button>
+);
+
+const renderDisabledButton = (turnPlayer?: Player) => (
+  <Button disabled size="large" type="primary" icon={<LoadingOutlined />}>
+    {turnPlayer
+      ? `${turnPlayer.username}'s turn to invest`
+      : 'The Strategists not started!'}
+  </Button>
+);
+
+const renderActionButtons = (investText: string, onClick: () => void) => (
+  <>
+    <Space.Compact size="large">
+      <Button type="primary" icon={<StockOutlined />} onClick={onClick}>
+        {investText}
+      </Button>
+      <Button
+        icon={<StepForwardOutlined />}
+        onClick={() => axios.put('/api/game/next')}
+      >
+        Skip
+      </Button>
+      <Dropdown
+        menu={{
+          items: [
+            {
+              key: '1',
+              label: 'Apply Cheat',
+            },
+          ],
+        }}
+        trigger={['click']}
+      >
+        <Button icon={<EllipsisOutlined />} />
+      </Dropdown>
+    </Space.Compact>
+  </>
+);

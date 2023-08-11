@@ -3,6 +3,7 @@ import { ActivityActions } from '.';
 
 export interface Activity {
   type:
+    | 'BANKRUPT'
     | 'BONUS'
     | 'CHEAT'
     | 'EVENT'
@@ -25,6 +26,8 @@ export interface Activity {
 export const parseActivity = (activity: Activity): ReactNode => {
   const { type, val1, val2, val3, val4, val5 } = activity;
   switch (type) {
+    case 'BANKRUPT':
+      return `${val1} declared bankruptcy!`;
     case 'BONUS':
       return `${val1} gave ${val2} a bonus of ${val3} cash after completing one turn.`;
     case 'CHEAT':

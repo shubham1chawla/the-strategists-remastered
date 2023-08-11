@@ -40,16 +40,16 @@ public class Player implements Serializable {
 	private static final long serialVersionUID = -7588097421340659821L;
 
 	public enum State {
-		ACTIVE, DEAD, JAIL;
+		ACTIVE, BANKRUPT, JAIL;
 	}
 
-	public Player(String username, double cash, String password) {
+	public Player(String username, double baseCash, String password) {
 		Assert.hasText(username, "Username can't be empty!");
-		Assert.isTrue(cash > 0, "Cash can't be negative!");
+		Assert.isTrue(baseCash > 0, "Cash can't be negative!");
 		Assert.hasText(password, "Password can't be empty!");
 
 		this.username = username;
-		this.cash = cash;
+		this.baseCash = baseCash;
 		this.password = password;
 	}
 
@@ -71,12 +71,12 @@ public class Player implements Serializable {
 	 */
 	@JsonIgnore
 	@Column(nullable = false, precision = 2)
-	private Double cash;
+	private Double baseCash;
 
 	@Column(nullable = true, columnDefinition = "INTEGER DEFAULT 0")
 	private Integer index = 0;
 
-	@Column(nullable = true, columnDefinition = "VARCHAR(6) DEFAULT 'ACTIVE'")
+	@Column(nullable = true, columnDefinition = "VARCHAR(8) DEFAULT 'ACTIVE'")
 	@Enumerated(EnumType.STRING)
 	private State state = State.ACTIVE;
 
@@ -111,14 +111,21 @@ public class Player implements Serializable {
 	@JsonProperty("cash")
 	@Transient
 	public double getCash() {
-		val credits = cash + sum(receivedRents, Rent::getRentAmount);
+		val credits = baseCash + sum(receivedRents, Rent::getRentAmount);
 		val debits = sum(paidRents, Rent::getRentAmount) + sum(playerLands, PlayerLand::getBuyAmount);
 		return credits - debits;
 	}
 
+	/**
+	 * Aggregation of player's cash and investments' worth. Note that investments
+	 * are reverted post bankruptcy and don't count towards net worth.
+	 * 
+	 * @return
+	 */
 	@Transient
 	public double getNetWorth() {
-		return getCash() + sum(playerLands, pl -> pl.getLand().getMarketValue() * (pl.getOwnership() / 100));
+		return (State.BANKRUPT.equals(state) ? 0d
+				: sum(playerLands, pl -> pl.getLand().getMarketValue() * (pl.getOwnership() / 100))) + getCash();
 	}
 
 	public void addLand(Land land, double ownership, double buyAmount) {

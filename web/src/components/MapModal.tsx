@@ -104,16 +104,18 @@ const renderTable = (player?: Player, land?: Land) => {
   ];
 
   // preparing expected datasource instance
-  const dataSource = (player?.lands || land?.players || []).map(
-    (pl: PlayerLand) => {
-      return {
-        key: (pl.player || pl.land)?.id,
-        name: pl.player?.username || pl.land?.name,
-        ownership: pl.ownership,
-        buyAmount: pl.buyAmount,
-      };
-    }
-  );
+  const dataSource = (
+    player?.lands ||
+    land?.players.filter((pl) => pl.player?.state !== 'BANKRUPT') ||
+    []
+  ).map((pl: PlayerLand) => {
+    return {
+      key: (pl.player || pl.land)?.id,
+      name: pl.player?.username || pl.land?.name,
+      ownership: pl.ownership,
+      buyAmount: pl.buyAmount,
+    };
+  });
 
   return (
     <Table pagination={false} dataSource={dataSource} columns={columns}></Table>

@@ -1,10 +1,11 @@
 import {
+  AuditOutlined,
   DollarOutlined,
   StockOutlined,
   UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
-import { Card, Col, Divider, Row, Statistic } from 'antd';
+import { Card, Col, Divider, Row, Statistic, Tag } from 'antd';
 import { useSelector } from 'react-redux';
 import { State } from '../redux';
 
@@ -15,6 +16,11 @@ export const Stats = () => {
 
   return (
     <div className="strategists-stats">
+      {player?.state === 'BANKRUPT' ? (
+        <div className="strategists-stats__bankrupt strategists-striped">
+          <Tag icon={<AuditOutlined />}>Bankrupt</Tag>
+        </div>
+      ) : null}
       <Row>
         <Col span={24} className="strategists-stats__username">
           <Divider>

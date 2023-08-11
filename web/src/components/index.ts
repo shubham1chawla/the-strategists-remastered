@@ -1,5 +1,6 @@
 export * from './Actions';
 export * from './ActivityTimeline';
+export * from './Bankruptcy';
 export * from './Dashboard';
 export * from './InvestModal';
 export * from './Lobby';
