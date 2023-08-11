@@ -86,7 +86,10 @@ const LobbyPlayers = (state: 'lobby' | 'active') => {
       dataSource={players}
       renderItem={(player: Player) => (
         <List.Item
-          className="strategists-lobby__players__player"
+          className={
+            'strategists-lobby__players__player' +
+            (player.state === 'BANKRUPT' ? ' strategists-striped' : '')
+          }
           extra={
             <Tooltip
               title={

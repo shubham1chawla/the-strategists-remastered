@@ -36,7 +36,9 @@ public interface PlayerService {
 	List<Player> nextPlayer();
 
 	void invest(long playerId, long landId, double ownership);
-	
+
 	void payRent(Rent rent);
+
+	void bankruptPlayer(Player player);
 
 }

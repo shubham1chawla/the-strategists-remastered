@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.ToDoubleFunction;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -15,6 +16,8 @@ import javax.persistence.Id;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
+
+import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -81,9 +84,17 @@ public class Land implements Serializable {
 		return baseValue + (sensitivity + getDelta()) * getTotalOwnership();
 	}
 
+	/**
+	 * Aggregation of all players' ownerships on this land. Note that the
+	 * aggregation avoids bankrupt players. This step will ensure that bankrupt
+	 * players' investments are available to other players and adjusts lands' market
+	 * value accordingly.
+	 * 
+	 * @return
+	 */
 	@Transient
 	public double getTotalOwnership() {
-		return Objects.isNull(playerLands) ? 0d : playerLands.stream().mapToDouble(PlayerLand::getOwnership).sum();
+		return sum(playerLands, pl -> Player.State.BANKRUPT.equals(pl.getPlayer().getState()) ? 0d : pl.getOwnership());
 	}
 
 	/**
@@ -95,9 +106,7 @@ public class Land implements Serializable {
 	@JsonIgnore
 	@Transient
 	public double getDelta() {
-		return Objects.isNull(landEvents) ? 0d
-				: landEvents.stream()
-						.mapToDouble(le -> DAMPENER * le.getEvent().getFactor() * le.getLevel() * le.getLife()).sum();
+		return sum(landEvents, le -> DAMPENER * le.getEvent().getFactor() * le.getLevel() * le.getLife());
 	}
 
 	public void addEvent(Event event, int life, int level) {
@@ -109,6 +118,10 @@ public class Land implements Serializable {
 		}
 		opt.get().setLife(opt.get().getLife() + life);
 		opt.get().setLevel(level);
+	}
+
+	private static <T> double sum(List<T> list, ToDoubleFunction<T> mapper) {
+		return CollectionUtils.isEmpty(list) ? 0d : list.stream().mapToDouble(mapper).sum();
 	}
 
 }

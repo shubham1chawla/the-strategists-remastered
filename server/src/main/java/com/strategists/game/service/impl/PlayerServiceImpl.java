@@ -212,4 +212,13 @@ public class PlayerServiceImpl implements PlayerService {
 		log.info("{} paid {} rent to {} for {}", source.getUsername(), amount, target.getUsername(), land.getName());
 	}
 
+	@Override
+	@ActivityMapping(Type.BANKRUPT)
+	public void bankruptPlayer(Player player) {
+		player.setState(State.BANKRUPT);
+		playerRepository.save(player);
+
+		log.info("Updated {}'s state to {}", player.getUsername(), player.getState());
+	}
+
 }

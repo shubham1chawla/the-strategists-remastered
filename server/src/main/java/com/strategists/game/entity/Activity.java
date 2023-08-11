@@ -23,7 +23,7 @@ public class Activity implements Serializable {
 	private static final long serialVersionUID = -6960667863521865520L;
 
 	public enum Type {
-		BONUS, CHEAT, EVENT, INVEST, JAIL, JOIN, KICK, MOVE, RENT, START, TRADE, TURN;
+		BANKRUPT, BONUS, CHEAT, EVENT, INVEST, JAIL, JOIN, KICK, MOVE, RENT, START, TRADE, TURN;
 	}
 
 	@Id
@@ -59,6 +59,10 @@ public class Activity implements Serializable {
 		if (values.length > 5) {
 			throw new IllegalArgumentException("More than 5 values are not supported!");
 		}
+	}
+
+	public static Activity ofBankrupt(String username) {
+		return new Activity(Type.BANKRUPT, username);
 	}
 
 	public static Activity ofBonus(String admin, String player, double amount) {

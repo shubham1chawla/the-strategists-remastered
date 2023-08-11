@@ -10,6 +10,7 @@ import {
   UserAddOutlined,
 } from '@ant-design/icons';
 import { ReactNode } from 'react';
+import { Bankruptcy } from '.';
 
 export const ActivityTimeline = () => {
   const activities = useSelector((state: State) => state.activities);
@@ -28,6 +29,8 @@ export const ActivityTimeline = () => {
 
 const getIcon = ({ type }: Activity): ReactNode | undefined => {
   switch (type) {
+    case 'BANKRUPT':
+      return <Bankruptcy />;
     case 'INVEST':
       return <RiseOutlined />;
     case 'JOIN':

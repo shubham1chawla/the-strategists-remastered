@@ -16,7 +16,7 @@ export interface Player {
   id: number;
   username: string;
   index: number;
-  state: string;
+  state: 'ACTIVE' | 'BANKRUPT' | 'JAIL';
   turn: boolean;
   remainingJailLife: number;
   netWorth: number;

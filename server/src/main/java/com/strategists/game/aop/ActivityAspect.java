@@ -1,5 +1,6 @@
 package com.strategists.game.aop;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.strategists.game.entity.Activity;
+import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
@@ -19,6 +21,7 @@ import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 import com.strategists.game.service.UpdateService;
 import com.strategists.game.update.AbstractUpdatePayload;
+import com.strategists.game.update.BankruptcyUpdatePayload;
 import com.strategists.game.update.InvestmentUpdatePayload;
 import com.strategists.game.update.JoinPlayerUpdatePayload;
 import com.strategists.game.update.KickPlayerUpdatePayload;
@@ -62,6 +65,9 @@ public class ActivityAspect {
 		log.info("Logging & updating activity of type: {}", mapping.value());
 		AbstractUpdatePayload<?> payload = null;
 		switch (mapping.value()) {
+		case BANKRUPT:
+			payload = handleBankruptActivity(joinPoint.getArgs());
+			break;
 		case INVEST:
 			payload = handleInvestActivity(joinPoint.getArgs());
 			break;
@@ -89,6 +95,21 @@ public class ActivityAspect {
 		}
 		updateService.sendUpdate(payload);
 		return obj;
+	}
+
+	private BankruptcyUpdatePayload handleBankruptActivity(Object... args) {
+		val player = (Player) args[0];
+
+		val players = new HashSet<Player>();
+		val lands = player.getPlayerLands().stream().map(PlayerLand::getLand).toList();
+		for (Land land : lands) {
+			players.addAll(land.getPlayerLands().stream().map(PlayerLand::getPlayer).toList());
+		}
+
+		// Creating activity for bankruptcy
+		val activity = activityRepository.save(Activity.ofBankrupt(player.getUsername()));
+
+		return new BankruptcyUpdatePayload(activity, lands, players);
 	}
 
 	private InvestmentUpdatePayload handleInvestActivity(Object... args) {

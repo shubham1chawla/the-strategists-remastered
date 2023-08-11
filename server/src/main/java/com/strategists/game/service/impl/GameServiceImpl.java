@@ -1,5 +1,6 @@
 package com.strategists.game.service.impl;
 
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Random;
 
@@ -62,8 +63,8 @@ public class GameServiceImpl implements GameService {
 		val player = playerService.movePlayer(RANDOM.nextInt(diceSize) + 1);
 		val land = landService.getLandByIndex(player.getIndex());
 
-		// Paying rent to players
-		for (PlayerLand pl : land.getPlayerLands()) {
+		// Paying rent to players on current land
+		for (PlayerLand pl : new ArrayList<>(land.getPlayerLands())) {
 			val targetPlayer = pl.getPlayer();
 
 			// Avoiding self rent payment
@@ -74,6 +75,11 @@ public class GameServiceImpl implements GameService {
 			// Paying rent to target player
 			val rentAmount = rentFactor * (pl.getOwnership() / 100) * land.getMarketValue();
 			playerService.payRent(new Rent(player, targetPlayer, land, rentAmount));
+		}
+
+		// Checking if player is bankrupt
+		if (player.getCash() < 0) {
+			playerService.bankruptPlayer(player);
 		}
 
 	}

@@ -50,11 +50,18 @@ export const Dashboard = () => {
     updates.onmessage = (message: MessageEvent<any>) => {
       const { type, data, activity } = JSON.parse(message.data);
       switch (type) {
-        case 'INVEST':
+        case 'BANKRUPT': {
+          const { lands, players } = data;
+          dispatch(LobbyActions.patchLands(lands));
+          dispatch(LobbyActions.patchPlayers(players));
+          break;
+        }
+        case 'INVEST': {
           const { land, players } = data;
           dispatch(LobbyActions.patchLands([land]));
           dispatch(LobbyActions.patchPlayers(players));
           break;
+        }
         case 'JOIN':
           dispatch(LobbyActions.addPlayer(data));
           break;

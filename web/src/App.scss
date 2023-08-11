@@ -89,6 +89,16 @@ h1.strategists-logo {
   backdrop-filter: blur(calc(var(--base-unit-size)));
 }
 
+.strategists-striped {
+  background: repeating-linear-gradient(
+    -45deg,
+    var(--accent-color) 0px,
+    var(--accent-color) 1px,
+    transparent 2px,
+    transparent 12px
+  );
+}
+
 // ----- LOGIN COMPONENT'S CSS DEFINED BELOW ----- //
 
 .strategists-login {
@@ -145,6 +155,20 @@ h1.strategists-logo {
 // ----- STATS COMPONENT'S CSS DEFINED BELOW ----- //
 
 .strategists-stats {
+  &__bankrupt {
+    position: absolute;
+    height: var(--strategists-stats-height);
+    width: 100%;
+
+    .ant-tag {
+      position: relative;
+      top: 10%;
+      left: 80%;
+      color: var(--text-color);
+      background-color: var(--dark-color);
+    }
+  }
+
   &__username {
     padding: 0 var(--ant-lg-padding);
   }
