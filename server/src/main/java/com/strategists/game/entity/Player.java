@@ -1,6 +1,8 @@
 package com.strategists.game.entity;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -20,7 +22,6 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -38,6 +39,8 @@ import lombok.val;
 public class Player implements Serializable {
 
 	private static final long serialVersionUID = -7588097421340659821L;
+
+	private static final int PRECISION = 2;
 
 	public enum State {
 		ACTIVE, BANKRUPT, JAIL;
@@ -70,7 +73,7 @@ public class Player implements Serializable {
 	 * Check {@link Player#getCash()} for details.
 	 */
 	@JsonIgnore
-	@Column(nullable = false, precision = 2)
+	@Column(nullable = false, precision = PRECISION)
 	private Double baseCash;
 
 	@Column(nullable = true, columnDefinition = "INTEGER DEFAULT 0")
@@ -113,7 +116,7 @@ public class Player implements Serializable {
 	public double getCash() {
 		val credits = baseCash + sum(receivedRents, Rent::getRentAmount);
 		val debits = sum(paidRents, Rent::getRentAmount) + sum(playerLands, PlayerLand::getBuyAmount);
-		return credits - debits;
+		return BigDecimal.valueOf(credits - debits).setScale(PRECISION, RoundingMode.HALF_UP).doubleValue();
 	}
 
 	/**
@@ -147,7 +150,7 @@ public class Player implements Serializable {
 	}
 
 	private static <T> double sum(List<T> list, ToDoubleFunction<T> mapper) {
-		return CollectionUtils.isEmpty(list) ? 0d : list.stream().mapToDouble(mapper).sum();
+		return Objects.isNull(list) ? 0d : list.stream().mapToDouble(mapper).sum();
 	}
 
 }

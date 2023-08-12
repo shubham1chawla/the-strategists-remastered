@@ -11,6 +11,7 @@ import org.springframework.util.Assert;
 
 import com.strategists.game.aop.ActivityMapping;
 import com.strategists.game.entity.Activity.Type;
+import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
 import com.strategists.game.service.GameService;
@@ -67,8 +68,10 @@ public class GameServiceImpl implements GameService {
 		for (PlayerLand pl : new ArrayList<>(land.getPlayerLands())) {
 			val targetPlayer = pl.getPlayer();
 
-			// Avoiding self rent payment
-			if (Objects.equals(targetPlayer.getId(), player.getId())) {
+			// Avoiding self rent payment and bankrupt players
+			val isSelfTransfer = Objects.equals(targetPlayer.getId(), player.getId());
+			val isTargetPlayerBankrupt = Player.State.BANKRUPT.equals(targetPlayer.getState());
+			if (isSelfTransfer || isTargetPlayerBankrupt) {
 				continue;
 			}
 
