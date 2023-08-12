@@ -2,7 +2,6 @@ package com.strategists.game.aop;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -121,7 +120,7 @@ public class ActivityAspect {
 		 * net-worth is tied with the market value of the land, therefore investment in
 		 * this land will boost each investors' net-worth.
 		 */
-		val players = land.getPlayerLands().stream().map(PlayerLand::getPlayer).collect(Collectors.toList());
+		val players = land.getPlayerLands().stream().map(PlayerLand::getPlayer).toList();
 
 		// Creating activity for investment
 		val activity = activityRepository.save(Activity.ofInvest(curr.getUsername(), (double) args[2], land.getName()));

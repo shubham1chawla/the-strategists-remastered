@@ -17,8 +17,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
-import org.springframework.util.CollectionUtils;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -121,7 +119,7 @@ public class Land implements Serializable {
 	}
 
 	private static <T> double sum(List<T> list, ToDoubleFunction<T> mapper) {
-		return CollectionUtils.isEmpty(list) ? 0d : list.stream().mapToDouble(mapper).sum();
+		return Objects.isNull(list) ? 0d : list.stream().mapToDouble(mapper).sum();
 	}
 
 }

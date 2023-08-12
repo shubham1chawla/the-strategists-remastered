@@ -7,6 +7,7 @@ import {
   InputNumber,
   List,
   Space,
+  Tag,
   Tooltip,
 } from 'antd';
 import {
@@ -17,6 +18,7 @@ import {
   UserOutlined,
   WalletOutlined,
   StockOutlined,
+  CrownOutlined,
 } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { Player, State } from '../redux';
@@ -43,6 +45,9 @@ export const Lobby = () => {
 const LobbyPlayers = (state: 'lobby' | 'active') => {
   const { players } = useSelector((state: State) => state.lobby);
   const [passwords, setPasswords] = useState<Map<number, Password>>(new Map());
+
+  // Sorting players in decreasing order of net-worth
+  players.sort((p1, p2) => p2.netWorth - p1.netWorth);
 
   const kickPlayer = (event: MouseEvent, { username }: Player) => {
     event.stopPropagation();
@@ -84,7 +89,7 @@ const LobbyPlayers = (state: 'lobby' | 'active') => {
       className="strategists-lobby__players"
       size="large"
       dataSource={players}
-      renderItem={(player: Player) => (
+      renderItem={(player: Player, index: number) => (
         <List.Item
           className={
             'strategists-lobby__players__player' +
@@ -115,6 +120,9 @@ const LobbyPlayers = (state: 'lobby' | 'active') => {
           >
             <div className="strategists-lobby__players__player__content__info">
               <span>
+                {state === 'active' && player.state !== 'BANKRUPT' ? (
+                  <Tag icon={<CrownOutlined />}>#{index + 1}</Tag>
+                ) : null}
                 <UserOutlined /> {player.username}
               </span>
               <span>

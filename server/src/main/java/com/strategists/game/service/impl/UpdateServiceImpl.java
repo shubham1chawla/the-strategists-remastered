@@ -28,6 +28,7 @@ public class UpdateServiceImpl implements UpdateService {
 		emitters.computeIfAbsent(username, key -> {
 			val emitter = new SseEmitter(-1L);
 			emitter.onCompletion(() -> emitters.remove(key));
+			emitter.onError(ex -> emitters.remove(key));
 			return emitter;
 		});
 		return emitters.get(username);
@@ -44,7 +45,7 @@ public class UpdateServiceImpl implements UpdateService {
 			try {
 				entry.getValue().send(payload, MediaType.APPLICATION_JSON);
 			} catch (IOException ex) {
-				log.error(ex.getMessage(), ex);
+				log.debug(ex.getMessage(), ex);
 			}
 		});
 	}

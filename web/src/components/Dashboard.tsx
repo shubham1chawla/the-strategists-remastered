@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   ActivityActions,
   LobbyActions,
+  Player,
   State,
   UserActions,
   parseActivity,
@@ -54,6 +55,16 @@ export const Dashboard = () => {
           const { lands, players } = data;
           dispatch(LobbyActions.patchLands(lands));
           dispatch(LobbyActions.patchPlayers(players));
+
+          // Skipping turn if current player declared bankruptcy
+          if (
+            players.find(
+              (p: Player) => p.username === username && p.state === 'BANKRUPT'
+            )
+          ) {
+            axios.put('/api/game/next');
+          }
+
           break;
         }
         case 'INVEST': {
