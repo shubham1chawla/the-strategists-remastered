@@ -42,7 +42,7 @@ export const Lobby = () => {
   );
 };
 
-const LobbyPlayers = (state: 'lobby' | 'active') => {
+const LobbyPlayers = (state: 'LOBBY' | 'ACTIVE') => {
   const { players } = useSelector((state: State) => state.lobby);
   const [passwords, setPasswords] = useState<Map<number, Password>>(new Map());
 
@@ -98,13 +98,13 @@ const LobbyPlayers = (state: 'lobby' | 'active') => {
           extra={
             <Tooltip
               title={
-                state === 'active'
+                state === 'ACTIVE'
                   ? `The Strategists in session, you can't kick ${player.username} now!`
                   : `Kick ${player.username} out!`
               }
             >
               <Button
-                disabled={state === 'active'}
+                disabled={state === 'ACTIVE'}
                 className="strategists-lobby__players__player__kick"
                 type="text"
                 shape="circle"
@@ -120,7 +120,7 @@ const LobbyPlayers = (state: 'lobby' | 'active') => {
           >
             <div className="strategists-lobby__players__player__content__info">
               <span>
-                {state === 'active' && player.state !== 'BANKRUPT' ? (
+                {state === 'ACTIVE' && player.state !== 'BANKRUPT' ? (
                   <Tag icon={<CrownOutlined />}>#{index + 1}</Tag>
                 ) : null}
                 <UserOutlined /> {player.username}
@@ -153,7 +153,7 @@ const LobbyPlayers = (state: 'lobby' | 'active') => {
   );
 };
 
-const AddPlayerForm = (state: 'lobby' | 'active') => {
+const AddPlayerForm = (state: 'LOBBY' | 'ACTIVE') => {
   const [form] = Form.useForm();
 
   const addPlayer = async ({ username, cash }: Player) => {
@@ -173,7 +173,7 @@ const AddPlayerForm = (state: 'lobby' | 'active') => {
     >
       <Tooltip
         title={
-          state === 'active'
+          state === 'ACTIVE'
             ? `The Strategists in session, you can't add players now!`
             : null
         }
@@ -185,7 +185,7 @@ const AddPlayerForm = (state: 'lobby' | 'active') => {
             rules={[{ required: true, message: `Username required!` }]}
           >
             <Input
-              disabled={state === 'active'}
+              disabled={state === 'ACTIVE'}
               placeholder="Username"
               prefix={<UserOutlined />}
             />
@@ -196,7 +196,7 @@ const AddPlayerForm = (state: 'lobby' | 'active') => {
             rules={[{ required: true, message: `Cash required!` }]}
           >
             <InputNumber
-              disabled={state === 'active'}
+              disabled={state === 'ACTIVE'}
               placeholder="Cash"
               min={MIN_CASH_AMOUNT}
               max={MAX_CASH_AMOUNT}
@@ -205,7 +205,7 @@ const AddPlayerForm = (state: 'lobby' | 'active') => {
           </Form.Item>
           <Form.Item noStyle>
             <Button
-              disabled={state === 'active'}
+              disabled={state === 'ACTIVE'}
               type="primary"
               htmlType="submit"
               icon={<UserAddOutlined />}
