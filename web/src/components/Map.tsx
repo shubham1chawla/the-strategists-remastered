@@ -120,7 +120,7 @@ const preparePlayers = (cy: Core, lands: Land[], players: Player[]): void => {
 
   // adding players
   players.forEach((player) => {
-    // Checking if player is active
+    // Checking if player is not bankrupt
     if (player.state === 'BANKRUPT') {
       return;
     }

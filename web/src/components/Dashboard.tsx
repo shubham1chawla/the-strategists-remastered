@@ -132,9 +132,9 @@ const Navigation = (type: 'admin' | 'player', dispatch: Dispatch<any>) => {
   const { state, players } = useSelector((state: State) => state.lobby);
 
   const start = async () => {
-    if (state === 'active') return;
+    if (state === 'ACTIVE') return;
     await axios.put('/api/game/start');
-    dispatch(LobbyActions.setState('active'));
+    dispatch(LobbyActions.setState('ACTIVE'));
   };
 
   return (
@@ -156,18 +156,18 @@ const Navigation = (type: 'admin' | 'player', dispatch: Dispatch<any>) => {
           title={
             !players.length
               ? 'Add players to start The Strategists!'
-              : state === 'active'
+              : state === 'ACTIVE'
               ? 'The Strategists in progress!'
               : 'Start The Strategists!'
           }
         >
           <Button
-            disabled={state === 'active' || !players.length}
+            disabled={state === 'ACTIVE' || !players.length}
             type="primary"
             htmlType="submit"
             onClick={() => start()}
           >
-            {state === 'active' ? <FireOutlined /> : <RocketFilled />}
+            {state === 'ACTIVE' ? <FireOutlined /> : <RocketFilled />}
           </Button>
         </Tooltip>
       ) : null}

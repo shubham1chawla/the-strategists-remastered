@@ -38,13 +38,13 @@ export interface Land {
 export interface LobbyState {
   players: Player[];
   lands: Land[];
-  state: 'lobby' | 'active';
+  state: 'LOBBY' | 'ACTIVE';
 }
 
 const initialState: LobbyState = {
   players: [],
   lands: [],
-  state: 'lobby',
+  state: 'LOBBY',
 };
 
 export const lobbyReducer = (

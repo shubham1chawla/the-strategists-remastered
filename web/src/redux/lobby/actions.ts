@@ -46,7 +46,7 @@ export namespace LobbyActions {
     };
   };
 
-  export const setState = (state: 'lobby' | 'active') => {
+  export const setState = (state: 'LOBBY' | 'ACTIVE') => {
     return {
       type: Types.SET_STATE,
       payload: state,
