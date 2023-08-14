@@ -11,6 +11,7 @@ import org.springframework.util.Assert;
 
 import com.strategists.game.aop.ActivityMapping;
 import com.strategists.game.entity.Activity.Type;
+import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
 import com.strategists.game.service.GameService;
@@ -44,9 +45,9 @@ public class GameServiceImpl implements GameService {
 
 	@Override
 	@ActivityMapping(Type.START)
-	public void start() {
+	public Player start() {
 		Assert.isTrue(playerService.getCount() > 0, "No players added!");
-		playerService.assignTurn();
+		return playerService.assignTurn();
 	}
 
 	@Override

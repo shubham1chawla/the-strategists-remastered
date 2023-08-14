@@ -47,7 +47,7 @@ export const parseActivity = (activity: Activity): ReactNode => {
     case 'RENT':
       return `${val1} paid ${val2} cash rent to ${val3} for ${val4}.`;
     case 'START':
-      return `${val1} started The Strategists!`;
+      return `${val1} started The Strategists! ${val2}'s turn to invest.`;
     case 'TRADE':
       return `${val1} traded ${val2}% of ${val3} with ${val4} for ${val5} cash.`;
     case 'TURN':

@@ -95,13 +95,13 @@ public class Player implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.player", cascade = CascadeType.ALL)
 	private List<PlayerLand> playerLands;
 
-	@ToString.Exclude
 	@JsonIgnore
+	@ToString.Exclude
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "targetPlayer", cascade = CascadeType.ALL)
 	private List<Rent> receivedRents;
 
-	@ToString.Exclude
 	@JsonIgnore
+	@ToString.Exclude
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "sourcePlayer", cascade = CascadeType.ALL)
 	private List<Rent> paidRents;
 
@@ -111,8 +111,8 @@ public class Player implements Serializable {
 	 * 
 	 * @return
 	 */
-	@JsonProperty("cash")
 	@Transient
+	@JsonProperty("cash")
 	public double getCash() {
 		val credits = baseCash + sum(receivedRents, Rent::getRentAmount);
 		val debits = sum(paidRents, Rent::getRentAmount) + sum(playerLands, PlayerLand::getBuyAmount);
