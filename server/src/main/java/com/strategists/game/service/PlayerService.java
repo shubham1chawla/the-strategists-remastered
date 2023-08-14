@@ -2,6 +2,7 @@ package com.strategists.game.service;
 
 import java.util.List;
 
+import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.Rent;
 
@@ -25,15 +26,9 @@ public interface PlayerService {
 
 	Player getCurrentPlayer();
 
-	Player movePlayer(int move);
+	Land movePlayer(Player player, int move);
 
-	/**
-	 * Assigns turn to the next player in sequence. The API returns the current and
-	 * previous player references for activity and notification purposes.
-	 * 
-	 * @return Current and previous player respectively.
-	 */
-	List<Player> nextPlayer();
+	Player nextPlayer(Player currentPlayer);
 
 	void invest(long playerId, long landId, double ownership);
 

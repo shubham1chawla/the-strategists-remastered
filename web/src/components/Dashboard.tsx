@@ -57,14 +57,12 @@ export const Dashboard = () => {
           dispatch(LobbyActions.patchPlayers(players));
 
           // Skipping turn if current player declared bankruptcy
-          if (
-            players.find(
-              (p: Player) => p.username === username && p.state === 'BANKRUPT'
-            )
-          ) {
-            axios.put('/api/game/next');
+          for (const p of players as Player[]) {
+            if (p.turn && p.username === username && p.state === 'BANKRUPT') {
+              axios.put('/api/game/next');
+              break;
+            }
           }
-
           break;
         }
         case 'INVEST': {

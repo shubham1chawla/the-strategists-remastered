@@ -1,8 +1,8 @@
 package com.strategists.game.service.impl;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -18,6 +18,7 @@ import org.springframework.util.Assert;
 
 import com.strategists.game.aop.ActivityMapping;
 import com.strategists.game.entity.Activity.Type;
+import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.Player.State;
 import com.strategists.game.entity.Rent;
@@ -133,42 +134,46 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Override
 	@ActivityMapping(Type.MOVE)
-	public Player movePlayer(int move) {
-		val player = getCurrentPlayer();
+	public Land movePlayer(Player player, int move) {
 		player.setIndex((player.getIndex() + move) % landService.getCount());
+		playerRepository.save(player);
 
 		log.info("Moved {} to index: {}", player.getUsername(), player.getIndex());
-		return playerRepository.save(player);
+		return landService.getLandByIndex(player.getIndex());
 	}
 
 	@Override
 	@ActivityMapping(Type.TURN)
-	public List<Player> nextPlayer() {
-		Assert.state(isTurnAssigned(), "No player has the turn!");
+	public Player nextPlayer(Player currentPlayer) {
+		Assert.state(currentPlayer.isTurn(),
+				currentPlayer.getUsername() + " should have the turn to find who's the next player!");
 
-		log.info("Assigning turn to the next player...");
+		log.info("Finding next player of {}", currentPlayer.getUsername());
 
-		val players = playerRepository.findByStateIn(Set.of(State.ACTIVE, State.JAIL));
-		Player prev = null;
-		Player curr = null;
-		int index = -1;
+		val players = playerRepository.findAll();
+		int i = players.indexOf(currentPlayer);
 
-		for (int i = 0; i < players.size(); i++) {
+		// Finding suitable player
+		do {
+			i = (i + 1) % players.size();
 			val player = players.get(i);
-			if (player.isTurn()) {
-				player.setTurn(false);
-				prev = playerRepository.save(player);
-				index = i;
-				break;
+
+			// Checking if next player is not bankrupt and not current player
+			if (player.isBankrupt() || Objects.equals(currentPlayer.getId(), player.getId())) {
+				continue;
 			}
-		}
 
-		curr = players.get(index + 1 < players.size() ? index + 1 : 0);
-		curr.setTurn(true);
-		curr = playerRepository.save(curr);
+			currentPlayer.setTurn(false);
+			player.setTurn(true);
+			playerRepository.saveAll(List.of(currentPlayer, player));
 
-		log.info("Assigned turn to {}.", curr.getUsername());
-		return List.of(curr, prev);
+			log.info("Assigned turn to {}.", player.getUsername());
+			return player;
+
+		} while (!Objects.equals(currentPlayer.getId(), players.get(i).getId()));
+
+		log.warn("No suitable next player found!");
+		return null;
 	}
 
 	@Override
