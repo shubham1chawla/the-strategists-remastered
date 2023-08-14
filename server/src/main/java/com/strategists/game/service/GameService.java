@@ -1,5 +1,7 @@
 package com.strategists.game.service;
 
+import com.strategists.game.entity.Player;
+
 public interface GameService {
 
 	enum State {
@@ -10,7 +12,7 @@ public interface GameService {
 
 	boolean isState(State state);
 
-	void start();
+	Player start();
 
 	void next();
 

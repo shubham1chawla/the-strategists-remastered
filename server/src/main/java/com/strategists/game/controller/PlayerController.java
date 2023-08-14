@@ -1,6 +1,7 @@
 package com.strategists.game.controller;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
@@ -18,7 +19,10 @@ import com.strategists.game.request.InvestmentRequest;
 import com.strategists.game.request.KickPlayerRequest;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.GameService.State;
+import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
+
+import lombok.val;
 
 @RestController
 @RequestMapping("/api/players")
@@ -29,6 +33,9 @@ public class PlayerController {
 
 	@Autowired
 	private PlayerService playerService;
+
+	@Autowired
+	private LandService landService;
 
 	@GetMapping
 	public List<Player> getPlayers() {
@@ -55,7 +62,14 @@ public class PlayerController {
 	@PostMapping("/{playerId}/lands")
 	public void invest(@PathVariable Long playerId, @RequestBody InvestmentRequest request) {
 		Assert.state(gameService.isState(State.ACTIVE), "You need an active game to buy land!");
-		playerService.invest(playerId, request.getLandId(), request.getOwnership());
+
+		val player = playerService.getCurrentPlayer();
+		Assert.state(Objects.equals(playerId, player.getId()), "Requesting player is not the current player!");
+
+		val land = landService.getLandByIndex(player.getIndex());
+		Assert.state(Objects.equals(land.getId(), request.getLandId()), "Current player is not at the requested land!");
+
+		playerService.invest(player, land, request.getOwnership());
 	}
 
 }

@@ -35,11 +35,6 @@ public class PlayerServiceImpl implements PlayerService {
 
 	private static final Random RANDOM = new Random();
 
-	/*
-	 * Since target player adds rent to its entity, we must refresh the source
-	 * player's entity to reflect financial details for the current thread.
-	 * Subsequent calls will reflect updated information regardless.
-	 */
 	@PersistenceContext
 	private EntityManager em;
 
@@ -112,7 +107,7 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	public void assignTurn() {
+	public Player assignTurn() {
 		Assert.state(!isTurnAssigned(), "Turn already assigned!");
 
 		log.info("Randomly assigning turn to a player...");
@@ -122,6 +117,7 @@ public class PlayerServiceImpl implements PlayerService {
 		playerRepository.save(player);
 
 		log.info("Assigned turn to {}.", player.getUsername());
+		return player;
 	}
 
 	@Override
@@ -177,20 +173,26 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
+	@Transactional
 	@ActivityMapping(Type.INVEST)
-	public void invest(long playerId, long landId, double ownership) {
-		val player = getCurrentPlayer();
-		Assert.state(player.getId().equals(playerId), "Requesting player is not the current player!");
-
-		val land = landService.getLandByIndex(player.getIndex());
-		Assert.state(land.getId().equals(landId), "Current player is not at the requested land!");
-
+	public void invest(Player player, Land land, double ownership) {
 		val buyAmount = land.getMarketValue() * (ownership / 100);
 		Assert.isTrue(land.getTotalOwnership() + ownership <= 100, "Can't buy more than 100% of a land!");
 		Assert.isTrue(player.getCash() > buyAmount, "You don't have enough cash to buy this land!");
 
 		player.addLand(land, ownership, buyAmount);
-		playerRepository.save(player);
+
+		/*
+		 * Somehow standard "save" method was not inserting the record right away. My
+		 * guess, since PlayerLand has complex Id situation, JPA is unable to predict
+		 * that it needs to insert/update the record. This behavior breaks refreshing of
+		 * land's entity. The "saveAndFlush" method forces JPA to insert/update the
+		 * record right away.
+		 */
+		playerRepository.saveAndFlush(player);
+
+		// Refreshing land's entity to reflect this investment
+		em.refresh(land);
 
 		log.info("Player {} invested in {}.", player.getUsername(), land.getName());
 	}

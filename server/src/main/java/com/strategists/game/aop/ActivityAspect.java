@@ -17,8 +17,6 @@ import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
 import com.strategists.game.repository.ActivityRepository;
-import com.strategists.game.service.LandService;
-import com.strategists.game.service.PlayerService;
 import com.strategists.game.service.UpdateService;
 import com.strategists.game.update.AbstractUpdatePayload;
 import com.strategists.game.update.BankruptcyUpdatePayload;
@@ -43,12 +41,6 @@ public class ActivityAspect {
 
 	@Autowired
 	private ActivityRepository activityRepository;
-
-	@Autowired
-	private PlayerService playerService;
-
-	@Autowired
-	private LandService landService;
 
 	@Autowired
 	private UpdateService updateService;
@@ -83,7 +75,7 @@ public class ActivityAspect {
 			payload = handleRentActivity(joinPoint.getArgs());
 			break;
 		case START:
-			payload = handleStartActivity();
+			payload = handleStartActivity(obj);
 			break;
 		case TURN:
 			payload = handleTurnActivity(obj, joinPoint.getArgs());
@@ -115,8 +107,9 @@ public class ActivityAspect {
 	}
 
 	private InvestmentUpdatePayload handleInvestActivity(Object... args) {
-		val curr = playerService.getCurrentPlayer();
-		val land = landService.getLandByIndex(curr.getIndex());
+		val player = (Player) args[0];
+		val land = (Land) args[1];
+		val ownership = (double) args[2];
 
 		/*
 		 * Updating all the players that are linked with this land. Each player's
@@ -126,7 +119,7 @@ public class ActivityAspect {
 		val players = land.getPlayerLands().stream().map(PlayerLand::getPlayer).toList();
 
 		// Creating activity for investment
-		val activity = activityRepository.save(Activity.ofInvest(curr.getUsername(), (double) args[2], land.getName()));
+		val activity = activityRepository.save(Activity.ofInvest(player.getUsername(), ownership, land.getName()));
 
 		return new InvestmentUpdatePayload(activity, land, players);
 	}
@@ -170,9 +163,11 @@ public class ActivityAspect {
 		return new RentUpdatePayload(activity, List.of(sourcePlayer, targetPlayer));
 	}
 
-	private StartUpdatePayload handleStartActivity() {
-		val activity = activityRepository.save(Activity.ofStart(adminUsername));
-		return new StartUpdatePayload(activity, playerService.getCurrentPlayer());
+	private StartUpdatePayload handleStartActivity(Object obj) {
+		val player = (Player) obj;
+
+		val activity = activityRepository.save(Activity.ofStart(adminUsername, player.getUsername()));
+		return new StartUpdatePayload(activity, player);
 	}
 
 	private TurnUpdatePayload handleTurnActivity(Object obj, Object... args) {

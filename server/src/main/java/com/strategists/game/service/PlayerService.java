@@ -22,7 +22,7 @@ public interface PlayerService {
 
 	boolean isTurnAssigned();
 
-	void assignTurn();
+	Player assignTurn();
 
 	Player getCurrentPlayer();
 
@@ -30,7 +30,7 @@ public interface PlayerService {
 
 	Player nextPlayer(Player currentPlayer);
 
-	void invest(long playerId, long landId, double ownership);
+	void invest(Player player, Land land, double ownership);
 
 	void payRent(Rent rent);
 
