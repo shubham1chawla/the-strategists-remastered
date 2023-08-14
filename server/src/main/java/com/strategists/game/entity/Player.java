@@ -127,8 +127,14 @@ public class Player implements Serializable {
 	 */
 	@Transient
 	public double getNetWorth() {
-		return (State.BANKRUPT.equals(state) ? 0d
-				: sum(playerLands, pl -> pl.getLand().getMarketValue() * (pl.getOwnership() / 100))) + getCash();
+		return (isBankrupt() ? 0d : sum(playerLands, pl -> pl.getLand().getMarketValue() * (pl.getOwnership() / 100)))
+				+ getCash();
+	}
+
+	@Transient
+	@JsonIgnore
+	public boolean isBankrupt() {
+		return State.BANKRUPT.equals(state);
 	}
 
 	public void addLand(Land land, double ownership, double buyAmount) {

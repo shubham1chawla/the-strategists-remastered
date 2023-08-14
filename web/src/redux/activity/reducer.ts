@@ -43,7 +43,7 @@ export const parseActivity = (activity: Activity): ReactNode => {
     case 'KICK':
       return `${val1} kicked ${val2} out!`;
     case 'MOVE':
-      return `${val1} moved to ${val2}.`;
+      return `${val1} travelled ${val2} steps and reached ${val3}.`;
     case 'RENT':
       return `${val1} paid ${val2} cash rent to ${val3} for ${val4}.`;
     case 'START':

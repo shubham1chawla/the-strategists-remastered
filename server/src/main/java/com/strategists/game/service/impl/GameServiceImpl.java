@@ -11,11 +11,9 @@ import org.springframework.util.Assert;
 
 import com.strategists.game.aop.ActivityMapping;
 import com.strategists.game.entity.Activity.Type;
-import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
 import com.strategists.game.service.GameService;
-import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 
 import lombok.val;
@@ -33,9 +31,6 @@ public class GameServiceImpl implements GameService {
 
 	@Autowired
 	private PlayerService playerService;
-
-	@Autowired
-	private LandService landService;
 
 	@Override
 	public State getState() {
@@ -58,20 +53,20 @@ public class GameServiceImpl implements GameService {
 	public void next() {
 
 		// Assigning turn to next player
-		playerService.nextPlayer();
+		val player = playerService.nextPlayer(playerService.getCurrentPlayer());
+		if (Objects.isNull(player)) {
+			return;
+		}
 
 		// Moving the current player to a new position
-		val player = playerService.movePlayer(RANDOM.nextInt(diceSize) + 1);
-		val land = landService.getLandByIndex(player.getIndex());
+		val land = playerService.movePlayer(player, RANDOM.nextInt(diceSize) + 1);
 
 		// Paying rent to players on current land
 		for (PlayerLand pl : new ArrayList<>(land.getPlayerLands())) {
 			val targetPlayer = pl.getPlayer();
 
 			// Avoiding self rent payment and bankrupt players
-			val isSelfTransfer = Objects.equals(targetPlayer.getId(), player.getId());
-			val isTargetPlayerBankrupt = Player.State.BANKRUPT.equals(targetPlayer.getState());
-			if (isSelfTransfer || isTargetPlayerBankrupt) {
+			if (Objects.equals(targetPlayer.getId(), player.getId()) || targetPlayer.isBankrupt()) {
 				continue;
 			}
 

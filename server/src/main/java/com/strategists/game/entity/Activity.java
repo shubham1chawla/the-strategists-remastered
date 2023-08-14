@@ -93,8 +93,8 @@ public class Activity implements Serializable {
 		return new Activity(Type.KICK, admin, player);
 	}
 
-	public static Activity ofMove(String player, String land) {
-		return new Activity(Type.MOVE, player, land);
+	public static Activity ofMove(String player, int move, String land) {
+		return new Activity(Type.MOVE, player, Integer.toString(move), land);
 	}
 
 	public static Activity ofRent(String payer, double amount, String payee, String land) {

@@ -2,6 +2,7 @@ package com.strategists.game.aop;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -61,7 +62,6 @@ public class ActivityAspect {
 			log.error("Unable to log & update activity of type: {}", mapping.value(), ex);
 			throw ex;
 		}
-		log.info("Logging & updating activity of type: {}", mapping.value());
 		AbstractUpdatePayload<?> payload = null;
 		switch (mapping.value()) {
 		case BANKRUPT:
@@ -77,7 +77,7 @@ public class ActivityAspect {
 			payload = handleKickPlayerActivity(joinPoint.getArgs());
 			break;
 		case MOVE:
-			payload = handleMoveActivity(obj);
+			payload = handleMoveActivity(obj, joinPoint.getArgs());
 			break;
 		case RENT:
 			payload = handleRentActivity(joinPoint.getArgs());
@@ -86,13 +86,16 @@ public class ActivityAspect {
 			payload = handleStartActivity();
 			break;
 		case TURN:
-			payload = handleTurnActivity(obj);
+			payload = handleTurnActivity(obj, joinPoint.getArgs());
 			break;
 		default:
 			log.warn("Unsupported Activity Type: {}", mapping.value());
 			return obj;
 		}
-		updateService.sendUpdate(payload);
+		if (!Objects.isNull(payload)) {
+			log.info("Logging & updating activity of type: {}", mapping.value());
+			updateService.sendUpdate(payload);
+		}
 		return obj;
 	}
 
@@ -142,12 +145,13 @@ public class ActivityAspect {
 		return new KickPlayerUpdatePayload(activity, (String) args[0]);
 	}
 
-	private MoveUpdatePayload handleMoveActivity(Object obj) {
-		val player = (Player) obj;
-		val land = landService.getLandByIndex(player.getIndex());
+	private MoveUpdatePayload handleMoveActivity(Object obj, Object... args) {
+		val player = (Player) args[0];
+		val move = (int) args[1];
+		val land = (Land) obj;
 
 		// Creating activity for move
-		val activity = activityRepository.save(Activity.ofMove(player.getUsername(), land.getName()));
+		val activity = activityRepository.save(Activity.ofMove(player.getUsername(), move, land.getName()));
 
 		return new MoveUpdatePayload(activity, player);
 	}
@@ -171,10 +175,13 @@ public class ActivityAspect {
 		return new StartUpdatePayload(activity, playerService.getCurrentPlayer());
 	}
 
-	private TurnUpdatePayload handleTurnActivity(Object obj) {
-		val players = (List<?>) obj;
-		val curr = (Player) players.get(0);
-		val prev = (Player) players.get(1);
+	private TurnUpdatePayload handleTurnActivity(Object obj, Object... args) {
+		if (Objects.isNull(obj)) {
+			return null;
+		}
+
+		val curr = (Player) obj;
+		val prev = (Player) args[0];
 
 		// Creating activity for turn
 		val activity = activityRepository.save(Activity.ofTurn(prev.getUsername(), curr.getUsername()));

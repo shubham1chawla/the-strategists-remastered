@@ -92,7 +92,7 @@ public class Land implements Serializable {
 	 */
 	@Transient
 	public double getTotalOwnership() {
-		return sum(playerLands, pl -> Player.State.BANKRUPT.equals(pl.getPlayer().getState()) ? 0d : pl.getOwnership());
+		return sum(playerLands, pl -> pl.getPlayer().isBankrupt() ? 0d : pl.getOwnership());
 	}
 
 	/**

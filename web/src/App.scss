@@ -161,9 +161,9 @@ h1.strategists-logo {
     width: 100%;
 
     .ant-tag {
-      position: relative;
-      top: 10%;
-      left: 80%;
+      position: absolute;
+      top: var(--base-unit-size);
+      right: var(--base-unit-size);
       color: var(--text-color);
       background-color: var(--dark-color);
     }
