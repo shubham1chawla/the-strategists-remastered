@@ -92,17 +92,17 @@ public class Player implements Serializable {
 	@ToString.Exclude
 	@JsonProperty("lands")
 	@JsonIgnoreProperties({ "pk", "player", "land", "playerId" })
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.player", cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.player", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<PlayerLand> playerLands;
 
 	@JsonIgnore
 	@ToString.Exclude
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "targetPlayer", cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "targetPlayer", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Rent> receivedRents;
 
 	@JsonIgnore
 	@ToString.Exclude
-	@OneToMany(fetch = FetchType.LAZY, mappedBy = "sourcePlayer", cascade = CascadeType.ALL)
+	@OneToMany(fetch = FetchType.LAZY, mappedBy = "sourcePlayer", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Rent> paidRents;
 
 	/**

@@ -8,9 +8,9 @@ import lombok.Getter;
 
 @Getter
 @EqualsAndHashCode(callSuper = true)
-public class JoinPlayerUpdatePayload extends AbstractUpdatePayload<Player> {
+public class JoinUpdatePayload extends AbstractUpdatePayload<Player> {
 
-	public JoinPlayerUpdatePayload(Activity activity, Player player) {
+	public JoinUpdatePayload(Activity activity, Player player) {
 		super(activity, player);
 	}
 

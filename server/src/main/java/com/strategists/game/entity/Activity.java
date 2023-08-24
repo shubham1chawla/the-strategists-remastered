@@ -23,7 +23,7 @@ public class Activity implements Serializable {
 	private static final long serialVersionUID = -6960667863521865520L;
 
 	public enum Type {
-		BANKRUPT, BONUS, CHEAT, EVENT, INVEST, JAIL, JOIN, KICK, MOVE, RENT, START, TRADE, TURN;
+		BANKRUPTCY, BONUS, CHEAT, EVENT, INVEST, JAIL, JOIN, KICK, MOVE, RENT, RESET, START, TRADE, TURN;
 	}
 
 	@Id
@@ -61,8 +61,8 @@ public class Activity implements Serializable {
 		}
 	}
 
-	public static Activity ofBankrupt(String username) {
-		return new Activity(Type.BANKRUPT, username);
+	public static Activity ofBankruptcy(String username) {
+		return new Activity(Type.BANKRUPTCY, username);
 	}
 
 	public static Activity ofBonus(String admin, String player, double amount) {

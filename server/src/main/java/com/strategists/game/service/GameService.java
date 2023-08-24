@@ -15,5 +15,7 @@ public interface GameService {
 	Player start();
 
 	void next();
+	
+	void reset();
 
 }

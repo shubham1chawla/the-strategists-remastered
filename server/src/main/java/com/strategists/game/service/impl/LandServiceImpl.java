@@ -1,18 +1,17 @@
 package com.strategists.game.service.impl;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.strategists.game.entity.Event;
 import com.strategists.game.entity.Land;
 import com.strategists.game.repository.LandRepository;
 import com.strategists.game.service.EventService;
 import com.strategists.game.service.LandService;
 
+import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
@@ -32,7 +31,7 @@ public class LandServiceImpl implements LandService {
 
 	@Override
 	public Land getLandById(long id) {
-		Optional<Land> opt = landRepository.findById(id);
+		val opt = landRepository.findById(id);
 		Assert.isTrue(opt.isPresent(), "No land found with ID: " + id);
 
 		return opt.get();
@@ -50,16 +49,27 @@ public class LandServiceImpl implements LandService {
 
 	@Override
 	public void hostEvent(long landId, long eventId, int life, int level) {
-		final Optional<Land> opt = landRepository.findById(landId);
+		val opt = landRepository.findById(landId);
 		Assert.isTrue(opt.isPresent(), "No land associated with ID: " + landId);
 
-		final Land land = opt.get();
-		final Event event = eventService.getEventById(eventId);
+		val land = opt.get();
+		val event = eventService.getEventById(eventId);
 
 		land.addEvent(event, life, level);
 		landRepository.save(land);
 
 		log.info("Event {} hosted on {}.", event.getName(), land.getName());
+	}
+
+	@Override
+	public void resetLands() {
+		val lands = getLands();
+		for (Land land : lands) {
+			land.getLandEvents().clear();
+		}
+
+		landRepository.saveAll(lands);
+		log.info("Reset lands completed");
 	}
 
 }

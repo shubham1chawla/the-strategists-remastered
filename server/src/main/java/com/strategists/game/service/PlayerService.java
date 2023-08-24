@@ -36,4 +36,6 @@ public interface PlayerService {
 
 	void bankruptPlayer(Player player);
 
+	void resetPlayers();
+
 }

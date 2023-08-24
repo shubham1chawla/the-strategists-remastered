@@ -2,6 +2,7 @@ package com.strategists.game.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,6 +33,11 @@ public class GameController {
 	public void next() {
 		Assert.state(gameService.isState(State.ACTIVE), "Game not started yet!");
 		gameService.next();
+	}
+
+	@DeleteMapping("/reset")
+	public void reset() {
+		gameService.reset();
 	}
 
 }
