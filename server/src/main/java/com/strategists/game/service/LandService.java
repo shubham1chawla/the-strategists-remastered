@@ -16,4 +16,6 @@ public interface LandService {
 
 	void hostEvent(long landId, long eventId, int life, int level);
 
+	void resetLands();
+
 }

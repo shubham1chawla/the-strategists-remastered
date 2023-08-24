@@ -16,10 +16,11 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.strategists.game.aop.ActivityMapping;
 import com.strategists.game.entity.Activity.Type;
+import com.strategists.game.activity.ActivityMapping;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
+import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Player.State;
 import com.strategists.game.entity.Rent;
 import com.strategists.game.repository.PlayerRepository;
@@ -220,12 +221,38 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	@ActivityMapping(Type.BANKRUPT)
+	@ActivityMapping(Type.BANKRUPTCY)
 	public void bankruptPlayer(Player player) {
 		player.setState(State.BANKRUPT);
 		playerRepository.save(player);
 
 		log.info("Updated {}'s state to {}", player.getUsername(), player.getState());
+	}
+
+	@Override
+	public void resetPlayers() {
+		val players = getPlayers();
+		for (Player player : players) {
+
+			// Removing all the investments
+			for (PlayerLand pl : player.getPlayerLands()) {
+				pl.getLand().getPlayerLands().clear();
+			}
+			player.getPlayerLands().clear();
+
+			// Removing all the rents
+			player.getReceivedRents().clear();
+			player.getPaidRents().clear();
+
+			// Reseting other information
+			player.setIndex(0);
+			player.setTurn(false);
+			player.setState(State.ACTIVE);
+			player.setRemainingJailLife(0);
+		}
+
+		playerRepository.saveAll(players);
+		log.info("Reset players completed");
 	}
 
 }

@@ -1,4 +1,4 @@
-package com.strategists.game.aop;
+package com.strategists.game.activity;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

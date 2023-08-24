@@ -51,7 +51,7 @@ export const Dashboard = () => {
     updates.onmessage = (message: MessageEvent<any>) => {
       const { type, data, activity } = JSON.parse(message.data);
       switch (type) {
-        case 'BANKRUPT': {
+        case 'BANKRUPTCY': {
           const { lands, players } = data;
           dispatch(LobbyActions.patchLands(lands));
           dispatch(LobbyActions.patchPlayers(players));

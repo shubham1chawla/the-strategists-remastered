@@ -7,9 +7,9 @@ import lombok.Getter;
 
 @Getter
 @EqualsAndHashCode(callSuper = true)
-public class KickPlayerUpdatePayload extends AbstractUpdatePayload<String> {
+public class KickUpdatePayload extends AbstractUpdatePayload<String> {
 
-	public KickPlayerUpdatePayload(Activity activity, String username) {
+	public KickUpdatePayload(Activity activity, String username) {
 		super(activity, username);
 	}
 

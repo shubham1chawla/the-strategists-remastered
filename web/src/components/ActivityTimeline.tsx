@@ -29,7 +29,7 @@ export const ActivityTimeline = () => {
 
 const getIcon = ({ type }: Activity): ReactNode | undefined => {
   switch (type) {
-    case 'BANKRUPT':
+    case 'BANKRUPTCY':
       return <Bankruptcy />;
     case 'INVEST':
       return <RiseOutlined />;
