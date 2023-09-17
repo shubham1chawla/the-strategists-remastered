@@ -11,6 +11,7 @@ import org.aspectj.lang.annotation.Aspect;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.strategists.game.activity.handler.ActivityHandler;
 import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.service.UpdateService;
@@ -50,12 +51,18 @@ public class ActivityAspect {
 		val handler = handlers.get(mapping.value());
 		val optional = handler.apply(obj, joinPoint.getArgs());
 
-		optional.ifPresent(payload -> {
-			log.info("Logging & updating activity of type: {}", mapping.value());
-			activityRepository.save(payload.getActivity());
-			updateService.sendUpdate(payload);
-		});
+		// Checking if optional is present
+		if (optional.isEmpty()) {
+			return obj;
+		}
+		val payload = optional.get();
 
+		if (handler.shouldPersistActivity()) {
+			activityRepository.save(payload.getActivity());
+		}
+		updateService.sendUpdate(payload);
+
+		log.info("Handled activity of type: {}", mapping.value());
 		return obj;
 	}
 

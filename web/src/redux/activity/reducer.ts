@@ -13,6 +13,7 @@ export interface Activity {
     | 'KICK'
     | 'MOVE'
     | 'RENT'
+    | 'RESET'
     | 'START'
     | 'TRADE'
     | 'TURN';
@@ -46,6 +47,8 @@ export const parseActivity = (activity: Activity): ReactNode => {
       return `${val1} travelled ${val2} steps and reached ${val3}.`;
     case 'RENT':
       return `${val1} paid ${val2} cash rent to ${val3} for ${val4}.`;
+    case 'RESET':
+      return `${val1} resetted The Strategists!`;
     case 'START':
       return `${val1} started The Strategists! ${val2}'s turn to invest.`;
     case 'TRADE':

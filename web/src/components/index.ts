@@ -9,4 +9,5 @@ export * from './Logo';
 export * from './Map';
 export * from './MapModal';
 export * from './NotFound';
+export * from './ResetModal';
 export * from './Stats';

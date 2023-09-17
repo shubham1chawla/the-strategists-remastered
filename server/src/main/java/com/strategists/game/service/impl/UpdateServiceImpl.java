@@ -9,8 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.strategists.game.activity.payload.AbstractUpdatePayload;
 import com.strategists.game.service.UpdateService;
-import com.strategists.game.update.AbstractUpdatePayload;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;

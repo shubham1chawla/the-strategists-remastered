@@ -4,7 +4,7 @@ import java.util.function.Predicate;
 
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.strategists.game.update.AbstractUpdatePayload;
+import com.strategists.game.activity.payload.AbstractUpdatePayload;
 
 public interface UpdateService {
 
