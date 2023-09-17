@@ -1,15 +1,15 @@
-package com.strategists.game.activity;
+package com.strategists.game.activity.handler;
 
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
+import com.strategists.game.activity.payload.InvestUpdatePayload;
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
-import com.strategists.game.update.InvestUpdatePayload;
 
 import lombok.val;
 

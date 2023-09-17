@@ -1,19 +1,19 @@
-package com.strategists.game.activity;
+package com.strategists.game.activity.handler;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
+import com.strategists.game.activity.payload.RentUpdatePayload;
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.entity.Rent;
-import com.strategists.game.update.RentUpdatePayload;
 
 import lombok.val;
 
 @Component
-public class RendActivityHandler implements ActivityHandler<RentUpdatePayload> {
+public class RentActivityHandler implements ActivityHandler<RentUpdatePayload> {
 
 	@Override
 	public Optional<RentUpdatePayload> apply(Object obj, Object[] args) {

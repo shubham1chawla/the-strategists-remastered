@@ -1,7 +1,16 @@
-import { Dispatch, useEffect } from 'react';
+import { Dispatch, useEffect, useState } from 'react';
+import { AnyAction } from 'redux';
 import { useNavigate } from 'react-router-dom';
 import { Button, Col, Row, Tabs, Tooltip, notification } from 'antd';
-import { Actions, ActivityTimeline, Logo, Lobby, Map, Stats } from '.';
+import {
+  Actions,
+  ActivityTimeline,
+  Logo,
+  Lobby,
+  Map,
+  Stats,
+  ResetModal,
+} from '.';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   ActivityActions,
@@ -11,7 +20,11 @@ import {
   UserActions,
   parseActivity,
 } from '../redux';
-import { FireOutlined, LogoutOutlined, RocketFilled } from '@ant-design/icons';
+import {
+  LogoutOutlined,
+  PlayCircleFilled,
+  StopFilled,
+} from '@ant-design/icons';
 import axios from 'axios';
 
 const getCalls = {
@@ -19,6 +32,12 @@ const getCalls = {
   '/api/activities': ActivityActions.setActivities, // Updating players
   '/api/lands': LobbyActions.setLands, // Updating lands
   '/api/game': LobbyActions.setState, // Updating state
+};
+
+const syncGameStates = (dispatch: Dispatch<AnyAction>) => {
+  for (const [api, action] of Object.entries(getCalls)) {
+    axios.get(api).then(({ data }) => dispatch(action(data)));
+  }
 };
 
 export const Dashboard = () => {
@@ -40,9 +59,7 @@ export const Dashboard = () => {
     }
 
     // Syncing game's state
-    for (const [api, action] of Object.entries(getCalls)) {
-      axios.get(api).then(({ data }) => dispatch(action(data)));
-    }
+    syncGameStates(dispatch);
 
     // Setting up SSE for updates
     const updates = new EventSource(
@@ -82,6 +99,9 @@ export const Dashboard = () => {
           break;
         case 'RENT':
           dispatch(LobbyActions.patchPlayers(data));
+          break;
+        case 'RESET':
+          syncGameStates(dispatch);
           break;
         case 'START':
           dispatch(LobbyActions.patchPlayers([data]));
@@ -128,11 +148,17 @@ export const Dashboard = () => {
 
 const Navigation = (type: 'admin' | 'player', dispatch: Dispatch<any>) => {
   const { state, players } = useSelector((state: State) => state.lobby);
+  const [showResetModal, setShowResetModal] = useState(false);
 
   const start = async () => {
     if (state === 'ACTIVE') return;
-    await axios.put('/api/game/start');
+    await axios.post('/api/game');
     dispatch(LobbyActions.setState('ACTIVE'));
+  };
+
+  const reset = () => {
+    if (state === 'LOBBY') return;
+    setShowResetModal(true);
   };
 
   return (
@@ -155,20 +181,23 @@ const Navigation = (type: 'admin' | 'player', dispatch: Dispatch<any>) => {
             !players.length
               ? 'Add players to start The Strategists!'
               : state === 'ACTIVE'
-              ? 'The Strategists in progress!'
+              ? 'Reset The Strategists!'
               : 'Start The Strategists!'
           }
         >
           <Button
-            disabled={state === 'ACTIVE' || !players.length}
             type="primary"
             htmlType="submit"
-            onClick={() => start()}
+            onClick={() => (state === 'ACTIVE' ? reset() : start())}
           >
-            {state === 'ACTIVE' ? <FireOutlined /> : <RocketFilled />}
+            {state === 'LOBBY' ? <PlayCircleFilled /> : <StopFilled />}
           </Button>
         </Tooltip>
       ) : null}
+      <ResetModal
+        open={showResetModal}
+        onCancel={() => setShowResetModal(false)}
+      />
     </nav>
   );
 };

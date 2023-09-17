@@ -1,4 +1,4 @@
-package com.strategists.game.update;
+package com.strategists.game.activity.payload;
 
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Player;

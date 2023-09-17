@@ -71,7 +71,7 @@ const renderActionButtons = (investText: string, onClick: () => void) => (
       </Button>
       <Button
         icon={<StepForwardOutlined />}
-        onClick={() => axios.put('/api/game/next')}
+        onClick={() => axios.put('/api/game')}
       >
         Skip
       </Button>

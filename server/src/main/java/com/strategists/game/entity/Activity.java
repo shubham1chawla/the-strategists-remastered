@@ -101,6 +101,10 @@ public class Activity implements Serializable {
 		return new Activity(Type.RENT, payer, Double.toString(amount), payee, land);
 	}
 
+	public static Activity ofReset(String admin) {
+		return new Activity(Type.RESET, admin);
+	}
+
 	public static Activity ofStart(String admin, String player) {
 		return new Activity(Type.START, admin, player);
 	}

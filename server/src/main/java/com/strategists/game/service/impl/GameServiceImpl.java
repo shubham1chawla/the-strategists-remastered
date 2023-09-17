@@ -9,11 +9,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.activity.ActivityMapping;
+import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
+import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
@@ -36,6 +37,9 @@ public class GameServiceImpl implements GameService {
 
 	@Autowired
 	private LandService landService;
+
+	@Autowired
+	private ActivityRepository activityRepository;
 
 	@Override
 	public State getState() {
@@ -90,8 +94,14 @@ public class GameServiceImpl implements GameService {
 	@Override
 	@ActivityMapping(Type.RESET)
 	public void reset() {
+		// Resetting players
 		playerService.resetPlayers();
+
+		// Reseting lands
 		landService.resetLands();
+
+		// Reseting activities
+		activityRepository.deleteAll();
 	}
 
 }

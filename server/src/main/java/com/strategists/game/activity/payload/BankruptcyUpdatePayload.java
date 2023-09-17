@@ -1,4 +1,4 @@
-package com.strategists.game.update;
+package com.strategists.game.activity.payload;
 
 import java.util.Collection;
 import java.util.Map;

@@ -40,6 +40,8 @@ export const App = () => {
           colorTextDisabled: CssVariables['--accent-color'],
           colorBorder: CssVariables['--accent-color'],
           colorBgContainer: 'transparent',
+          colorErrorBg: 'transparent',
+          colorWarningBg: 'transparent',
           colorText: CssVariables['--text-color'],
           colorTextPlaceholder: CssVariables['--text-color'],
           fontFamily: CssVariables['--font-family'],
