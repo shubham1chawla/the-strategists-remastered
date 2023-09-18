@@ -1,6 +1,7 @@
 export * from './Actions';
 export * from './ActivityTimeline';
 export * from './Bankruptcy';
+export * from './Confetti';
 export * from './Dashboard';
 export * from './InvestModal';
 export * from './Lobby';
@@ -11,3 +12,4 @@ export * from './MapModal';
 export * from './NotFound';
 export * from './ResetModal';
 export * from './Stats';
+export * from './WinModal';

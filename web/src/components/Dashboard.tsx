@@ -10,6 +10,7 @@ import {
   Map,
   Stats,
   ResetModal,
+  WinModal,
 } from '.';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -42,6 +43,7 @@ const syncGameStates = (dispatch: Dispatch<AnyAction>) => {
 
 export const Dashboard = () => {
   const { username, type } = useSelector((state: State) => state.user);
+  const [showWinModal, setShowWinModal] = useState(false);
   const [api, contextHolder] = notification.useNotification();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -82,6 +84,10 @@ export const Dashboard = () => {
           }
           break;
         }
+        case 'END': {
+          setShowWinModal(true);
+          break;
+        }
         case 'INVEST': {
           const { land, players } = data;
           dispatch(LobbyActions.patchLands([land]));
@@ -101,6 +107,7 @@ export const Dashboard = () => {
           dispatch(LobbyActions.patchPlayers(data));
           break;
         case 'RESET':
+          setShowWinModal(false);
           syncGameStates(dispatch);
           break;
         case 'START':
@@ -136,12 +143,13 @@ export const Dashboard = () => {
       <Row className="strategists-dashboard strategists-wallpaper">
         <Col className="strategists-glossy" flex="30%">
           {Navigation(type, dispatch)}
-          {type === 'admin' ? AdminPanel() : PlayerPanel()}
+          {type === 'admin' ? AdminPanel() : PlayerPanel(username)}
         </Col>
         <Col flex="70%">
           <Map />
         </Col>
       </Row>
+      <WinModal open={showWinModal} onCancel={() => setShowWinModal(false)} />
     </>
   );
 };
@@ -231,10 +239,13 @@ const AdminPanel = () => {
   );
 };
 
-const PlayerPanel = () => {
+const PlayerPanel = (username?: string) => {
+  const { players } = useSelector((state: State) => state.lobby);
+  const player = players.find((p) => p.username === username);
+
   return (
     <div className="strategists-player-panel">
-      <Stats />
+      <Stats player={player} />
       <ActivityTimeline />
       <Actions />
     </div>

@@ -3,6 +3,7 @@ import { Timeline } from 'antd';
 import { Activity, State, parseActivity } from '../redux';
 import {
   CheckOutlined,
+  CrownOutlined,
   DoubleRightOutlined,
   FallOutlined,
   FireOutlined,
@@ -31,6 +32,8 @@ const getIcon = ({ type }: Activity): ReactNode | undefined => {
   switch (type) {
     case 'BANKRUPTCY':
       return <Bankruptcy />;
+    case 'END':
+      return <CrownOutlined />;
     case 'INVEST':
       return <RiseOutlined />;
     case 'JOIN':
