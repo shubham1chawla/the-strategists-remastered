@@ -28,6 +28,10 @@ import {
 } from '@ant-design/icons';
 import axios from 'axios';
 
+/**
+ * -----  UTILITIES DEFINED BELOW  -----
+ */
+
 const getCalls = {
   '/api/players': LobbyActions.setPlayers, // Updating players
   '/api/activities': ActivityActions.setActivities, // Updating players
@@ -41,8 +45,15 @@ const syncGameStates = (dispatch: Dispatch<AnyAction>) => {
   }
 };
 
+/**
+ * -----  DASHBOARD COMPONENT BELOW  -----
+ */
+
 export const Dashboard = () => {
-  const { username, type } = useSelector((state: State) => state.user);
+  const { user, lobby } = useSelector((state: State) => state);
+  const { username, type } = user;
+  const { players, state } = lobby;
+
   const [showWinModal, setShowWinModal] = useState(false);
   const [api, contextHolder] = notification.useNotification();
   const dispatch = useDispatch();
@@ -137,13 +148,26 @@ export const Dashboard = () => {
     };
   }, [dispatch, navigate, username, api]);
 
+  // Determining dashboard's panel component
+  const getPanel = () => {
+    if (type === 'admin') return <AdminPanel />;
+    const player = players.find((player) => player.username === username);
+    if (!player) return null;
+    return <PlayerPanel player={player} />;
+  };
+
   return (
     <>
       {contextHolder}
       <Row className="strategists-dashboard strategists-wallpaper">
         <Col className="strategists-glossy" flex="30%">
-          {Navigation(type, dispatch)}
-          {type === 'admin' ? AdminPanel() : PlayerPanel(username)}
+          <Navigation
+            dispatch={dispatch}
+            players={players}
+            state={state}
+            type={type}
+          />
+          {getPanel()}
         </Col>
         <Col flex="70%">
           <Map />
@@ -154,8 +178,19 @@ export const Dashboard = () => {
   );
 };
 
-const Navigation = (type: 'admin' | 'player', dispatch: Dispatch<any>) => {
-  const { state, players } = useSelector((state: State) => state.lobby);
+/**
+ * -----  NAVIGATION COMPONENT BELOW  -----
+ */
+
+interface NavigationProps {
+  type: 'admin' | 'player';
+  dispatch: Dispatch<AnyAction>;
+  state: 'ACTIVE' | 'LOBBY';
+  players: Player[];
+}
+
+const Navigation = (props: NavigationProps) => {
+  const { type, dispatch, state, players } = props;
   const [showResetModal, setShowResetModal] = useState(false);
 
   const start = async () => {
@@ -210,6 +245,10 @@ const Navigation = (type: 'admin' | 'player', dispatch: Dispatch<any>) => {
   );
 };
 
+/**
+ * -----  ADMIN PANEL COMPONENT BELOW  -----
+ */
+
 const AdminPanel = () => {
   return (
     <Tabs
@@ -239,10 +278,16 @@ const AdminPanel = () => {
   );
 };
 
-const PlayerPanel = (username?: string) => {
-  const { players } = useSelector((state: State) => state.lobby);
-  const player = players.find((p) => p.username === username);
+/**
+ * -----  PLAYER PANEL COMPONENT BELOW  -----
+ */
 
+interface PlayerPanelProps {
+  player: Player;
+}
+
+const PlayerPanel = (props: PlayerPanelProps) => {
+  const { player } = props;
   return (
     <div className="strategists-player-panel">
       <Stats player={player} />

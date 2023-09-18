@@ -5,11 +5,6 @@ export interface PlayerLand {
   playerId?: number;
   ownership: number;
   buyAmount: number;
-
-  // fields for frontend state linking only
-  // these are not part of backend entities
-  land?: Land;
-  player?: Player;
 }
 
 export interface Player {
