@@ -146,6 +146,12 @@ h1.strategists-logo {
     );
   }
 
+  .strategists-stats {
+    &__username {
+      padding: 0 var(--ant-lg-padding);
+    }
+  }
+
   .strategists-actions {
     box-sizing: border-box;
     padding: var(--ant-lg-padding);
@@ -167,10 +173,6 @@ h1.strategists-logo {
       color: var(--text-color);
       background-color: var(--dark-color);
     }
-  }
-
-  &__username {
-    padding: 0 var(--ant-lg-padding);
   }
 
   .ant-divider {

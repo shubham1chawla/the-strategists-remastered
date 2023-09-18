@@ -6,6 +6,7 @@ export interface Activity {
     | 'BANKRUPTCY'
     | 'BONUS'
     | 'CHEAT'
+    | 'END'
     | 'EVENT'
     | 'INVEST'
     | 'JAIL'
@@ -33,6 +34,8 @@ export const parseActivity = (activity: Activity): ReactNode => {
       return `${val1} gave ${val2} a bonus of ${val3} cash after completing one turn.`;
     case 'CHEAT':
       return `${val1} applied a cheat!`;
+    case 'END':
+      return `${val1} won The Strategists!`;
     case 'EVENT':
       return `${val1} caused ${val2} at ${val3} for ${val4} turns!`;
     case 'INVEST':

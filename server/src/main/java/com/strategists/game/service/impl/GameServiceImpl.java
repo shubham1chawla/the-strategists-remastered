@@ -20,7 +20,9 @@ import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 
 import lombok.val;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 @Service
 public class GameServiceImpl implements GameService {
 
@@ -59,12 +61,17 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public void next() {
+	@ActivityMapping(Type.END)
+	public Player next() {
+
+		// Current player will be the previous player now
+		val prevPlayer = playerService.getCurrentPlayer();
 
 		// Assigning turn to next player
-		val player = playerService.nextPlayer(playerService.getCurrentPlayer());
+		val player = playerService.nextPlayer(prevPlayer);
 		if (Objects.isNull(player)) {
-			return;
+			log.info("Player {} is the winner", prevPlayer.getUsername());
+			return prevPlayer;
 		}
 
 		// Moving the current player to a new position
@@ -89,6 +96,8 @@ public class GameServiceImpl implements GameService {
 			playerService.bankruptPlayer(player);
 		}
 
+		// No winner declared
+		return null;
 	}
 
 	@Override

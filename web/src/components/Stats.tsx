@@ -6,13 +6,17 @@ import {
   WalletOutlined,
 } from '@ant-design/icons';
 import { Card, Col, Divider, Row, Statistic, Tag } from 'antd';
-import { useSelector } from 'react-redux';
-import { State } from '../redux';
+import { Player } from '../redux';
 
-export const Stats = () => {
-  const { players } = useSelector((state: State) => state.lobby);
-  const { username } = useSelector((state: State) => state.user);
-  const player = players.find((p) => p.username === username);
+export interface StatsProps {
+  player: Player;
+}
+
+export const Stats = (props: Partial<StatsProps>) => {
+  const { player } = props;
+  if (!player) {
+    return null;
+  }
 
   return (
     <div className="strategists-stats">

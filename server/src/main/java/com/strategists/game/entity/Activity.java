@@ -23,7 +23,7 @@ public class Activity implements Serializable {
 	private static final long serialVersionUID = -6960667863521865520L;
 
 	public enum Type {
-		BANKRUPTCY, BONUS, CHEAT, EVENT, INVEST, JAIL, JOIN, KICK, MOVE, RENT, RESET, START, TRADE, TURN;
+		BANKRUPTCY, BONUS, CHEAT, END, EVENT, INVEST, JAIL, JOIN, KICK, MOVE, RENT, RESET, START, TRADE, TURN;
 	}
 
 	@Id
@@ -71,6 +71,10 @@ public class Activity implements Serializable {
 
 	public static Activity ofCheat(String player) {
 		return new Activity(Type.CHEAT, player);
+	}
+
+	public static Activity ofEnd(String player) {
+		return new Activity(Type.END, player);
 	}
 
 	public static Activity ofEvent(String admin, String event, String land, int turns) {
