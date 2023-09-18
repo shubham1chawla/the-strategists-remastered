@@ -8,7 +8,12 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CssVariables } from '../App';
 import { Land, Player, State } from '../redux';
-import { MapModal, MapModalProps } from '.';
+import {
+  LandInvestmentModal,
+  LandInvestmentModalProps,
+  PlayerPortfolioModal,
+  PlayerPortfolioModalProps,
+} from '.';
 
 const prepareStyles = (): Stylesheet[] => {
   return [
@@ -196,7 +201,10 @@ const prepareMap = (cy: Core, lands: Land[], players: Player[]): void => {
 export const Map = () => {
   const { players, lands } = useSelector((state: State) => state.lobby);
   const container = useRef<HTMLDivElement>(null);
-  const [props, setProps] = useState<MapModalProps | null>(null);
+  const [landInvestmentModalProps, setLandInvestmentModalProps] =
+    useState<LandInvestmentModalProps | null>(null);
+  const [playerPortfolioModalProps, setPlayerPortfolioModalProps] =
+    useState<PlayerPortfolioModalProps | null>(null);
 
   // memoizing styles since they won't change
   const style = useMemo(prepareStyles, []);
@@ -221,11 +229,19 @@ export const Map = () => {
     // adding onclick hook for map modal
     cy.on('click', 'node', (event: EventObjectNode) => {
       const { player, land } = event.target.data();
-      setProps({
-        type: player ? 'player' : 'land',
-        id: player?.id || land?.id,
-        onCancel: () => setProps(null),
-      });
+      if (player) {
+        setPlayerPortfolioModalProps({
+          open: !!player,
+          onCancel: () => setPlayerPortfolioModalProps(null),
+          player,
+        });
+      } else {
+        setLandInvestmentModalProps({
+          open: !!land,
+          onCancel: () => setLandInvestmentModalProps(null),
+          land,
+        });
+      }
     });
 
     // setting up map elements
@@ -234,7 +250,8 @@ export const Map = () => {
 
   return (
     <>
-      <MapModal {...props} />
+      <LandInvestmentModal {...landInvestmentModalProps} />
+      <PlayerPortfolioModal {...playerPortfolioModalProps} />
       <div ref={container} className="strategists-map"></div>
     </>
   );

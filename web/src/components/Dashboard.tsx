@@ -78,7 +78,7 @@ export const Dashboard = () => {
           // Skipping turn if current player declared bankruptcy
           for (const p of players as Player[]) {
             if (p.turn && p.username === username && p.state === 'BANKRUPT') {
-              axios.put('/api/game/next');
+              axios.put('/api/game');
               break;
             }
           }

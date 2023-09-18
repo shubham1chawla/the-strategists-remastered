@@ -9,7 +9,7 @@ import { Button, Dropdown, Space } from 'antd';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Player, State } from '../redux';
-import { InvestModal } from '.';
+import { PlayerInvestModal } from '.';
 import axios from 'axios';
 
 export const Actions = () => {
@@ -31,7 +31,7 @@ export const Actions = () => {
 
   return (
     <>
-      <InvestModal
+      <PlayerInvestModal
         open={showModal}
         player={player}
         land={land}
