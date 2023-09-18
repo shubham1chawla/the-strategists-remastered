@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Land, Player, PlayerLand, State, UserActions } from '../redux';
+import { Land, Player, State, UserActions } from '../redux';
 import {
   Alert,
   Button,
@@ -14,21 +14,27 @@ import {
   Space,
   Statistic,
   Table,
+  Tag,
 } from 'antd';
 import {
+  CrownOutlined,
   DollarCircleOutlined,
   ExclamationCircleOutlined,
+  HeartOutlined,
   HomeOutlined,
+  InfoCircleOutlined,
   LogoutOutlined,
+  PercentageOutlined,
   PieChartOutlined,
   RiseOutlined,
+  SlidersOutlined,
   StockOutlined,
   StopFilled,
   StopOutlined,
   UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
-import { Confetti, Stats } from '.';
+import { Confetti, Logo, Stats } from '.';
 import axios from 'axios';
 
 interface BaseModalProps {
@@ -163,24 +169,18 @@ export const PlayerPortfolioModal = (
   props: Partial<PlayerPortfolioModalProps>
 ) => {
   const { open, onCancel, player } = props;
-  const { lands } = useSelector((state: State) => state.lobby);
   if (!open || !onCancel || !player) {
     return null;
   }
-
-  // linking lands with the player
-  const map = new Map<number, Land>();
-  lands.forEach((land) => map.set(land.id, land));
-  player.lands.forEach((pl) => {
-    pl.land = pl.landId ? map.get(pl.landId) : pl.land;
-  });
 
   return (
     <Modal
       className="strategists-map__modal"
       title={
         <div className="strategists-map__modal__title">
-          <span>{`${player.username}'s Portfolio`}</span>
+          <span>
+            <UserOutlined /> {player.username}
+          </span>
           <small>
             <StockOutlined /> {player.netWorth} current net worth
           </small>
@@ -190,58 +190,76 @@ export const PlayerPortfolioModal = (
       onCancel={onCancel}
       footer={null}
     >
-      <Divider />
-      <PlayerPortfolioTable lands={player.lands} />
+      <PlayerPortfolioTable player={player} />
     </Modal>
   );
 };
 
 export interface PlayerPortfolioTableProps {
-  lands: PlayerLand[];
+  player: Player;
 }
 
 export const PlayerPortfolioTable = (props: PlayerPortfolioTableProps) => {
-  const datasource = props.lands.map((pl) => {
+  const { lands } = useSelector((state: State) => state.lobby);
+  const { player } = props;
+
+  // preparing map of lands for referencing lands' names
+  const map = new Map<number, Land>();
+  lands.forEach((land) => map.set(land.id, land));
+
+  const datasource = player.lands.map((pl) => {
     return {
       ...pl,
       key: pl.landId,
-      name: pl.land?.name,
+      name: pl.landId ? map.get(pl.landId)?.name : 'Unknown',
     };
   });
 
   return (
-    <Table
-      pagination={false}
-      dataSource={datasource}
-      columns={[
-        {
-          title: 'Name',
-          dataIndex: 'name',
-          key: 'name',
-          render: (value) => (
-            <>
-              <HomeOutlined /> {value}
-            </>
-          ),
-        },
-        {
-          title: 'Ownership',
-          dataIndex: 'ownership',
-          key: 'ownership',
-          render: (value) => `${value}%`,
-        },
-        {
-          title: 'Buy Amount',
-          dataIndex: 'buyAmount',
-          key: 'buyAmount',
-          render: (value) => (
-            <span>
-              <DollarCircleOutlined /> {value}
-            </span>
-          ),
-        },
-      ]}
-    />
+    <>
+      <Divider>
+        <SlidersOutlined /> Portfolio
+      </Divider>
+      <Table
+        pagination={false}
+        dataSource={datasource}
+        columns={[
+          {
+            title: 'Name',
+            dataIndex: 'name',
+            key: 'name',
+            render: (value) => (
+              <Space>
+                <HomeOutlined />
+                {value}
+              </Space>
+            ),
+          },
+          {
+            title: 'Ownership',
+            dataIndex: 'ownership',
+            key: 'ownership',
+            render: (value) => (
+              <Space>
+                {value}
+                <PercentageOutlined />
+              </Space>
+            ),
+          },
+          {
+            title: 'Buy Amount',
+            dataIndex: 'buyAmount',
+            key: 'buyAmount',
+            render: (value) => (
+              <Space>
+                <DollarCircleOutlined />
+                {value}
+              </Space>
+            ),
+          },
+        ]}
+      />
+    </>
   );
 };
 
@@ -257,24 +275,19 @@ export const LandInvestmentModal = (
   props: Partial<LandInvestmentModalProps>
 ) => {
   const { open, onCancel, land } = props;
-  const { players } = useSelector((state: State) => state.lobby);
   if (!open || !onCancel || !land) {
     return null;
   }
-
-  // linking players with the land
-  const map = new Map<number, Player>();
-  players.forEach((player) => map.set(player.id, player));
-  land.players.forEach((pl) => {
-    pl.player = pl.playerId ? map.get(pl.playerId) : pl.player;
-  });
 
   return (
     <Modal
       className="strategists-map__modal"
       title={
         <div className="strategists-map__modal__title">
-          <span>{`${land?.name}'s Investments`}</span>
+          <Space>
+            <HomeOutlined />
+            {land.name}
+          </Space>
           <small>
             <DollarCircleOutlined /> {land?.marketValue} current market value
           </small>
@@ -284,60 +297,78 @@ export const LandInvestmentModal = (
       onCancel={onCancel}
       footer={null}
     >
-      <Divider />
-      <LandInvestmentTable players={land.players} />
+      <LandInvestmentTable land={land} />
     </Modal>
   );
 };
 
 export interface LandInvestmentTableProps {
-  players: PlayerLand[];
+  land: Land;
 }
 
 export const LandInvestmentTable = (props: LandInvestmentTableProps) => {
-  const datasource = props.players
-    .filter((pl) => pl.player?.state !== 'BANKRUPT')
+  const { players } = useSelector((state: State) => state.lobby);
+  const { land } = props;
+
+  // preparing map of players for referencing players' usernames
+  const map = new Map<number, Player>();
+  players.forEach((player) => map.set(player.id, player));
+
+  const datasource = land.players
+    .filter((pl) => !pl.playerId || map.get(pl.playerId)?.state !== 'BANKRUPT')
     .map((pl) => {
       return {
         ...pl,
         key: pl.playerId,
-        name: pl.player?.username,
+        name: pl.playerId ? map.get(pl.playerId)?.username : 'Unknown',
       };
     });
 
   return (
-    <Table
-      pagination={false}
-      dataSource={datasource}
-      columns={[
-        {
-          title: 'Name',
-          dataIndex: 'name',
-          key: 'name',
-          render: (value) => (
-            <>
-              <UserOutlined /> {value}
-            </>
-          ),
-        },
-        {
-          title: 'Ownership',
-          dataIndex: 'ownership',
-          key: 'ownership',
-          render: (value) => `${value}%`,
-        },
-        {
-          title: 'Buy Amount',
-          dataIndex: 'buyAmount',
-          key: 'buyAmount',
-          render: (value) => (
-            <span>
-              <DollarCircleOutlined /> {value}
-            </span>
-          ),
-        },
-      ]}
-    />
+    <>
+      <Divider>
+        <SlidersOutlined /> Investments
+      </Divider>
+      <Table
+        pagination={false}
+        dataSource={datasource}
+        columns={[
+          {
+            title: 'Name',
+            dataIndex: 'name',
+            key: 'name',
+            render: (value) => (
+              <Space>
+                <UserOutlined />
+                {value}
+              </Space>
+            ),
+          },
+          {
+            title: 'Ownership',
+            dataIndex: 'ownership',
+            key: 'ownership',
+            render: (value) => (
+              <Space>
+                {value}
+                <PercentageOutlined />
+              </Space>
+            ),
+          },
+          {
+            title: 'Buy Amount',
+            dataIndex: 'buyAmount',
+            key: 'buyAmount',
+            render: (value) => (
+              <Space>
+                <DollarCircleOutlined />
+                {value}
+              </Space>
+            ),
+          },
+        ]}
+      />
+    </>
   );
 };
 
@@ -422,6 +453,9 @@ export const WinModal = (props: WinModalProps) => {
 
   // determining the winner
   const player = lobby.players.find((p) => p.state === 'ACTIVE');
+  if (!player) {
+    return null;
+  }
 
   return (
     <>
@@ -431,30 +465,48 @@ export const WinModal = (props: WinModalProps) => {
         onCancel={onCancel}
         closable={false}
         maskClosable={false}
-        title="The Strategists Winner"
+        title={
+          <Row justify="space-between" align="middle">
+            <Logo />
+            <Tag icon={<CrownOutlined />}>Winner</Tag>
+          </Row>
+        }
         footer={
-          user.type === 'admin' ? (
-            <>
-              <Button
-                type="primary"
-                icon={<StopFilled />}
-                onClick={() => setShowResetModal(true)}
-              >
-                Reset
-              </Button>
-            </>
-          ) : (
-            <Button
-              type="primary"
-              icon={<LogoutOutlined />}
-              onClick={() => dispatch(UserActions.unsetUser())}
-            >
-              Logout
-            </Button>
-          )
+          <Row justify="space-between" align="middle">
+            {user.type === 'admin' ? (
+              <>
+                <Space>
+                  <InfoCircleOutlined />
+                  Reset the game to play again.
+                </Space>
+                <Button
+                  type="primary"
+                  icon={<StopFilled />}
+                  onClick={() => setShowResetModal(true)}
+                >
+                  Reset
+                </Button>
+              </>
+            ) : (
+              <>
+                <Space>
+                  <HeartOutlined />
+                  Thank you for playing The Strategists!
+                </Space>
+                <Button
+                  type="primary"
+                  icon={<LogoutOutlined />}
+                  onClick={() => dispatch(UserActions.unsetUser())}
+                >
+                  Logout
+                </Button>
+              </>
+            )}
+          </Row>
         }
       >
         <Stats player={player} />
+        <PlayerPortfolioTable player={player} />
       </Modal>
       {showResetModal ? (
         <ResetModal
