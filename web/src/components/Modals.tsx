@@ -482,7 +482,7 @@ export const WinModal = () => {
         }
         footer={
           <Row justify="space-between" align="middle">
-            {type === 'admin' ? (
+            {type === 'ADMIN' ? (
               <>
                 <Space>
                   <InfoCircleOutlined />

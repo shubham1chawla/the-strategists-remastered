@@ -149,7 +149,7 @@ export const Dashboard = () => {
 
   // Determining dashboard's panel component
   const getPanel = () => {
-    if (type === 'admin') return <AdminPanel />;
+    if (type === 'ADMIN') return <AdminPanel />;
     const player = players.find((player) => player.username === username);
     if (!player) return null;
     return <PlayerPanel player={player} />;
@@ -182,7 +182,7 @@ export const Dashboard = () => {
  */
 
 interface NavigationProps {
-  type: 'admin' | 'player';
+  type: 'ADMIN' | 'PLAYER';
   dispatch: Dispatch<AnyAction>;
   state: 'ACTIVE' | 'LOBBY';
   players: Player[];
@@ -216,7 +216,7 @@ const Navigation = (props: NavigationProps) => {
         </Tooltip>
         <Logo />
       </header>
-      {type === 'admin' ? (
+      {type === 'ADMIN' ? (
         <Tooltip
           title={
             !players.length

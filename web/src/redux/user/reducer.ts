@@ -1,7 +1,7 @@
 import { UserActions } from '.';
 
 export interface UserState {
-  type: 'player' | 'admin';
+  type: 'ADMIN' | 'PLAYER';
   username?: string;
 }
 
@@ -26,5 +26,5 @@ export const userReducer = (state = initialState(), action: any): UserState => {
 
 const initialState = (): UserState => {
   const json = sessionStorage.getItem('user');
-  return json ? JSON.parse(json) : { type: 'player' };
+  return json ? JSON.parse(json) : { type: 'PLAYER' };
 };
