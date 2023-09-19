@@ -22,7 +22,6 @@
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
     "start": "react-scripts start",
-    "start:host": "HOST=0.0.0.0 npm run start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
