@@ -1,12 +1,9 @@
 package com.strategists.game.entity;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.ToDoubleFunction;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -26,6 +23,7 @@ import org.springframework.util.Assert;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.strategists.game.util.MathUtil;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -40,8 +38,6 @@ public class Player implements Serializable {
 
 	private static final long serialVersionUID = -7588097421340659821L;
 
-	private static final int PRECISION = 2;
-
 	public enum State {
 		ACTIVE, BANKRUPT, JAIL;
 	}
@@ -52,7 +48,7 @@ public class Player implements Serializable {
 		Assert.hasText(password, "Password can't be empty!");
 
 		this.username = username;
-		this.baseCash = baseCash;
+		this.baseCash = MathUtil.round(baseCash);
 		this.password = password;
 	}
 
@@ -73,7 +69,7 @@ public class Player implements Serializable {
 	 * Check {@link Player#getCash()} for details.
 	 */
 	@JsonIgnore
-	@Column(nullable = false, precision = PRECISION)
+	@Column(nullable = false, precision = MathUtil.PRECISION)
 	private Double baseCash;
 
 	@Column(nullable = true, columnDefinition = "INTEGER DEFAULT 0")
@@ -114,9 +110,9 @@ public class Player implements Serializable {
 	@Transient
 	@JsonProperty("cash")
 	public double getCash() {
-		val credits = baseCash + sum(receivedRents, Rent::getRentAmount);
-		val debits = sum(paidRents, Rent::getRentAmount) + sum(playerLands, PlayerLand::getBuyAmount);
-		return BigDecimal.valueOf(credits - debits).setScale(PRECISION, RoundingMode.HALF_UP).doubleValue();
+		val credits = baseCash + MathUtil.sum(receivedRents, Rent::getRentAmount);
+		val debits = MathUtil.sum(paidRents, Rent::getRentAmount) + MathUtil.sum(playerLands, PlayerLand::getBuyAmount);
+		return MathUtil.round(credits - debits);
 	}
 
 	/**
@@ -127,8 +123,9 @@ public class Player implements Serializable {
 	 */
 	@Transient
 	public double getNetWorth() {
-		return (isBankrupt() ? 0d : sum(playerLands, pl -> pl.getLand().getMarketValue() * (pl.getOwnership() / 100)))
-				+ getCash();
+		val investments = isBankrupt() ? 0d
+				: MathUtil.sum(playerLands, pl -> pl.getLand().getMarketValue() * (pl.getOwnership() / 100));
+		return MathUtil.round(investments + getCash());
 	}
 
 	@Transient
@@ -153,10 +150,6 @@ public class Player implements Serializable {
 			receivedRents = new ArrayList<>();
 		}
 		receivedRents.add(rent);
-	}
-
-	private static <T> double sum(List<T> list, ToDoubleFunction<T> mapper) {
-		return Objects.isNull(list) ? 0d : list.stream().mapToDouble(mapper).sum();
 	}
 
 }

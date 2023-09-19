@@ -10,6 +10,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 import com.strategists.game.request.CreateCheatRequest;
+import com.strategists.game.util.MathUtil;
 
 import lombok.Data;
 import lombok.val;
@@ -34,7 +35,7 @@ public class Cheat {
 	@Enumerated(EnumType.STRING)
 	private Type type;
 
-	@Column(nullable = false, precision = 2)
+	@Column(nullable = false, precision = MathUtil.PRECISION)
 	private Double amount;
 
 	@Column(nullable = false)

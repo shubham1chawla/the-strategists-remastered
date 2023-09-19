@@ -4,7 +4,6 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.ToDoubleFunction;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -20,6 +19,7 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.strategists.game.util.MathUtil;
 
 import lombok.Data;
 import lombok.ToString;
@@ -62,7 +62,7 @@ public class Land implements Serializable {
 	 * reveal the market value calculation formula.
 	 */
 	@JsonIgnore
-	@Column(nullable = false, precision = 2)
+	@Column(nullable = false, precision = MathUtil.PRECISION)
 	private Double baseValue;
 
 	@ToString.Exclude
@@ -92,7 +92,7 @@ public class Land implements Serializable {
 	 */
 	@Transient
 	public double getTotalOwnership() {
-		return sum(playerLands, pl -> pl.getPlayer().isBankrupt() ? 0d : pl.getOwnership());
+		return MathUtil.sum(playerLands, pl -> pl.getPlayer().isBankrupt() ? 0d : pl.getOwnership());
 	}
 
 	/**
@@ -104,7 +104,7 @@ public class Land implements Serializable {
 	@JsonIgnore
 	@Transient
 	public double getDelta() {
-		return sum(landEvents, le -> DAMPENER * le.getEvent().getFactor() * le.getLevel() * le.getLife());
+		return MathUtil.sum(landEvents, le -> DAMPENER * le.getEvent().getFactor() * le.getLevel() * le.getLife());
 	}
 
 	public void addEvent(Event event, int life, int level) {
@@ -116,10 +116,6 @@ public class Land implements Serializable {
 		}
 		opt.get().setLife(opt.get().getLife() + life);
 		opt.get().setLevel(level);
-	}
-
-	private static <T> double sum(List<T> list, ToDoubleFunction<T> mapper) {
-		return Objects.isNull(list) ? 0d : list.stream().mapToDouble(mapper).sum();
 	}
 
 }
