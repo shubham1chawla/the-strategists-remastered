@@ -24,6 +24,10 @@ import { useSelector } from 'react-redux';
 import { Player, State } from '../redux';
 import axios from 'axios';
 
+/**
+ * -----  UTILITIES DEFINED BELOW  -----
+ */
+
 const MIN_CASH_AMOUNT = 100;
 const MAX_CASH_AMOUNT = 9999;
 
@@ -32,18 +36,25 @@ interface Password {
   show: boolean;
 }
 
+/**
+ * -----  LOBBY COMPONENT BELOW  -----
+ */
+
 export const Lobby = () => {
-  const { state } = useSelector((state: State) => state.lobby);
   return (
     <>
-      {LobbyPlayers(state)}
-      {AddPlayerForm(state)}
+      <LobbyPlayers />
+      <AddPlayerForm />
     </>
   );
 };
 
-const LobbyPlayers = (state: 'LOBBY' | 'ACTIVE') => {
-  const { players } = useSelector((state: State) => state.lobby);
+/**
+ * -----  LOBBY PLAYERS COMPONENT BELOW  -----
+ */
+
+const LobbyPlayers = () => {
+  const { state, players } = useSelector((state: State) => state.lobby);
   const [passwords, setPasswords] = useState<Map<number, Password>>(new Map());
 
   // Sorting players in decreasing order of net-worth
@@ -153,7 +164,12 @@ const LobbyPlayers = (state: 'LOBBY' | 'ACTIVE') => {
   );
 };
 
-const AddPlayerForm = (state: 'LOBBY' | 'ACTIVE') => {
+/**
+ * -----  ADD PLAYER FORM COMPONENT BELOW  -----
+ */
+
+const AddPlayerForm = () => {
+  const { state } = useSelector((state: State) => state.lobby);
   const [form] = Form.useForm();
 
   const addPlayer = async ({ username, cash }: Player) => {
