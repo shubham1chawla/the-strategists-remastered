@@ -145,10 +145,14 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
         {
           // This will show a warning to user that their current balance is less then the maximum available ownership.
           maxOfferOwnership !== maxAvailOwnership ? (
-            <>
-              <ExclamationCircleOutlined />
-              Investment capped at {maxOfferOwnership}% due to low cash!
-            </>
+            <Row justify="center">
+              <Space>
+                <ExclamationCircleOutlined />
+                <span>
+                  Investment capped at {maxOfferOwnership}% due to low cash!
+                </span>
+              </Space>
+            </Row>
           ) : null
         }
       </main>
