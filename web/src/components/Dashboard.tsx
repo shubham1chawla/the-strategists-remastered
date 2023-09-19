@@ -54,7 +54,6 @@ export const Dashboard = () => {
   const { username, type } = user;
   const { players, state } = lobby;
 
-  const [showWinModal, setShowWinModal] = useState(false);
   const [api, contextHolder] = notification.useNotification();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -96,7 +95,7 @@ export const Dashboard = () => {
           break;
         }
         case 'END': {
-          setShowWinModal(true);
+          // Do nothing
           break;
         }
         case 'INVEST': {
@@ -118,11 +117,11 @@ export const Dashboard = () => {
           dispatch(LobbyActions.patchPlayers(data));
           break;
         case 'RESET':
-          setShowWinModal(false);
           syncGameStates(dispatch);
           break;
         case 'START':
           dispatch(LobbyActions.patchPlayers([data]));
+          dispatch(LobbyActions.setState('ACTIVE'));
           break;
         case 'TURN':
           dispatch(LobbyActions.patchPlayers(data));
@@ -173,7 +172,7 @@ export const Dashboard = () => {
           <Map />
         </Col>
       </Row>
-      <WinModal open={showWinModal} onCancel={() => setShowWinModal(false)} />
+      <WinModal />
     </>
   );
 };
@@ -193,10 +192,9 @@ const Navigation = (props: NavigationProps) => {
   const { type, dispatch, state, players } = props;
   const [showResetModal, setShowResetModal] = useState(false);
 
-  const start = async () => {
+  const start = () => {
     if (state === 'ACTIVE') return;
-    await axios.post('/api/game');
-    dispatch(LobbyActions.setState('ACTIVE'));
+    axios.post('/api/game');
   };
 
   const reset = () => {

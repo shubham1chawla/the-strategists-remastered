@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Land, Player, State, UserActions } from '../redux';
 import {
@@ -441,28 +441,33 @@ export const ResetModal = (props: ResetModalProps) => {
  * -----  WIN MODAL BELOW  -----
  */
 
-export interface WinModalProps extends BaseModalProps {
-  // No additional fields
-}
-
-export const WinModal = (props: WinModalProps) => {
+export const WinModal = () => {
+  const [player, setPlayer] = useState<Player | null>(null);
   const { user, lobby } = useSelector((state: State) => state);
+  const { type } = user;
+  const { players, state } = lobby;
+
   const [showResetModal, setShowResetModal] = useState(false);
-  const { open, onCancel } = props;
   const dispatch = useDispatch();
 
-  // determining the winner
-  const player = lobby.players.find((p) => p.state === 'ACTIVE');
-  if (!player) {
-    return null;
-  }
+  const closeResetModal = () => setShowResetModal(false);
+  const openResetModal = () => setShowResetModal(true);
 
+  useEffect(() => {
+    // determining whether to show win modal
+    const activePlayers = players.filter((player) => player.state === 'ACTIVE');
+    setPlayer(
+      state === 'ACTIVE' && activePlayers.length === 1 ? activePlayers[0] : null
+    );
+  }, [players, state]);
+
+  if (!player) return null;
   return (
     <>
       <Confetti type="multiple" />
       <Modal
-        open={open}
-        onCancel={onCancel}
+        open={!!player}
+        onCancel={closeResetModal}
         closable={false}
         maskClosable={false}
         title={
@@ -473,7 +478,7 @@ export const WinModal = (props: WinModalProps) => {
         }
         footer={
           <Row justify="space-between" align="middle">
-            {user.type === 'admin' ? (
+            {type === 'admin' ? (
               <>
                 <Space>
                   <InfoCircleOutlined />
@@ -482,7 +487,7 @@ export const WinModal = (props: WinModalProps) => {
                 <Button
                   type="primary"
                   icon={<StopFilled />}
-                  onClick={() => setShowResetModal(true)}
+                  onClick={openResetModal}
                 >
                   Reset
                 </Button>
@@ -509,10 +514,7 @@ export const WinModal = (props: WinModalProps) => {
         <PlayerPortfolioTable player={player} />
       </Modal>
       {showResetModal ? (
-        <ResetModal
-          open={showResetModal}
-          onCancel={() => setShowResetModal(false)}
-        />
+        <ResetModal open={showResetModal} onCancel={closeResetModal} />
       ) : null}
     </>
   );
