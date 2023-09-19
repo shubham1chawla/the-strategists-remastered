@@ -1,8 +1,6 @@
 package com.strategists.game.entity;
 
 import java.io.Serializable;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import com.strategists.game.util.MathUtil;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,8 +23,6 @@ import lombok.NoArgsConstructor;
 public class Rent implements Serializable {
 
 	private static final long serialVersionUID = -2636338193178571280L;
-
-	private static final int PRECISION = 2;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,14 +40,14 @@ public class Rent implements Serializable {
 	@JoinColumn(name = "land_id", referencedColumnName = "id")
 	private Land land;
 
-	@Column(nullable = false, precision = PRECISION)
+	@Column(nullable = false, precision = MathUtil.PRECISION)
 	private Double rentAmount;
 
 	public Rent(Player sourcePlayer, Player targetPlayer, Land land, double rentAmount) {
 		this.sourcePlayer = sourcePlayer;
 		this.targetPlayer = targetPlayer;
 		this.land = land;
-		this.rentAmount = BigDecimal.valueOf(rentAmount).setScale(PRECISION, RoundingMode.HALF_UP).doubleValue();
+		this.rentAmount = MathUtil.round(rentAmount);
 	}
 
 }
