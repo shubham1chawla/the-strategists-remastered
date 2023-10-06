@@ -312,6 +312,18 @@ h1.strategists-logo {
       flex-direction: column;
     }
   }
+
+  &__tooltip {
+    position: absolute;
+    z-index: 1;
+    background-color: var(--dark-color);
+    border: 1px solid var(--accent-color);
+    padding: var(--ant-lg-padding);
+
+    &-hidden {
+      display: none;
+    }
+  }
 }
 
 // ----- GLOBAL ANTD OVERRIDES DEFINED BELOW ----- //

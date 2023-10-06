@@ -14,6 +14,9 @@ import {
   PlayerPortfolioModal,
   PlayerPortfolioModalProps,
 } from '.';
+import popper from 'cytoscape-popper';
+import { Divider, Space } from 'antd';
+import { DollarCircleOutlined, HomeOutlined } from '@ant-design/icons';
 
 const prepareStyles = (): Stylesheet[] => {
   return [
@@ -201,6 +204,8 @@ const prepareMap = (cy: Core, lands: Land[], players: Player[]): void => {
 export const Map = () => {
   const { players, lands } = useSelector((state: State) => state.lobby);
   const container = useRef<HTMLDivElement>(null);
+  const tooltip = useRef<HTMLDivElement>(null);
+  const [landTooltip, setLandTooltip] = useState<Land | null>(null);
   const [landInvestmentModalProps, setLandInvestmentModalProps] =
     useState<LandInvestmentModalProps | null>(null);
   const [playerPortfolioModalProps, setPlayerPortfolioModalProps] =
@@ -215,6 +220,7 @@ export const Map = () => {
     }
 
     // setting up cytoscape
+    cytoscape.use(popper);
     const cy = cytoscape({
       autolock: true,
       maxZoom: 1.5,
@@ -244,12 +250,46 @@ export const Map = () => {
       }
     });
 
+    // adding mouseover hook for map tooltip
+    cy.on('mousemove', 'node', ({ target }: EventObjectNode) => {
+      const { land } = target.data();
+      if (land) {
+        setLandTooltip(land);
+      }
+      target.popper({
+        content: () => tooltip.current as HTMLDivElement,
+      });
+    });
+
+    // adding mouseout hook to remove tooltip
+    cy.on('mouseout', 'node', (_: EventObjectNode) => {
+      setLandTooltip(null);
+    });
+
     // setting up map elements
     prepareMap(cy, lands, players);
   }, [style, players, lands]);
 
   return (
     <>
+      <div
+        ref={tooltip}
+        className={`strategists-map__tooltip ${
+          landTooltip ? '' : 'strategists-map__tooltip-hidden'
+        }`}
+      >
+        <Space>
+          <Space>
+            <HomeOutlined />
+            {landTooltip?.name}
+          </Space>
+          <Divider type="vertical" />
+          <Space>
+            <DollarCircleOutlined />
+            {landTooltip?.marketValue}
+          </Space>
+        </Space>
+      </div>
       <LandInvestmentModal {...landInvestmentModalProps} />
       <PlayerPortfolioModal {...playerPortfolioModalProps} />
       <div ref={container} className="strategists-map"></div>
