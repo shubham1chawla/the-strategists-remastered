@@ -8,7 +8,7 @@ import {
   Logo,
   Lobby,
   Map,
-  Stats,
+  PlayerStats,
   ResetModal,
   WinModal,
 } from '.';
@@ -229,6 +229,7 @@ const Navigation = (props: NavigationProps) => {
           <Button
             type="primary"
             htmlType="submit"
+            disabled={state === 'LOBBY' && !players.length}
             onClick={() => (state === 'ACTIVE' ? reset() : start())}
           >
             {state === 'LOBBY' ? <PlayCircleFilled /> : <StopFilled />}
@@ -288,7 +289,7 @@ const PlayerPanel = (props: PlayerPanelProps) => {
   const { player } = props;
   return (
     <div className="strategists-player-panel">
-      <Stats player={player} />
+      <PlayerStats player={player} />
       <ActivityTimeline />
       <Actions />
     </div>

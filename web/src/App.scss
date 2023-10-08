@@ -318,10 +318,20 @@ h1.strategists-logo {
     z-index: 1;
     background-color: var(--dark-color);
     border: 1px solid var(--accent-color);
+    border-radius: 4px;
+    width: 40%;
+    max-width: 40rem;
     padding: var(--ant-lg-padding);
+    transition: all ease 0.4s;
+    opacity: 1;
 
     &-hidden {
-      display: none;
+      opacity: 0;
+      z-index: -1;
+    }
+
+    .ant-divider {
+      margin-top: 0;
     }
   }
 }

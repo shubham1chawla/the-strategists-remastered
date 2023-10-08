@@ -34,10 +34,10 @@ import {
   UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
-import { Confetti, Logo, Stats } from '.';
+import { Confetti, Logo, PlayerStats } from '.';
 import axios from 'axios';
 
-interface BaseModalProps {
+export interface BaseModalProps {
   open: boolean;
   onCancel: () => void;
 }
@@ -514,7 +514,7 @@ export const WinModal = () => {
           </Row>
         }
       >
-        <Stats player={player} />
+        <PlayerStats player={player} />
         <PlayerPortfolioTable player={player} />
       </Modal>
       {showResetModal ? (
