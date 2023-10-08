@@ -22,9 +22,6 @@ Please refer to the documentation before contributing - https://getbem.com/
   // height of ant buttons and padding calculated
   --strategists-actions-height: calc(40px + 2 * var(--ant-lg-padding));
 
-  // height of card, text, and padding calculated
-  --strategists-stats-height: 112.85px;
-
   // large ant-list-item height
   --ant-lg-padding: 24px;
 
@@ -139,18 +136,9 @@ h1.strategists-logo {
 
 .strategists-player-panel {
   height: calc(100% - var(--strategists-nav-height));
-
-  .strategists-activity {
-    height: calc(
-      100% - var(--strategists-actions-height) - var(--strategists-stats-height)
-    );
-  }
-
-  .strategists-stats {
-    &__username {
-      padding: 0 var(--ant-lg-padding);
-    }
-  }
+  display: flex;
+  flex-direction: column;
+  flex: 1 auto 1;
 
   .strategists-actions {
     box-sizing: border-box;
@@ -161,20 +149,6 @@ h1.strategists-logo {
 // ----- STATS COMPONENT'S CSS DEFINED BELOW ----- //
 
 .strategists-stats {
-  &__bankrupt {
-    position: absolute;
-    height: var(--strategists-stats-height);
-    width: 100%;
-
-    .ant-tag {
-      position: absolute;
-      top: var(--base-unit-size);
-      right: var(--base-unit-size);
-      color: var(--text-color);
-      background-color: var(--dark-color);
-    }
-  }
-
   .ant-divider {
     margin: 0;
   }
@@ -188,9 +162,8 @@ h1.strategists-logo {
 
 .strategists-actions {
   &__modal {
-    &__title {
-      display: flex;
-      flex-direction: column;
+    .ant-divider:first-of-type {
+      margin: 0;
     }
   }
 
@@ -306,13 +279,6 @@ h1.strategists-logo {
   height: 100%;
   width: 100%;
 
-  &__modal {
-    &__title {
-      display: flex;
-      flex-direction: column;
-    }
-  }
-
   &__tooltip {
     position: absolute;
     z-index: 1;
@@ -331,7 +297,7 @@ h1.strategists-logo {
     }
 
     .ant-divider {
-      margin-top: 0;
+      margin: 0;
     }
   }
 }

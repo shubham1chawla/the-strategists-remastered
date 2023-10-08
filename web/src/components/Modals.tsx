@@ -28,13 +28,12 @@ import {
   PieChartOutlined,
   RiseOutlined,
   SlidersOutlined,
-  StockOutlined,
   StopFilled,
   StopOutlined,
   UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
-import { Confetti, Logo, PlayerStats } from '.';
+import { Confetti, LandStats, Logo, PlayerStats } from '.';
 import axios from 'axios';
 
 export interface BaseModalProps {
@@ -82,80 +81,127 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
   return (
     <Modal
       className="strategists-actions__modal"
-      title={
-        <div className="strategists-actions__modal__title">
-          {investText}
-          <Space>
-            <small>
-              <WalletOutlined /> {player.cash} cash available
-            </small>
-            <Divider type="vertical" />
-            <small>
-              <PieChartOutlined /> {maxAvailOwnership}% shares available
-            </small>
-          </Space>
-        </div>
-      }
+      title="Investment Strategy"
       open={!!open}
-      okText={
-        <>
-          <RiseOutlined /> Invest
-        </>
-      }
-      onOk={invest}
       onCancel={onCancel}
-      okButtonProps={{
-        disabled: userInvestAmount > player.cash,
-      }}
-    >
-      <Divider />
-      <main className="strategists-actions__modal__body">
-        <Row>
-          <Col span={12}>
-            <Card bordered={false}>
-              <Statistic
-                title="Proposed Ownership"
-                value={ownership}
-                precision={0}
-                prefix={<RiseOutlined />}
-                suffix="%"
-              />
-            </Card>
-          </Col>
-          <Col span={12}>
-            <Card bordered={false}>
-              <Statistic
-                title="Cost of Investment"
-                value={userInvestAmount}
-                precision={2}
-                prefix={<DollarCircleOutlined />}
-              />
-            </Card>
-          </Col>
+      footer={
+        <Row justify="space-between" wrap={false}>
+          <Space>
+            {
+              // This will show a warning to user that their current balance is less then the maximum available ownership.
+              maxOfferOwnership !== maxAvailOwnership ? (
+                <>
+                  <ExclamationCircleOutlined />
+                  <span>
+                    Offer capped at {maxOfferOwnership}% due to low cash!
+                  </span>
+                </>
+              ) : (
+                ''
+              )
+            }
+          </Space>
+          <Space>
+            <Button onClick={onCancel}>Cancel</Button>
+            <Button
+              type="primary"
+              disabled={userInvestAmount > player.cash}
+              icon={<RiseOutlined />}
+              onClick={invest}
+            >
+              Invest
+            </Button>
+          </Space>
         </Row>
-        <Slider
-          defaultValue={ownership}
-          min={0}
-          max={maxOfferOwnership}
-          onAfterChange={(value) => setOwnership(value)}
-          tooltip={{
-            formatter: (value) => `${value}%`,
-          }}
-        />
-        {
-          // This will show a warning to user that their current balance is less then the maximum available ownership.
-          maxOfferOwnership !== maxAvailOwnership ? (
-            <Row justify="center">
-              <Space>
-                <ExclamationCircleOutlined />
-                <span>
-                  Investment capped at {maxOfferOwnership}% due to low cash!
-                </span>
-              </Space>
-            </Row>
-          ) : null
-        }
-      </main>
+      }
+    >
+      <Row>
+        <Col span={24}>
+          <Divider>
+            <Tag icon={<RiseOutlined />}>{investText}</Tag>
+          </Divider>
+        </Col>
+      </Row>
+      <Row>
+        <Col span={12}>
+          <Card bordered={false}>
+            <Statistic
+              title={
+                <Space>
+                  <PieChartOutlined />
+                  Remaining Shares
+                </Space>
+              }
+              value={maxAvailOwnership - ownership}
+              precision={0}
+              suffix={<PercentageOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col span={12}>
+          <Card bordered={false}>
+            <Statistic
+              title={
+                <Space>
+                  <WalletOutlined />
+                  Remaining Cash
+                </Space>
+              }
+              value={player.cash - userInvestAmount}
+              precision={2}
+              prefix={<DollarCircleOutlined />}
+            />
+          </Card>
+        </Col>
+      </Row>
+      <Row>
+        <Col span={12}>
+          <Card bordered={false}>
+            <Statistic
+              title={
+                <Space>
+                  <PieChartOutlined />
+                  Proposed Ownership
+                </Space>
+              }
+              value={ownership}
+              precision={0}
+              suffix={<PercentageOutlined />}
+            />
+          </Card>
+        </Col>
+        <Col span={12}>
+          <Card bordered={false}>
+            <Statistic
+              title={
+                <Space>
+                  <WalletOutlined />
+                  Investment Cost
+                </Space>
+              }
+              value={userInvestAmount}
+              precision={2}
+              prefix={<DollarCircleOutlined />}
+            />
+          </Card>
+        </Col>
+      </Row>
+      <Slider
+        defaultValue={ownership}
+        min={0}
+        max={maxOfferOwnership}
+        onAfterChange={(value) => setOwnership(value)}
+        tooltip={{
+          formatter: (value) => `${value}%`,
+        }}
+        autoFocus={true}
+      />
+      <Row justify="center">
+        <Space>
+          <InfoCircleOutlined />
+          Use this slider to adjust your investment offer.
+        </Space>
+      </Row>
       <Divider />
     </Modal>
   );
@@ -179,21 +225,12 @@ export const PlayerPortfolioModal = (
 
   return (
     <Modal
-      className="strategists-map__modal"
-      title={
-        <div className="strategists-map__modal__title">
-          <span>
-            <UserOutlined /> {player.username}
-          </span>
-          <small>
-            <StockOutlined /> {player.netWorth} current net worth
-          </small>
-        </div>
-      }
+      title="Portfolio Analysis"
       open={open}
       onCancel={onCancel}
       footer={null}
     >
+      <PlayerStats player={player} />
       <PlayerPortfolioTable player={player} />
     </Modal>
   );
@@ -211,7 +248,7 @@ export const PlayerPortfolioTable = (props: PlayerPortfolioTableProps) => {
   const map = new Map<number, Land>();
   lands.forEach((land) => map.set(land.id, land));
 
-  const datasource = player.lands.map((pl) => {
+  const datasource = (player.lands || []).map((pl) => {
     return {
       ...pl,
       key: pl.landId,
@@ -285,22 +322,12 @@ export const LandInvestmentModal = (
 
   return (
     <Modal
-      className="strategists-map__modal"
-      title={
-        <div className="strategists-map__modal__title">
-          <Space>
-            <HomeOutlined />
-            {land.name}
-          </Space>
-          <small>
-            <DollarCircleOutlined /> {land?.marketValue} current market value
-          </small>
-        </div>
-      }
+      title="Investments' Analysis"
       open={open}
       onCancel={onCancel}
       footer={null}
     >
+      <LandStats land={land} />
       <LandInvestmentTable land={land} />
     </Modal>
   );
@@ -318,7 +345,7 @@ export const LandInvestmentTable = (props: LandInvestmentTableProps) => {
   const map = new Map<number, Player>();
   players.forEach((player) => map.set(player.id, player));
 
-  const datasource = land.players
+  const datasource = (land.players || [])
     .filter((pl) => !pl.playerId || map.get(pl.playerId)?.state !== 'BANKRUPT')
     .map((pl) => {
       return {

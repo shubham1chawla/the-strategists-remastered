@@ -18,8 +18,8 @@ import {
   PlayerPortfolioModalProps,
   PlayerStats,
 } from '.';
-import { Divider, Row, Space } from 'antd';
-import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { Divider, Space } from 'antd';
+import { InfoCircleOutlined } from '@ant-design/icons';
 
 /**
  * -----  MAP COMPONENT BELOW  -----
@@ -265,6 +265,7 @@ export const Map = () => {
           },
         });
       }
+      setMapTooltipHidden(true);
     });
 
     // adding mousemove hook for map tooltip
@@ -286,7 +287,7 @@ export const Map = () => {
               },
             },
           ],
-          strategy: 'fixed',
+          strategy: 'absolute',
         },
       });
       setMapTooltipHidden(false);
@@ -336,17 +337,16 @@ const MapTooltipBody = (props: Partial<MapTooltipBodyProps>) => {
       ) : land ? (
         <LandStats land={land} />
       ) : null}
-      <Divider />
-      <Row justify="center" align="middle">
+      <Divider>
         <Space>
-          <ExclamationCircleOutlined />
+          <InfoCircleOutlined />
           {player ? (
             <span>Click to check {player.username}'s portfolio.</span>
           ) : land ? (
             <span>Click to check {land.name}'s investments</span>
           ) : null}
         </Space>
-      </Row>
+      </Divider>
     </>
   );
 };
