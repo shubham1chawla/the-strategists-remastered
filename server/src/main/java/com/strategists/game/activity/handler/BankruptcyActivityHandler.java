@@ -22,6 +22,7 @@ public class BankruptcyActivityHandler implements ActivityHandler<BankruptcyUpda
 		val player = (Player) args[0];
 
 		val players = new HashSet<Player>();
+		players.add(player);
 		val lands = player.getPlayerLands().stream().map(PlayerLand::getLand).toList();
 		for (Land land : lands) {
 			players.addAll(land.getPlayerLands().stream().map(PlayerLand::getPlayer).toList());

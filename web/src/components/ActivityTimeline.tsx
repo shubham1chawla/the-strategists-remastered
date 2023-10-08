@@ -9,6 +9,7 @@ import {
   FireOutlined,
   RiseOutlined,
   UserAddOutlined,
+  UserDeleteOutlined,
 } from '@ant-design/icons';
 import { ReactNode } from 'react';
 import { Bankruptcy } from '.';
@@ -38,6 +39,8 @@ const getIcon = ({ type }: Activity): ReactNode | undefined => {
       return <RiseOutlined />;
     case 'JOIN':
       return <UserAddOutlined />;
+    case 'KICK':
+      return <UserDeleteOutlined />;
     case 'MOVE':
       return <DoubleRightOutlined />;
     case 'RENT':

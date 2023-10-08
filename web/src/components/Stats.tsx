@@ -23,15 +23,15 @@ export const PlayerStats = (props: PlayerStatsProps) => {
   const { player } = props;
   return (
     <div className="strategists-stats">
-      {player?.state === 'BANKRUPT' ? (
-        <div className="strategists-stats__bankrupt strategists-striped">
-          <Tag icon={<AuditOutlined />}>Bankrupt</Tag>
-        </div>
-      ) : null}
       <Row>
         <Col span={24}>
           <Divider>
-            <UserOutlined /> {player?.username}
+            <Space>
+              <Tag icon={<UserOutlined />}>{player?.username}</Tag>
+              {player.state === 'BANKRUPT' ? (
+                <Tag icon={<AuditOutlined />}>Bankrupt</Tag>
+              ) : null}
+            </Space>
           </Divider>
         </Col>
       </Row>
@@ -86,7 +86,7 @@ export const LandStats = (props: LandStatsProps) => {
       <Row>
         <Col span={24}>
           <Divider>
-            <HomeOutlined /> {land?.name}
+            <Tag icon={<HomeOutlined />}>{land?.name}</Tag>
           </Divider>
         </Col>
       </Row>
