@@ -4,19 +4,26 @@ import cytoscape, {
   Position,
   Stylesheet,
 } from 'cytoscape';
+import popper from 'cytoscape-popper';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CssVariables } from '../App';
 import { Land, Player, State } from '../redux';
 import {
+  BaseModalProps,
   LandInvestmentModal,
   LandInvestmentModalProps,
+  LandStats,
   PlayerPortfolioModal,
   PlayerPortfolioModalProps,
+  PlayerStats,
 } from '.';
-import popper from 'cytoscape-popper';
-import { Divider, Space } from 'antd';
-import { DollarCircleOutlined, HomeOutlined } from '@ant-design/icons';
+import { Divider, Row, Space } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
+
+/**
+ * -----  MAP COMPONENT BELOW  -----
+ */
 
 const prepareStyles = (): Stylesheet[] => {
   return [
@@ -203,13 +210,17 @@ const prepareMap = (cy: Core, lands: Land[], players: Player[]): void => {
 
 export const Map = () => {
   const { players, lands } = useSelector((state: State) => state.lobby);
+
+  // setting up references to DOM elements
   const container = useRef<HTMLDivElement>(null);
   const tooltip = useRef<HTMLDivElement>(null);
-  const [landTooltip, setLandTooltip] = useState<Land | null>(null);
-  const [landInvestmentModalProps, setLandInvestmentModalProps] =
-    useState<LandInvestmentModalProps | null>(null);
-  const [playerPortfolioModalProps, setPlayerPortfolioModalProps] =
-    useState<PlayerPortfolioModalProps | null>(null);
+
+  // setting up state variables
+  const [isMapTooltipHidden, setMapTooltipHidden] = useState(true);
+  const [mapTooltipBodyProps, setMapTooltipBodyProps] =
+    useState<Partial<MapTooltipBodyProps> | null>(null);
+  const [mapModalProps, setMapModalProps] =
+    useState<Partial<MapModalProps> | null>(null);
 
   // memoizing styles since they won't change
   const style = useMemo(prepareStyles, []);
@@ -235,35 +246,55 @@ export const Map = () => {
     // adding onclick hook for map modal
     cy.on('click', 'node', (event: EventObjectNode) => {
       const { player, land } = event.target.data();
+      const props: BaseModalProps = {
+        open: true,
+        onCancel: () => setMapModalProps(null),
+      };
       if (player) {
-        setPlayerPortfolioModalProps({
-          open: !!player,
-          onCancel: () => setPlayerPortfolioModalProps(null),
-          player,
+        setMapModalProps({
+          playerPortfolioModalProps: {
+            ...props,
+            player,
+          },
         });
       } else {
-        setLandInvestmentModalProps({
-          open: !!land,
-          onCancel: () => setLandInvestmentModalProps(null),
-          land,
+        setMapModalProps({
+          landInvestmentModalProps: {
+            ...props,
+            land,
+          },
         });
       }
     });
 
-    // adding mouseover hook for map tooltip
+    // adding mousemove hook for map tooltip
     cy.on('mousemove', 'node', ({ target }: EventObjectNode) => {
-      const { land } = target.data();
-      if (land) {
-        setLandTooltip(land);
-      }
+      const { land, player } = target.data();
+      setMapTooltipBodyProps({
+        land,
+        player,
+      });
       target.popper({
         content: () => tooltip.current as HTMLDivElement,
+        popper: {
+          placement: 'right',
+          modifiers: [
+            {
+              name: 'offset',
+              options: {
+                offset: [0, 12],
+              },
+            },
+          ],
+          strategy: 'fixed',
+        },
       });
+      setMapTooltipHidden(false);
     });
 
     // adding mouseout hook to remove tooltip
     cy.on('mouseout', 'node', (_: EventObjectNode) => {
-      setLandTooltip(null);
+      setMapTooltipHidden(true);
     });
 
     // setting up map elements
@@ -274,25 +305,68 @@ export const Map = () => {
     <>
       <div
         ref={tooltip}
+        role="tooltip"
         className={`strategists-map__tooltip ${
-          landTooltip ? '' : 'strategists-map__tooltip-hidden'
+          isMapTooltipHidden ? 'strategists-map__tooltip-hidden' : ''
         }`}
       >
-        <Space>
-          <Space>
-            <HomeOutlined />
-            {landTooltip?.name}
-          </Space>
-          <Divider type="vertical" />
-          <Space>
-            <DollarCircleOutlined />
-            {landTooltip?.marketValue}
-          </Space>
-        </Space>
+        <MapTooltipBody {...mapTooltipBodyProps} />
       </div>
-      <LandInvestmentModal {...landInvestmentModalProps} />
-      <PlayerPortfolioModal {...playerPortfolioModalProps} />
+      <MapModal {...mapModalProps} />
       <div ref={container} className="strategists-map"></div>
     </>
   );
+};
+
+/**
+ * -----  MAP TOOLTIP BELOW  -----
+ */
+
+interface MapTooltipBodyProps {
+  player: Player;
+  land: Land;
+}
+
+const MapTooltipBody = (props: Partial<MapTooltipBodyProps>) => {
+  const { player, land } = props;
+  return (
+    <>
+      {player ? (
+        <PlayerStats player={player} />
+      ) : land ? (
+        <LandStats land={land} />
+      ) : null}
+      <Divider />
+      <Row justify="center" align="middle">
+        <Space>
+          <ExclamationCircleOutlined />
+          {player ? (
+            <span>Click to check {player.username}'s portfolio.</span>
+          ) : land ? (
+            <span>Click to check {land.name}'s investments</span>
+          ) : null}
+        </Space>
+      </Row>
+    </>
+  );
+};
+
+/**
+ * -----  MAP MODAL BELOW  -----
+ */
+
+interface MapModalProps {
+  landInvestmentModalProps: LandInvestmentModalProps;
+  playerPortfolioModalProps: PlayerPortfolioModalProps;
+}
+
+const MapModal = (props: Partial<MapModalProps>) => {
+  const { landInvestmentModalProps, playerPortfolioModalProps } = props;
+  if (landInvestmentModalProps) {
+    return <LandInvestmentModal {...landInvestmentModalProps} />;
+  }
+  if (playerPortfolioModalProps) {
+    return <PlayerPortfolioModal {...playerPortfolioModalProps} />;
+  }
+  return null;
 };
