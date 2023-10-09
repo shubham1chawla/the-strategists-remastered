@@ -33,10 +33,16 @@ export const Actions = () => {
     }
 
     // Checking if investment is allowed
-    if (!land.marketValue || player.cash < 0.01 * land.marketValue) {
+    if (
+      !land.marketValue ||
+      player.cash < 0.01 * land.marketValue ||
+      land.totalOwnership >= 100
+    ) {
       setInvestText(
         !land.marketValue
           ? `Cannot invest in ${land?.name}`
+          : land.totalOwnership >= 100
+          ? 'No shares available!'
           : `Not enough cash to invest!`
       );
       setInvestmentDisabled(true);
