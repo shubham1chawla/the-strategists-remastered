@@ -1,6 +1,7 @@
 import { useSelector } from 'react-redux';
 import { Timeline } from 'antd';
-import { Activity, State, parseActivity } from '../redux';
+import { Activity, State } from '../redux';
+import { parseActivity } from '../utils';
 import {
   CheckOutlined,
   CrownOutlined,

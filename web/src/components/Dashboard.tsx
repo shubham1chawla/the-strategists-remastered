@@ -19,8 +19,8 @@ import {
   Player,
   State,
   UserActions,
-  parseActivity,
 } from '../redux';
+import { parseActivity } from '../utils';
 import {
   LogoutOutlined,
   PlayCircleFilled,
@@ -52,9 +52,41 @@ const syncGameStates = (dispatch: Dispatch<AnyAction>) => {
 export const Dashboard = () => {
   const { user, lobby } = useSelector((state: State) => state);
   const { username, type } = user;
-  const { players, state } = lobby;
+  const { players } = lobby;
 
+  // Determining dashboard's panel component
+  const getPanel = () => {
+    if (type === 'ADMIN') return <AdminPanel />;
+    const player = players.find((player) => player.username === username);
+    if (!player) return null;
+    return <PlayerPanel player={player} />;
+  };
+
+  return (
+    <>
+      <Update />
+      <Row className="strategists-dashboard strategists-wallpaper">
+        <Col className="strategists-glossy" flex="30%">
+          <Navigation />
+          {getPanel()}
+        </Col>
+        <Col flex="70%">
+          <Map />
+        </Col>
+      </Row>
+      <WinModal />
+    </>
+  );
+};
+
+/**
+ * -----  UPDATE COMPONENT BELOW  -----
+ */
+
+const Update = () => {
+  const { username } = useSelector((state: State) => state.user);
   const [api, contextHolder] = notification.useNotification();
+
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -73,6 +105,21 @@ export const Dashboard = () => {
     // Syncing game's state
     syncGameStates(dispatch);
 
+    /**
+     * If the bankruptcy is filled by this player,
+     * and there are more than 1 active player in the game,
+     * only then we invoke the next turn.
+     */
+    const handleBankruptcy = (players: Player[]) => {
+      const activePlayers = players.filter((p) => p.state === 'ACTIVE');
+      const bankruptPlayers = players.filter((p) => p.state === 'BANKRUPT');
+      for (const p of bankruptPlayers) {
+        if (p.turn && p.username === username && activePlayers.length > 1) {
+          axios.put('/api/game');
+        }
+      }
+    };
+
     // Setting up SSE for updates
     const updates = new EventSource(
       `${process.env.REACT_APP_API_BASE_URL}/api/updates/${username}`
@@ -84,14 +131,7 @@ export const Dashboard = () => {
           const { lands, players } = data;
           dispatch(LobbyActions.patchLands(lands));
           dispatch(LobbyActions.patchPlayers(players));
-
-          // Skipping turn if current player declared bankruptcy
-          for (const p of players as Player[]) {
-            if (p.turn && p.username === username && p.state === 'BANKRUPT') {
-              axios.put('/api/game');
-              break;
-            }
-          }
+          handleBankruptcy(players);
           break;
         }
         case 'END': {
@@ -147,49 +187,20 @@ export const Dashboard = () => {
     };
   }, [dispatch, navigate, username, api]);
 
-  // Determining dashboard's panel component
-  const getPanel = () => {
-    if (type === 'ADMIN') return <AdminPanel />;
-    const player = players.find((player) => player.username === username);
-    if (!player) return null;
-    return <PlayerPanel player={player} />;
-  };
-
-  return (
-    <>
-      {contextHolder}
-      <Row className="strategists-dashboard strategists-wallpaper">
-        <Col className="strategists-glossy" flex="30%">
-          <Navigation
-            dispatch={dispatch}
-            players={players}
-            state={state}
-            type={type}
-          />
-          {getPanel()}
-        </Col>
-        <Col flex="70%">
-          <Map />
-        </Col>
-      </Row>
-      <WinModal />
-    </>
-  );
+  return <>{contextHolder}</>;
 };
 
 /**
  * -----  NAVIGATION COMPONENT BELOW  -----
  */
 
-interface NavigationProps {
-  type: 'ADMIN' | 'PLAYER';
-  dispatch: Dispatch<AnyAction>;
-  state: 'ACTIVE' | 'LOBBY';
-  players: Player[];
-}
+const Navigation = () => {
+  const { user, lobby } = useSelector((state: State) => state);
+  const { type } = user;
+  const { state, players } = lobby;
 
-const Navigation = (props: NavigationProps) => {
-  const { type, dispatch, state, players } = props;
+  const dispatch = useDispatch();
+
   const [showResetModal, setShowResetModal] = useState(false);
 
   const start = () => {

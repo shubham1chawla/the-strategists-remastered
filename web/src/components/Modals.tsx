@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Land, Player, State, UserActions } from '../redux';
+import { InvestmentStrategy } from '../utils';
 import {
   Alert,
   Button,
@@ -48,23 +49,18 @@ export interface BaseModalProps {
 export interface PlayerInvestModalProps extends BaseModalProps {
   player: Player;
   land: Land;
-  investText: string;
+  title: string;
 }
 
 export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
-  const { open, player, land, investText, onCancel } = props;
+  const { open, player, land, title, onCancel } = props;
   const [ownership, setOwnership] = useState(0);
-  if (!open || !player || !land || !investText || !onCancel) {
+  if (!open || !player || !land || !title || !onCancel) {
     return null;
   }
 
-  // calculating investment-related parameters
-  const userInvestAmount = (ownership * land.marketValue) / 100;
-  const maxAvailOwnership = 100 - land.totalOwnership;
-  const maxOfferOwnership = Math.min(
-    maxAvailOwnership,
-    Math.floor((player.cash * 100) / land.marketValue)
-  );
+  // setting up investment strategy
+  const strategy = new InvestmentStrategy(player, land, ownership);
 
   const invest = async () => {
     await axios.post(`/api/players/${player.id}/lands`, {
@@ -87,25 +83,23 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
       footer={
         <Row justify="space-between" wrap={false}>
           <Space>
-            {
-              // This will show a warning to user that their current balance is less then the maximum available ownership.
-              maxOfferOwnership !== maxAvailOwnership ? (
-                <>
-                  <ExclamationCircleOutlined />
-                  <span>
-                    Offer capped at {maxOfferOwnership}% due to low cash!
-                  </span>
-                </>
-              ) : (
-                ''
-              )
-            }
+            {strategy.maxOfferableOwnership !== strategy.availableOwnership ? (
+              <>
+                <ExclamationCircleOutlined />
+                <span>
+                  Offer capped at {strategy.maxOfferableOwnership}% due to low
+                  cash!
+                </span>
+              </>
+            ) : (
+              ''
+            )}
           </Space>
           <Space>
             <Button onClick={onCancel}>Cancel</Button>
             <Button
               type="primary"
-              disabled={userInvestAmount > player.cash}
+              disabled={!strategy.feasible}
               icon={<RiseOutlined />}
               onClick={invest}
             >
@@ -118,7 +112,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
       <Row>
         <Col span={24}>
           <Divider>
-            <Tag icon={<RiseOutlined />}>{investText}</Tag>
+            <Tag icon={<RiseOutlined />}>{title}</Tag>
           </Divider>
         </Col>
       </Row>
@@ -129,10 +123,10 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
               title={
                 <Space>
                   <PieChartOutlined />
-                  Remaining Shares
+                  Remaining Ownership
                 </Space>
               }
-              value={maxAvailOwnership - ownership}
+              value={strategy.availableOwnership - ownership}
               precision={0}
               suffix={<PercentageOutlined />}
             />
@@ -147,7 +141,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
                   Remaining Cash
                 </Space>
               }
-              value={player.cash - userInvestAmount}
+              value={player.cash - strategy.cost}
               precision={2}
               prefix={<DollarCircleOutlined />}
             />
@@ -179,7 +173,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
                   Investment Cost
                 </Space>
               }
-              value={userInvestAmount}
+              value={strategy.cost}
               precision={2}
               prefix={<DollarCircleOutlined />}
             />
@@ -189,7 +183,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
       <Slider
         defaultValue={ownership}
         min={0}
-        max={maxOfferOwnership}
+        max={strategy.maxOfferableOwnership}
         onAfterChange={(value) => setOwnership(value)}
         tooltip={{
           formatter: (value) => `${value}%`,
