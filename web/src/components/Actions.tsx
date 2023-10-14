@@ -7,51 +7,41 @@ import {
   StopOutlined,
 } from '@ant-design/icons';
 import { Button, Dropdown, Space } from 'antd';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { Player, State } from '../redux';
+import { InvestmentStrategy } from '../utils';
 import { PlayerInvestModal } from '.';
 import axios from 'axios';
 
 export const Actions = () => {
   const { players, lands } = useSelector((state: State) => state.lobby);
   const { username } = useSelector((state: State) => state.user);
-
-  const [isWaiting, setWaiting] = useState(true);
-  const [isInvestmentDisabled, setInvestmentDisabled] = useState(true);
-  const [investText, setInvestText] = useState('');
   const [showModal, setShowModal] = useState(false);
 
   // Finding user in lobby's players
   const player = players.find((p) => p.username === username);
-  const turnPlayer = players.find((p) => p.turn);
+  const turnPlayer = player?.turn ? player : players.find((p) => p.turn);
   const land = player ? lands[player.index] : undefined;
 
-  useEffect(() => {
-    if (!player || !land) {
-      return;
-    }
+  if (!player || !land) {
+    return null;
+  }
 
-    // Checking if investment is allowed
-    if (
-      !land.marketValue ||
-      player.cash < 0.01 * land.marketValue ||
-      land.totalOwnership >= 100
-    ) {
-      setInvestText(
-        !land.marketValue
-          ? `Cannot invest in ${land?.name}`
-          : land.totalOwnership >= 100
-          ? 'No shares available!'
-          : `Not enough cash to invest!`
-      );
-      setInvestmentDisabled(true);
-    } else {
-      setInvestText(`Invest in ${land?.name}`);
-      setInvestmentDisabled(false);
-    }
-    setWaiting(!player.turn);
-  }, [player, land]);
+  // Defining investment strategy
+  const strategy = new InvestmentStrategy(player, land, 1);
+  let title = '';
+
+  // Checking if investment is allowed
+  if (!strategy.feasible) {
+    title = !land.marketValue
+      ? `Cannot invest in ${land?.name}`
+      : land.totalOwnership >= 100
+      ? 'No shares available!'
+      : `Not enough cash to invest!`;
+  } else {
+    title = `Invest in ${land?.name}`;
+  }
 
   return (
     <>
@@ -59,19 +49,19 @@ export const Actions = () => {
         open={showModal}
         player={player}
         land={land}
-        investText={investText}
+        title={title}
         onCancel={() => setShowModal(false)}
       />
       <div className="strategists-actions">
         {player?.state === 'BANKRUPT' ? (
           <BankruptPrompt />
-        ) : isWaiting ? (
+        ) : !player.turn ? (
           <WaitingPrompt turnPlayer={turnPlayer} />
         ) : (
           <ActionButtons
-            investText={investText}
+            title={title}
             onInvestClick={() => setShowModal(true)}
-            isInvestmentDisabled={isInvestmentDisabled}
+            isInvestmentDisabled={!strategy.feasible}
           />
         )}
       </div>
@@ -113,13 +103,13 @@ const WaitingPrompt = (props: WaitingPromptProps) => {
  */
 
 interface ActionButtonsProps {
-  investText: string;
+  title: string;
   onInvestClick: () => void;
   isInvestmentDisabled: boolean;
 }
 
 const ActionButtons = (props: ActionButtonsProps) => {
-  const { investText, onInvestClick, isInvestmentDisabled } = props;
+  const { title, onInvestClick, isInvestmentDisabled } = props;
   return (
     <>
       <Space.Compact size="large">
@@ -129,7 +119,7 @@ const ActionButtons = (props: ActionButtonsProps) => {
           icon={isInvestmentDisabled ? <StopOutlined /> : <StockOutlined />}
           onClick={onInvestClick}
         >
-          {investText}
+          {title}
         </Button>
         <Button
           icon={<StepForwardOutlined />}
