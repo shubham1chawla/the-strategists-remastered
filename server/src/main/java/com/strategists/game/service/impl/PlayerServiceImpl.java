@@ -59,6 +59,11 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
+	public List<Player> getActivePlayers() {
+		return playerRepository.findByState(State.ACTIVE);
+	}
+
+	@Override
 	public Player getPlayerById(long id) {
 		val opt = playerRepository.findById(id);
 		Assert.isTrue(opt.isPresent(), "No player found with ID: " + id);
@@ -147,7 +152,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 		log.info("Finding next player of {}", currentPlayer.getUsername());
 
-		val players = playerRepository.findAll();
+		val players = getPlayers();
 		int i = players.indexOf(currentPlayer);
 
 		// Finding suitable player

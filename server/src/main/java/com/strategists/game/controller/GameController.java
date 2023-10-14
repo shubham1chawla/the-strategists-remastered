@@ -27,18 +27,18 @@ public class GameController {
 	@PostMapping
 	public void start() {
 		Assert.state(gameService.isState(State.LOBBY), "Game already started!");
-		gameService.start();
+		gameService.startGame();
 	}
 
 	@PutMapping
 	public void next() {
 		Assert.state(gameService.isState(State.ACTIVE), "Game not started yet!");
-		gameService.next();
+		gameService.playTurn();
 	}
 
 	@DeleteMapping
 	public void reset() {
-		gameService.reset();
+		gameService.resetGame();
 	}
 
 }

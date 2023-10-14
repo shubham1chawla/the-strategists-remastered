@@ -12,6 +12,8 @@ public interface PlayerService {
 
 	List<Player> getPlayers();
 
+	List<Player> getActivePlayers();
+
 	Player getPlayerById(long id);
 
 	Player getPlayerByUsername(String username);

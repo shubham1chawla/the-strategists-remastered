@@ -12,10 +12,10 @@ public interface GameService {
 
 	boolean isState(State state);
 
-	Player start();
+	Player startGame();
 
-	Player next();
+	Player playTurn();
 
-	void reset();
+	void resetGame();
 
 }
