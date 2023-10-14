@@ -55,24 +55,17 @@ public class GameServiceImpl implements GameService {
 
 	@Override
 	@ActivityMapping(Type.START)
-	public Player start() {
+	public Player startGame() {
 		Assert.isTrue(playerService.getCount() > 0, "No players added!");
 		return playerService.assignTurn();
 	}
 
 	@Override
 	@ActivityMapping(Type.END)
-	public Player next() {
-
-		// Current player will be the previous player now
-		val prevPlayer = playerService.getCurrentPlayer();
+	public Player playTurn() {
 
 		// Assigning turn to next player
-		val player = playerService.nextPlayer(prevPlayer);
-		if (Objects.isNull(player)) {
-			log.info("Player {} is the winner", prevPlayer.getUsername());
-			return prevPlayer;
-		}
+		val player = playerService.nextPlayer(playerService.getCurrentPlayer());
 
 		// Moving the current player to a new position
 		val land = playerService.movePlayer(player, RANDOM.nextInt(diceSize) + 1);
@@ -94,6 +87,16 @@ public class GameServiceImpl implements GameService {
 		// Checking if player is bankrupt
 		if (player.getCash() < 0) {
 			playerService.bankruptPlayer(player);
+
+			// Checking if only one player remains
+			val activePlayers = playerService.getActivePlayers();
+			if (activePlayers.size() == 1) {
+
+				// Declaring the last active player as winner
+				val winner = activePlayers.get(0);
+				log.info("Player {} is the winner", winner.getUsername());
+				return winner;
+			}
 		}
 
 		// No winner declared
@@ -102,7 +105,7 @@ public class GameServiceImpl implements GameService {
 
 	@Override
 	@ActivityMapping(Type.RESET)
-	public void reset() {
+	public void resetGame() {
 		// Resetting players
 		playerService.resetPlayers();
 
