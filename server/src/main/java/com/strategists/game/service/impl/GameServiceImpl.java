@@ -2,6 +2,7 @@ package com.strategists.game.service.impl;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +15,6 @@ import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
-import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
@@ -40,9 +40,6 @@ public class GameServiceImpl implements GameService {
 	@Autowired
 	private LandService landService;
 
-	@Autowired
-	private ActivityRepository activityRepository;
-
 	@Override
 	public State getState() {
 		return playerService.isTurnAssigned() ? State.ACTIVE : State.LOBBY;
@@ -63,6 +60,12 @@ public class GameServiceImpl implements GameService {
 	@Override
 	@ActivityMapping(Type.END)
 	public Player playTurn() {
+
+		// Checking if game has ended
+		val winner = getWinnerPlayer();
+		if (winner.isPresent()) {
+			return winner.get();
+		}
 
 		// Assigning turn to next player
 		val player = playerService.nextPlayer(playerService.getCurrentPlayer());
@@ -85,22 +88,23 @@ public class GameServiceImpl implements GameService {
 		}
 
 		// Checking if player is bankrupt
-		if (player.getCash() < 0) {
+		if (player.getCash() <= 0) {
 			playerService.bankruptPlayer(player);
-
-			// Checking if only one player remains
-			val activePlayers = playerService.getActivePlayers();
-			if (activePlayers.size() == 1) {
-
-				// Declaring the last active player as winner
-				val winner = activePlayers.get(0);
-				log.info("Player {} is the winner", winner.getUsername());
-				return winner;
-			}
 		}
 
 		// No winner declared
 		return null;
+	}
+
+	private Optional<Player> getWinnerPlayer() {
+		val activePlayers = playerService.getActivePlayers();
+		if (activePlayers.size() > 1) {
+			return Optional.empty();
+		}
+
+		val winner = activePlayers.get(0);
+		log.info("Found winner: {}", winner.getUsername());
+		return Optional.of(winner);
 	}
 
 	@Override
@@ -111,9 +115,6 @@ public class GameServiceImpl implements GameService {
 
 		// Reseting lands
 		landService.resetLands();
-
-		// Reseting activities
-		activityRepository.deleteAll();
 	}
 
 }

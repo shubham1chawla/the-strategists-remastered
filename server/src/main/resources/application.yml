@@ -8,7 +8,7 @@ strategists:
     username: Creator
     password: 9999
   analysis:
-    export-directory: ../model/data/
+    export-data-directory: ../model/data/
   game:
     password-length: 4
     dice-size: 6
