@@ -28,7 +28,7 @@ public class EndActivityHandler implements ActivityHandler<EndUpdatePayload> {
 		}
 
 		// Exporting the game data
-		analysisService.export();
+		analysisService.exportGameData();
 
 		val activity = Activity.ofEnd(player.getUsername());
 		return Optional.of(new EndUpdatePayload(activity, player));

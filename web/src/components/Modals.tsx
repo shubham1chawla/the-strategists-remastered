@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Land, Player, State, UserActions } from '../redux';
 import { InvestmentStrategy } from '../utils';
@@ -467,26 +467,24 @@ export const ResetModal = (props: ResetModalProps) => {
  */
 
 export const WinModal = () => {
-  const [player, setPlayer] = useState<Player | null>(null);
   const { user, lobby } = useSelector((state: State) => state);
   const { type } = user;
   const { players, state } = lobby;
 
   const [showResetModal, setShowResetModal] = useState(false);
-  const dispatch = useDispatch();
 
+  const dispatch = useDispatch();
   const closeResetModal = () => setShowResetModal(false);
   const openResetModal = () => setShowResetModal(true);
 
-  useEffect(() => {
-    // determining whether to show win modal
-    const activePlayers = players.filter((player) => player.state === 'ACTIVE');
-    setPlayer(
-      state === 'ACTIVE' && activePlayers.length === 1 ? activePlayers[0] : null
-    );
-  }, [players, state]);
-
+  // determining whether to show win modal
+  const activePlayers = players.filter((player) => player.state === 'ACTIVE');
+  const player =
+    state === 'ACTIVE' && activePlayers.length === 1
+      ? activePlayers[0]
+      : undefined;
   if (!player) return null;
+
   return (
     <>
       <Confetti type="multiple" />

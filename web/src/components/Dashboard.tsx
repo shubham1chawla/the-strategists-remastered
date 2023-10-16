@@ -54,13 +54,8 @@ export const Dashboard = () => {
   const { username, type } = user;
   const { players } = lobby;
 
-  // Determining dashboard's panel component
-  const getPanel = () => {
-    if (type === 'ADMIN') return <AdminPanel />;
-    const player = players.find((player) => player.username === username);
-    if (!player) return null;
-    return <PlayerPanel player={player} />;
-  };
+  // Determining player
+  const player = players.find((player) => player.username === username);
 
   return (
     <>
@@ -68,7 +63,11 @@ export const Dashboard = () => {
       <Row className="strategists-dashboard strategists-wallpaper">
         <Col className="strategists-glossy" flex="30%">
           <Navigation />
-          {getPanel()}
+          {type === 'ADMIN' ? (
+            <AdminPanel />
+          ) : player ? (
+            <PlayerPanel player={player} />
+          ) : null}
         </Col>
         <Col flex="70%">
           <Map />
@@ -105,21 +104,6 @@ const Update = () => {
     // Syncing game's state
     syncGameStates(dispatch);
 
-    /**
-     * If the bankruptcy is filled by this player,
-     * and there are more than 1 active player in the game,
-     * only then we invoke the next turn.
-     */
-    const handleBankruptcy = (players: Player[]) => {
-      const activePlayers = players.filter((p) => p.state === 'ACTIVE');
-      const bankruptPlayers = players.filter((p) => p.state === 'BANKRUPT');
-      for (const p of bankruptPlayers) {
-        if (p.turn && p.username === username && activePlayers.length > 1) {
-          axios.put('/api/game');
-        }
-      }
-    };
-
     // Setting up SSE for updates
     const updates = new EventSource(
       `${process.env.REACT_APP_API_BASE_URL}/api/updates/${username}`
@@ -131,7 +115,14 @@ const Update = () => {
           const { lands, players } = data;
           dispatch(LobbyActions.patchLands(lands));
           dispatch(LobbyActions.patchPlayers(players));
-          handleBankruptcy(players);
+
+          // Skipping turn if current player declared bankruptcy
+          for (const p of players as Player[]) {
+            if (p.turn && p.username === username && p.state === 'BANKRUPT') {
+              axios.put('/api/game');
+              break;
+            }
+          }
           break;
         }
         case 'END': {
