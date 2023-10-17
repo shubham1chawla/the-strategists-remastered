@@ -3,8 +3,12 @@ package com.strategists.game.service.impl;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -29,24 +33,14 @@ import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 import com.strategists.game.util.MathUtil;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
 public class AnalysisServiceImpl implements AnalysisService {
-
-	private class Column {
-		private static final String TIMESTAMP = "timestamp";
-		private static final String PLAYER = "player";
-		private static final String BASE_CASH = "base-cash";
-		private static final String STATE = "state";
-		private static final String BANKRUPTCY_ORDER = "bankruptcy-order";
-		private static final String INVESTMENT_DEBITS = "investment-debits";
-		private static final String RENT_DEBITS = "rent-debits";
-		private static final String RENT_CREDITS = "rent-credits";
-		private static final String AVERAGE_OWNERSHIP = "average-ownership";
-	}
 
 	@Value("${strategists.analysis.export-data-directory}")
 	private File exportDataDirectory;
@@ -86,7 +80,8 @@ public class AnalysisServiceImpl implements AnalysisService {
 
 			// Adding rows to the CSV file
 			for (int order = 1; order <= orderedPlayers.size(); order++) {
-				printer.printRecord(getCSVRow(headers, orderedPlayers.get(order - 1), order, timestamp));
+				val row = new CSVRow(timestamp, order, orderedPlayers.get(order - 1));
+				printer.printRecord(row.getValues(headers));
 			}
 
 			log.info("Export completed!");
@@ -96,22 +91,24 @@ public class AnalysisServiceImpl implements AnalysisService {
 	}
 
 	private List<String> getCSVHeaders() {
-		// Preparing a list to store all headers
-		val headers = new ArrayList<String>(2 + landService.getCount());
+		val headers = new ArrayList<String>();
+		val landNames = landService.getLands().stream().map(Land::getName).toList();
 
-		// Adding constant columns
-		headers.add(Column.TIMESTAMP);
-		headers.add(Column.PLAYER);
-		headers.add(Column.BASE_CASH);
-		headers.add(Column.STATE);
-		headers.add(Column.BANKRUPTCY_ORDER);
-		headers.add(Column.INVESTMENT_DEBITS);
-		headers.add(Column.RENT_DEBITS);
-		headers.add(Column.RENT_CREDITS);
-		headers.add(Column.AVERAGE_OWNERSHIP);
+		for (Field field : CSVColumn.class.getDeclaredFields()) {
+			if (Modifier.isStatic(field.getModifiers()) && String.class.equals(field.getType())) {
+				try {
+					val header = (String) field.get(null);
+					if (CSVColumn.FORMATS.contains(header)) {
+						landNames.forEach(name -> headers.add(String.format(header, name)));
+					} else {
+						headers.add(header);
+					}
+				} catch (Exception ex) {
+					log.error(ex.getMessage(), ex);
+				}
+			}
+		}
 
-		// Adding land names as columns
-		landService.getLands().stream().map(Land::getName).map(String::toLowerCase).forEach(headers::add);
 		return headers;
 	}
 
@@ -135,47 +132,131 @@ public class AnalysisServiceImpl implements AnalysisService {
 		return orderedPlayers;
 	}
 
-	private List<Object> getCSVRow(List<String> headers, Player player, int order, long timestamp) {
-		val lands = player.getPlayerLands().stream()
-				.collect(Collectors.toMap(pl -> pl.getLand().getName().toLowerCase(), PlayerLand::getOwnership));
+	@NoArgsConstructor(access = AccessLevel.PRIVATE)
+	private class CSVColumn {
+		// Game-related columns
+		private static final String GAME_EXPORT_TIMESTAMP = "game.export.timestamp";
+		private static final String GAME_BANKRUPTCY_ORDER = "game.bankruptcy-order";
 
-		// Preparing a row to be added in the CSV
-		val row = new ArrayList<>(headers.size());
-		for (String header : headers) {
+		// Player-related columns
+		private static final String PLAYER_USERNAME = "player.username";
+		private static final String PLAYER_BASE_CASH = "player.base-cash";
+		private static final String PLAYER_STATE = "player.state";
+
+		// Ownership-related columns
+		private static final String OWNERSHIP_TOTAL = "ownership.total";
+		private static final String OWNERSHIP_COUNT = "ownership.count";
+		private static final String OWNERSHIP_LAND_FMT = "ownership.%s";
+
+		// Debits-related columns
+		private static final String DEBIT_TOTAL = "debit.total";
+		private static final String DEBIT_COUNT = "debit.count";
+		private static final String DEBIT_INVEST_TOTAL = "debit.invest.total";
+		private static final String DEBIT_INVEST_COUNT = "debit.invest.count";
+		private static final String DEBIT_INVEST_LAND_FMT = "debit.invest.%s";
+		private static final String DEBIT_RENT_TOTAL = "debit.rent.total";
+		private static final String DEBIT_RENT_COUNT = "debit.rent.count";
+		private static final String DEBIT_RENT_LAND_FMT = "debit.rent.%s";
+
+		// Credits-related columns
+		private static final String CREDIT_TOTAL = "credit.total";
+		private static final String CREDIT_COUNT = "credit.count";
+		private static final String CREDIT_RENT_TOTAL = "credit.rent.total";
+		private static final String CREDIT_RENT_COUNT = "credit.rent.count";
+		private static final String CREDIT_RENT_LAND_FMT = "credit.rent.%s";
+
+		// Formats
+		private static final Set<String> FORMATS = Set.of(OWNERSHIP_LAND_FMT, DEBIT_INVEST_LAND_FMT,
+				DEBIT_RENT_LAND_FMT, CREDIT_RENT_LAND_FMT);
+	}
+
+	private class CSVRow {
+
+		private long timestamp;
+		private int order;
+		private Player player;
+
+		private Map<String, PlayerLand> investmentPerLand;
+		private Map<String, List<Rent>> rentsPaidPerLand;
+		private Map<String, List<Rent>> rentsReceivedPerLand;
+
+		private double totalOwnership;
+		private double totalInvestment;
+		private double totalRentPaid;
+		private double totalRentReceived;
+
+		CSVRow(long timestamp, int order, Player player) {
+			this.timestamp = timestamp;
+			this.order = order;
+			this.player = player;
+
+			// Preparing statistics per land
+			investmentPerLand = player.getPlayerLands().stream()
+					.collect(Collectors.toMap(pl -> pl.getLand().getName(), Function.identity()));
+			rentsPaidPerLand = player.getPaidRents().stream()
+					.collect(Collectors.groupingBy(r -> r.getLand().getName()));
+			rentsReceivedPerLand = player.getReceivedRents().stream()
+					.collect(Collectors.groupingBy(r -> r.getLand().getName()));
+
+			// Preparing statistics for the player
+			totalOwnership = MathUtil.sum(player.getPlayerLands(), PlayerLand::getOwnership);
+			totalInvestment = MathUtil.sum(player.getPlayerLands(), PlayerLand::getBuyAmount);
+			totalRentPaid = MathUtil.sum(player.getPaidRents(), Rent::getRentAmount);
+			totalRentReceived = MathUtil.sum(player.getReceivedRents(), Rent::getRentAmount);
+		}
+
+		List<Object> getValues(List<String> headers) {
+			return headers.stream().map(this::getValue).toList();
+		}
+
+		Object getValue(String header) {
 			switch (header) {
-			case Column.TIMESTAMP:
-				row.add(timestamp);
-				break;
-			case Column.PLAYER:
-				row.add(player.getUsername());
-				break;
-			case Column.BASE_CASH:
-				row.add(player.getBaseCash());
-				break;
-			case Column.STATE:
-				row.add(player.getState());
-				break;
-			case Column.BANKRUPTCY_ORDER:
-				row.add(order);
-				break;
-			case Column.INVESTMENT_DEBITS:
-				row.add(MathUtil.sum(player.getPlayerLands(), PlayerLand::getBuyAmount));
-				break;
-			case Column.RENT_DEBITS:
-				row.add(MathUtil.sum(player.getPaidRents(), Rent::getRentAmount));
-				break;
-			case Column.RENT_CREDITS:
-				row.add(MathUtil.sum(player.getReceivedRents(), Rent::getRentAmount));
-				break;
-			case Column.AVERAGE_OWNERSHIP:
-				val average = MathUtil.sum(player.getPlayerLands(), PlayerLand::getOwnership) / landService.getCount();
-				row.add(MathUtil.round(average));
-				break;
+			case CSVColumn.GAME_EXPORT_TIMESTAMP:
+				return timestamp;
+			case CSVColumn.GAME_BANKRUPTCY_ORDER:
+				return order;
+			case CSVColumn.PLAYER_USERNAME:
+				return player.getUsername();
+			case CSVColumn.PLAYER_BASE_CASH:
+				return player.getBaseCash();
+			case CSVColumn.PLAYER_STATE:
+				return player.getState();
+			case CSVColumn.OWNERSHIP_COUNT, CSVColumn.DEBIT_INVEST_COUNT:
+				return investmentPerLand.size();
+			case CSVColumn.OWNERSHIP_TOTAL:
+				return totalOwnership;
+			case CSVColumn.DEBIT_TOTAL:
+				return MathUtil.round(totalInvestment + totalRentPaid);
+			case CSVColumn.DEBIT_COUNT:
+				return investmentPerLand.size() + player.getPaidRents().size();
+			case CSVColumn.DEBIT_INVEST_TOTAL:
+				return totalInvestment;
+			case CSVColumn.DEBIT_RENT_TOTAL:
+				return totalRentPaid;
+			case CSVColumn.DEBIT_RENT_COUNT:
+				return player.getPaidRents().size();
+			case CSVColumn.CREDIT_TOTAL, CSVColumn.CREDIT_RENT_TOTAL:
+				return totalRentReceived;
+			case CSVColumn.CREDIT_COUNT, CSVColumn.CREDIT_RENT_COUNT:
+				return player.getReceivedRents().size();
 			default:
-				row.add(lands.containsKey(header) ? lands.get(header) : 0);
+				val split = header.split("\\.");
+				val name = split[split.length - 1];
+				if ("ownership".equals(split[0])) {
+					return investmentPerLand.containsKey(name) ? investmentPerLand.get(name).getOwnership() : 0d;
+				} else if ("credit".equals(split[0])) {
+					return MathUtil.sum(rentsReceivedPerLand.get(name), Rent::getRentAmount);
+				} else if ("invest".equals(split[1])) {
+					return investmentPerLand.containsKey(name) ? investmentPerLand.get(name).getBuyAmount() : 0d;
+				} else if ("rent".equals(split[1])) {
+					return MathUtil.sum(rentsPaidPerLand.get(name), Rent::getRentAmount);
+				} else {
+					log.warn("Unknown header: {}", header);
+				}
+				return null;
 			}
 		}
-		return row;
+
 	}
 
 }
