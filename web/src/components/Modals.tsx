@@ -8,6 +8,7 @@ import {
   Card,
   Checkbox,
   Col,
+  Collapse,
   Divider,
   Modal,
   Row,
@@ -17,7 +18,9 @@ import {
   Table,
   Tag,
 } from 'antd';
+import { SliderMarks } from 'antd/es/slider';
 import {
+  CheckCircleOutlined,
   CrownOutlined,
   DollarCircleOutlined,
   ExclamationCircleOutlined,
@@ -46,6 +49,19 @@ export interface BaseModalProps {
  * -----  INVEST MODAL BELOW  -----
  */
 
+const prepareSliderMarks = (strategy: InvestmentStrategy): SliderMarks => {
+  const max = strategy.maxOfferableOwnership;
+  const style = {
+    color: 'var(--text-color)',
+    marginTop: '0.5rem',
+  };
+  const marks: SliderMarks = {};
+  [0, Math.floor(max / 2), max].forEach(
+    (ownership) => (marks[ownership] = { label: `${ownership}%`, style })
+  );
+  return marks;
+};
+
 export interface PlayerInvestModalProps extends BaseModalProps {
   player: Player;
   land: Land;
@@ -59,7 +75,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
     return null;
   }
 
-  // setting up investment strategy
+  // Setting up investment strategy
   const strategy = new InvestmentStrategy(player, land, ownership);
 
   const invest = async () => {
@@ -180,23 +196,50 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
           </Card>
         </Col>
       </Row>
-      <Slider
-        defaultValue={ownership}
-        min={0}
-        max={strategy.maxOfferableOwnership}
-        onAfterChange={(value) => setOwnership(value)}
-        tooltip={{
-          formatter: (value) => `${value}%`,
-        }}
-        autoFocus={true}
-      />
-      <Row justify="center">
-        <Space>
-          <InfoCircleOutlined />
-          Use this slider to adjust your investment offer.
-        </Space>
-      </Row>
-      <Divider />
+      <Card className="strategists-actions__modal__slider-card">
+        <Slider
+          defaultValue={ownership}
+          min={0}
+          max={strategy.maxOfferableOwnership}
+          onAfterChange={(value) => setOwnership(value)}
+          tooltip={{
+            formatter: (value) => `${value}%`,
+          }}
+          autoFocus={true}
+          marks={prepareSliderMarks(strategy)}
+        />
+        <Row justify="center">
+          <Space>
+            <InfoCircleOutlined />
+            Use this slider to adjust your investment offer.
+          </Space>
+        </Row>
+      </Card>
+      <Collapse
+        size="large"
+        bordered={false}
+        ghost={true}
+        expandIconPosition="end"
+      >
+        <Collapse.Panel
+          key="1"
+          header={
+            land.totalOwnership > 0 ? (
+              <Space>
+                <SlidersOutlined />
+                <span>Click to check {land.name}'s investments</span>
+              </Space>
+            ) : (
+              <Space>
+                <CheckCircleOutlined />
+                <span>No investments in {land.name}!</span>
+              </Space>
+            )
+          }
+        >
+          <LandInvestmentTable land={land} showHeader={false} />
+        </Collapse.Panel>
+      </Collapse>
     </Modal>
   );
 };
@@ -329,11 +372,12 @@ export const LandInvestmentModal = (
 
 export interface LandInvestmentTableProps {
   land: Land;
+  showHeader?: boolean;
 }
 
 export const LandInvestmentTable = (props: LandInvestmentTableProps) => {
   const { players } = useSelector((state: State) => state.lobby);
-  const { land } = props;
+  const { land, showHeader } = props;
 
   // preparing map of players for referencing players' usernames
   const map = new Map<number, Player>();
@@ -351,9 +395,11 @@ export const LandInvestmentTable = (props: LandInvestmentTableProps) => {
 
   return (
     <>
-      <Divider>
-        <SlidersOutlined /> Investments
-      </Divider>
+      {showHeader === undefined || !!showHeader ? (
+        <Divider>
+          <SlidersOutlined /> Investments
+        </Divider>
+      ) : null}
       <Table
         pagination={false}
         dataSource={datasource}

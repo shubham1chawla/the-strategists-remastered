@@ -162,6 +162,18 @@ h1.strategists-logo {
 
 .strategists-actions {
   &__modal {
+    &__slider-card {
+      border-color: var(--accent-color);
+    }
+
+    .ant-collapse-header {
+      padding: var(--ant-lg-padding) 0 !important;
+    }
+
+    .ant-collapse-content-box {
+      padding: 0 !important;
+    }
+
     .ant-divider:first-of-type {
       margin: 0;
     }
