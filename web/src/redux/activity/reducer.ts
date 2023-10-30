@@ -1,22 +1,24 @@
 import { ActivityActions } from '.';
 
+export type ActivityType =
+  | 'BANKRUPTCY'
+  | 'BONUS'
+  | 'CHEAT'
+  | 'END'
+  | 'EVENT'
+  | 'INVEST'
+  | 'JAIL'
+  | 'JOIN'
+  | 'KICK'
+  | 'MOVE'
+  | 'RENT'
+  | 'RESET'
+  | 'START'
+  | 'TRADE'
+  | 'TURN';
+
 export interface Activity {
-  type:
-    | 'BANKRUPTCY'
-    | 'BONUS'
-    | 'CHEAT'
-    | 'END'
-    | 'EVENT'
-    | 'INVEST'
-    | 'JAIL'
-    | 'JOIN'
-    | 'KICK'
-    | 'MOVE'
-    | 'RENT'
-    | 'RESET'
-    | 'START'
-    | 'TRADE'
-    | 'TURN';
+  type: ActivityType;
   val1: string;
   val2: string | null;
   val3: string | null;
