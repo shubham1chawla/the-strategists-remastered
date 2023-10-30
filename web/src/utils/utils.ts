@@ -1,7 +1,6 @@
-import { ReactNode } from 'react';
 import { Activity, Land, Player } from '../redux';
 
-export const parseActivity = (activity: Activity): ReactNode => {
+export const parseActivity = (activity: Activity): string => {
   const { type, val1, val2, val3, val4, val5 } = activity;
   switch (type) {
     case 'BANKRUPTCY':
