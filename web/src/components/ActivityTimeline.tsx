@@ -1,16 +1,17 @@
 import { useSelector } from 'react-redux';
-import { Tag, Timeline, Tooltip } from 'antd';
+import { Collapse, Select, Space, Timeline } from 'antd';
 import { ActivityType, State } from '../redux';
 import { parseActivity } from '../utils';
 import {
+  BarsOutlined,
   CheckOutlined,
   CrownOutlined,
   DoubleRightOutlined,
   FallOutlined,
   FireOutlined,
-  ReloadOutlined,
+  InfoCircleOutlined,
   RiseOutlined,
-  StockOutlined,
+  SettingOutlined,
   StopOutlined,
   UserAddOutlined,
   UserDeleteOutlined,
@@ -18,76 +19,83 @@ import {
 import { ReactNode, useState } from 'react';
 import { Bankruptcy } from '.';
 
-interface ActivityTimelineFilter {
-  name: string;
-  icon: ReactNode;
-  types: ActivityType[];
-  tooltip: string;
-}
+const activityTypeTree: { [key: string]: ActivityType[] } = {
+  Finacials: ['BANKRUPTCY', 'BONUS', 'INVEST', 'RENT', 'TRADE'],
+  Movements: ['MOVE', 'TURN'],
+  Players: ['JOIN', 'KICK'],
+  Specials: ['CHEAT', 'EVENT', 'JAIL', 'RESET', 'START'],
+};
 
-const filters: ActivityTimelineFilter[] = [
-  {
-    name: 'Financials',
-    icon: <StockOutlined />,
-    types: ['INVEST', 'RENT', 'BANKRUPTCY'],
-    tooltip: 'Toggle finace-related activities',
-  },
-  {
-    name: 'Turns & Moves',
-    icon: <ReloadOutlined />,
-    types: ['TURN', 'MOVE'],
-    tooltip: 'Toggle movement-related activities',
-  },
-];
+const getAllActivityTypes = (): ActivityType[] => {
+  const types: ActivityType[] = [];
+  for (const key in activityTypeTree) {
+    types.push(...activityTypeTree[key]);
+  }
+  return types;
+};
+
+const getActivityTypeOptions = () => {
+  const options = [];
+  for (const key in activityTypeTree) {
+    options.push({
+      label: key,
+      options: activityTypeTree[key].map((type) => ({
+        label: type.charAt(0) + type.slice(1).toLowerCase(),
+        value: type,
+      })),
+    });
+  }
+  return options;
+};
 
 export const ActivityTimeline = () => {
   const activities = useSelector((state: State) => state.activities);
-  const [disabledFilters, setDisabledFilters] = useState<
-    Set<ActivityTimelineFilter>
-  >(new Set());
-
-  const toggleFilter = (filter: ActivityTimelineFilter) => {
-    const updatedFilters = new Set(disabledFilters);
-    if (disabledFilters.has(filter)) {
-      updatedFilters.delete(filter);
-    } else {
-      updatedFilters.add(filter);
-    }
-    setDisabledFilters(updatedFilters);
-  };
+  const [selectedTypes, setSelectedTypes] = useState(getAllActivityTypes());
 
   // Extracting filtered activities
-  const hiddenTypes = new Set();
-  disabledFilters.forEach(({ types }) =>
-    types.forEach((type) => hiddenTypes.add(type))
-  );
-  const filteredActivities = activities.filter(
-    ({ type }) => !hiddenTypes.has(type)
+  const filteredActivites = activities.filter(({ type }) =>
+    selectedTypes.includes(type)
   );
 
   return (
     <div className="strategists-activity">
-      <div className="strategists-activity__filters">
-        {filters.map((filter) => (
-          <Tooltip key={filter.name} title={filter.tooltip}>
-            <Tag
-              key={filter.name}
-              icon={filter.icon}
-              className={`strategists-activity__filters__filter ${
-                disabledFilters.has(filter)
-                  ? ''
-                  : 'strategists-activity__filters__filter-active'
-              }`}
-              onClick={() => toggleFilter(filter)}
-            >
-              {filter.name}
-            </Tag>
-          </Tooltip>
-        ))}
-      </div>
+      <Collapse
+        size="large"
+        bordered={false}
+        expandIconPosition="end"
+        accordion={true}
+        expandIcon={(props) => (
+          <SettingOutlined rotate={props.isActive ? 90 : 0} />
+        )}
+      >
+        <Collapse.Panel
+          key="1"
+          header={
+            <Space>
+              <BarsOutlined />
+              <span>Activity Timeline</span>
+            </Space>
+          }
+        >
+          <Space>
+            <InfoCircleOutlined />
+            <span>
+              Personalize the timeline by filtering desired Activity Types.
+            </span>
+          </Space>
+          <Select
+            className="strategists-activity__filters"
+            mode="multiple"
+            maxTagCount={3}
+            value={selectedTypes}
+            onChange={(types) => setSelectedTypes(types)}
+            options={getActivityTypeOptions()}
+          />
+        </Collapse.Panel>
+      </Collapse>
       <Timeline
         className="strategists-activity__timeline"
-        items={filteredActivities.map((activity) => {
+        items={filteredActivites.map((activity) => {
           return {
             dot: getIcon(activity.type),
             children: parseActivity(activity),
