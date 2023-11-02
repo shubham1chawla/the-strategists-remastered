@@ -6,14 +6,14 @@ import { ActivityState, activityReducer } from './activity';
 import logger from 'redux-logger';
 
 export interface State {
-  activities: ActivityState;
+  activity: ActivityState;
   lobby: LobbyState;
   user: UserState;
 }
 
 export const store = createStore(
   combineReducers({
-    activities: activityReducer,
+    activity: activityReducer,
     lobby: lobbyReducer,
     user: userReducer,
   }),

@@ -1,6 +1,11 @@
-import { useSelector } from 'react-redux';
-import { Collapse, Select, Space, Timeline } from 'antd';
-import { ActivityType, State } from '../redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { Collapse, Select, Space, Timeline, notification } from 'antd';
+import {
+  ActivityActions,
+  ActivityType,
+  State,
+  getAllActivityTypes,
+} from '../redux';
 import { parseActivity } from '../utils';
 import {
   BarsOutlined,
@@ -16,93 +21,94 @@ import {
   UserAddOutlined,
   UserDeleteOutlined,
 } from '@ant-design/icons';
-import { ReactNode, useState } from 'react';
+import { ReactNode } from 'react';
 import { Bankruptcy } from '.';
 
-const activityTypeTree: { [key: string]: ActivityType[] } = {
-  Finacials: ['BANKRUPTCY', 'BONUS', 'INVEST', 'RENT', 'TRADE'],
-  Movements: ['MOVE', 'TURN'],
-  Players: ['JOIN', 'KICK'],
-  Specials: ['CHEAT', 'EVENT', 'JAIL', 'RESET', 'START'],
-};
-
-const getAllActivityTypes = (): ActivityType[] => {
-  const types: ActivityType[] = [];
-  for (const key in activityTypeTree) {
-    types.push(...activityTypeTree[key]);
-  }
-  return types;
-};
-
-const getActivityTypeOptions = () => {
-  const options = [];
-  for (const key in activityTypeTree) {
-    options.push({
-      label: key,
-      options: activityTypeTree[key].map((type) => ({
-        label: type.charAt(0) + type.slice(1).toLowerCase(),
-        value: type,
-      })),
-    });
-  }
-  return options;
-};
-
 export const ActivityTimeline = () => {
-  const activities = useSelector((state: State) => state.activities);
-  const [selectedTypes, setSelectedTypes] = useState(getAllActivityTypes());
+  const { activities, subscribedTypes } = useSelector(
+    (state: State) => state.activity
+  );
+  const dispatch = useDispatch();
+  const [api, contextHolder] = notification.useNotification();
 
   // Extracting filtered activities
   const filteredActivites = activities.filter(({ type }) =>
-    selectedTypes.includes(type)
+    subscribedTypes.includes(type)
   );
 
+  const formatActivityType = (type: ActivityType): string => {
+    return type.charAt(0) + type.slice(1).toLowerCase();
+  };
+
+  const setSubscribedTypes = (types: ActivityType[]) => {
+    if (types.length > subscribedTypes.length) {
+      const set = new Set<ActivityType>(subscribedTypes);
+      const type = types.filter((type) => !set.has(type))[0];
+      api.info({
+        message: `Subscribed to all ${formatActivityType(type)} activities!`,
+      });
+    } else {
+      const set = new Set<ActivityType>(types);
+      const type = subscribedTypes.filter((type) => !set.has(type))[0];
+      api.info({
+        message: `Unsubscribed from all ${formatActivityType(
+          type
+        )} activities!`,
+      });
+    }
+    dispatch(ActivityActions.setSubscribedTypes(types));
+  };
+
   return (
-    <div className="strategists-activity">
-      <Collapse
-        size="large"
-        bordered={false}
-        expandIconPosition="end"
-        accordion={true}
-        expandIcon={(props) => (
-          <SettingOutlined rotate={props.isActive ? 90 : 0} />
-        )}
-      >
-        <Collapse.Panel
-          key="1"
-          header={
-            <Space>
-              <BarsOutlined />
-              <span>Activity Timeline</span>
-            </Space>
-          }
+    <>
+      {contextHolder}
+      <div className="strategists-activity">
+        <Collapse
+          size="large"
+          bordered={false}
+          expandIconPosition="end"
+          accordion={true}
+          expandIcon={(props) => (
+            <SettingOutlined rotate={props.isActive ? 90 : 0} />
+          )}
         >
-          <Space>
-            <InfoCircleOutlined />
-            <span>
-              Personalize the timeline by filtering desired Activity Types.
-            </span>
-          </Space>
-          <Select
-            className="strategists-activity__filters"
-            mode="multiple"
-            maxTagCount={3}
-            value={selectedTypes}
-            onChange={(types) => setSelectedTypes(types)}
-            options={getActivityTypeOptions()}
-          />
-        </Collapse.Panel>
-      </Collapse>
-      <Timeline
-        className="strategists-activity__timeline"
-        items={filteredActivites.map((activity) => {
-          return {
-            dot: getIcon(activity.type),
-            children: parseActivity(activity),
-          };
-        })}
-      />
-    </div>
+          <Collapse.Panel
+            key="1"
+            header={
+              <Space>
+                <BarsOutlined />
+                <span>Activity Timeline</span>
+              </Space>
+            }
+          >
+            <Space>
+              <InfoCircleOutlined />
+              <span>Personalize your Timeline & Notifications.</span>
+            </Space>
+            <Select
+              className="strategists-activity__filters"
+              mode="multiple"
+              maxTagCount={3}
+              value={subscribedTypes}
+              onChange={(types) => setSubscribedTypes(types)}
+              options={getAllActivityTypes().map((type) => ({
+                label: formatActivityType(type),
+                value: type,
+              }))}
+            />
+          </Collapse.Panel>
+        </Collapse>
+        <Timeline
+          className="strategists-activity__timeline"
+          items={filteredActivites.map((activity) => {
+            return {
+              dot: getIcon(activity.type),
+              children: parseActivity(activity),
+            };
+          })}
+        />
+      </div>
+    </>
   );
 };
 

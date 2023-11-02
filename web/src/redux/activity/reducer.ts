@@ -17,6 +17,26 @@ export type ActivityType =
   | 'TRADE'
   | 'TURN';
 
+export const getAllActivityTypes = (): ActivityType[] => {
+  return [
+    'BANKRUPTCY',
+    'BONUS',
+    'CHEAT',
+    'END',
+    'EVENT',
+    'INVEST',
+    'JAIL',
+    'JOIN',
+    'KICK',
+    'MOVE',
+    'RENT',
+    'RESET',
+    'START',
+    'TRADE',
+    'TURN',
+  ];
+};
+
 export interface Activity {
   type: ActivityType;
   val1: string;
@@ -26,19 +46,39 @@ export interface Activity {
   val5: string | null;
 }
 
-export type ActivityState = Activity[];
+export interface ActivityState {
+  subscribedTypes: ActivityType[];
+  activities: Activity[];
+}
+
+const initialState: ActivityState = {
+  subscribedTypes: [...getAllActivityTypes()],
+  activities: [],
+};
 
 export const activityReducer = (
-  state: ActivityState = [],
+  state: ActivityState = initialState,
   action: any
 ): ActivityState => {
   const { type, payload } = action;
   switch (type) {
     case ActivityActions.Types.SET_ACTIVITIES:
-      return [...payload];
+      return {
+        ...state,
+        activities: [...payload],
+      };
 
     case ActivityActions.Types.ADD_ACTIVITY:
-      return [payload, ...state];
+      return {
+        ...state,
+        activities: [payload, ...state.activities],
+      };
+
+    case ActivityActions.Types.SET_SUBSCRIBED_TYPES:
+      return {
+        ...state,
+        subscribedTypes: [...payload],
+      };
 
     default:
       return state;
