@@ -1,4 +1,4 @@
-import { Dispatch, useEffect, useState } from 'react';
+import { Dispatch, useEffect, useMemo, useState } from 'react';
 import { AnyAction } from 'redux';
 import { useNavigate } from 'react-router-dom';
 import { Button, Col, Row, Tabs, Tooltip, notification } from 'antd';
@@ -54,6 +54,32 @@ export const Dashboard = () => {
   const { username, type } = user;
   const { players } = lobby;
 
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const alertUser = (event: any) => {
+    event.preventDefault();
+    return (event.returnValue = '');
+  };
+
+  // Checking if user is logged-in
+  useEffect(() => {
+    if (!username) {
+      navigate('/login');
+      return;
+    }
+
+    // Syncing game's state
+    syncGameStates(dispatch);
+
+    // Dashboard component's unmount event
+    window.addEventListener('beforeunload', alertUser);
+    return () => {
+      // Removing listener if user logouts
+      window.removeEventListener('beforeunload', alertUser);
+    };
+  }, [dispatch, navigate, username]);
+
   // Determining player
   const player = players.find((player) => player.username === username);
 
@@ -83,31 +109,33 @@ export const Dashboard = () => {
  */
 
 const Update = () => {
-  const { username } = useSelector((state: State) => state.user);
+  const { activity, user } = useSelector((state: State) => state);
+  const { subscribedTypes } = activity;
+  const { username } = user;
   const [api, contextHolder] = notification.useNotification();
 
   const dispatch = useDispatch();
-  const navigate = useNavigate();
 
-  const alertUser = (event: any) => {
-    event.preventDefault();
-    return (event.returnValue = '');
-  };
-
-  useEffect(() => {
-    // Checking if player is logged in
+  /**
+   * This useMemo ensures that we'll change the event source's instance
+   * only when the username changes.
+   */
+  const updates = useMemo(() => {
     if (!username) {
-      navigate('/login');
-      return;
+      return null;
     }
-
-    // Syncing game's state
-    syncGameStates(dispatch);
-
-    // Setting up SSE for updates
     const updates = new EventSource(
       `${process.env.REACT_APP_API_BASE_URL}/api/updates/${username}`
     );
+    updates.onerror = console.error;
+    return updates;
+  }, [username]);
+
+  /**
+   * This useEffect will only update the event source's onmessage hook.
+   */
+  useEffect(() => {
+    if (!updates) return;
     updates.onmessage = (message: MessageEvent<any>) => {
       const { type, data, activity } = JSON.parse(message.data);
       switch (type) {
@@ -161,22 +189,26 @@ const Update = () => {
           console.warn(`Unsupported update type: ${type}`);
       }
       dispatch(ActivityActions.addActivity(activity));
-      api.open({ message: parseActivity(activity) });
+      if (subscribedTypes.includes(type)) {
+        api.open({ message: parseActivity(activity) });
+      }
     };
-    updates.onerror = console.error;
+  }, [api, dispatch, subscribedTypes, updates, username]);
 
-    // Dashboard component's unmount event
-    window.addEventListener('beforeunload', alertUser);
+  /**
+   * This useEffect will close the event source for the
+   * current user if they decide to logout or closes the tab.
+   */
+  useEffect(() => {
     return () => {
-      // Closing Event Stream for the current user
+      if (!updates) {
+        return;
+      }
       updates.onmessage = null;
       updates.onerror = null;
       updates.close();
-
-      // Removing listener if user logouts
-      window.removeEventListener('beforeunload', alertUser);
     };
-  }, [dispatch, navigate, username, api]);
+  }, [updates]);
 
   return <>{contextHolder}</>;
 };
