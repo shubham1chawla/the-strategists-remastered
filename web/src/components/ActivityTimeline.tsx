@@ -29,7 +29,7 @@ export const ActivityTimeline = () => {
     (state: State) => state.activity
   );
   const dispatch = useDispatch();
-  const [api, contextHolder] = notification.useNotification();
+  const [api, contextHolder] = notification.useNotification({ maxCount: 3 });
 
   // Extracting filtered activities
   const filteredActivites = activities.filter(({ type }) =>
