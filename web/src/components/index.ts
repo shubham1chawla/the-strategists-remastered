@@ -9,4 +9,5 @@ export * from './Logo';
 export * from './Map';
 export * from './Modals';
 export * from './NotFound';
+export * from './Portfolio';
 export * from './Stats';
