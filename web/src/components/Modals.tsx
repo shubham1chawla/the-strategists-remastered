@@ -15,6 +15,7 @@ import {
   Slider,
   Space,
   Statistic,
+  Switch,
   Table,
   Tag,
 } from 'antd';
@@ -25,7 +26,6 @@ import {
   DollarCircleOutlined,
   ExclamationCircleOutlined,
   HeartOutlined,
-  HomeOutlined,
   InfoCircleOutlined,
   LogoutOutlined,
   PercentageOutlined,
@@ -37,7 +37,14 @@ import {
   UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
-import { Confetti, LandStats, Logo, PlayerStats } from '.';
+import {
+  Confetti,
+  LandStats,
+  Logo,
+  PlayerPortfolio,
+  PlayerPortfolioTable,
+  PlayerStats,
+} from '.';
 import axios from 'axios';
 
 export interface BaseModalProps {
@@ -255,89 +262,35 @@ export interface PlayerPortfolioModalProps extends BaseModalProps {
 export const PlayerPortfolioModal = (
   props: Partial<PlayerPortfolioModalProps>
 ) => {
+  const [view, setView] = useState<'chart' | 'table'>('chart');
   const { open, onCancel, player } = props;
   if (!open || !onCancel || !player) {
     return null;
   }
+  const toggleView = () => setView(view === 'chart' ? 'table' : 'chart');
 
   return (
     <Modal
       title="Portfolio Analysis"
       open={open}
       onCancel={onCancel}
-      footer={null}
+      footer={
+        <Row align="middle" justify="space-between">
+          <Space>
+            <InfoCircleOutlined /> Change portfolio view
+          </Space>
+          <Switch
+            checked={view === 'chart'}
+            checkedChildren="Chart"
+            unCheckedChildren="Table"
+            onChange={toggleView}
+          />
+        </Row>
+      }
     >
       <PlayerStats player={player} />
-      <PlayerPortfolioTable player={player} />
+      <PlayerPortfolio view={view} player={player} />
     </Modal>
-  );
-};
-
-export interface PlayerPortfolioTableProps {
-  player: Player;
-}
-
-export const PlayerPortfolioTable = (props: PlayerPortfolioTableProps) => {
-  const { lands } = useSelector((state: State) => state.lobby);
-  const { player } = props;
-
-  // preparing map of lands for referencing lands' names
-  const map = new Map<number, Land>();
-  lands.forEach((land) => map.set(land.id, land));
-
-  const datasource = (player.lands || []).map((pl) => {
-    return {
-      ...pl,
-      key: pl.landId,
-      name: pl.landId ? map.get(pl.landId)?.name : 'Unknown',
-    };
-  });
-
-  return (
-    <>
-      <Divider>
-        <SlidersOutlined /> Portfolio
-      </Divider>
-      <Table
-        pagination={false}
-        dataSource={datasource}
-        columns={[
-          {
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'name',
-            render: (value) => (
-              <Space>
-                <HomeOutlined />
-                {value}
-              </Space>
-            ),
-          },
-          {
-            title: 'Ownership',
-            dataIndex: 'ownership',
-            key: 'ownership',
-            render: (value) => (
-              <Space>
-                {value}
-                <PercentageOutlined />
-              </Space>
-            ),
-          },
-          {
-            title: 'Buy Amount',
-            dataIndex: 'buyAmount',
-            key: 'buyAmount',
-            render: (value) => (
-              <Space>
-                <DollarCircleOutlined />
-                {value}
-              </Space>
-            ),
-          },
-        ]}
-      />
-    </>
   );
 };
 
