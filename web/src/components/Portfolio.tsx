@@ -182,7 +182,33 @@ export const PlayerPortfolioChart = (props: PlayerPortfolioChartProps) => {
       })
       .legend(false)
       .style('opacity', 0.75)
-      .style('lineWidth', 1);
+      .style('lineWidth', 1)
+      .tooltip({
+        items: [
+          {
+            name: 'Property',
+            field: 'name',
+            color: 'transparent',
+          },
+          {
+            name: 'Ownership',
+            field: 'ownership',
+            color: 'transparent',
+            valueFormatter: (value: number) => `${value}%`,
+          },
+          {
+            name: 'Investment Amount',
+            field: 'buyAmount',
+            color: 'transparent',
+            valueFormatter: (value: number) => `$${value}`,
+          },
+        ],
+      });
+
+    // Updating tooltip position
+    chart.interaction('tooltip', {
+      position: 'left', // Matching the positioning of map's tooltip
+    });
 
     // Rendering the chart
     chart.render();
