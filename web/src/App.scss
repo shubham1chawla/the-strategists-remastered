@@ -369,3 +369,22 @@ h1.strategists-logo {
   .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
   background-color: var(--dark-color);
 }
+
+.g2-tooltip {
+  background-color: var(--dark-color) !important;
+  border: 1px solid var(--accent-color);
+  padding: var(--ant-lg-padding) !important;
+  font-family: var(--font-family) !important;
+  font-size: 14px !important; // This is default of antd
+  opacity: 1 !important;
+
+  * {
+    color: var(--text-color) !important;
+  }
+
+  .g2-tooltip-list-item-marker {
+    width: 0 !important;
+    height: 0 !important;
+    margin-right: 0 !important;
+  }
+}
