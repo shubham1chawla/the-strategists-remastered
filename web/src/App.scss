@@ -215,10 +215,6 @@ h1.strategists-logo {
     .ant-select-selection-item {
       background-color: var(--accent-color);
     }
-
-    .ant-select-arrow {
-      color: var(--text-color);
-    }
   }
 
   .ant-collapse-header,
@@ -358,6 +354,10 @@ h1.strategists-logo {
 }
 
 .ant-statistic-title {
+  color: var(--text-color) !important;
+}
+
+.ant-select-arrow {
   color: var(--text-color) !important;
 }
 
