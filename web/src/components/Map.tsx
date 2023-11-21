@@ -9,15 +9,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CssVariables } from '../App';
 import { Land, Player, State } from '../redux';
-import {
-  BaseModalProps,
-  LandInvestmentModal,
-  LandInvestmentModalProps,
-  LandStats,
-  PlayerPortfolioModal,
-  PlayerPortfolioModalProps,
-  PlayerStats,
-} from '.';
+import { LandStats, PlayerStats, PortfolioModal, PortfolioModalProps } from '.';
 import { Divider, Space } from 'antd';
 import { InfoCircleOutlined } from '@ant-design/icons';
 
@@ -219,8 +211,9 @@ export const Map = () => {
   const [isMapTooltipHidden, setMapTooltipHidden] = useState(true);
   const [mapTooltipBodyProps, setMapTooltipBodyProps] =
     useState<Partial<MapTooltipBodyProps> | null>(null);
-  const [mapModalProps, setMapModalProps] =
-    useState<Partial<MapModalProps> | null>(null);
+  const [modalProps, setModalProps] = useState<PortfolioModalProps | null>(
+    null
+  );
 
   // memoizing styles since they won't change
   const style = useMemo(prepareStyles, []);
@@ -246,25 +239,12 @@ export const Map = () => {
     // adding onclick hook for map modal
     cy.on('click', 'node', (event: EventObjectNode) => {
       const { player, land } = event.target.data();
-      const props: BaseModalProps = {
+      setModalProps({
         open: true,
-        onCancel: () => setMapModalProps(null),
-      };
-      if (player) {
-        setMapModalProps({
-          playerPortfolioModalProps: {
-            ...props,
-            player,
-          },
-        });
-      } else {
-        setMapModalProps({
-          landInvestmentModalProps: {
-            ...props,
-            land,
-          },
-        });
-      }
+        onCancel: () => setModalProps(null),
+        player,
+        land,
+      });
       setMapTooltipHidden(true);
     });
 
@@ -313,7 +293,7 @@ export const Map = () => {
       >
         <MapTooltipBody {...mapTooltipBodyProps} />
       </div>
-      <MapModal {...mapModalProps} />
+      <PortfolioModal {...modalProps} />
       <div ref={container} className="strategists-map"></div>
     </>
   );
@@ -349,24 +329,4 @@ const MapTooltipBody = (props: Partial<MapTooltipBodyProps>) => {
       </Divider>
     </>
   );
-};
-
-/**
- * -----  MAP MODAL BELOW  -----
- */
-
-interface MapModalProps {
-  landInvestmentModalProps: LandInvestmentModalProps;
-  playerPortfolioModalProps: PlayerPortfolioModalProps;
-}
-
-const MapModal = (props: Partial<MapModalProps>) => {
-  const { landInvestmentModalProps, playerPortfolioModalProps } = props;
-  if (landInvestmentModalProps) {
-    return <LandInvestmentModal {...landInvestmentModalProps} />;
-  }
-  if (playerPortfolioModalProps) {
-    return <PlayerPortfolioModal {...playerPortfolioModalProps} />;
-  }
-  return null;
 };

@@ -15,8 +15,6 @@ import {
   Slider,
   Space,
   Statistic,
-  Switch,
-  Table,
   Tag,
 } from 'antd';
 import { SliderMarks } from 'antd/es/slider';
@@ -34,16 +32,16 @@ import {
   SlidersOutlined,
   StopFilled,
   StopOutlined,
-  UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
 import {
   Confetti,
   LandStats,
   Logo,
-  PlayerPortfolio,
-  PlayerPortfolioTable,
   PlayerStats,
+  Portfolio,
+  TabularPortfolio,
+  VisualPortfolio,
 } from '.';
 import axios from 'axios';
 
@@ -244,7 +242,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
             )
           }
         >
-          <LandInvestmentTable land={land} showHeader={false} />
+          <TabularPortfolio perspective="land" playerLands={land.players} />
         </Collapse.Panel>
       </Collapse>
     </Modal>
@@ -252,147 +250,36 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
 };
 
 /**
- * -----  PLAYER PORTFOLIO MODAL BELOW  -----
+ * -----  PORTFOLIO MODAL BELOW  -----
  */
 
-export interface PlayerPortfolioModalProps extends BaseModalProps {
+export interface PortfolioModalProps extends BaseModalProps {
   player: Player;
-}
-
-export const PlayerPortfolioModal = (
-  props: Partial<PlayerPortfolioModalProps>
-) => {
-  const [view, setView] = useState<'chart' | 'table'>('chart');
-  const { open, onCancel, player } = props;
-  if (!open || !onCancel || !player) {
-    return null;
-  }
-  const toggleView = () => setView(view === 'chart' ? 'table' : 'chart');
-
-  return (
-    <Modal
-      title="Portfolio Analysis"
-      open={open}
-      onCancel={onCancel}
-      footer={
-        <Row align="middle" justify="space-between">
-          <Space>
-            <InfoCircleOutlined /> Change portfolio view
-          </Space>
-          <Switch
-            checked={view === 'chart'}
-            checkedChildren="Chart"
-            unCheckedChildren="Table"
-            onChange={toggleView}
-          />
-        </Row>
-      }
-    >
-      <PlayerStats player={player} />
-      <PlayerPortfolio view={view} player={player} />
-    </Modal>
-  );
-};
-
-/**
- * -----  LAND INVESTMENT MODAL BELOW  -----
- */
-
-export interface LandInvestmentModalProps extends BaseModalProps {
   land: Land;
 }
 
-export const LandInvestmentModal = (
-  props: Partial<LandInvestmentModalProps>
-) => {
-  const { open, onCancel, land } = props;
-  if (!open || !onCancel || !land) {
+export const PortfolioModal = (props: Partial<PortfolioModalProps>) => {
+  const { open, onCancel, player, land } = props;
+  if (!open || !onCancel || (!!land && !!player) || (!land && !player)) {
     return null;
   }
+  const perspective = land ? 'land' : 'player';
+  const playerLands = land ? land.players : player ? player.lands : [];
 
   return (
     <Modal
-      title="Investments' Analysis"
+      title={land ? `Investments' Analysis` : 'Portfolio Analysis'}
       open={open}
       onCancel={onCancel}
       footer={null}
     >
-      <LandStats land={land} />
-      <LandInvestmentTable land={land} />
-    </Modal>
-  );
-};
-
-export interface LandInvestmentTableProps {
-  land: Land;
-  showHeader?: boolean;
-}
-
-export const LandInvestmentTable = (props: LandInvestmentTableProps) => {
-  const { players } = useSelector((state: State) => state.lobby);
-  const { land, showHeader } = props;
-
-  // preparing map of players for referencing players' usernames
-  const map = new Map<number, Player>();
-  players.forEach((player) => map.set(player.id, player));
-
-  const datasource = (land.players || [])
-    .filter((pl) => !pl.playerId || map.get(pl.playerId)?.state !== 'BANKRUPT')
-    .map((pl) => {
-      return {
-        ...pl,
-        key: pl.playerId,
-        name: pl.playerId ? map.get(pl.playerId)?.username : 'Unknown',
-      };
-    });
-
-  return (
-    <>
-      {showHeader === undefined || !!showHeader ? (
-        <Divider>
-          <SlidersOutlined /> Investments
-        </Divider>
+      {land ? (
+        <LandStats land={land} />
+      ) : player ? (
+        <PlayerStats player={player} />
       ) : null}
-      <Table
-        pagination={false}
-        dataSource={datasource}
-        columns={[
-          {
-            title: 'Name',
-            dataIndex: 'name',
-            key: 'name',
-            render: (value) => (
-              <Space>
-                <UserOutlined />
-                {value}
-              </Space>
-            ),
-          },
-          {
-            title: 'Ownership',
-            dataIndex: 'ownership',
-            key: 'ownership',
-            render: (value) => (
-              <Space>
-                {value}
-                <PercentageOutlined />
-              </Space>
-            ),
-          },
-          {
-            title: 'Buy Amount',
-            dataIndex: 'buyAmount',
-            key: 'buyAmount',
-            render: (value) => (
-              <Space>
-                <DollarCircleOutlined />
-                {value}
-              </Space>
-            ),
-          },
-        ]}
-      />
-    </>
+      <Portfolio perspective={perspective} playerLands={playerLands} />
+    </Modal>
   );
 };
 
@@ -533,7 +420,7 @@ export const WinModal = () => {
         }
       >
         <PlayerStats player={player} />
-        <PlayerPortfolioTable player={player} />
+        <VisualPortfolio perspective="player" playerLands={player.lands} />
       </Modal>
       {showResetModal ? (
         <ResetModal open={showResetModal} onCancel={closeResetModal} />
