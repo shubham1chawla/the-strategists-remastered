@@ -4,4 +4,6 @@ public interface AnalysisService {
 
 	void exportGameData();
 
+	void updateTrends();
+
 }

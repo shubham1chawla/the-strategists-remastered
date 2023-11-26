@@ -24,6 +24,10 @@ public class EndActivityHandler implements ActivityHandler<EndUpdatePayload> {
 	public Optional<EndUpdatePayload> apply(Object obj, Object[] args) {
 		val player = (Player) obj;
 		if (Objects.isNull(player)) {
+
+			// Updating game's trends
+			analysisService.updateTrends();
+
 			return Optional.empty();
 		}
 

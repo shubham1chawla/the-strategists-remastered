@@ -27,7 +27,9 @@ import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
+import com.strategists.game.entity.Trend;
 import com.strategists.game.repository.ActivityRepository;
+import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.service.AnalysisService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
@@ -47,6 +49,9 @@ public class AnalysisServiceImpl implements AnalysisService {
 
 	@Autowired
 	private ActivityRepository activityRepository;
+
+	@Autowired
+	private TrendRepository trendRepository;
 
 	@Autowired
 	private PlayerService playerService;
@@ -259,4 +264,9 @@ public class AnalysisServiceImpl implements AnalysisService {
 
 	}
 
+	@Override
+	public void updateTrends() {
+		trendRepository.saveAll(playerService.getActivePlayers().stream().map(Trend::fromPlayer).toList());
+		trendRepository.saveAll(landService.getLands().stream().map(Trend::fromLand).toList());
+	}
 }
