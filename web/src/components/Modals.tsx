@@ -1,7 +1,5 @@
 import { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Land, Player, State, UserActions } from '../redux';
-import { InvestmentStrategy } from '../utils';
 import {
   Alert,
   Button,
@@ -15,6 +13,7 @@ import {
   Slider,
   Space,
   Statistic,
+  Tabs,
   Tag,
 } from 'antd';
 import { SliderMarks } from 'antd/es/slider';
@@ -41,8 +40,11 @@ import {
   PlayerStats,
   Portfolio,
   TabularPortfolio,
+  Trends,
   VisualPortfolio,
 } from '.';
+import { Land, Player, State, UserActions } from '../redux';
+import { InvestmentStrategy } from '../utils';
 import axios from 'axios';
 
 export interface BaseModalProps {
@@ -265,6 +267,7 @@ export const PortfolioModal = (props: Partial<PortfolioModalProps>) => {
   }
   const perspective = land ? 'land' : 'player';
   const playerLands = land ? land.players : player ? player.lands : [];
+  const id = land ? land.id : player ? player.id : -1;
 
   return (
     <Modal
@@ -278,7 +281,25 @@ export const PortfolioModal = (props: Partial<PortfolioModalProps>) => {
       ) : player ? (
         <PlayerStats player={player} />
       ) : null}
-      <Portfolio perspective={perspective} playerLands={playerLands} />
+      <Tabs
+        centered
+        defaultActiveKey="1"
+        size="large"
+        items={[
+          {
+            key: '1',
+            label: 'Trends',
+            children: <Trends perspective={perspective} id={id} />,
+          },
+          {
+            key: '2',
+            label: 'Portfolio',
+            children: (
+              <Portfolio perspective={perspective} playerLands={playerLands} />
+            ),
+          },
+        ]}
+      />
     </Modal>
   );
 };
@@ -420,7 +441,28 @@ export const WinModal = () => {
         }
       >
         <PlayerStats player={player} />
-        <VisualPortfolio perspective="player" playerLands={player.lands} />
+        <Tabs
+          centered
+          defaultActiveKey="1"
+          size="large"
+          items={[
+            {
+              key: '1',
+              label: 'Trends',
+              children: <Trends perspective="player" id={player.id} />,
+            },
+            {
+              key: '2',
+              label: 'Portfolio',
+              children: (
+                <VisualPortfolio
+                  perspective="player"
+                  playerLands={player.lands}
+                />
+              ),
+            },
+          ]}
+        />
       </Modal>
       {showResetModal ? (
         <ResetModal open={showResetModal} onCancel={closeResetModal} />
