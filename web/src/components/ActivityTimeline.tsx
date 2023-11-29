@@ -1,12 +1,6 @@
-import { useDispatch, useSelector } from 'react-redux';
+import { ReactNode } from 'react';
 import { Collapse, Select, Space, Timeline, notification } from 'antd';
-import {
-  ActivityActions,
-  ActivityType,
-  State,
-  getAllActivityTypes,
-} from '../redux';
-import { parseActivity } from '../utils';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   BarsOutlined,
   CheckOutlined,
@@ -21,8 +15,14 @@ import {
   UserAddOutlined,
   UserDeleteOutlined,
 } from '@ant-design/icons';
-import { ReactNode } from 'react';
 import { Bankruptcy } from '.';
+import {
+  ActivityActions,
+  State,
+  UpdateType,
+  getAllUpdateTypes,
+} from '../redux';
+import { parseActivity } from '../utils';
 
 export const ActivityTimeline = () => {
   const { activities, subscribedTypes } = useSelector(
@@ -36,24 +36,22 @@ export const ActivityTimeline = () => {
     subscribedTypes.includes(type)
   );
 
-  const formatActivityType = (type: ActivityType): string => {
+  const formatUpdateType = (type: UpdateType): string => {
     return type.charAt(0) + type.slice(1).toLowerCase();
   };
 
-  const setSubscribedTypes = (types: ActivityType[]) => {
+  const setSubscribedTypes = (types: UpdateType[]) => {
     if (types.length > subscribedTypes.length) {
-      const set = new Set<ActivityType>(subscribedTypes);
+      const set = new Set<UpdateType>(subscribedTypes);
       const type = types.filter((type) => !set.has(type))[0];
       api.info({
-        message: `Subscribed to all ${formatActivityType(type)} activities!`,
+        message: `Subscribed to all ${formatUpdateType(type)} activities!`,
       });
     } else {
-      const set = new Set<ActivityType>(types);
+      const set = new Set<UpdateType>(types);
       const type = subscribedTypes.filter((type) => !set.has(type))[0];
       api.info({
-        message: `Unsubscribed from all ${formatActivityType(
-          type
-        )} activities!`,
+        message: `Unsubscribed from all ${formatUpdateType(type)} activities!`,
       });
     }
     dispatch(ActivityActions.setSubscribedTypes(types));
@@ -91,8 +89,8 @@ export const ActivityTimeline = () => {
               maxTagCount={3}
               value={subscribedTypes}
               onChange={(types) => setSubscribedTypes(types)}
-              options={getAllActivityTypes().map((type) => ({
-                label: formatActivityType(type),
+              options={getAllUpdateTypes().map((type) => ({
+                label: formatUpdateType(type),
                 value: type,
               }))}
             />
@@ -112,7 +110,7 @@ export const ActivityTimeline = () => {
   );
 };
 
-const getIcon = (type: ActivityType): ReactNode | undefined => {
+const getIcon = (type: UpdateType): ReactNode | undefined => {
   switch (type) {
     case 'BANKRUPTCY':
       return <Bankruptcy />;

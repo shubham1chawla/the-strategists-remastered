@@ -16,16 +16,16 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.strategists.game.entity.Activity.Type;
-import com.strategists.game.activity.ActivityMapping;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
-import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Player.State;
+import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
 import com.strategists.game.repository.PlayerRepository;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
+import com.strategists.game.update.UpdateMapping;
+import com.strategists.game.update.UpdateType;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -82,7 +82,7 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	@ActivityMapping(Type.JOIN)
+	@UpdateMapping(UpdateType.JOIN)
 	public Player addPlayer(String username, double cash) {
 		log.info("Checking if {} username exists...", username);
 		Assert.isTrue(!playerRepository.existsByUsername(username), username + " username already exists!");
@@ -97,7 +97,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Override
 	@Transactional
-	@ActivityMapping(Type.KICK)
+	@UpdateMapping(UpdateType.KICK)
 	public void kickPlayer(String username) {
 		try {
 			playerRepository.deleteByUsername(username);
@@ -135,7 +135,7 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	@ActivityMapping(Type.MOVE)
+	@UpdateMapping(UpdateType.MOVE)
 	public Land movePlayer(Player player, int move) {
 		player.setIndex((player.getIndex() + move) % landService.getCount());
 		playerRepository.save(player);
@@ -145,7 +145,7 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	@ActivityMapping(Type.TURN)
+	@UpdateMapping(UpdateType.TURN)
 	public Player nextPlayer(Player currentPlayer) {
 		Assert.state(currentPlayer.isTurn(),
 				currentPlayer.getUsername() + " should have the turn to find who's the next player!");
@@ -180,7 +180,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Override
 	@Transactional
-	@ActivityMapping(Type.INVEST)
+	@UpdateMapping(UpdateType.INVEST)
 	public void invest(Player player, Land land, double ownership) {
 		val buyAmount = land.getMarketValue() * (ownership / 100);
 		Assert.isTrue(land.getTotalOwnership() + ownership <= 100, "Can't buy more than 100% of a land!");
@@ -205,7 +205,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Override
 	@Transactional
-	@ActivityMapping(Type.RENT)
+	@UpdateMapping(UpdateType.RENT)
 	public void payRent(Rent rent) {
 		val source = rent.getSourcePlayer();
 		val target = rent.getTargetPlayer();
@@ -226,7 +226,7 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	@ActivityMapping(Type.BANKRUPTCY)
+	@UpdateMapping(UpdateType.BANKRUPTCY)
 	public void bankruptPlayer(Player player) {
 		player.setState(State.BANKRUPT);
 		playerRepository.save(player);

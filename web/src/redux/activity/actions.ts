@@ -1,4 +1,4 @@
-import { Activity, ActivityType } from './reducer';
+import { Activity, UpdateType } from './reducer';
 
 export namespace ActivityActions {
   export const Types = {
@@ -21,7 +21,7 @@ export namespace ActivityActions {
     };
   };
 
-  export const setSubscribedTypes = (types: ActivityType[]) => {
+  export const setSubscribedTypes = (types: UpdateType[]) => {
     return {
       type: Types.SET_SUBSCRIBED_TYPES,
       payload: types,

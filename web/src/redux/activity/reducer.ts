@@ -1,6 +1,6 @@
 import { ActivityActions } from '.';
 
-export type ActivityType =
+export type UpdateType =
   | 'BANKRUPTCY'
   | 'BONUS'
   | 'CHEAT'
@@ -17,7 +17,7 @@ export type ActivityType =
   | 'TRADE'
   | 'TURN';
 
-export const getAllActivityTypes = (): ActivityType[] => {
+export const getAllUpdateTypes = (): UpdateType[] => {
   return [
     'BANKRUPTCY',
     'BONUS',
@@ -38,7 +38,7 @@ export const getAllActivityTypes = (): ActivityType[] => {
 };
 
 export interface Activity {
-  type: ActivityType;
+  type: UpdateType;
   val1: string;
   val2: string | null;
   val3: string | null;
@@ -47,12 +47,12 @@ export interface Activity {
 }
 
 export interface ActivityState {
-  subscribedTypes: ActivityType[];
+  subscribedTypes: UpdateType[];
   activities: Activity[];
 }
 
 const initialState: ActivityState = {
-  subscribedTypes: [...getAllActivityTypes()],
+  subscribedTypes: [...getAllUpdateTypes()],
   activities: [],
 };
 

@@ -1,7 +1,13 @@
 import { Dispatch, useEffect, useMemo, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { AnyAction } from 'redux';
 import { useNavigate } from 'react-router-dom';
 import { Button, Col, Row, Tabs, Tooltip, notification } from 'antd';
+import {
+  LogoutOutlined,
+  PlayCircleFilled,
+  StopFilled,
+} from '@ant-design/icons';
 import {
   Actions,
   ActivityTimeline,
@@ -12,20 +18,16 @@ import {
   ResetModal,
   WinModal,
 } from '.';
-import { useDispatch, useSelector } from 'react-redux';
 import {
+  Activity,
   ActivityActions,
   LobbyActions,
   Player,
   State,
+  UpdateType,
   UserActions,
 } from '../redux';
 import { parseActivity } from '../utils';
-import {
-  LogoutOutlined,
-  PlayCircleFilled,
-  StopFilled,
-} from '@ant-design/icons';
 import axios from 'axios';
 
 /**
@@ -108,6 +110,12 @@ export const Dashboard = () => {
  * -----  UPDATE COMPONENT BELOW  -----
  */
 
+interface UpdatePayload {
+  type: UpdateType;
+  activity?: Activity;
+  payload: any;
+}
+
 const Update = () => {
   const { activity, user } = useSelector((state: State) => state);
   const { subscribedTypes } = activity;
@@ -137,10 +145,12 @@ const Update = () => {
   useEffect(() => {
     if (!updates) return;
     updates.onmessage = (message: MessageEvent<any>) => {
-      const { type, data, activity } = JSON.parse(message.data);
+      const { type, payload, activity }: UpdatePayload = JSON.parse(
+        message.data
+      );
       switch (type) {
         case 'BANKRUPTCY': {
-          const { lands, players } = data;
+          const { lands, players } = payload;
           dispatch(LobbyActions.patchLands(lands));
           dispatch(LobbyActions.patchPlayers(players));
 
@@ -158,36 +168,37 @@ const Update = () => {
           break;
         }
         case 'INVEST': {
-          const { land, players } = data;
+          const { land, players } = payload;
           dispatch(LobbyActions.patchLands([land]));
           dispatch(LobbyActions.patchPlayers(players));
           break;
         }
         case 'JOIN':
-          dispatch(LobbyActions.addPlayer(data));
+          dispatch(LobbyActions.addPlayer(payload));
           break;
         case 'KICK':
-          dispatch(LobbyActions.kickPlayer(data));
+          dispatch(LobbyActions.kickPlayer(payload));
           break;
         case 'MOVE':
-          dispatch(LobbyActions.patchPlayers([data]));
+          dispatch(LobbyActions.patchPlayers([payload]));
           break;
         case 'RENT':
-          dispatch(LobbyActions.patchPlayers(data));
+          dispatch(LobbyActions.patchPlayers(payload));
           break;
         case 'RESET':
           syncGameStates(dispatch);
           break;
         case 'START':
-          dispatch(LobbyActions.patchPlayers([data]));
+          dispatch(LobbyActions.patchPlayers([payload]));
           dispatch(LobbyActions.setState('ACTIVE'));
           break;
         case 'TURN':
-          dispatch(LobbyActions.patchPlayers(data));
+          dispatch(LobbyActions.patchPlayers(payload));
           break;
         default:
           console.warn(`Unsupported update type: ${type}`);
       }
+      if (!activity) return;
       dispatch(ActivityActions.addActivity(activity));
       if (subscribedTypes.includes(type)) {
         api.open({ message: parseActivity(activity) });
