@@ -132,45 +132,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
         </Row>
       }
     >
-      <Row>
-        <Col span={24}>
-          <Divider>
-            <Tag icon={<RiseOutlined />}>{title}</Tag>
-          </Divider>
-        </Col>
-      </Row>
-      <Row>
-        <Col span={12}>
-          <Card bordered={false}>
-            <Statistic
-              title={
-                <Space>
-                  <PieChartOutlined />
-                  Remaining Ownership
-                </Space>
-              }
-              value={strategy.availableOwnership - ownership}
-              precision={0}
-              suffix={<PercentageOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card bordered={false}>
-            <Statistic
-              title={
-                <Space>
-                  <WalletOutlined />
-                  Remaining Cash
-                </Space>
-              }
-              value={player.cash - strategy.cost}
-              precision={2}
-              prefix={<DollarCircleOutlined />}
-            />
-          </Card>
-        </Col>
-      </Row>
+      <LandStats land={land} />
       <Row>
         <Col span={12}>
           <Card bordered={false}>
