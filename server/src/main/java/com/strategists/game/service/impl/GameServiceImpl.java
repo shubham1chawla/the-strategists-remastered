@@ -10,14 +10,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.strategists.game.activity.ActivityMapping;
-import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
+import com.strategists.game.update.UpdateMapping;
+import com.strategists.game.update.UpdateType;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -51,14 +51,14 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	@ActivityMapping(Type.START)
+	@UpdateMapping(UpdateType.START)
 	public Player startGame() {
 		Assert.isTrue(playerService.getCount() > 0, "No players added!");
 		return playerService.assignTurn();
 	}
 
 	@Override
-	@ActivityMapping(Type.END)
+	@UpdateMapping(UpdateType.END)
 	public Player playTurn() {
 
 		// Checking if game has ended
@@ -108,7 +108,7 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	@ActivityMapping(Type.RESET)
+	@UpdateMapping(UpdateType.RESET)
 	public void resetGame() {
 		// Resetting players
 		playerService.resetPlayers();

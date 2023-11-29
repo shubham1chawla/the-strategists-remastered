@@ -1,26 +1,32 @@
-package com.strategists.game.activity.handler;
+package com.strategists.game.update.handler;
 
 import java.util.HashSet;
-import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 
-import com.strategists.game.activity.payload.BankruptcyUpdatePayload;
 import com.strategists.game.entity.Activity;
-import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
+import com.strategists.game.update.UpdateType;
+import com.strategists.game.update.payload.BankruptcyUpdatePayload;
 
 import lombok.val;
 
 @Component
-public class BankruptcyActivityHandler implements ActivityHandler<BankruptcyUpdatePayload> {
+public class BankruptcyUpdateHandler extends AbstractUpdateHandler<BankruptcyUpdatePayload> {
 
 	@Override
-	public Optional<BankruptcyUpdatePayload> apply(Object obj, Object[] args) {
+	public UpdateType getType() {
+		return UpdateType.BANKRUPTCY;
+	}
+
+	@Override
+	public void handle(Object returnValue, Object[] args) {
+		// Bankrupt player as per the argument
 		val player = (Player) args[0];
 
+		// Extracting all the impacted players and lands
 		val players = new HashSet<Player>();
 		players.add(player);
 		val lands = player.getPlayerLands().stream().map(PlayerLand::getLand).toList();
@@ -28,13 +34,9 @@ public class BankruptcyActivityHandler implements ActivityHandler<BankruptcyUpda
 			players.addAll(land.getPlayerLands().stream().map(PlayerLand::getPlayer).toList());
 		}
 
+		// Persisting the activity and sending the update
 		val activity = Activity.ofBankruptcy(player.getUsername());
-		return Optional.of(new BankruptcyUpdatePayload(activity, lands, players));
-	}
-
-	@Override
-	public Type getType() {
-		return Type.BANKRUPTCY;
+		sendUpdate(new BankruptcyUpdatePayload(saveActivity(activity), lands, players));
 	}
 
 }

@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.strategists.game.entity.Activity;
-import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
@@ -33,6 +32,7 @@ import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.service.AnalysisService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
+import com.strategists.game.update.UpdateType;
 import com.strategists.game.util.MathUtil;
 
 import lombok.AccessLevel;
@@ -124,7 +124,7 @@ public class AnalysisServiceImpl implements AnalysisService {
 
 		// Adding players in order of bankruptcy
 		val orderedPlayers = new ArrayList<Player>(players.size());
-		for (Activity activity : activityRepository.findByType(Type.BANKRUPTCY)) {
+		for (Activity activity : activityRepository.findByType(UpdateType.BANKRUPTCY)) {
 			orderedPlayers.add(players.get(activity.getVal1()));
 		}
 

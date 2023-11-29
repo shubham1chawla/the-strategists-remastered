@@ -1,14 +1,12 @@
-package com.strategists.game.activity;
+package com.strategists.game.update;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.strategists.game.entity.Activity.Type;
-
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
-public @interface ActivityMapping {
-	Type value();
+public @interface UpdateMapping {
+	UpdateType value();
 }

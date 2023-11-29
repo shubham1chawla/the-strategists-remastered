@@ -9,8 +9,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import com.strategists.game.activity.payload.AbstractUpdatePayload;
 import com.strategists.game.service.UpdateService;
+import com.strategists.game.update.payload.UpdatePayload;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -35,12 +35,12 @@ public class UpdateServiceImpl implements UpdateService {
 	}
 
 	@Override
-	public void sendUpdate(AbstractUpdatePayload<?> payload) {
+	public void sendUpdate(UpdatePayload<?> payload) {
 		sendUpdate(payload, ALL);
 	}
 
 	@Override
-	public void sendUpdate(AbstractUpdatePayload<?> payload, Predicate<String> filter) {
+	public void sendUpdate(UpdatePayload<?> payload, Predicate<String> filter) {
 		emitters.entrySet().stream().filter(entry -> filter.test(entry.getKey())).forEach(entry -> {
 			try {
 				entry.getValue().send(payload, MediaType.APPLICATION_JSON);
