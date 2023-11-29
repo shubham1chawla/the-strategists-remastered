@@ -10,6 +10,7 @@ import com.strategists.game.activity.payload.ResetUpdatePayload;
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Activity.Type;
 import com.strategists.game.repository.ActivityRepository;
+import com.strategists.game.repository.TrendRepository;
 
 @Component
 public class ResetActivityHandler implements ActivityHandler<ResetUpdatePayload> {
@@ -20,11 +21,17 @@ public class ResetActivityHandler implements ActivityHandler<ResetUpdatePayload>
 	@Autowired
 	private ActivityRepository activityRepository;
 
+	@Autowired
+	private TrendRepository trendRepository;
+
 	@Override
 	public Optional<ResetUpdatePayload> apply(Object obj, Object[] args) {
 
 		// Reseting activities
 		activityRepository.deleteAll();
+
+		// Reseting trends
+		trendRepository.deleteAll();
 
 		return Optional.of(new ResetUpdatePayload(Activity.ofReset(adminUsername)));
 	}
