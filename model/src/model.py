@@ -6,6 +6,9 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.utils.class_weight import compute_sample_weight
 
 MODEL_EXPORT_NAME = 'model.sav'
+PROBABILITY_THRESHOLD = 0.2
+TEST_SPLIT_RATIO = 0.25
+TEST_RANDOM_STATE = 42
 
 def export_model(data_dir: str, out_dir: str) -> None:
     csv_files = []
@@ -14,17 +17,11 @@ def export_model(data_dir: str, out_dir: str) -> None:
             csv_files.append(path.join(data_dir, export_file_path))
     print(f'CSV files found: {len(csv_files)}')
 
-    all_games_data = pd.concat([pd.read_csv(f) for f in csv_files], ignore_index=True)
-    all_games_data['is_winner'] = all_games_data['player.state'].apply(lambda x: 1 if x == 'ACTIVE' else 0)
+    df = pd.concat([pd.read_csv(f) for f in csv_files], ignore_index=True)
+    X = df[get_features(df)]
+    y = df['player.state'].apply(lambda x: 1 if x == 'ACTIVE' else 0)
 
-    debit_columns = [col for col in all_games_data.columns if col.startswith('debit.')]
-    credit_columns = [col for col in all_games_data.columns if col.startswith('credit.')]
-    features = ['player.base-cash'] + debit_columns + credit_columns
-
-    X = all_games_data[features]
-    y = all_games_data['is_winner']
-
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=TEST_SPLIT_RATIO, random_state=TEST_RANDOM_STATE)
 
     sample_weights = compute_sample_weight(class_weight='balanced', y=y_train)
 
@@ -51,16 +48,16 @@ def evaluate_model(model_dir: str, predict_file: str) -> None:
     print(f'Model: {model_file_path}')
 
     model = pickle.load(open(model_file_path, 'rb'))
-    input_df = pd.read_csv(predict_file)
+    df = pd.read_csv(predict_file)
+    df = df[get_features(df)]
 
-    debit_columns = [col for col in input_df.columns if col.startswith('debit.')]
-    credit_columns = [col for col in input_df.columns if col.startswith('credit.')]
-    features = ['player.base-cash'] + debit_columns + credit_columns
-    input_df_filtered = input_df[features]
-
-    predicted_probability = model.predict_proba(input_df_filtered)[:, 1]
-
-    threshold = 0.2
-    prediction = (predicted_probability >= threshold).astype(int)
-
+    predicted_probability = model.predict_proba(df)[:, 1]
+    prediction = (predicted_probability >= PROBABILITY_THRESHOLD).astype(int)
     print(f'Prediction: {prediction[0]}')
+
+
+def get_features(df: pd.DataFrame) -> pd.DataFrame:
+    ownership_columns = [col for col in df.columns if col.startswith('ownership.')]
+    debit_columns = [col for col in df.columns if col.startswith('debit.')]
+    credit_columns = [col for col in df.columns if col.startswith('credit.')]
+    return ['player.base-cash'] + debit_columns + credit_columns + ownership_columns
