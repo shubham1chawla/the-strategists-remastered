@@ -8,25 +8,22 @@ import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.update.UpdateType;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
 public class InvestUpdatePayload implements UpdatePayload<Map<String, Object>> {
 
 	private Activity activity;
-	private Land land;
-	private List<Player> players;
+	private Map<String, Object> payload;
+
+	public InvestUpdatePayload(Activity activity, Land land, List<Player> players) {
+		this.activity = activity;
+		this.payload = Map.of("land", land, "players", players);
+	}
 
 	@Override
 	public UpdateType getType() {
 		return UpdateType.INVEST;
-	}
-
-	@Override
-	public Map<String, Object> getPayload() {
-		return Map.of("land", land, "players", players);
 	}
 
 }

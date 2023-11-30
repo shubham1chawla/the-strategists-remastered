@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.strategists.game.entity.Player;
-import com.strategists.game.entity.Trend;
-import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.request.AddPlayerRequest;
 import com.strategists.game.request.InvestmentRequest;
 import com.strategists.game.request.KickPlayerRequest;
@@ -38,9 +36,6 @@ public class PlayerController {
 
 	@Autowired
 	private LandService landService;
-
-	@Autowired
-	private TrendRepository trendRepository;
 
 	@GetMapping
 	public List<Player> getPlayers() {
@@ -75,12 +70,6 @@ public class PlayerController {
 		Assert.state(Objects.equals(land.getId(), request.getLandId()), "Current player is not at the requested land!");
 
 		playerService.invest(player, land, request.getOwnership());
-	}
-
-	@GetMapping("/{playerId}/trends")
-	public List<Trend> getTrends(@PathVariable Long playerId) {
-		Assert.state(gameService.isState(State.ACTIVE), "Trends are available in Active games only!");
-		return trendRepository.findByPlayerIdOrderByIdAsc(playerId);
 	}
 
 }

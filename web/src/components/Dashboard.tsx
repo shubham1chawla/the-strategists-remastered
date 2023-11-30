@@ -24,6 +24,7 @@ import {
   LobbyActions,
   Player,
   State,
+  TrendActions,
   UpdateType,
   UserActions,
 } from '../redux';
@@ -39,6 +40,7 @@ const getCalls = {
   '/api/activities': ActivityActions.setActivities, // Updating players
   '/api/lands': LobbyActions.setLands, // Updating lands
   '/api/game': LobbyActions.setState, // Updating state
+  '/api/trends': TrendActions.setTrends, // Updating trends
 };
 
 const syncGameStates = (dispatch: Dispatch<AnyAction>) => {
@@ -191,6 +193,9 @@ const Update = () => {
         case 'START':
           dispatch(LobbyActions.patchPlayers([payload]));
           dispatch(LobbyActions.setState('ACTIVE'));
+          break;
+        case 'TREND':
+          dispatch(TrendActions.addTrends(payload));
           break;
         case 'TURN':
           dispatch(LobbyActions.patchPlayers(payload));

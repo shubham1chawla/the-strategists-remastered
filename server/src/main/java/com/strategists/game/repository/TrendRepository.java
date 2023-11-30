@@ -8,8 +8,6 @@ import com.strategists.game.entity.Trend;
 
 public interface TrendRepository extends JpaRepository<Trend, Long> {
 
-	List<Trend> findByPlayerIdOrderByIdAsc(Long playerId);
-
-	List<Trend> findByLandIdOrderByIdAsc(Long landId);
+	List<Trend> findByOrderByIdAsc();
 
 }

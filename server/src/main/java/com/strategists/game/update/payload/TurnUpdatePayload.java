@@ -14,17 +14,16 @@ import lombok.Getter;
 public class TurnUpdatePayload implements UpdatePayload<List<Player>> {
 
 	private Activity activity;
-	private Player currentPlayer;
-	private Player previousPlayer;
+	private List<Player> payload;
+
+	public TurnUpdatePayload(Activity activity, Player currentPlayer, Player previousPlayer) {
+		this.activity = activity;
+		this.payload = List.of(currentPlayer, previousPlayer);
+	}
 
 	@Override
 	public UpdateType getType() {
 		return UpdateType.TURN;
-	}
-
-	@Override
-	public List<Player> getPayload() {
-		return List.of(currentPlayer, previousPlayer);
 	}
 
 }
