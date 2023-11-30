@@ -32,6 +32,7 @@ import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.service.AnalysisService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
+import com.strategists.game.update.UpdateMapping;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.util.MathUtil;
 
@@ -265,8 +266,13 @@ public class AnalysisServiceImpl implements AnalysisService {
 	}
 
 	@Override
-	public void updateTrends() {
-		trendRepository.saveAll(playerService.getActivePlayers().stream().map(Trend::fromPlayer).toList());
-		trendRepository.saveAll(landService.getLands().stream().map(Trend::fromLand).toList());
+	@UpdateMapping(UpdateType.TREND)
+	public List<Trend> updateTrends() {
+		val players = playerService.getActivePlayers();
+		val lands = landService.getLands();
+		val trends = new ArrayList<Trend>(players.size() + lands.size());
+		trends.addAll(trendRepository.saveAll(players.stream().map(Trend::fromPlayer).toList()));
+		trends.addAll(trendRepository.saveAll(lands.stream().map(Trend::fromLand).toList()));
+		return trends;
 	}
 }

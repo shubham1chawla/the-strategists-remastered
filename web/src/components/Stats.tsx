@@ -25,9 +25,15 @@ import {
   UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
-import { Land, Player, PlayerLand, State } from '../redux';
+import {
+  Land,
+  LandTrend,
+  Player,
+  PlayerLand,
+  PlayerTrend,
+  State,
+} from '../redux';
 import { CssVariables } from '../App';
-import axios from 'axios';
 
 /**
  * -----  PLAYER STATS BELOW  -----
@@ -257,6 +263,7 @@ export interface TrendsProps {
 }
 
 export const Trends = (props: TrendsProps) => {
+  const trends = useSelector((state: State) => state.trend);
   const { perspective, id } = props;
 
   useEffect(() => {
@@ -290,23 +297,21 @@ export const Trends = (props: TrendsProps) => {
       position: 'left', // Matching the positioning of map's tooltip
     });
 
-    // Calling API to fetch trends data
-    axios.get(`/api/${perspective}s/${id}/trends`).then((response) => {
-      perspective === 'player'
-        ? drawPlayerTrends(chart, response.data)
-        : drawLandTrends(chart, response.data);
-      chart.render();
-    });
-  }, [perspective, id]);
+    switch (perspective) {
+      case 'player':
+        const playerTrends = trends.filter(({ playerId }) => playerId === id);
+        drawPlayerTrends(chart, playerTrends as PlayerTrend[]);
+        break;
+      case 'land':
+        const landTrends = trends.filter(({ landId }) => landId === id);
+        drawLandTrends(chart, landTrends as LandTrend[]);
+        break;
+    }
+    chart.render();
+  }, [id, perspective, trends]);
 
   return <div id="trends-container"></div>;
 };
-
-interface PlayerTrend {
-  playerId: number;
-  cash: number;
-  netWorth: number;
-}
 
 const drawPlayerTrends = (chart: Chart, trends: PlayerTrend[]) => {
   // Creating player's net worth trends
@@ -383,11 +388,6 @@ const drawPlayerTrends = (chart: Chart, trends: PlayerTrend[]) => {
       ],
     });
 };
-
-interface LandTrend {
-  landId: number;
-  marketValue: number;
-}
 
 const drawLandTrends = (chart: Chart, trends: LandTrend[]) => {
   // Creating player's net worth trends

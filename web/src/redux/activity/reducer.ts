@@ -15,9 +15,10 @@ export type UpdateType =
   | 'RESET'
   | 'START'
   | 'TRADE'
+  | 'TREND'
   | 'TURN';
 
-export const getAllUpdateTypes = (): UpdateType[] => {
+export const getSubscribableTypes = (): UpdateType[] => {
   return [
     'BANKRUPTCY',
     'BONUS',
@@ -52,7 +53,7 @@ export interface ActivityState {
 }
 
 const initialState: ActivityState = {
-  subscribedTypes: [...getAllUpdateTypes()],
+  subscribedTypes: [...getSubscribableTypes()],
   activities: [],
 };
 

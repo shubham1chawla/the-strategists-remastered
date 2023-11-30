@@ -20,7 +20,7 @@ import {
   ActivityActions,
   State,
   UpdateType,
-  getAllUpdateTypes,
+  getSubscribableTypes,
 } from '../redux';
 import { parseActivity } from '../utils';
 
@@ -89,7 +89,7 @@ export const ActivityTimeline = () => {
               maxTagCount={3}
               value={subscribedTypes}
               onChange={(types) => setSubscribedTypes(types)}
-              options={getAllUpdateTypes().map((type) => ({
+              options={getSubscribableTypes().map((type) => ({
                 label: formatUpdateType(type),
                 value: type,
               }))}
