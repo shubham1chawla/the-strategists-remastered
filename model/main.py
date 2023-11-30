@@ -12,7 +12,7 @@ parser_train.add_argument('--out-dir', '-O', type=str, help='Directory where mod
 
 parser_predict = subparsers.add_parser('predict')
 parser_predict.add_argument('--model-dir', '-M', type=str, help='Directory where model is exported', required=True)
-parser_predict.add_argument('--predict_file', '-P', type=str, help='Path to prediction CSV file', required=True)
+parser_predict.add_argument('--predict-file', '-P', type=str, help='Path to prediction CSV file', required=True)
 
 args = parser.parse_args()
 
