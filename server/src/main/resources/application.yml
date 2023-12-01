@@ -9,6 +9,10 @@ strategists:
     password: 9999
   analysis:
     export-data-directory: ../model/data/
+    model-out-directory: ../model/out/
+    predict-file-directory: ../model/temp/
+    python-executable: ../model/.venv/bin/python
+    python-script: ../model/main.py
   game:
     password-length: 4
     dice-size: 6

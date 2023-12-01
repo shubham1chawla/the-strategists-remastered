@@ -99,6 +99,10 @@ public class Activity implements Serializable {
 		return new Activity(UpdateType.MOVE, player, Integer.toString(move), land);
 	}
 
+	public static Activity ofPrediction(String admin, String player, String prediction) {
+		return new Activity(UpdateType.PREDICTION, admin, player, prediction);
+	}
+
 	public static Activity ofRent(String payer, double amount, String payee, String land) {
 		return new Activity(UpdateType.RENT, payer, Double.toString(amount), payee, land);
 	}

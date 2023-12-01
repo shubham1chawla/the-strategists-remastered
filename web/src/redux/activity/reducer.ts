@@ -11,6 +11,7 @@ export type UpdateType =
   | 'JOIN'
   | 'KICK'
   | 'MOVE'
+  | 'PREDICTION'
   | 'RENT'
   | 'RESET'
   | 'START'
@@ -30,6 +31,7 @@ export const getSubscribableTypes = (): UpdateType[] => {
     'JOIN',
     'KICK',
     'MOVE',
+    'PREDICTION',
     'RENT',
     'RESET',
     'START',
