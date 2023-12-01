@@ -80,6 +80,7 @@ def plot_roc_curve(y_test, y_pred_probs, roc_auc) -> None:
 def evaluate_model(model_dir: str, predict_file: str) -> None:
     model_file_path = path.join(model_dir, MODEL_EXPORT_NAME)
     print('Model:', model_file_path)
+    print('File:', predict_file)
 
     model = pickle.load(open(model_file_path, 'rb'))
     df = pd.read_csv(predict_file)
