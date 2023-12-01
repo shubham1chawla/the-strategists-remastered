@@ -1,13 +1,17 @@
 package com.strategists.game.service.impl;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -48,6 +52,18 @@ public class AnalysisServiceImpl implements AnalysisService {
 	@Value("${strategists.analysis.export-data-directory}")
 	private File exportDataDirectory;
 
+	@Value("${strategists.analysis.model-out-directory}")
+	private File modelOutDirectory;
+
+	@Value("${strategists.analysis.predict-file-directory}")
+	private File predictFileDirectory;
+
+	@Value("${strategists.analysis.python-executable}")
+	private String pythonExecutable;
+
+	@Value("${strategists.analysis.python-script}")
+	private String pythonScript;
+
 	@Autowired
 	private ActivityRepository activityRepository;
 
@@ -62,37 +78,92 @@ public class AnalysisServiceImpl implements AnalysisService {
 
 	@PostConstruct
 	public void setup() {
-		if (!exportDataDirectory.exists()) {
-			Assert.state(exportDataDirectory.mkdirs(), "Unable to create export data directory!");
-		}
-		log.info("Export Data Directory: {}", exportDataDirectory.getAbsolutePath());
+		validateDirectories();
 	}
 
 	@Override
 	public void exportGameData() {
 		log.info("Exporting game data as CSV...");
 
+		// Sorting players as per their rank
+		val orderedPlayers = getPlayersOrderByBankruptcy();
+		exportPlayers(orderedPlayers, exportDataDirectory, "export-" + System.currentTimeMillis());
+	}
+
+	@Override
+	@UpdateMapping(UpdateType.PREDICTION)
+	public Prediction executePrediction(Player player) {
+		log.info("Checking win prediction for Player: {}", player.getUsername());
+
+		// Exporting player data
+		val csv = exportPlayers(List.of(player), predictFileDirectory, player.getUsername());
+		if (Objects.isNull(csv)) {
+			log.warn("Prediction file not exported!");
+			return Prediction.UNKNOWN;
+		}
+
+		// Executing prediction script
+		val commands = new String[] {
+
+				// Script execution command
+				pythonExecutable, pythonScript, "predict",
+
+				// Prediction file
+				"-P", csv.getAbsolutePath(),
+
+				// Model out directory
+				"-M", modelOutDirectory.getAbsolutePath()
+
+		};
+		val builder = new ProcessBuilder(commands);
+		builder.redirectErrorStream(true);
+		try {
+			val process = builder.start();
+			val code = process.waitFor();
+
+			// Checking if process executed successfully
+			if (code != 0) {
+				log.warn("Prediction script exited with code: {}", code);
+				csv.delete();
+				return Prediction.UNKNOWN;
+			}
+
+			// Extracting results from prediction
+			val stream = new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8);
+			try (val reader = new BufferedReader(stream)) {
+				val lines = reader.lines().toList();
+				val result = Integer.valueOf(lines.get(2).split(" ")[1]);
+				csv.delete();
+
+				return result == 1 ? Prediction.WINNER : Prediction.BANKRUPT;
+			}
+		} catch (Exception ex) {
+			log.warn("Unable to execute prediction script! Message: {}", ex.getMessage(), ex);
+			csv.delete();
+			return Prediction.UNKNOWN;
+		}
+	}
+
+	private File exportPlayers(List<Player> players, File directory, String filename) {
 		// Creating CSV formatter
 		val headers = getCSVHeaders();
 		val format = CSVFormat.DEFAULT.builder().setHeader(headers.toArray(String[]::new)).build();
 
-		// Sorting players as per their rank
-		val orderedPlayers = getPlayersOrderByBankruptcy();
-
 		// Preparing CSV file
-		val timestamp = System.currentTimeMillis();
-		val csv = new File(exportDataDirectory, String.format("export-%s.csv", timestamp));
+		val csv = new File(directory, String.format("%s.csv", filename));
 		try (final CSVPrinter printer = new CSVPrinter(new FileWriter(csv), format)) {
 
 			// Adding rows to the CSV file
-			for (int order = 1; order <= orderedPlayers.size(); order++) {
-				val row = new CSVRow(timestamp, order, orderedPlayers.get(order - 1));
+			for (int order = 1; order <= players.size(); order++) {
+				val row = new CSVRow(System.currentTimeMillis(), order, players.get(order - 1));
 				printer.printRecord(row.getValues(headers));
 			}
 
-			log.info("Export completed!");
+			log.info("Exported: {}", csv.getAbsolutePath());
+			return csv;
 		} catch (IOException ex) {
-			log.error("Unable to export data! Message: {}", ex.getMessage(), ex);
+			log.warn("Unable to export data! Message: {}", ex.getMessage(), ex);
+			return null;
 		}
 	}
 
@@ -275,4 +346,16 @@ public class AnalysisServiceImpl implements AnalysisService {
 		trends.addAll(trendRepository.saveAll(lands.stream().map(Trend::fromLand).toList()));
 		return trends;
 	}
+
+	private void validateDirectories() {
+		for (File directory : List.of(exportDataDirectory, modelOutDirectory, predictFileDirectory)) {
+			if (!directory.exists()) {
+				Assert.state(directory.mkdirs(), "Unable to create directory: " + directory);
+			}
+		}
+		log.info("Export Data Directory: {}", exportDataDirectory.getAbsolutePath());
+		log.info("Model Out Directory: {}", modelOutDirectory.getAbsolutePath());
+		log.info("Predict File Directory: {}", predictFileDirectory.getAbsolutePath());
+	}
+
 }

@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import com.strategists.game.entity.Activity;
+import com.strategists.game.entity.Player;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.service.AnalysisService;
@@ -46,6 +47,10 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
 
 	protected void updateTrends() {
 		analysisService.updateTrends();
+	}
+
+	protected void executePrediction(Player player) {
+		analysisService.executePrediction(player);
 	}
 
 	protected void sendUpdate(T update) {

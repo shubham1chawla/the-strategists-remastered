@@ -3,6 +3,7 @@ import { Collapse, Select, Space, Timeline, notification } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   BarsOutlined,
+  BulbOutlined,
   CheckOutlined,
   CrownOutlined,
   DoubleRightOutlined,
@@ -124,6 +125,8 @@ const getIcon = (type: UpdateType): ReactNode | undefined => {
       return <UserDeleteOutlined />;
     case 'MOVE':
       return <DoubleRightOutlined />;
+    case 'PREDICTION':
+      return <BulbOutlined />;
     case 'RENT':
       return <FallOutlined />;
     case 'RESET':
