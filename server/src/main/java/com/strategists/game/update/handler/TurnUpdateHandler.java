@@ -28,8 +28,8 @@ public class TurnUpdateHandler extends AbstractUpdateHandler<TurnUpdatePayload> 
 		val currentPlayer = (Player) returnValue;
 		val previousPlayer = (Player) args[0];
 
-		// Running win prediction
-		executePrediction(currentPlayer);
+		// Running prediction model
+		executePredictionModelAsync(currentPlayer);
 
 		// Persisting the activity and sending the update
 		val activity = Activity.ofTurn(previousPlayer.getUsername(), currentPlayer.getUsername());

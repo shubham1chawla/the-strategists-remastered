@@ -7,9 +7,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.strategists.game.entity.Land;
+import com.strategists.game.entity.Trend;
 import com.strategists.game.repository.LandRepository;
+import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.service.EventService;
 import com.strategists.game.service.LandService;
+import com.strategists.game.update.UpdateMapping;
+import com.strategists.game.update.UpdateType;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -23,6 +27,9 @@ public class LandServiceImpl implements LandService {
 
 	@Autowired
 	private EventService eventService;
+
+	@Autowired
+	private TrendRepository trendRepository;
 
 	@Override
 	public List<Land> getLands() {
@@ -70,6 +77,12 @@ public class LandServiceImpl implements LandService {
 
 		landRepository.saveAll(lands);
 		log.info("Reset lands completed");
+	}
+
+	@Override
+	@UpdateMapping(UpdateType.TREND)
+	public List<Trend> updateLandTrends() {
+		return trendRepository.saveAll(getLands().stream().map(Trend::fromLand).toList());
 	}
 
 }

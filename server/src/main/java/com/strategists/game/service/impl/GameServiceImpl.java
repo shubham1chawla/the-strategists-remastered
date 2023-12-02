@@ -54,7 +54,12 @@ public class GameServiceImpl implements GameService {
 	@UpdateMapping(UpdateType.START)
 	public Player startGame() {
 		Assert.isTrue(playerService.getCount() > 0, "No players added!");
-		return playerService.assignTurn();
+		val player = playerService.assignTurn();
+
+		// Updating initial trends
+		updateTrends();
+
+		return player;
 	}
 
 	@Override
@@ -92,8 +97,21 @@ public class GameServiceImpl implements GameService {
 			playerService.bankruptPlayer(player);
 		}
 
+		// Updating trends
+		updateTrends();
+
 		// No winner declared
 		return null;
+	}
+
+	@Override
+	@UpdateMapping(UpdateType.RESET)
+	public void resetGame() {
+		// Resetting players
+		playerService.resetPlayers();
+
+		// Reseting lands
+		landService.resetLands();
 	}
 
 	private Optional<Player> getWinnerPlayer() {
@@ -107,14 +125,9 @@ public class GameServiceImpl implements GameService {
 		return Optional.of(winner);
 	}
 
-	@Override
-	@UpdateMapping(UpdateType.RESET)
-	public void resetGame() {
-		// Resetting players
-		playerService.resetPlayers();
-
-		// Reseting lands
-		landService.resetLands();
+	private void updateTrends() {
+		playerService.updatePlayerTrends();
+		landService.updateLandTrends();
 	}
 
 }

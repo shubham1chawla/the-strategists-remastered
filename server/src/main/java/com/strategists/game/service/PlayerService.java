@@ -5,6 +5,7 @@ import java.util.List;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.Rent;
+import com.strategists.game.entity.Trend;
 
 public interface PlayerService {
 
@@ -39,5 +40,7 @@ public interface PlayerService {
 	void bankruptPlayer(Player player);
 
 	void resetPlayers();
+
+	List<Trend> updatePlayerTrends();
 
 }

@@ -17,6 +17,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.transaction.Transactional;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -30,12 +31,10 @@ import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
-import com.strategists.game.entity.Trend;
 import com.strategists.game.repository.ActivityRepository;
-import com.strategists.game.repository.TrendRepository;
-import com.strategists.game.service.AnalysisService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
+import com.strategists.game.service.PredictionService;
 import com.strategists.game.update.UpdateMapping;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.util.MathUtil;
@@ -47,7 +46,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
-public class AnalysisServiceImpl implements AnalysisService {
+public class PredictionServiceImpl implements PredictionService {
 
 	@Value("${strategists.analysis.export-data-directory}")
 	private File exportDataDirectory;
@@ -68,9 +67,6 @@ public class AnalysisServiceImpl implements AnalysisService {
 	private ActivityRepository activityRepository;
 
 	@Autowired
-	private TrendRepository trendRepository;
-
-	@Autowired
 	private PlayerService playerService;
 
 	@Autowired
@@ -82,28 +78,43 @@ public class AnalysisServiceImpl implements AnalysisService {
 	}
 
 	@Override
-	public void exportGameData() {
-		log.info("Exporting game data as CSV...");
+	public void trainPredictionModel(boolean export) {
 
-		// Sorting players as per their rank
-		val orderedPlayers = getPlayersOrderByBankruptcy();
-		exportPlayers(orderedPlayers, exportDataDirectory, "export-" + System.currentTimeMillis());
+		// Exporting game data if requested
+		if (export) {
+			val orderedPlayers = getPlayersOrderByBankruptcy();
+			exportCSVFile(orderedPlayers, exportDataDirectory, "export-" + System.currentTimeMillis());
+		}
+
+		// Training the prediction model
+		val output = executePredictionScript(new String[] {
+
+				// Script execution command
+				pythonExecutable, pythonScript, "train",
+
+				// Prediction file
+				"-D", exportDataDirectory.getAbsolutePath(),
+
+				// Model out directory
+				"-O", modelOutDirectory.getAbsolutePath()
+
+		});
+		log.info("Train Prediction Model Output:\n{}", String.join("\n", output));
 	}
 
 	@Override
+	@Transactional
 	@UpdateMapping(UpdateType.PREDICTION)
-	public Prediction executePrediction(Player player) {
-		log.info("Checking win prediction for Player: {}", player.getUsername());
+	public Prediction executePredictionModel(Player player) {
 
 		// Exporting player data
-		val csv = exportPlayers(List.of(player), predictFileDirectory, player.getUsername());
+		val csv = exportCSVFile(List.of(player), predictFileDirectory, player.getUsername());
 		if (Objects.isNull(csv)) {
-			log.warn("Prediction file not exported!");
 			return Prediction.UNKNOWN;
 		}
 
 		// Executing prediction script
-		val commands = new String[] {
+		val output = executePredictionScript(new String[] {
 
 				// Script execution command
 				pythonExecutable, pythonScript, "predict",
@@ -114,37 +125,20 @@ public class AnalysisServiceImpl implements AnalysisService {
 				// Model out directory
 				"-M", modelOutDirectory.getAbsolutePath()
 
-		};
-		val builder = new ProcessBuilder(commands);
-		builder.redirectErrorStream(true);
-		try {
-			val process = builder.start();
-			val code = process.waitFor();
+		});
 
-			// Checking if process executed successfully
-			if (code != 0) {
-				log.warn("Prediction script exited with code: {}", code);
-				csv.delete();
-				return Prediction.UNKNOWN;
-			}
+		// Deleting prediction file
+		csv.delete();
 
-			// Extracting results from prediction
-			val stream = new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8);
-			try (val reader = new BufferedReader(stream)) {
-				val lines = reader.lines().toList();
-				val result = Integer.valueOf(lines.get(2).split(" ")[1]);
-				csv.delete();
-
-				return result == 1 ? Prediction.WINNER : Prediction.BANKRUPT;
-			}
-		} catch (Exception ex) {
-			log.warn("Unable to execute prediction script! Message: {}", ex.getMessage(), ex);
-			csv.delete();
+		// Extracting prediction results
+		if (output == null || output.size() != 3) {
 			return Prediction.UNKNOWN;
 		}
+		val result = Integer.valueOf(output.get(2).split(" ")[1]);
+		return result == 1 ? Prediction.WINNER : Prediction.BANKRUPT;
 	}
 
-	private File exportPlayers(List<Player> players, File directory, String filename) {
+	private File exportCSVFile(List<Player> players, File directory, String filename) {
 		// Creating CSV formatter
 		val headers = getCSVHeaders();
 		val format = CSVFormat.DEFAULT.builder().setHeader(headers.toArray(String[]::new)).build();
@@ -159,12 +153,39 @@ public class AnalysisServiceImpl implements AnalysisService {
 				printer.printRecord(row.getValues(headers));
 			}
 
-			log.info("Exported: {}", csv.getAbsolutePath());
+			log.debug("Exported: {}", csv.getAbsolutePath());
 			return csv;
 		} catch (IOException ex) {
-			log.warn("Unable to export data! Message: {}", ex.getMessage(), ex);
+			log.warn("Unable to export CSV file! Message: {}", ex.getMessage(), ex);
 			return null;
 		}
+	}
+
+	private List<String> executePredictionScript(String[] commands) {
+		List<String> output = null;
+		val builder = new ProcessBuilder(commands);
+		builder.redirectErrorStream(true);
+		try {
+
+			val process = builder.start();
+			val code = process.waitFor();
+
+			// Checking if process executed successfully
+			if (code != 0) {
+				log.warn("Prediction script exited with code: {}", code);
+				return output;
+			}
+
+			// Extracting results from prediction
+			val stream = new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8);
+			try (val reader = new BufferedReader(stream)) {
+				output = reader.lines().toList();
+			}
+
+		} catch (Exception ex) {
+			log.warn("Unable to execute prediction script! Message: {}", ex.getMessage(), ex);
+		}
+		return output;
 	}
 
 	private List<String> getCSVHeaders() {
@@ -334,17 +355,6 @@ public class AnalysisServiceImpl implements AnalysisService {
 			}
 		}
 
-	}
-
-	@Override
-	@UpdateMapping(UpdateType.TREND)
-	public List<Trend> updateTrends() {
-		val players = playerService.getActivePlayers();
-		val lands = landService.getLands();
-		val trends = new ArrayList<Trend>(players.size() + lands.size());
-		trends.addAll(trendRepository.saveAll(players.stream().map(Trend::fromPlayer).toList()));
-		trends.addAll(trendRepository.saveAll(lands.stream().map(Trend::fromLand).toList()));
-		return trends;
 	}
 
 	private void validateDirectories() {
