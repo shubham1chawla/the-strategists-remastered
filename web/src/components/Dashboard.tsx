@@ -165,10 +165,9 @@ const Update = () => {
           }
           break;
         }
-        case 'END': {
+        case 'END':
           // Do nothing
           break;
-        }
         case 'INVEST': {
           const { land, players } = payload;
           dispatch(LobbyActions.patchLands([land]));
@@ -183,6 +182,9 @@ const Update = () => {
           break;
         case 'MOVE':
           dispatch(LobbyActions.patchPlayers([payload]));
+          break;
+        case 'PREDICTION':
+          // Do nothing
           break;
         case 'RENT':
           dispatch(LobbyActions.patchPlayers(payload));

@@ -24,14 +24,13 @@ public class EndUpdateHandler extends AbstractUpdateHandler<EndUpdatePayload> {
 		// Winner player returned by the method
 		val player = (Player) returnValue;
 
-		// If no winner is declared, update the trends and avoid sending update
+		// If no winner is declared, avoid sending update
 		if (Objects.isNull(player)) {
-			updateTrends();
 			return;
 		}
 
-		// Exporting game data if winner is declared
-		exportGameData();
+		// Exporting data and training the prediction model
+		trainPredictionModelAsync(true);
 
 		// Persisting the activity and sending the update
 		val activity = Activity.ofEnd(player.getUsername());

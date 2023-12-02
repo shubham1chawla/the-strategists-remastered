@@ -21,7 +21,9 @@ import com.strategists.game.entity.Player;
 import com.strategists.game.entity.Player.State;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
+import com.strategists.game.entity.Trend;
 import com.strategists.game.repository.PlayerRepository;
+import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 import com.strategists.game.update.UpdateMapping;
@@ -47,6 +49,9 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Autowired
 	private LandService landService;
+
+	@Autowired
+	private TrendRepository trendRepository;
 
 	@Override
 	public long getCount() {
@@ -258,6 +263,12 @@ public class PlayerServiceImpl implements PlayerService {
 
 		playerRepository.saveAll(players);
 		log.info("Reset players completed");
+	}
+
+	@Override
+	@UpdateMapping(UpdateType.TREND)
+	public List<Trend> updatePlayerTrends() {
+		return trendRepository.saveAll(getActivePlayers().stream().map(Trend::fromPlayer).toList());
 	}
 
 }
