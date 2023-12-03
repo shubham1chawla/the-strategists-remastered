@@ -78,6 +78,7 @@ public class PredictionServiceImpl implements PredictionService {
 	}
 
 	@Override
+	@Transactional
 	public void trainPredictionModel(boolean export) {
 
 		// Exporting game data if requested
@@ -106,6 +107,8 @@ public class PredictionServiceImpl implements PredictionService {
 	@Transactional
 	@UpdateMapping(UpdateType.PREDICTION)
 	public Prediction executePredictionModel(Player player) {
+		// Fetching new reference
+		player = playerService.getPlayerById(player.getId());
 
 		// Exporting player data
 		val csv = exportCSVFile(List.of(player), predictFileDirectory, player.getUsername());
