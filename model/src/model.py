@@ -22,7 +22,7 @@ def export_model(data_dir: str, out_dir: str) -> None:
 
     # Feature extraction
     df = pd.concat([pd.read_csv(f) for f in csv_files], ignore_index=True)
-    X = df[get_features(df)]
+    X = extract_features(df)
     y = df['player.state'].apply(lambda x: 1 if x == 'ACTIVE' else 0)
     print('Rows found:', len(df))
 
@@ -84,16 +84,24 @@ def evaluate_model(model_dir: str, predict_file: str) -> None:
 
     model = pickle.load(open(model_file_path, 'rb'))
     df = pd.read_csv(predict_file)
-    df = df[get_features(df)]
+    df = extract_features(df)
 
     predicted_probability = model.predict_proba(df)[:, 1]
     prediction = (predicted_probability >= PROBABILITY_THRESHOLD).astype(int)
     print('Prediction:', prediction[0])
 
 
-def get_features(df: pd.DataFrame) -> pd.DataFrame:
-    features = ['player.base-cash']
+def extract_features(df: pd.DataFrame) -> pd.DataFrame:
+    features = df.copy()
+    features['ownership.average'] = features['ownership.total'] / (features['ownership.count'] * 100)
+    features['debit.invest.average'] = features['debit.invest.total'] / (features['debit.invest.count'] * df['player.base-cash'])
+    features['debit.rent.average'] = features['debit.rent.total'] / (features['debit.rent.count'] * df['player.base-cash'])
+    features['credit.rent.average'] = features['credit.rent.total'] / (features['credit.rent.count'] * df['player.base-cash'])
     for col in df.columns:
-        if col.startswith('ownership.') or col.startswith('debit') or col.startswith('credit'):
-            features.append(col)
-    return features
+        if col.startswith('ownership') and not (col.endswith('total') or col.endswith('count')):
+            features[col] /= 100
+        elif (col.startswith('debit') or col.startswith('credit')) and not (col.endswith('total') or col.endswith('count')):
+            features[col] /= df['player.base-cash']
+        else:
+            features = features.drop(col, axis=1)
+    return features.fillna(0)
