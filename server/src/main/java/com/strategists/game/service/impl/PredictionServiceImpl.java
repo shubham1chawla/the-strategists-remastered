@@ -48,19 +48,19 @@ import lombok.extern.log4j.Log4j2;
 @Service
 public class PredictionServiceImpl implements PredictionService {
 
-	@Value("${strategists.analysis.export-data-directory}")
+	@Value("${strategists.prediction.export-data-directory}")
 	private File exportDataDirectory;
 
-	@Value("${strategists.analysis.model-out-directory}")
+	@Value("${strategists.prediction.model-out-directory}")
 	private File modelOutDirectory;
 
-	@Value("${strategists.analysis.predict-file-directory}")
+	@Value("${strategists.prediction.predict-file-directory}")
 	private File predictFileDirectory;
 
-	@Value("${strategists.analysis.python-executable}")
+	@Value("${strategists.prediction.python-executable}")
 	private String pythonExecutable;
 
-	@Value("${strategists.analysis.python-script}")
+	@Value("${strategists.prediction.python-script}")
 	private String pythonScript;
 
 	@Autowired

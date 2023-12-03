@@ -7,12 +7,12 @@ strategists:
   admin:
     username: Creator
     password: 9999
-  analysis:
-    export-data-directory: ../model/data/
-    model-out-directory: ../model/out/
-    predict-file-directory: ../model/temp/
-    python-executable: ../model/.venv/bin/python
-    python-script: ../model/main.py
+  prediction:
+    export-data-directory: ../prediction/data/
+    model-out-directory: ../prediction/out/
+    predict-file-directory: ../prediction/temp/
+    python-executable: ../prediction/.venv/bin/python
+    python-script: ../prediction/main.py
   game:
     password-length: 4
     dice-size: 6

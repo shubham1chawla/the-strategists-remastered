@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "strategists-model"
+name = "strategists-prediction"
 version = "0.1.0"
-description = "Machine Learning models project for The Strategists"
+description = "Machine Learning prediction model for The Strategists"
 authors = ["Shubham Chawla <shubham_chawla@live.com>"]
 readme = "README.md"
 

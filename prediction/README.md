@@ -1,5 +1,5 @@
-# The Strategists - Analysis Model
-This directory contains all the source files required to run the analysis on the exported game data.
+# The Strategists - Prediction Model
+This directory contains all the source files required to run the win prediction on the previous played games data.
 
 ## Setup
 - Make sure you have `poetry` installed on your system. If not, use `pip install poetry` command.
