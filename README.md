@@ -67,6 +67,12 @@ In addition to ownership interactions, the game introduces a visual representati
 
 While the implementation of chance cards is not yet realized in this version, the potential for future integration is recognized. The game remains dynamic and responsive to player feedback, with ongoing enhancements aimed at delivering a more immersive and strategic investment experience.
 
+### Winner
+
+![The Strategists Winner](/images/winner.png)
+
+The game includes a confetti animation once a player wins. The prediction model trains itself after each game session, learning from every game.
+
 ## Blogs
 
 - [How to write a messy useEffect in React and fix it](https://medium.com/@shuchawl/how-to-write-a-messy-useeffect-in-react-and-fix-it-c0e98f872d22)
