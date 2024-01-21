@@ -6,10 +6,9 @@ import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.Rent;
 import com.strategists.game.entity.Trend;
+import com.strategists.game.request.GoogleLoginRequest;
 
 public interface PlayerService {
-
-	long getCount();
 
 	List<Player> getPlayers();
 
@@ -17,11 +16,13 @@ public interface PlayerService {
 
 	Player getPlayerById(long id);
 
-	Player getPlayerByUsername(String username);
+	Player getPlayerByEmail(String email);
 
-	Player addPlayer(String username, double cash);
+	Player sendInvite(String email, double cash);
 
-	void kickPlayer(String username);
+	Player acceptInvite(GoogleLoginRequest request);
+
+	Player kickPlayer(long playerId);
 
 	boolean isTurnAssigned();
 

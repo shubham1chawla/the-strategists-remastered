@@ -18,6 +18,7 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -39,17 +40,16 @@ public class Player implements Serializable {
 	private static final long serialVersionUID = -7588097421340659821L;
 
 	public enum State {
-		ACTIVE, BANKRUPT, JAIL;
+		INVITED, ACTIVE, BANKRUPT, JAIL;
 	}
 
-	public Player(String username, double baseCash, String password) {
-		Assert.hasText(username, "Username can't be empty!");
+	public Player(String email, double baseCash) {
+		Assert.isTrue(EmailValidator.getInstance().isValid(email), "Email is not valid!");
 		Assert.isTrue(baseCash > 0, "Cash can't be negative!");
-		Assert.hasText(password, "Password can't be empty!");
 
-		this.username = username;
+		this.username = email.split("@")[0];
+		this.email = email;
 		this.baseCash = MathUtil.round(baseCash);
-		this.password = password;
 	}
 
 	@Id
@@ -60,9 +60,8 @@ public class Player implements Serializable {
 	private String username;
 
 	@JsonIgnore
-	@ToString.Exclude
-	@Column(nullable = false, unique = false)
-	private String password;
+	@Column(nullable = false, unique = true)
+	private String email;
 
 	/**
 	 * Player's cash will be dynamically calculated based on their investments.
@@ -77,7 +76,7 @@ public class Player implements Serializable {
 
 	@Column(nullable = true, columnDefinition = "VARCHAR(8) DEFAULT 'ACTIVE'")
 	@Enumerated(EnumType.STRING)
-	private State state = State.ACTIVE;
+	private State state = State.INVITED;
 
 	@Column(nullable = true, columnDefinition = "BOOLEAN DEFAULT FALSE")
 	private boolean turn = false;
@@ -126,6 +125,12 @@ public class Player implements Serializable {
 		val investments = isBankrupt() ? 0d
 				: MathUtil.sum(playerLands, pl -> pl.getLand().getMarketValue() * (pl.getOwnership() / 100));
 		return MathUtil.round(investments + getCash());
+	}
+
+	@Transient
+	@JsonIgnore
+	public boolean isInvited() {
+		return State.INVITED.equals(state);
 	}
 
 	@Transient

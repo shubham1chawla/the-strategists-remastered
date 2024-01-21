@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { AnyAction } from 'redux';
 import { useNavigate } from 'react-router-dom';
 import { Button, Col, Row, Tabs, Tooltip, notification } from 'antd';
+import { googleLogout } from '@react-oauth/google';
 import {
   LogoutOutlined,
   PlayCircleFilled,
@@ -174,8 +175,11 @@ const Update = () => {
           dispatch(LobbyActions.patchPlayers(players));
           break;
         }
-        case 'JOIN':
+        case 'INVITE':
           dispatch(LobbyActions.addPlayer(payload));
+          break;
+        case 'JOIN':
+          dispatch(LobbyActions.patchPlayers([payload]));
           break;
         case 'KICK':
           dispatch(LobbyActions.kickPlayer(payload));
@@ -254,6 +258,11 @@ const Navigation = () => {
     setShowResetModal(true);
   };
 
+  const logout = () => {
+    googleLogout();
+    dispatch(UserActions.unsetUser());
+  };
+
   return (
     <nav className="strategists-nav">
       <header className="strategists-header">
@@ -263,7 +272,7 @@ const Navigation = () => {
             type="text"
             shape="circle"
             icon={<LogoutOutlined />}
-            onClick={() => dispatch(UserActions.unsetUser())}
+            onClick={logout}
           />
         </Tooltip>
         <Logo />
@@ -273,6 +282,8 @@ const Navigation = () => {
           title={
             !players.length
               ? 'Add players to start The Strategists!'
+              : !!players.find((p) => p.state === 'INVITED')
+              ? 'All players must accept the invite!'
               : state === 'ACTIVE'
               ? 'Reset The Strategists!'
               : 'Start The Strategists!'
@@ -281,7 +292,10 @@ const Navigation = () => {
           <Button
             type="primary"
             htmlType="submit"
-            disabled={state === 'LOBBY' && !players.length}
+            disabled={
+              state === 'LOBBY' &&
+              (!players.length || !!players.find((p) => p.state === 'INVITED'))
+            }
             onClick={() => (state === 'ACTIVE' ? reset() : start())}
           >
             {state === 'LOBBY' ? <PlayCircleFilled /> : <StopFilled />}

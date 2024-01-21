@@ -3,9 +3,9 @@ package com.strategists.game.request;
 import lombok.Data;
 
 @Data
-public class AddPlayerRequest {
+public class InvitePlayerRequest {
 
-	private String username;
+	private String email;
 	private Double cash;
 
 }

@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.strategists.game.entity.Player;
-import com.strategists.game.request.AddPlayerRequest;
+import com.strategists.game.request.InvitePlayerRequest;
 import com.strategists.game.request.InvestmentRequest;
 import com.strategists.game.request.KickPlayerRequest;
 import com.strategists.game.service.GameService;
@@ -42,21 +42,16 @@ public class PlayerController {
 		return playerService.getPlayers();
 	}
 
-	@GetMapping("/{playerId}/password")
-	public String getPassword(@PathVariable Long playerId) {
-		return playerService.getPlayerById(playerId).getPassword();
-	}
-
 	@PostMapping
-	public Player addPlayer(@RequestBody AddPlayerRequest request) {
+	public Player sendInvite(@RequestBody InvitePlayerRequest request) {
 		Assert.state(gameService.isState(State.LOBBY), "Can't add players to active game!");
-		return playerService.addPlayer(request.getUsername(), request.getCash());
+		return playerService.sendInvite(request.getEmail(), request.getCash());
 	}
 
 	@DeleteMapping
 	public void kickPlayer(@RequestBody KickPlayerRequest request) {
 		Assert.state(gameService.isState(State.LOBBY), "Can't kick players in active game!");
-		playerService.kickPlayer(request.getUsername());
+		playerService.kickPlayer(request.getPlayerId());
 	}
 
 	@PostMapping("/{playerId}/lands")

@@ -3,8 +3,6 @@ package com.strategists.game.service.impl;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -24,6 +22,7 @@ import com.strategists.game.entity.Rent;
 import com.strategists.game.entity.Trend;
 import com.strategists.game.repository.PlayerRepository;
 import com.strategists.game.repository.TrendRepository;
+import com.strategists.game.request.GoogleLoginRequest;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 import com.strategists.game.update.UpdateMapping;
@@ -41,8 +40,8 @@ public class PlayerServiceImpl implements PlayerService {
 	@PersistenceContext
 	private EntityManager em;
 
-	@Value("${strategists.game.password-length}")
-	private Integer passwordLength;
+	@Value("${strategists.admin.email}")
+	private String adminEmail;
 
 	@Autowired
 	private PlayerRepository playerRepository;
@@ -52,11 +51,6 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Autowired
 	private TrendRepository trendRepository;
-
-	@Override
-	public long getCount() {
-		return playerRepository.count();
-	}
 
 	@Override
 	public List<Player> getPlayers() {
@@ -78,38 +72,57 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	public Player getPlayerByUsername(String username) {
-		val opt = playerRepository.findByUsername(username);
-		Assert.isTrue(opt.isPresent(), "No player found with username: " + username);
+	public Player getPlayerByEmail(String email) {
+		val opt = playerRepository.findByEmail(email);
+		Assert.isTrue(opt.isPresent(), "No player found with email: " + email);
 
 		log.info("Found player: {}", opt.get());
 		return opt.get();
 	}
 
 	@Override
+	@UpdateMapping(UpdateType.INVITE)
+	public Player sendInvite(String email, double cash) {
+		log.info("Checking if {} email exists...", email);
+		Assert.isTrue(!Objects.equals(adminEmail, email), "Player email can't be same as admin's email!");
+		Assert.isTrue(!playerRepository.existsByEmail(email), email + " already exists!");
+
+		log.info("Creating player for {}", email);
+		return playerRepository.save(new Player(email, cash));
+	}
+
+	@Override
 	@UpdateMapping(UpdateType.JOIN)
-	public Player addPlayer(String username, double cash) {
-		log.info("Checking if {} username exists...", username);
-		Assert.isTrue(!playerRepository.existsByUsername(username), username + " username already exists!");
+	public Player acceptInvite(GoogleLoginRequest request) {
+		val player = getPlayerByEmail(request.getEmail());
 
-		// generating password
-		val password = IntStream.range(0, passwordLength).map(i -> 10).map(RANDOM::nextInt).mapToObj(Integer::toString)
-				.collect(Collectors.joining());
+		// Generating valid username for the player
+		int count = 0;
+		val split = request.getName().split("\\s+");
+		String username = split[0];
+		while (playerRepository.existsByUsername(username)) {
+			username = String.format("%s-%s", split[0], ++count);
+		}
+		player.setUsername(username);
+		player.setState(State.ACTIVE);
 
-		log.info("Creating player with {} username", username);
-		return playerRepository.save(new Player(username, cash, password));
+		log.info("Updating {} username to {}", player.getEmail(), username);
+		return playerRepository.save(player);
 	}
 
 	@Override
 	@Transactional
 	@UpdateMapping(UpdateType.KICK)
-	public void kickPlayer(String username) {
+	public Player kickPlayer(long playerId) {
 		try {
-			playerRepository.deleteByUsername(username);
-			log.info("Kicked {}", username);
+			val player = getPlayerById(playerId);
+			playerRepository.delete(player);
+			log.info("Kicked {}", player.getUsername());
+			return player;
 		} catch (EmptyResultDataAccessException ex) {
 			// suppress exception
 		}
+		return null;
 	}
 
 	@Override

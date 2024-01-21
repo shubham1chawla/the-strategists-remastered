@@ -7,6 +7,7 @@ export type UpdateType =
   | 'END'
   | 'EVENT'
   | 'INVEST'
+  | 'INVITE'
   | 'JAIL'
   | 'JOIN'
   | 'KICK'
@@ -27,6 +28,7 @@ export const getSubscribableTypes = (): UpdateType[] => {
     'END',
     'EVENT',
     'INVEST',
+    'INVITE',
     'JAIL',
     'JOIN',
     'KICK',

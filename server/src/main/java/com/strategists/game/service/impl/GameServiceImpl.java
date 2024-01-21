@@ -53,7 +53,15 @@ public class GameServiceImpl implements GameService {
 	@Override
 	@UpdateMapping(UpdateType.START)
 	public Player startGame() {
-		Assert.isTrue(playerService.getCount() > 0, "No players added!");
+		val players = playerService.getPlayers();
+
+		// Validating
+		Assert.isTrue(players.size() > 0, "No players added!");
+		for (Player player : players) {
+			Assert.isTrue(!player.isInvited(), player.getEmail() + " not accepted the invite!");
+		}
+
+		// Assigning turn
 		val player = playerService.assignTurn();
 
 		// Updating initial trends

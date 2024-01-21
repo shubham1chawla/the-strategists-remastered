@@ -6,7 +6,7 @@ spring:
 strategists:
   admin:
     username: Creator
-    password: 9999
+    email: 
   prediction:
     export-data-directory: ../prediction/data/
     model-out-directory: ../prediction/out/
@@ -14,6 +14,5 @@ strategists:
     python-executable: ../prediction/.venv/bin/python
     python-script: ../prediction/main.py
   game:
-    password-length: 4
     dice-size: 6
     rent-factor: 0.2

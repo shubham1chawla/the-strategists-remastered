@@ -250,34 +250,8 @@ h1.strategists-logo {
         display: none !important;
       }
 
-      &__content {
-        display: flex;
-        width: 100%;
-
-        &__info {
-          display: flex;
-          flex-direction: column;
-          row-gap: calc(0.25 * var(--ant-lg-padding));
-          flex-basis: 50%;
-          margin: auto 0;
-          padding: var(--base-unit-size);
-        }
-
-        &__password {
-          display: none;
-          cursor: pointer;
-          font-family: monospace;
-          text-align: center;
-          margin: auto 0;
-          padding: var(--base-unit-size);
-        }
-      }
-
       // Hovering row will reveal player's password div & kick button
       &:hover .strategists-lobby__players__player {
-        &__content__password {
-          display: block;
-        }
         &__kick {
           display: block !important;
         }

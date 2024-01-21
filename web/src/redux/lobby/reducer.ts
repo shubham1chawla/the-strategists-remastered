@@ -11,7 +11,7 @@ export interface Player {
   id: number;
   username: string;
   index: number;
-  state: 'ACTIVE' | 'BANKRUPT' | 'JAIL';
+  state: 'INVITED' | 'ACTIVE' | 'BANKRUPT' | 'JAIL';
   turn: boolean;
   remainingJailLife: number;
   netWorth: number;
@@ -63,7 +63,7 @@ export const lobbyReducer = (
     case LobbyActions.Types.KICK_PLAYER:
       return {
         ...state,
-        players: state.players.filter((player) => player.username !== payload),
+        players: state.players.filter((player) => player.id !== payload),
       };
 
     case LobbyActions.Types.PATCH_PLAYERS: {

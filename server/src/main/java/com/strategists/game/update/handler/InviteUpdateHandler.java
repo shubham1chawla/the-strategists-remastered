@@ -5,26 +5,26 @@ import org.springframework.stereotype.Component;
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Player;
 import com.strategists.game.update.UpdateType;
-import com.strategists.game.update.payload.JoinUpdatePayload;
+import com.strategists.game.update.payload.InviteUpdatePayload;
 
 import lombok.val;
 
 @Component
-public class JoinUpdateHandler extends AbstractUpdateHandler<JoinUpdatePayload> {
+public class InviteUpdateHandler extends AbstractUpdateHandler<InviteUpdatePayload> {
 
 	@Override
 	public UpdateType getType() {
-		return UpdateType.JOIN;
+		return UpdateType.INVITE;
 	}
 
 	@Override
 	public void handle(Object returnValue, Object[] args) {
-		// Joined player returned by the method
+		// Invited player returned by the method
 		val player = (Player) returnValue;
 
 		// Persisting the activity and sending the update
-		val activity = Activity.ofJoin(player.getUsername());
-		sendUpdate(new JoinUpdatePayload(saveActivity(activity), player));
+		val activity = Activity.ofInvite(getAdminUsername(), player.getEmail());
+		sendUpdate(new InviteUpdatePayload(saveActivity(activity), player));
 	}
 
 }

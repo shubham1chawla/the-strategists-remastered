@@ -1,23 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Button, Divider, Form, Input, Space, notification } from 'antd';
+import { Button, Divider, Row, Space, notification } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { State, UserActions } from '../redux';
-import { useForm } from 'antd/es/form/Form';
-import {
-  GithubOutlined,
-  LockOutlined,
-  LoginOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
+import { GithubOutlined, LoadingOutlined } from '@ant-design/icons';
+import { GoogleCredentialResponse, GoogleLogin } from '@react-oauth/google';
+import { jwtDecode } from 'jwt-decode';
 import { Logo } from '.';
 import axios from 'axios';
+
+interface GoogleUser {
+  name: string;
+  email: string;
+}
 
 export const Login = () => {
   const user = useSelector((state: State) => state.user);
   const [loading, setLoading] = useState(false);
   const [api, contextHolder] = notification.useNotification();
-  const [form] = useForm();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -29,13 +29,19 @@ export const Login = () => {
     navigate('/dashboard');
   }, [navigate, user.username]);
 
-  const loginPlayer = ({ username, password }: any) => {
+  const handleGoogleLoginSuccess = ({
+    credential,
+  }: GoogleCredentialResponse) => {
+    if (!credential) {
+      handleGoogleLoginError();
+      return;
+    }
+    const user: GoogleUser = jwtDecode(credential);
     setLoading(true);
     axios
-      .post('/api/auth', { username, password })
+      .post('/api/auth', user)
       .then(({ data }) => {
-        form.resetFields();
-        dispatch(UserActions.setUser({ username, type: data }));
+        dispatch(UserActions.setUser(data));
         navigate('/dashboard');
       })
       .catch(({ response }) => {
@@ -48,6 +54,13 @@ export const Login = () => {
       });
   };
 
+  const handleGoogleLoginError = () => {
+    const message =
+      'Google authentication failed. Please contact the developers to address your issue!';
+    api.error({ message });
+    setLoading(false);
+  };
+
   return (
     <>
       {contextHolder}
@@ -57,47 +70,29 @@ export const Login = () => {
             <Logo />
           </Divider>
           <br />
-          <Form
-            layout="inline"
-            name="basic"
-            className="strategists-login__card__form"
-            form={form}
-            onFinish={loginPlayer}
-            onFinishFailed={({ errorFields }) => {
-              errorFields.forEach((field) =>
-                api.error({ message: field.errors[0] })
-              );
-            }}
-            autoComplete="off"
-          >
-            <Space.Compact size="large">
-              <Form.Item
-                noStyle
-                name="username"
-                rules={[{ required: true, message: 'Username required!' }]}
-              >
-                <Input prefix={<UserOutlined />} placeholder="Username" />
-              </Form.Item>
-              <Form.Item
-                noStyle
-                name="password"
-                rules={[{ required: true, message: 'Password required!' }]}
-              >
-                <Input.Password
-                  placeholder="Password"
-                  prefix={<LockOutlined />}
+          <Row justify="center">
+            {
+              /**
+               * Google Login documentation link -
+               * https://www.npmjs.com/package/@react-oauth/google
+               */
+              !loading ? (
+                <GoogleLogin
+                  onSuccess={handleGoogleLoginSuccess}
+                  onError={handleGoogleLoginError}
+                  theme="filled_black"
+                  size="medium"
+                  shape="rectangular"
+                  useOneTap
                 />
-              </Form.Item>
-              <Form.Item noStyle>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  loading={loading}
-                  icon={<LoginOutlined />}
-                />
-              </Form.Item>
-            </Space.Compact>
-          </Form>
+              ) : (
+                <Space>
+                  <LoadingOutlined />
+                  Signing you in...
+                </Space>
+              )
+            }
+          </Row>
           <br />
           <Divider>
             <Button

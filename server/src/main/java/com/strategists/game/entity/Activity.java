@@ -83,12 +83,16 @@ public class Activity implements Serializable {
 		return new Activity(UpdateType.INVEST, buyer, Double.toString(ownership), land);
 	}
 
+	public static Activity ofInvite(String admin, String email) {
+		return new Activity(UpdateType.INVITE, admin, email);
+	}
+
 	public static Activity ofJail(String player) {
 		return new Activity(UpdateType.JAIL, player);
 	}
 
-	public static Activity ofJoin(String player, double cash) {
-		return new Activity(UpdateType.JOIN, player, Double.toString(cash));
+	public static Activity ofJoin(String player) {
+		return new Activity(UpdateType.JOIN, player);
 	}
 
 	public static Activity ofKick(String admin, String player) {

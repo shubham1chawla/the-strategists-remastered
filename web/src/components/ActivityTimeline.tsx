@@ -10,6 +10,7 @@ import {
   FallOutlined,
   FireOutlined,
   InfoCircleOutlined,
+  MailOutlined,
   RiseOutlined,
   SettingOutlined,
   StopOutlined,
@@ -119,6 +120,8 @@ const getIcon = (type: UpdateType): ReactNode | undefined => {
       return <CrownOutlined />;
     case 'INVEST':
       return <RiseOutlined />;
+    case 'INVITE':
+      return <MailOutlined />;
     case 'JOIN':
       return <UserAddOutlined />;
     case 'KICK':
