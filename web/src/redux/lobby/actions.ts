@@ -25,10 +25,10 @@ export namespace LobbyActions {
     };
   };
 
-  export const kickPlayer = (username: string) => {
+  export const kickPlayer = (id: number) => {
     return {
       type: Types.KICK_PLAYER,
-      payload: username,
+      payload: id,
     };
   };
 

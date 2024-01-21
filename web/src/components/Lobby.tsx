@@ -1,7 +1,6 @@
-import { MouseEvent, useState } from 'react';
+import { MouseEvent } from 'react';
 import {
   Button,
-  Divider,
   Form,
   Input,
   InputNumber,
@@ -9,16 +8,16 @@ import {
   Space,
   Tag,
   Tooltip,
+  notification,
 } from 'antd';
 import {
-  LockOutlined,
-  UnlockOutlined,
   UserAddOutlined,
   UserDeleteOutlined,
   UserOutlined,
   WalletOutlined,
   StockOutlined,
   CrownOutlined,
+  MailOutlined,
 } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { Player, State } from '../redux';
@@ -31,11 +30,6 @@ import axios from 'axios';
 const MIN_CASH_AMOUNT = 100;
 const MAX_CASH_AMOUNT = 9999;
 
-interface Password {
-  value: string;
-  show: boolean;
-}
-
 /**
  * -----  LOBBY COMPONENT BELOW  -----
  */
@@ -44,7 +38,7 @@ export const Lobby = () => {
   return (
     <>
       <LobbyPlayers />
-      <AddPlayerForm />
+      <InvitePlayerForm />
     </>
   );
 };
@@ -55,44 +49,13 @@ export const Lobby = () => {
 
 const LobbyPlayers = () => {
   const { state, players } = useSelector((state: State) => state.lobby);
-  const [passwords, setPasswords] = useState<Map<number, Password>>(new Map());
 
   // Sorting players in decreasing order of net-worth
   players.sort((p1, p2) => p2.netWorth - p1.netWorth);
 
-  const kickPlayer = (event: MouseEvent, { username }: Player) => {
+  const kickPlayer = (event: MouseEvent, { id }: Player) => {
     event.stopPropagation();
-    axios.delete('/api/players', { data: { username } });
-  };
-
-  const showPassword = async ({ id }: Player) => {
-    let password = passwords.get(id);
-    if (!password) {
-      const { data } = await axios.get(`/api/players/${id}/password`);
-      password = { value: data, show: true };
-    }
-    setPasswords(new Map(passwords.set(id, { ...password, show: true })));
-  };
-
-  const hidePassword = ({ id }: Player) => {
-    const password = passwords.get(id);
-    if (!password) {
-      return;
-    }
-    setPasswords(new Map(passwords.set(id, { ...password, show: false })));
-  };
-
-  const renderPassword = ({ id }: Player) => {
-    const password = passwords.get(id);
-    return password && password.show ? (
-      <>
-        <UnlockOutlined /> {password.value}
-      </>
-    ) : (
-      <>
-        <LockOutlined /> ****
-      </>
-    );
+    axios.delete('/api/players', { data: { playerId: id } });
   };
 
   return (
@@ -125,39 +88,27 @@ const LobbyPlayers = () => {
             </Tooltip>
           }
         >
-          <div
-            onMouseLeave={() => hidePassword(player)}
-            className="strategists-lobby__players__player__content"
-          >
-            <div className="strategists-lobby__players__player__content__info">
-              <span>
-                {state === 'ACTIVE' && player.state !== 'BANKRUPT' ? (
+          <Space direction="vertical">
+            <Space>
+              <UserOutlined /> {player.username}
+            </Space>
+            <Space>
+              {state === 'ACTIVE' && player.state !== 'BANKRUPT' ? (
+                <Tooltip title={<>{player.username}'s rank</>}>
                   <Tag icon={<CrownOutlined />}>#{index + 1}</Tag>
-                ) : null}
-                <UserOutlined /> {player.username}
-              </span>
-              <span>
-                <Tooltip title={<>{player.username}'s cash</>}>
-                  <WalletOutlined /> {player.cash}
                 </Tooltip>
-                <Divider type="vertical" />
-                <Tooltip title={<>{player.username}'s net worth</>}>
-                  <StockOutlined /> {player.netWorth}
-                </Tooltip>
-              </span>
-            </div>
-            <div
-              className="strategists-lobby__players__player__content__password"
-              onMouseDown={() => showPassword(player)}
-              onMouseUp={() => hidePassword(player)}
-            >
-              <Tooltip
-                title={`Hold down to reveal ${player.username}'s password`}
-              >
-                {renderPassword(player)}
+              ) : null}
+              {player.state === 'INVITED' && (
+                <Tag icon={<MailOutlined />}>Invited</Tag>
+              )}
+              <Tooltip title={<>{player.username}'s cash</>}>
+                <Tag icon={<WalletOutlined />}>{player.cash}</Tag>
               </Tooltip>
-            </div>
-          </div>
+              <Tooltip title={<>{player.username}'s net worth</>}>
+                <Tag icon={<StockOutlined />}>{player.netWorth}</Tag>
+              </Tooltip>
+            </Space>
+          </Space>
         </List.Item>
       )}
     />
@@ -168,67 +119,86 @@ const LobbyPlayers = () => {
  * -----  ADD PLAYER FORM COMPONENT BELOW  -----
  */
 
-const AddPlayerForm = () => {
+interface Invitation {
+  email: string;
+  cash: number;
+}
+
+const InvitePlayerForm = () => {
   const { state } = useSelector((state: State) => state.lobby);
+  const [api, contextHolder] = notification.useNotification();
   const [form] = Form.useForm();
 
-  const addPlayer = async ({ username, cash }: Player) => {
-    await axios.post('/api/players', { username, cash });
+  const invitePlayer = async (invite: Invitation) => {
+    try {
+      await axios.post('/api/players', invite);
+    } catch (error) {
+      api.error({ message: `Unable to invite ${invite.email}` });
+    }
     form.resetFields();
   };
 
   return (
-    <Form
-      layout="inline"
-      form={form}
-      name="basic"
-      className="strategists-lobby__form"
-      onFinish={addPlayer}
-      onFinishFailed={(event) => console.error(event)}
-      autoComplete="off"
-    >
-      <Tooltip
-        title={
-          state === 'ACTIVE'
-            ? `The Strategists in session, you can't add players now!`
-            : null
+    <>
+      {contextHolder}
+      <Form
+        layout="inline"
+        form={form}
+        name="basic"
+        className="strategists-lobby__form"
+        onFinish={invitePlayer}
+        onFinishFailed={() =>
+          api.error({ message: 'Incorrect player details!' })
         }
+        autoComplete="off"
       >
-        <Space.Compact size="large">
-          <Form.Item
-            noStyle
-            name="username"
-            rules={[{ required: true, message: `Username required!` }]}
-          >
-            <Input
-              disabled={state === 'ACTIVE'}
-              placeholder="Username"
-              prefix={<UserOutlined />}
-            />
-          </Form.Item>
-          <Form.Item
-            noStyle
-            name="cash"
-            rules={[{ required: true, message: `Cash required!` }]}
-          >
-            <InputNumber
-              disabled={state === 'ACTIVE'}
-              placeholder="Cash"
-              min={MIN_CASH_AMOUNT}
-              max={MAX_CASH_AMOUNT}
-              prefix={<WalletOutlined />}
-            />
-          </Form.Item>
-          <Form.Item noStyle>
-            <Button
-              disabled={state === 'ACTIVE'}
-              type="primary"
-              htmlType="submit"
-              icon={<UserAddOutlined />}
-            />
-          </Form.Item>
-        </Space.Compact>
-      </Tooltip>
-    </Form>
+        <Tooltip
+          title={
+            state === 'ACTIVE'
+              ? `The Strategists in session, you can't invite players now!`
+              : null
+          }
+        >
+          <Space.Compact size="large">
+            <Form.Item
+              noStyle
+              name="email"
+              rules={[{ required: true, type: 'email' }]}
+            >
+              <Input
+                disabled={state === 'ACTIVE'}
+                placeholder="Enter player's email"
+                prefix={<UserOutlined />}
+                type="email"
+                required
+              />
+            </Form.Item>
+            <Form.Item
+              noStyle
+              name="cash"
+              rules={[{ required: true, type: 'number' }]}
+            >
+              <InputNumber
+                disabled={state === 'ACTIVE'}
+                placeholder="Cash"
+                min={MIN_CASH_AMOUNT}
+                max={MAX_CASH_AMOUNT}
+                prefix={<WalletOutlined />}
+                required
+                type="number"
+              />
+            </Form.Item>
+            <Form.Item noStyle>
+              <Button
+                disabled={state === 'ACTIVE'}
+                type="primary"
+                htmlType="submit"
+                icon={<UserAddOutlined />}
+              />
+            </Form.Item>
+          </Space.Compact>
+        </Tooltip>
+      </Form>
+    </>
   );
 };

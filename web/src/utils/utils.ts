@@ -14,11 +14,13 @@ export const parseActivity = (activity: Activity): string => {
     case 'EVENT':
       return `${val1} caused ${val2} at ${val3} for ${val4} turns!`;
     case 'INVEST':
-      return `${val1} invested in ${val2}% of ${val3}`;
+      return `${val1} invested in ${val2}% of ${val3}!`;
+    case 'INVITE':
+      return `${val1} invited ${val2}!`;
     case 'JAIL':
       return `${val1} just got arrested!`;
     case 'JOIN':
-      return `${val1} joined the game with ${val2} cash.`;
+      return `${val1} accepted the invite!`;
     case 'KICK':
       return `${val1} kicked ${val2} out!`;
     case 'MOVE':

@@ -12,9 +12,9 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
 
 	boolean existsByUsername(String username);
 
-	Optional<Player> findByUsername(String username);
+	boolean existsByEmail(String email);
 
-	void deleteByUsername(String username);
+	Optional<Player> findByEmail(String email);
 
 	boolean existsByTurn(boolean turn);
 

@@ -1,8 +1,11 @@
 package com.strategists.game.update.handler;
 
+import java.util.Objects;
+
 import org.springframework.stereotype.Component;
 
 import com.strategists.game.entity.Activity;
+import com.strategists.game.entity.Player;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.KickUpdatePayload;
 
@@ -18,9 +21,14 @@ public class KickUpdateHandler extends AbstractUpdateHandler<KickUpdatePayload> 
 
 	@Override
 	public void handle(Object returnValue, Object[] args) {
+		val player = (Player) returnValue;
+		if (Objects.isNull(player)) {
+			return;
+		}
+
 		// Persisting the activity and sending the update
-		val activity = Activity.ofKick(getAdminUsername(), (String) args[0]);
-		sendUpdate(new KickUpdatePayload(saveActivity(activity), (String) args[0]));
+		val activity = Activity.ofKick(getAdminUsername(), player.getUsername());
+		sendUpdate(new KickUpdatePayload(saveActivity(activity), player.getId()));
 	}
 
 }
