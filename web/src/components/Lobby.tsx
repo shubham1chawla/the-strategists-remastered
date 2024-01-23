@@ -119,7 +119,7 @@ const LobbyPlayers = () => {
  * -----  ADD PLAYER FORM COMPONENT BELOW  -----
  */
 
-interface Invitation {
+interface Invite {
   email: string;
   cash: number;
 }
@@ -129,7 +129,10 @@ const InvitePlayerForm = () => {
   const [api, contextHolder] = notification.useNotification();
   const [form] = Form.useForm();
 
-  const invitePlayer = async (invite: Invitation) => {
+  // Hiding invite player form when game starts
+  if (state === 'ACTIVE') return null;
+
+  const invitePlayer = async (invite: Invite) => {
     try {
       await axios.post('/api/players', invite);
     } catch (error) {
@@ -150,54 +153,42 @@ const InvitePlayerForm = () => {
         onFinishFailed={() =>
           api.error({ message: 'Incorrect player details!' })
         }
-        autoComplete="off"
       >
-        <Tooltip
-          title={
-            state === 'ACTIVE'
-              ? `The Strategists in session, you can't invite players now!`
-              : null
-          }
-        >
-          <Space.Compact size="large">
-            <Form.Item
-              noStyle
-              name="email"
-              rules={[{ required: true, type: 'email' }]}
-            >
-              <Input
-                disabled={state === 'ACTIVE'}
-                placeholder="Enter player's email"
-                prefix={<UserOutlined />}
-                type="email"
-                required
-              />
-            </Form.Item>
-            <Form.Item
-              noStyle
-              name="cash"
-              rules={[{ required: true, type: 'number' }]}
-            >
-              <InputNumber
-                disabled={state === 'ACTIVE'}
-                placeholder="Cash"
-                min={MIN_CASH_AMOUNT}
-                max={MAX_CASH_AMOUNT}
-                prefix={<WalletOutlined />}
-                required
-                type="number"
-              />
-            </Form.Item>
-            <Form.Item noStyle>
-              <Button
-                disabled={state === 'ACTIVE'}
-                type="primary"
-                htmlType="submit"
-                icon={<UserAddOutlined />}
-              />
-            </Form.Item>
-          </Space.Compact>
-        </Tooltip>
+        <Space.Compact size="large">
+          <Form.Item
+            noStyle
+            name="email"
+            rules={[{ required: true, type: 'email' }]}
+          >
+            <Input
+              placeholder="Enter player's email"
+              prefix={<UserOutlined />}
+              type="email"
+              required
+            />
+          </Form.Item>
+          <Form.Item
+            noStyle
+            name="cash"
+            rules={[{ required: true, type: 'number' }]}
+          >
+            <InputNumber
+              placeholder="Cash"
+              min={MIN_CASH_AMOUNT}
+              max={MAX_CASH_AMOUNT}
+              prefix={<WalletOutlined />}
+              required
+              type="number"
+            />
+          </Form.Item>
+          <Form.Item noStyle>
+            <Button
+              type="primary"
+              htmlType="submit"
+              icon={<UserAddOutlined />}
+            />
+          </Form.Item>
+        </Space.Compact>
       </Form>
     </>
   );

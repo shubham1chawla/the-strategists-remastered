@@ -333,11 +333,6 @@ const AdminPanel = () => {
           children: <ActivityTimeline />,
           className: 'strategists-tab-body',
         },
-        {
-          key: '3',
-          label: `Events`,
-          children: `Content of Tab Events`,
-        },
       ]}
     />
   );

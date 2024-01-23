@@ -239,10 +239,10 @@ h1.strategists-logo {
 .strategists-lobby {
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  flex: auto 1;
 
   &__players {
-    // lobby form's height = 40px
-    height: calc(100% - 40px - 2 * var(--ant-lg-padding));
     overflow-y: scroll;
 
     &__player {
@@ -268,12 +268,12 @@ h1.strategists-logo {
 
       // Overriding username's input css
       .ant-input-affix-wrapper {
-        flex-basis: 60%;
+        flex-basis: calc(100% - 150px);
       }
 
       // Overriding cash's input css
       .ant-input-number-affix-wrapper {
-        flex-basis: calc(40% - 40px);
+        flex-basis: calc(150px - 40px);
         border-radius: 0px;
       }
     }
