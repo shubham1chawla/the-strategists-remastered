@@ -16,7 +16,7 @@ Follow the steps mentioned below to understand how to setup the Spring Boot appl
 - Before creating a Docker image, make sure you have created a dedicated `application-docker.yml` file in the resources directory along with `application.yml`.
 - Overwrite any default configuration in the dedicated `yml` file. **DO NOT** update the default `application.yml` file.
 - Make sure to add the `strategists.admin.email` key in the Docker's dedicated `yml` file. The application won't start otherwise as the admin's email address is not provided in the default `application.yml` file.
-- Once you have created a dedicated `yml` file, you can build a Docker image using the `docker buildx build --tag <REPOSITORY_NAME>/strategists-service:<TAG_NAME> .` command.
+- Once you have created a dedicated `yml` file, you can build a Docker image from the **parent directory (outside server)** using the `docker buildx build -f server/Dockerfile -t <REPOSITORY_NAME>/strategists-service:<TAG_NAME> .` command.
 - To run the image, use the `docker run -e PROFILE=docker -p 8090:8090 <REPOSITORY_NAME>/strategists-service:<TAG_NAME>` command. This command assumes that your dedicated file is named `application-docker.yml`.
 
 ### Troubleshooting
