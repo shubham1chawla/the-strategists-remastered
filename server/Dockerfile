@@ -15,9 +15,15 @@ RUN --mount=type=cache,target=/root/.m2  mvn clean package -Dmaven.test.skip
 # spliting the built app into multiple layers to improve layer rebuild
 RUN mkdir -p target/docker-packaging && cd target/docker-packaging && jar -xf ../*.jar
 
-######## JRE Run Stage ########
+######## Extracting Jar & Prediction Model ########
 
-FROM openjdk:17-jdk-slim-buster
+# installing python 3.9 and java jdk 17
+FROM python:3.9-slim
+COPY --from=openjdk:17-jdk-slim-buster /usr/local/openjdk-17 /usr/local/openjdk-17
+ENV JAVA_HOME /usr/local/openjdk-17
+RUN update-alternatives --install /usr/bin/java java /usr/local/openjdk-17/bin/java 1
+
+# setting up working directory as 'app'
 WORKDIR /app
 
 # copying built app layer by layer
