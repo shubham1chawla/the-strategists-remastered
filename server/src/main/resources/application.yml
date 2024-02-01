@@ -1,8 +1,23 @@
+server:
+  port: 8090
 spring:
   application:
     name: strategists-service
-  profiles:
-    active: dev
+  datasource:
+    url: jdbc:h2:mem:devdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password: 
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+  h2:
+    console:
+      enabled: true
 strategists:
   admin:
     username: Creator
