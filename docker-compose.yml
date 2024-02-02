@@ -1,0 +1,36 @@
+version: '3.7'
+
+# If you face issues running the `docker-compose up` command.
+# Please refer to the README file of the front-end and back-end applications.
+
+services:
+  strategists-web:
+    container_name: strategists-web
+    # image: <REPOSITORY_NAME>/strategists-web:<TAG_NAME>
+    build:
+      context: web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - strategists-service
+    networks:
+      - strategists-network
+  
+  strategists-service:
+    container_name: strategists-service
+    # image: <REPOSITORY_NAME>/strategists-service:<TAG_NAME>
+    build: 
+      context: .
+      dockerfile: server/Dockerfile
+    ports:
+      - "8090:8090"
+    environment:
+      - PROFILE=docker
+    networks:
+      - strategists-network
+
+networks:
+  strategists-network:
+    driver: bridge
+    
