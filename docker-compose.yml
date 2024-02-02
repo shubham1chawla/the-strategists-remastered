@@ -23,8 +23,6 @@ services:
     build: 
       context: .
       dockerfile: server/Dockerfile
-    ports:
-      - "8090:8090"
     environment:
       - PROFILE=docker
     networks:

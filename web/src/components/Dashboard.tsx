@@ -135,9 +135,7 @@ const Update = () => {
     if (!username) {
       return null;
     }
-    const updates = new EventSource(
-      `${process.env.REACT_APP_API_BASE_URL}/api/updates/${username}`
-    );
+    const updates = new EventSource(`/api/updates/${username}`);
     updates.onerror = console.error;
     return updates;
   }, [username]);
