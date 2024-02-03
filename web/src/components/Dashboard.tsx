@@ -55,7 +55,8 @@ const syncGameStates = (dispatch: Dispatch<AnyAction>) => {
  */
 
 export const Dashboard = () => {
-  const { user, lobby } = useSelector((state: State) => state);
+  const lobby = useSelector((state: State) => state.lobby);
+  const user = useSelector((state: State) => state.user);
   const { username, type } = user;
   const { players } = lobby;
 
@@ -120,7 +121,8 @@ interface UpdatePayload {
 }
 
 const Update = () => {
-  const { activity, user } = useSelector((state: State) => state);
+  const activity = useSelector((state: State) => state.activity);
+  const user = useSelector((state: State) => state.user);
   const { subscribedTypes } = activity;
   const { username } = user;
   const [api, contextHolder] = notification.useNotification();
@@ -238,7 +240,8 @@ const Update = () => {
  */
 
 const Navigation = () => {
-  const { user, lobby } = useSelector((state: State) => state);
+  const lobby = useSelector((state: State) => state.lobby);
+  const user = useSelector((state: State) => state.user);
   const { type } = user;
   const { state, players } = lobby;
 

@@ -311,6 +311,10 @@ h1.strategists-logo {
 
 // ----- GLOBAL ANTD OVERRIDES DEFINED BELOW ----- //
 
+.ant-tag {
+  background-color: transparent;
+}
+
 .ant-btn-primary {
   box-shadow: none;
 }
