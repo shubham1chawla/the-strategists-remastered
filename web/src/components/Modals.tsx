@@ -336,7 +336,8 @@ export const ResetModal = (props: ResetModalProps) => {
  */
 
 export const WinModal = () => {
-  const { user, lobby } = useSelector((state: State) => state);
+  const lobby = useSelector((state: State) => state.lobby);
+  const user = useSelector((state: State) => state.user);
   const { type } = user;
   const { players, state } = lobby;
 
