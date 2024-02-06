@@ -16,7 +16,7 @@
 	<version>1.0-SNAPSHOT</version>
 
 	<name>strategists-service</name>
-	<description>The Strategists Backend Service</description>
+	<description>The Strategists - Back-end Service</description>
 
 	<properties>
 		<java.version>17</java.version>

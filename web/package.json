@@ -1,5 +1,6 @@
 {
-  "name": "strategists-ui",
+  "name": "strategists-web",
+  "description": "The Strategists - Front-end Application",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
