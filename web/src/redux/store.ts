@@ -26,5 +26,5 @@ export const store = configureStore({
       return defaultMiddlewares().concat(logger as any);
     }
     return defaultMiddlewares();
-  }
+  },
 });

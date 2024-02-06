@@ -48,6 +48,9 @@ import lombok.extern.log4j.Log4j2;
 @Service
 public class PredictionServiceImpl implements PredictionService {
 
+	@Value("${strategists.prediction.enabled}")
+	private boolean enabled;
+
 	@Value("${strategists.prediction.export-data-directory}")
 	private File exportDataDirectory;
 
@@ -74,12 +77,20 @@ public class PredictionServiceImpl implements PredictionService {
 
 	@PostConstruct
 	public void setup() {
-		validateDirectories();
+		if (enabled) {
+			validateDirectories();
+		} else {
+			log.info("Predictions are disabled.");
+		}
 	}
 
 	@Override
 	@Transactional
 	public void trainPredictionModel(boolean export) {
+		// Short-circuiting the method if predictions are disabled.
+		if (!enabled) {
+			return;
+		}
 
 		// Exporting game data if requested
 		if (export) {
@@ -107,6 +118,11 @@ public class PredictionServiceImpl implements PredictionService {
 	@Transactional
 	@UpdateMapping(UpdateType.PREDICTION)
 	public Prediction executePredictionModel(Player player) {
+		// Short-circuiting the method if predictions are disabled.
+		if (!enabled) {
+			return Prediction.UNKNOWN;
+		}
+
 		// Fetching new reference
 		player = playerService.getPlayerById(player.getId());
 

@@ -23,6 +23,7 @@ strategists:
     username: Creator
     email: 
   prediction:
+    enabled: true
     export-data-directory: ../prediction/data/
     model-out-directory: ../prediction/out/
     predict-file-directory: ../prediction/temp/

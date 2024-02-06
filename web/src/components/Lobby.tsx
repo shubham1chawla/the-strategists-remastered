@@ -51,7 +51,12 @@ const LobbyPlayers = () => {
   const { state, players } = useSelector((state: State) => state.lobby);
 
   // Sorting players in decreasing order of net-worth
-  players.sort((p1, p2) => p2.netWorth - p1.netWorth);
+  // Making a copy of players before sorting to avoid direct state mutation.
+  // Reference to the issue -
+  // https://stackoverflow.com/questions/41051302/react-and-redux-uncaught-error-a-state-mutation-was-detected-between-dispatche
+  const sortedPlayers = [...players].sort(
+    (p1, p2) => p2.netWorth - p1.netWorth
+  );
 
   const kickPlayer = (event: MouseEvent, { id }: Player) => {
     event.stopPropagation();
@@ -62,7 +67,7 @@ const LobbyPlayers = () => {
     <List
       className="strategists-lobby__players"
       size="large"
-      dataSource={players}
+      dataSource={sortedPlayers}
       renderItem={(player: Player, index: number) => (
         <List.Item
           className={
