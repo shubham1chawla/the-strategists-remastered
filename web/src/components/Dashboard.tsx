@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Col, Row, Tabs, Tooltip, notification } from 'antd';
 import { googleLogout } from '@react-oauth/google';
 import {
+  DisconnectOutlined,
   LogoutOutlined,
   PlayCircleFilled,
   StopFilled,
@@ -134,12 +135,7 @@ const Update = () => {
    * only when the username changes.
    */
   const updates = useMemo(() => {
-    if (!username) {
-      return null;
-    }
-    const updates = new EventSource(`/api/updates/${username}`);
-    updates.onerror = console.error;
-    return updates;
+    return !username ? null : new EventSource(`/api/updates/${username}`);
   }, [username]);
 
   /**
@@ -147,6 +143,26 @@ const Update = () => {
    */
   useEffect(() => {
     if (!updates) return;
+
+    // Setting up onerror startegy for the event source
+    updates.onerror = (error) => {
+      console.error(error);
+
+      // Preventing reconnection using the same instance.
+      updates.close();
+
+      // Showing notification to the user, urging them to refresh the page.
+      api.error({
+        icon: <DisconnectOutlined />,
+        message: 'Disconnected!',
+        description:
+          'We lost the connection to our servers. Refresh the page to reconnect!',
+        duration: 0,
+        onClose: () => window.location.reload(),
+      });
+    };
+
+    // Setting up on message strategy for the event source
     updates.onmessage = (message: MessageEvent<any>) => {
       const { type, payload, activity }: UpdatePayload = JSON.parse(
         message.data
