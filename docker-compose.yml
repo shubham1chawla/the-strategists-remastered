@@ -7,6 +7,7 @@ services:
   strategists-web:
     container_name: strategists-web
     # image: <REPOSITORY_NAME>/strategists-web:<TAG_NAME>
+    platform: linux/amd64
     build:
       context: web
       dockerfile: Dockerfile
@@ -20,6 +21,7 @@ services:
   strategists-service:
     container_name: strategists-service
     # image: <REPOSITORY_NAME>/strategists-service:<TAG_NAME>
+    platform: linux/amd64
     build: 
       context: .
       dockerfile: server/Dockerfile
