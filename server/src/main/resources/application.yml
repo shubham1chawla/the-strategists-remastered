@@ -32,3 +32,5 @@ strategists:
   game:
     dice-size: 6
     rent-factor: 0.2
+  configuration:
+    enable-sse-ping: false

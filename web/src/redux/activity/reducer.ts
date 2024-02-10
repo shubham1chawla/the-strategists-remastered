@@ -12,6 +12,7 @@ export type UpdateType =
   | 'JOIN'
   | 'KICK'
   | 'MOVE'
+  | 'PING'
   | 'PREDICTION'
   | 'RENT'
   | 'RESET'
