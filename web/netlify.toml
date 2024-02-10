@@ -1,0 +1,17 @@
+[build]
+  base = "web/"
+  publish = "build/"
+
+[[edge_functions]]
+  path = "/api/updates/*"
+  function = "proxy-sse"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/proxy"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
