@@ -203,6 +203,7 @@ const Update = () => {
         case 'MOVE':
           dispatch(LobbyActions.patchPlayers([payload]));
           break;
+        case 'PING':
         case 'PREDICTION':
           // Do nothing
           break;
