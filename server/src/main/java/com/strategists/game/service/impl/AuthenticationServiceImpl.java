@@ -7,11 +7,18 @@ import javax.annotation.PostConstruct;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import com.strategists.game.request.GoogleLoginRequest;
+import com.strategists.game.request.GoogleRecaptchaVerificationRequest;
 import com.strategists.game.response.AuthenticationResponse;
+import com.strategists.game.response.GoogleRecaptchaVerificationResponse;
 import com.strategists.game.service.AuthenticationService;
 import com.strategists.game.service.PlayerService;
 
@@ -28,12 +35,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	@Value("${strategists.admin.email}")
 	private String adminEmail;
 
+	@Value("${strategists.configuration.google-recaptcha-api-url}")
+	private String googleRecaptchaAPIUrl;
+
+	@Value("${strategists.configuration.google-recaptcha-secret-key}")
+	private String googleRecaptchaSecretKey;
+
 	@Autowired
 	private PlayerService playerService;
 
 	@PostConstruct
 	public void setup() {
 		Assert.isTrue(EmailValidator.getInstance().isValid(adminEmail), "Setup a valid admin email id!");
+		Assert.hasText(googleRecaptchaAPIUrl, "Google Recaptcha API URL is not provided!");
+		Assert.hasText(googleRecaptchaSecretKey, "Google Recaptcha Secret key is not provided!");
 	}
 
 	@Override
@@ -53,6 +68,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 		log.info("Authenticating player: {}", player.getUsername());
 		return new AuthenticationResponse(player.getUsername(), Type.PLAYER);
+	}
+
+	@Override
+	public boolean verify(GoogleRecaptchaVerificationRequest request) {
+		val headers = new HttpHeaders();
+		headers.add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE);
+		headers.add(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE);
+
+		val body = new LinkedMultiValueMap<String, String>();
+		body.add("secret", googleRecaptchaSecretKey);
+		body.add("response", request.getClientToken());
+
+		val entity = new HttpEntity<>(body, headers);
+		val template = new RestTemplate();
+		val response = template.postForEntity(googleRecaptchaAPIUrl, entity, GoogleRecaptchaVerificationResponse.class);
+		return response.hasBody() && response.getBody().isSuccess();
 	}
 
 }
