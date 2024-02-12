@@ -34,3 +34,5 @@ strategists:
     rent-factor: 0.2
   configuration:
     enable-sse-ping: false
+    google-recaptcha-api-url: https://www.google.com/recaptcha/api/siteverify
+    google-recaptcha-secret-key: 

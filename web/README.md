@@ -17,6 +17,13 @@ Follow the steps mentioned below to understand how to setup the React applicatio
 - Build a Docker image from the **current directory (web)** using the `docker buildx build -t <REPOSITORY_NAME>/strategists-web:<TAG_NAME> .` command.
 - To run the image, use the `docker run -p 3000:80 <REPOSITORY_NAME>/strategists-web:<TAG_NAME>` command.
 
+### Netlify
+
+- The web application is hosted using [Netlify](https://netlify.com/), which help's use the `HTTPS` protocol required for Google sign-in and Recaptcha functionalities.
+- Netlify handles all API proxies using Netlify Functions & Edge-functions since the APIs are accessed using `HTTP` protocol.
+- Install the Netlify CLI using `npm i netlify-cli -g` command. If you are on mac, use `brew install netlify-cli` to avoid permission issues.
+- To test the application using Netlify Function's use the command `netlify dev` command.
+
 ### Troubleshooting
 
 - To check the files in the Docker container, enter its shell using the `docker exec -it <CONTAINER_ID or CONTAINER_NAME> sh` command.

@@ -7,6 +7,7 @@ import { GithubOutlined, LoadingOutlined } from '@ant-design/icons';
 import { GoogleCredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { jwtDecode } from 'jwt-decode';
 import { Logo } from '.';
+import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
 
 interface GoogleUser {
@@ -14,12 +15,16 @@ interface GoogleUser {
   email: string;
 }
 
-type LobbyState = 'LOBBY' | 'ACTIVE' | 'UNREACHABLE';
+type Workflow =
+  | 'NOT_VERIFIED'
+  | 'VERIFYING'
+  | 'UNREACHABLE'
+  | 'VERIFIED'
+  | 'SIGNING_IN';
 
 export const Login = () => {
   const user = useSelector((state: State) => state.user);
-  const [signingIn, setSigningIn] = useState(false);
-  const [lobbyState, setLobbyState] = useState<LobbyState | null>(null);
+  const [workflow, setWorkflow] = useState<Workflow>('NOT_VERIFIED');
   const [api, contextHolder] = notification.useNotification();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -32,17 +37,6 @@ export const Login = () => {
     navigate('/dashboard');
   }, [navigate, user.username]);
 
-  // Checking if server is reachable using lobby state API
-  useEffect(() => {
-    axios
-      .get('/api/game')
-      .then(({ data }) => setLobbyState(data))
-      .catch((error) => {
-        console.error(error);
-        setLobbyState('UNREACHABLE');
-      });
-  }, []);
-
   const handleGoogleLoginSuccess = ({
     credential,
   }: GoogleCredentialResponse) => {
@@ -51,9 +45,9 @@ export const Login = () => {
       return;
     }
     const user: GoogleUser = jwtDecode(credential);
-    setSigningIn(true);
+    setWorkflow('SIGNING_IN');
     axios
-      .post('/api/auth', user)
+      .post('/api/authenticate', user)
       .then(({ data }) => {
         dispatch(UserActions.setUser(data));
         navigate('/dashboard');
@@ -64,7 +58,7 @@ export const Login = () => {
             ? 'Your email is not included in the ongoing session of The Strategists!'
             : 'Something went wrong, please try again later!';
         api.error({ message });
-        setSigningIn(false);
+        setWorkflow('VERIFIED');
       });
   };
 
@@ -72,7 +66,65 @@ export const Login = () => {
     const message =
       'Google authentication failed. Please contact the developers to address your issue!';
     api.error({ message });
-    setSigningIn(false);
+    setWorkflow('VERIFIED');
+  };
+
+  const getWorkflowComponent = () => {
+    switch (workflow) {
+      case 'NOT_VERIFIED':
+        return (
+          <ReCAPTCHA
+            sitekey={process.env.REACT_APP_GOOGLE_RECAPTCHA_SITE_KEY || ''}
+            theme="dark"
+            onChange={(clientToken) => {
+              setWorkflow('VERIFYING');
+              axios
+                .post('/api/recaptcha', { clientToken })
+                .then(() => setWorkflow('VERIFIED'))
+                .catch(({ response }) => {
+                  const { status } = response;
+                  setWorkflow(status === 403 ? 'NOT_VERIFIED' : 'UNREACHABLE');
+                });
+            }}
+          />
+        );
+      case 'VERIFYING':
+        return (
+          <Space>
+            <LoadingOutlined />
+            Verifying...
+          </Space>
+        );
+      case 'VERIFIED':
+        return (
+          <GoogleLogin
+            onSuccess={handleGoogleLoginSuccess}
+            onError={handleGoogleLoginError}
+            theme="filled_black"
+            size="medium"
+            shape="rectangular"
+            text="signin_with"
+            useOneTap
+          />
+        );
+      case 'SIGNING_IN':
+        return (
+          <Space>
+            <LoadingOutlined />
+            Signing you in...
+          </Space>
+        );
+      case 'UNREACHABLE':
+        return (
+          <Alert
+            type="error"
+            message="Servers are unreachable!"
+            description="The game is presently in a developmental stage, and we frequently deactivate the servers to reduce expenses. If you wish to engage with The Strategists, kindly reach out to the developers for access."
+            showIcon
+            banner
+          />
+        );
+    }
   };
 
   return (
@@ -84,55 +136,7 @@ export const Login = () => {
             <Logo />
           </Divider>
           <br />
-          <Row justify="center">
-            {!signingIn && !!lobbyState && lobbyState !== 'UNREACHABLE' && (
-              /**
-               * Google Login documentation link -
-               * https://www.npmjs.com/package/@react-oauth/google
-               */
-              <GoogleLogin
-                onSuccess={handleGoogleLoginSuccess}
-                onError={handleGoogleLoginError}
-                theme="filled_black"
-                size="medium"
-                shape="rectangular"
-                text={lobbyState === 'ACTIVE' ? 'continue_with' : 'signin_with'}
-                useOneTap
-              />
-            )}
-            {!!signingIn && (
-              <Space>
-                <LoadingOutlined />
-                Signing you in...
-              </Space>
-            )}
-            {!lobbyState && (
-              <Space>
-                <LoadingOutlined />
-                Checking game's status...
-              </Space>
-            )}
-          </Row>
-          {(lobbyState === 'UNREACHABLE' || lobbyState === 'ACTIVE') && (
-            <>
-              {lobbyState === 'ACTIVE' && <br />}
-              <Alert
-                type={lobbyState === 'UNREACHABLE' ? 'error' : 'warning'}
-                message={
-                  lobbyState === 'UNREACHABLE'
-                    ? 'Servers are unreachable!'
-                    : 'Session is underway!'
-                }
-                description={
-                  lobbyState === 'UNREACHABLE'
-                    ? 'The game is presently in a developmental stage, and we frequently deactivate the servers to reduce expenses. If you wish to engage with The Strategists, kindly reach out to the developers for access.'
-                    : "The game is presently undergoing development and can only accommodate one session simultaneously. If you're not involved in the ongoing session and want to enter The Strategists, kindly contact the developers."
-                }
-                showIcon
-                banner
-              />
-            </>
-          )}
+          <Row justify="center">{getWorkflowComponent()}</Row>
           <br />
           <Divider>
             <Button

@@ -1,5 +1,7 @@
 # The Strategists - Monopoly-Inspired Multiplayer Game
 
+[![Netlify Status](https://api.netlify.com/api/v1/badges/9fd07386-0ff5-4f26-97c7-503273b3f276/deploy-status)](https://app.netlify.com/sites/strategists/deploys)
+
 Welcome to The Strategists—an exhilarating journey into the world of turn-wise online multiplayer gaming! Brace yourself for an immersive experience like no other as you step into a virtual battleground where 8-10 players clash in a symphony of wit and strategy. Unveiling a captivating gameplay, this game transcends the ordinary, inviting you to dive headfirst into a universe where every move is a calculated risk.
 
 But hold on, there's more to it than meets the eye. Picture this: over 20 Indian cities waiting to be conquered, not as mere spaces on the board, but as powerful properties that you can strategically invest in. Witness the rise and fall of empires through a graph-like visualization that brings these lands to life. The game doesn't just stop there—it introduces a dynamic economic system that will keep you on your toes, forcing you to adapt, evolve, and outsmart your opponents.
@@ -21,6 +23,8 @@ In The Strategists, thinking outside the box isn't just a suggestion; it's a nec
 ![Matplotlib](https://img.shields.io/badge/Matplotlib-%23ffffff.svg?style=for-the-badge&logo=Matplotlib&logoColor=black)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-%23F7931E.svg?style=for-the-badge&logo=scikit-learn&logoColor=white)
 ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazon-aws&logoColor=white)
+![Netlify](https://img.shields.io/badge/netlify-%23000000.svg?style=for-the-badge&logo=netlify&logoColor=#00C7B7)
 
 ## Gameplay
 
@@ -76,9 +80,7 @@ The game includes a confetti animation once a player wins. The prediction model 
 
 ## Setup
 
-For development, please refer to README in the individual projects inside the *web* and *server* directories. If you just want to run the application using Docker, use the following *docker-compose* command.
-
-    docker-compose up
+If you just want to run the application on your local machine using Docker, use the `docker-compose up` command. Please make sure all the configurations are set before running this command. Refer to individual projects' README to read more.
 
 ## Blogs
 
