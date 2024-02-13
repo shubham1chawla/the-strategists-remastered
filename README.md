@@ -86,3 +86,4 @@ If you just want to run the application on your local machine using Docker, use 
 
 - [How to write a messy useEffect in React and fix it](https://medium.com/@shuchawl/how-to-write-a-messy-useeffect-in-react-and-fix-it-c0e98f872d22)
 - [Leveraging Spring Aspect-Oriented Programming (AOP) for Event-Driven Updates](https://medium.com/@shuchawl/leveraging-spring-aspect-oriented-programming-aop-for-event-driven-updates-a53240de6dc2)
+- [From localhost to the cloud — my struggles with hosting The Strategists for free!](https://medium.com/@shuchawl/from-localhost-to-the-cloud-my-struggles-with-hosting-the-strategists-for-free-66b7b5664c9a)
