@@ -34,8 +34,8 @@ public class InvestUpdateHandler extends AbstractUpdateHandler<InvestUpdatePaylo
 		val players = land.getPlayerLands().stream().map(PlayerLand::getPlayer).toList();
 
 		// Persisting the activity and sending the update
-		val activity = Activity.ofInvest(player.getUsername(), ownership, land.getName());
-		sendUpdate(new InvestUpdatePayload(saveActivity(activity), land, players));
+		val activity = Activity.ofInvest(player, land, ownership);
+		sendUpdate(player.getGame(), new InvestUpdatePayload(saveActivity(activity), land, players));
 	}
 
 }

@@ -23,12 +23,10 @@ public class RentUpdateHandler extends AbstractUpdateHandler<RentUpdatePayload> 
 		val rent = (Rent) args[0];
 		val source = rent.getSourcePlayer();
 		val target = rent.getTargetPlayer();
-		val land = rent.getLand();
-		val rentAmount = rent.getRentAmount();
 
 		// Persisting the activity and sending the update
-		val activity = Activity.ofRent(source.getUsername(), rentAmount, target.getUsername(), land.getName());
-		sendUpdate(new RentUpdatePayload(saveActivity(activity), source, target));
+		val activity = Activity.ofRent(rent);
+		sendUpdate(source.getGame(), new RentUpdatePayload(saveActivity(activity), source, target));
 	}
 
 }

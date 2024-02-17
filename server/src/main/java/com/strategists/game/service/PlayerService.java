@@ -2,6 +2,7 @@ package com.strategists.game.service;
 
 import java.util.List;
 
+import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.Rent;
@@ -10,25 +11,29 @@ import com.strategists.game.request.GoogleLoginRequest;
 
 public interface PlayerService {
 
-	List<Player> getPlayers();
+	List<Player> getPlayersByGame(Game game);
 
-	List<Player> getActivePlayers();
+	List<Player> getActivePlayersByGame(Game game);
+
+	List<Player> getPlayersByGameOrderByBankruptcy(Game game);
 
 	Player getPlayerById(long id);
 
 	Player getPlayerByEmail(String email);
 
-	Player sendInvite(String email, double cash);
+	Player getPlayerByUsername(Game game, String username);
+
+	Player sendInvite(Game game, String email, double cash);
 
 	Player acceptInvite(GoogleLoginRequest request);
 
 	Player kickPlayer(long playerId);
 
-	boolean isTurnAssigned();
+	boolean isTurnAssigned(Game game);
 
-	Player assignTurn();
+	Player assignTurn(Game game);
 
-	Player getCurrentPlayer();
+	Player getCurrentPlayer(Game game);
 
 	Land movePlayer(Player player, int move);
 
@@ -40,8 +45,8 @@ public interface PlayerService {
 
 	void bankruptPlayer(Player player);
 
-	void resetPlayers();
+	void resetPlayers(Game game);
 
-	List<Trend> updatePlayerTrends();
+	List<Trend> updatePlayerTrends(Game game);
 
 }

@@ -37,18 +37,39 @@ import axios from 'axios';
  * -----  UTILITIES DEFINED BELOW  -----
  */
 
-const getCalls = {
-  '/api/players': LobbyActions.setPlayers, // Updating players
-  '/api/activities': ActivityActions.setActivities, // Updating players
-  '/api/lands': LobbyActions.setLands, // Updating lands
-  '/api/game': LobbyActions.setState, // Updating state
-  '/api/trends': TrendActions.setTrends, // Updating trends
-};
-
-const syncGameStates = (dispatch: Dispatch<AnyAction>) => {
-  for (const [api, action] of Object.entries(getCalls)) {
-    axios.get(api).then(({ data }) => dispatch(action(data)));
-  }
+const syncGameStates = (
+  gameId: number,
+  dispatch: Dispatch<AnyAction>
+): void => {
+  // Defining all the GET calls to sync with server
+  const prefix = `/api/games/${gameId}`;
+  [
+    {
+      url: `${prefix}/players`,
+      action: LobbyActions.setPlayers,
+    },
+    {
+      url: `${prefix}/activities`,
+      action: ActivityActions.setActivities,
+    },
+    {
+      url: `${prefix}/lands`,
+      action: LobbyActions.setLands,
+    },
+    {
+      url: `${prefix}/state`,
+      action: LobbyActions.setState,
+    },
+    {
+      url: `${prefix}/trends`,
+      action: TrendActions.setTrends,
+    },
+  ].forEach(({ url, action }) =>
+    axios
+      .get(url)
+      .then(({ data }) => dispatch(action(data)))
+      .catch(console.error)
+  );
 };
 
 /**
@@ -58,7 +79,7 @@ const syncGameStates = (dispatch: Dispatch<AnyAction>) => {
 export const Dashboard = () => {
   const lobby = useSelector((state: State) => state.lobby);
   const user = useSelector((state: State) => state.user);
-  const { username, type } = user;
+  const { gameId, username, type } = user;
   const { players } = lobby;
 
   const dispatch = useDispatch();
@@ -71,13 +92,13 @@ export const Dashboard = () => {
 
   // Checking if user is logged-in
   useEffect(() => {
-    if (!username) {
+    if (!gameId) {
       navigate('/login');
       return;
     }
 
     // Syncing game's state
-    syncGameStates(dispatch);
+    syncGameStates(gameId, dispatch);
 
     // Dashboard component's unmount event
     window.addEventListener('beforeunload', alertUser);
@@ -85,7 +106,7 @@ export const Dashboard = () => {
       // Removing listener if user logouts
       window.removeEventListener('beforeunload', alertUser);
     };
-  }, [dispatch, navigate, username]);
+  }, [dispatch, navigate, gameId]);
 
   // Determining player
   const player = players.find((player) => player.username === username);
@@ -125,7 +146,7 @@ const Update = () => {
   const activity = useSelector((state: State) => state.activity);
   const user = useSelector((state: State) => state.user);
   const { subscribedTypes } = activity;
-  const { username } = user;
+  const { gameId, username } = user;
   const [api, contextHolder] = notification.useNotification();
 
   const dispatch = useDispatch();
@@ -135,14 +156,16 @@ const Update = () => {
    * only when the username changes.
    */
   const updates = useMemo(() => {
-    return !username ? null : new EventSource(`/api/updates/${username}`);
-  }, [username]);
+    return !username
+      ? null
+      : new EventSource(`/api/games/${gameId}/sse?username=${username}`);
+  }, [gameId, username]);
 
   /**
    * This useEffect will only update the event source's onmessage hook.
    */
   useEffect(() => {
-    if (!updates) return;
+    if (!updates || !gameId) return;
 
     // Setting up onerror startegy for the event source
     updates.onerror = (error) => {
@@ -176,7 +199,7 @@ const Update = () => {
           // Skipping turn if current player declared bankruptcy
           for (const p of players as Player[]) {
             if (p.turn && p.username === username && p.state === 'BANKRUPT') {
-              axios.put('/api/game');
+              axios.put(`/api/games/${gameId}/turn`);
               break;
             }
           }
@@ -211,7 +234,11 @@ const Update = () => {
           dispatch(LobbyActions.patchPlayers(payload));
           break;
         case 'RESET':
-          syncGameStates(dispatch);
+          /**
+           * Unknown issue here. Some clients refresh game's state but some don't (rarely).
+           * Adding the setTimeout seems to work here but root cause is still unknown.
+           */
+          setTimeout(() => syncGameStates(gameId, dispatch));
           break;
         case 'START':
           dispatch(LobbyActions.patchPlayers([payload]));
@@ -232,7 +259,7 @@ const Update = () => {
         api.open({ message: parseActivity(activity) });
       }
     };
-  }, [api, dispatch, subscribedTypes, updates, username]);
+  }, [api, dispatch, subscribedTypes, updates, username, gameId]);
 
   /**
    * This useEffect will close the event source for the
@@ -259,7 +286,7 @@ const Update = () => {
 const Navigation = () => {
   const lobby = useSelector((state: State) => state.lobby);
   const user = useSelector((state: State) => state.user);
-  const { type } = user;
+  const { gameId, type } = user;
   const { state, players } = lobby;
 
   const dispatch = useDispatch();
@@ -268,7 +295,7 @@ const Navigation = () => {
 
   const start = () => {
     if (state === 'ACTIVE') return;
-    axios.post('/api/game');
+    axios.put(`/api/games/${gameId}/start`);
   };
 
   const reset = () => {
@@ -322,6 +349,7 @@ const Navigation = () => {
       ) : null}
       <ResetModal
         open={showResetModal}
+        gameId={gameId || -1}
         onCancel={() => setShowResetModal(false)}
       />
     </nav>

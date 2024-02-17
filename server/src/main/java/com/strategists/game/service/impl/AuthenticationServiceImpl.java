@@ -1,5 +1,7 @@
 package com.strategists.game.service.impl;
 
+import java.io.File;
+import java.util.Map;
 import java.util.Objects;
 
 import javax.annotation.PostConstruct;
@@ -15,11 +17,14 @@ import org.springframework.util.Assert;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
+import com.strategists.game.entity.Game;
+import com.strategists.game.entity.GameMap;
 import com.strategists.game.request.GoogleLoginRequest;
 import com.strategists.game.request.GoogleRecaptchaVerificationRequest;
 import com.strategists.game.response.AuthenticationResponse;
 import com.strategists.game.response.GoogleRecaptchaVerificationResponse;
 import com.strategists.game.service.AuthenticationService;
+import com.strategists.game.service.GameService;
 import com.strategists.game.service.PlayerService;
 
 import lombok.val;
@@ -35,11 +40,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	@Value("${strategists.admin.email}")
 	private String adminEmail;
 
+	@Value("${strategists.game.default-map}")
+	private String defaultGameMap;
+
 	@Value("${strategists.configuration.google-recaptcha-api-url}")
 	private String googleRecaptchaAPIUrl;
 
 	@Value("${strategists.configuration.google-recaptcha-secret-key}")
 	private String googleRecaptchaSecretKey;
+
+	@Autowired
+	private Map<String, File> gameMapFiles;
+
+	@Autowired
+	private GameService gameService;
 
 	@Autowired
 	private PlayerService playerService;
@@ -56,8 +70,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 		// Checking if player is admin
 		if (Objects.equals(request.getEmail(), adminEmail)) {
+
+			// Checking if game exists for admin
+			Game game = null;
+			try {
+				game = gameService.getGameByAdminEmail(adminEmail);
+			} catch (Exception ex) {
+				val gameMap = GameMap.from(gameMapFiles.get(defaultGameMap));
+				game = gameService.createGame(adminUsername, adminEmail, gameMap);
+			}
+
 			log.info("Authenticating admin {} as {}", request.getName(), adminUsername);
-			return new AuthenticationResponse(adminUsername, Type.ADMIN);
+			return new AuthenticationResponse(game.getId(), game.getAdminUsername(), Type.ADMIN);
 		}
 
 		// Checking if its a standard player
@@ -66,8 +90,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 			playerService.acceptInvite(request);
 		}
 
-		log.info("Authenticating player: {}", player.getUsername());
-		return new AuthenticationResponse(player.getUsername(), Type.PLAYER);
+		log.info("Authenticating player {} for game ID: {}", player.getUsername(), player.getGameId());
+		return new AuthenticationResponse(player.getGameId(), player.getUsername(), Type.PLAYER);
 	}
 
 	@Override

@@ -1,0 +1,168 @@
+{
+    "id": "india",
+    "name": "India",
+    "description": "Incredible India",
+    "lands": [
+        {
+            "name": "Srinagar",
+            "x": 0,
+            "y": 0,
+            "sensitivity": 5,
+            "baseValue": 475.0
+        },
+        {
+            "name": "Leh",
+            "x": 150,
+            "y": 0,
+            "sensitivity": 5,
+            "baseValue": 475.0
+        },
+        {
+            "name": "Chandigarh",
+            "x": 40,
+            "y": 100,
+            "sensitivity": 5,
+            "baseValue": 500.0
+        },
+        {
+            "name": "Delhi",
+            "x": 120,
+            "y": 225,
+            "sensitivity": 5,
+            "baseValue": 800.0
+        },
+        {
+            "name": "Lucknow",
+            "x": 250,
+            "y": 300,
+            "sensitivity": 5,
+            "baseValue": 700.0
+        },
+        {
+            "name": "Patna",
+            "x": 400,
+            "y": 350,
+            "sensitivity": 5,
+            "baseValue": 250.0
+        },
+        {
+            "name": "Guwahati",
+            "x": 600,
+            "y": 300,
+            "sensitivity": 5,
+            "baseValue": 350.0
+        },
+        {
+            "name": "Itanagar",
+            "x": 675,
+            "y": 280,
+            "sensitivity": 5,
+            "baseValue": 320.0
+        },
+        {
+            "name": "Imphal",
+            "x": 700,
+            "y": 350,
+            "sensitivity": 5,
+            "baseValue": 275.0
+        },
+        {
+            "name": "Aizawl",
+            "x": 650,
+            "y": 400,
+            "sensitivity": 5,
+            "baseValue": 350.0
+        },
+        {
+            "name": "Kolkata",
+            "x": 500,
+            "y": 450,
+            "sensitivity": 5,
+            "baseValue": 825.0
+        },
+        {
+            "name": "Bhubneswar",
+            "x": 420,
+            "y": 500,
+            "sensitivity": 5,
+            "baseValue": 375.0
+        },
+        {
+            "name": "Visakhapatnam",
+            "x": 300,
+            "y": 580,
+            "sensitivity": 5,
+            "baseValue": 375.0
+        },
+        {
+            "name": "Hyderabad",
+            "x": 180,
+            "y": 600,
+            "sensitivity": 5,
+            "baseValue": 750.0
+        },
+        {
+            "name": "Chennai",
+            "x": 225,
+            "y": 800,
+            "sensitivity": 5,
+            "baseValue": 650.0
+        },
+        {
+            "name": "Coimbatore",
+            "x": 120,
+            "y": 875,
+            "sensitivity": 5,
+            "baseValue": 450.0
+        },
+        {
+            "name": "Bengaluru",
+            "x": 150,
+            "y": 800,
+            "sensitivity": 5,
+            "baseValue": 800.0
+        },
+        {
+            "name": "Panaji",
+            "x": 80,
+            "y": 700,
+            "sensitivity": 5,
+            "baseValue": 950.0
+        },
+        {
+            "name": "Mumbai",
+            "x": 50,
+            "y": 550,
+            "sensitivity": 5,
+            "baseValue": 900.0
+        },
+        {
+            "name": "Rajkot",
+            "x": -100,
+            "y": 480,
+            "sensitivity": 5,
+            "baseValue": 300.0
+        },
+        {
+            "name": "Ahmedabad",
+            "x": 45,
+            "y": 440,
+            "sensitivity": 5,
+            "baseValue": 700.0
+        },
+        {
+            "name": "Jaipur",
+            "x": 75,
+            "y": 300,
+            "sensitivity": 5,
+            "baseValue": 400.0
+        },
+        {
+            "name": "Prison",
+            "x": -100,
+            "y": 300,
+            "sensitivity": 5,
+            "baseValue": 0.0
+        }
+    ]
+}

@@ -26,12 +26,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.strategists.game.entity.Activity;
+import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
-import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 import com.strategists.game.service.PredictionService;
@@ -67,9 +66,6 @@ public class PredictionServiceImpl implements PredictionService {
 	private String pythonScript;
 
 	@Autowired
-	private ActivityRepository activityRepository;
-
-	@Autowired
 	private PlayerService playerService;
 
 	@Autowired
@@ -79,24 +75,20 @@ public class PredictionServiceImpl implements PredictionService {
 	public void setup() {
 		if (enabled) {
 			validateDirectories();
+			trainPredictionModel();
 		} else {
 			log.info("Predictions are disabled.");
 		}
 	}
 
 	@Override
-	@Transactional
-	public void trainPredictionModel(boolean export) {
+	public void trainPredictionModel() {
 		// Short-circuiting the method if predictions are disabled.
 		if (!enabled) {
 			return;
 		}
 
-		// Exporting game data if requested
-		if (export) {
-			val orderedPlayers = getPlayersOrderByBankruptcy();
-			exportCSVFile(orderedPlayers, exportDataDirectory, "export-" + System.currentTimeMillis());
-		}
+		log.info("Training prediction model...");
 
 		// Training the prediction model
 		val output = executePredictionScript(new String[] {
@@ -111,7 +103,22 @@ public class PredictionServiceImpl implements PredictionService {
 				"-O", modelOutDirectory.getAbsolutePath()
 
 		});
-		log.info("Train Prediction Model Output:\n{}", String.join("\n", output));
+		log.info("Prediction Model's training output:\n{}", String.join("\n", output));
+	}
+
+	@Override
+	@Transactional
+	public void trainPredictionModel(Game game) {
+		// Short-circuiting the method if predictions are disabled.
+		if (!enabled) {
+			return;
+		}
+
+		// Exporting game data if requested
+		val orderedPlayers = playerService.getPlayersByGameOrderByBankruptcy(game);
+		exportCSVFile(game, orderedPlayers, exportDataDirectory, "export-" + System.currentTimeMillis());
+
+		trainPredictionModel();
 	}
 
 	@Override
@@ -125,9 +132,10 @@ public class PredictionServiceImpl implements PredictionService {
 
 		// Fetching new reference
 		player = playerService.getPlayerById(player.getId());
+		log.info("Testing prediction model on {} for game ID: {}", player.getUsername(), player.getGameId());
 
 		// Exporting player data
-		val csv = exportCSVFile(List.of(player), predictFileDirectory, player.getUsername());
+		val csv = exportCSVFile(player.getGame(), List.of(player), predictFileDirectory, player.getGamePlayerKey());
 		if (Objects.isNull(csv)) {
 			return Prediction.UNKNOWN;
 		}
@@ -154,12 +162,15 @@ public class PredictionServiceImpl implements PredictionService {
 			return Prediction.UNKNOWN;
 		}
 		val result = Integer.valueOf(output.get(2).split(" ")[1]);
+		val prediction = result == 1 ? Prediction.WINNER : Prediction.BANKRUPT;
+
+		log.info("{} predicted to be {} for game ID: {}", player.getUsername(), prediction, player.getGameId());
 		return result == 1 ? Prediction.WINNER : Prediction.BANKRUPT;
 	}
 
-	private File exportCSVFile(List<Player> players, File directory, String filename) {
+	private File exportCSVFile(Game game, List<Player> players, File directory, String filename) {
 		// Creating CSV formatter
-		val headers = getCSVHeaders();
+		val headers = getCSVHeaders(game);
 		val format = CSVFormat.DEFAULT.builder().setHeader(headers.toArray(String[]::new)).build();
 
 		// Preparing CSV file
@@ -207,9 +218,9 @@ public class PredictionServiceImpl implements PredictionService {
 		return output;
 	}
 
-	private List<String> getCSVHeaders() {
+	private List<String> getCSVHeaders(Game game) {
 		val headers = new ArrayList<String>();
-		val landNames = landService.getLands().stream().map(Land::getName).toList();
+		val landNames = landService.getLandsByGame(game).stream().map(Land::getName).toList();
 
 		for (Field field : CSVColumn.class.getDeclaredFields()) {
 			if (Modifier.isStatic(field.getModifiers()) && String.class.equals(field.getType())) {
@@ -227,26 +238,6 @@ public class PredictionServiceImpl implements PredictionService {
 		}
 
 		return headers;
-	}
-
-	private List<Player> getPlayersOrderByBankruptcy() {
-		// Mapping players with their user name
-		val players = playerService.getPlayers().stream()
-				.collect(Collectors.toMap(Player::getUsername, Function.identity()));
-
-		// Adding players in order of bankruptcy
-		val orderedPlayers = new ArrayList<Player>(players.size());
-		for (Activity activity : activityRepository.findByType(UpdateType.BANKRUPTCY)) {
-			orderedPlayers.add(players.get(activity.getVal1()));
-		}
-
-		// Adding winner to the ordered players
-		for (Player player : players.values()) {
-			if (!player.isBankrupt()) {
-				orderedPlayers.add(player);
-			}
-		}
-		return orderedPlayers;
 	}
 
 	@NoArgsConstructor(access = AccessLevel.PRIVATE)

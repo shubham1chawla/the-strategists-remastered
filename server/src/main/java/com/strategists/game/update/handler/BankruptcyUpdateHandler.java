@@ -35,8 +35,8 @@ public class BankruptcyUpdateHandler extends AbstractUpdateHandler<BankruptcyUpd
 		}
 
 		// Persisting the activity and sending the update
-		val activity = Activity.ofBankruptcy(player.getUsername());
-		sendUpdate(new BankruptcyUpdatePayload(saveActivity(activity), lands, players));
+		val activity = Activity.ofBankruptcy(player);
+		sendUpdate(player.getGame(), new BankruptcyUpdatePayload(saveActivity(activity), lands, players));
 	}
 
 }

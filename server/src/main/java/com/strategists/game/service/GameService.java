@@ -1,21 +1,21 @@
 package com.strategists.game.service;
 
+import com.strategists.game.entity.Game;
+import com.strategists.game.entity.GameMap;
 import com.strategists.game.entity.Player;
 
 public interface GameService {
 
-	enum State {
-		LOBBY, ACTIVE;
-	}
+	Game createGame(String adminUsername, String adminEmail, GameMap gameMap);
 
-	State getState();
+	Game getGameByAdminEmail(String adminEmail);
 
-	boolean isState(State state);
+	Game getGameById(long id);
 
-	Player startGame();
+	void startGame(Game game);
 
-	Player playTurn();
+	Player playTurn(Game game);
 
-	void resetGame();
+	void resetGame(Game game);
 
 }

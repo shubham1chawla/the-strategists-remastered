@@ -23,8 +23,8 @@ public class JoinUpdateHandler extends AbstractUpdateHandler<JoinUpdatePayload> 
 		val player = (Player) returnValue;
 
 		// Persisting the activity and sending the update
-		val activity = Activity.ofJoin(player.getUsername());
-		sendUpdate(new JoinUpdatePayload(saveActivity(activity), player));
+		val activity = Activity.ofJoin(player);
+		sendUpdate(player.getGame(), new JoinUpdatePayload(saveActivity(activity), player));
 	}
 
 }

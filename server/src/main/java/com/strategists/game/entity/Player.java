@@ -14,6 +14,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -41,15 +43,6 @@ public class Player implements Serializable {
 
 	public enum State {
 		INVITED, ACTIVE, BANKRUPT, JAIL;
-	}
-
-	public Player(String email, double baseCash) {
-		Assert.isTrue(EmailValidator.getInstance().isValid(email), "Email is not valid!");
-		Assert.isTrue(baseCash > 0, "Cash can't be negative!");
-
-		this.username = email.split("@")[0];
-		this.email = email;
-		this.baseCash = MathUtil.round(baseCash);
 	}
 
 	@Id
@@ -84,6 +77,11 @@ public class Player implements Serializable {
 	@Column(nullable = true, columnDefinition = "INTEGER DEFAULT 0")
 	private Integer remainingJailLife = 0;
 
+	@JsonIgnore
+	@ManyToOne
+	@JoinColumn(name = "game_id", referencedColumnName = "id", nullable = false)
+	private Game game;
+
 	@ToString.Exclude
 	@JsonProperty("lands")
 	@JsonIgnoreProperties({ "pk", "player", "land", "playerId" })
@@ -99,6 +97,16 @@ public class Player implements Serializable {
 	@ToString.Exclude
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "sourcePlayer", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Rent> paidRents;
+
+	public Player(Game game, String email, double baseCash) {
+		Assert.isTrue(EmailValidator.getInstance().isValid(email), "Email is not valid!");
+		Assert.isTrue(baseCash > 0, "Cash can't be negative!");
+
+		this.game = game;
+		this.username = email.split("@")[0];
+		this.email = email;
+		this.baseCash = MathUtil.round(baseCash);
+	}
 
 	/**
 	 * Transient field that calculate player's current cash based on their
@@ -137,6 +145,18 @@ public class Player implements Serializable {
 	@JsonIgnore
 	public boolean isBankrupt() {
 		return State.BANKRUPT.equals(state);
+	}
+
+	@Transient
+	@JsonIgnore
+	public long getGameId() {
+		return game.getId();
+	}
+
+	@Transient
+	@JsonIgnore
+	public String getGamePlayerKey() {
+		return String.format("game-%s-player-%s", getGameId(), getUsername());
 	}
 
 	public void addLand(Land land, double ownership, double buyAmount) {

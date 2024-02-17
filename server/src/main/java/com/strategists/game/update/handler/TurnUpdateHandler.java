@@ -25,17 +25,17 @@ public class TurnUpdateHandler extends AbstractUpdateHandler<TurnUpdatePayload> 
 		if (Objects.isNull(returnValue)) {
 			return;
 		}
-		val currentPlayer = (Player) returnValue;
-		val previousPlayer = (Player) args[0];
+		val current = (Player) returnValue;
+		val previous = (Player) args[0];
 
 		// Running prediction model
-		if (!previousPlayer.isBankrupt()) {
-			executePredictionModelAsync(previousPlayer);
+		if (!previous.isBankrupt()) {
+			executePredictionModelAsync(previous);
 		}
 
 		// Persisting the activity and sending the update
-		val activity = Activity.ofTurn(previousPlayer.getUsername(), currentPlayer.getUsername());
-		sendUpdate(new TurnUpdatePayload(saveActivity(activity), currentPlayer, previousPlayer));
+		val activity = Activity.ofTurn(previous, current);
+		sendUpdate(current.getGame(), new TurnUpdatePayload(saveActivity(activity), current, previous));
 	}
 
 }

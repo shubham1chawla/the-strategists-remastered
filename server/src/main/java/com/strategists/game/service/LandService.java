@@ -2,23 +2,24 @@ package com.strategists.game.service;
 
 import java.util.List;
 
+import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Trend;
 
 public interface LandService {
 
-	List<Land> getLands();
+	void save(List<Land> lands);
 
-	Land getLandById(long id);
+	List<Land> getLandsByGame(Game game);
 
-	int getCount();
+	int getCount(Game game);
 
-	Land getLandByIndex(int index);
+	Land getLandByIndex(Game game, int index);
 
 	void hostEvent(long landId, long eventId, int life, int level);
 
-	void resetLands();
+	void resetLands(Game game);
 
-	List<Trend> updateLandTrends();
+	List<Trend> updateLandTrends(Game game);
 
 }

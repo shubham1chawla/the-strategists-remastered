@@ -23,8 +23,8 @@ public class InviteUpdateHandler extends AbstractUpdateHandler<InviteUpdatePaylo
 		val player = (Player) returnValue;
 
 		// Persisting the activity and sending the update
-		val activity = Activity.ofInvite(getAdminUsername(), player.getEmail());
-		sendUpdate(new InviteUpdatePayload(saveActivity(activity), player));
+		val activity = Activity.ofInvite(player);
+		sendUpdate(player.getGame(), new InviteUpdatePayload(saveActivity(activity), player));
 	}
 
 }

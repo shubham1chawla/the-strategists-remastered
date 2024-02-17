@@ -4,41 +4,46 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.strategists.game.entity.Game.State;
 import com.strategists.game.service.GameService;
-import com.strategists.game.service.GameService.State;
+
+import lombok.val;
 
 @RestController
-@RequestMapping("/api/game")
+@RequestMapping("/api/games/{gameId}")
 public class GameController {
 
 	@Autowired
 	private GameService gameService;
 
-	@GetMapping
-	public State getState() {
-		return gameService.getState();
+	@GetMapping("/state")
+	public State getState(@PathVariable long gameId) {
+		return gameService.getGameById(gameId).getState();
 	}
 
-	@PostMapping
-	public void start() {
-		Assert.state(gameService.isState(State.LOBBY), "Game already started!");
-		gameService.startGame();
+	@PutMapping("/start")
+	public void startGame(@PathVariable long gameId) {
+		val game = gameService.getGameById(gameId);
+		Assert.state(game.isLobby(), "Game already started!");
+		gameService.startGame(game);
 	}
 
-	@PutMapping
-	public void next() {
-		Assert.state(gameService.isState(State.ACTIVE), "Game not started yet!");
-		gameService.playTurn();
+	@PutMapping("/turn")
+	public void playTurn(@PathVariable long gameId) {
+		val game = gameService.getGameById(gameId);
+		Assert.state(game.isActive(), "Game not started yet!");
+		gameService.playTurn(game);
 	}
 
 	@DeleteMapping
-	public void reset() {
-		gameService.resetGame();
+	public void resetGame(@PathVariable long gameId) {
+		val game = gameService.getGameById(gameId);
+		gameService.resetGame(game);
 	}
 
 }

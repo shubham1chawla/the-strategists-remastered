@@ -5,21 +5,28 @@ import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.Player.State;
 
 public interface PlayerRepository extends JpaRepository<Player, Long> {
 
-	boolean existsByUsername(String username);
+	boolean existsByGameAndUsername(Game game, String username);
 
 	boolean existsByEmail(String email);
 
 	Optional<Player> findByEmail(String email);
 
-	boolean existsByTurn(boolean turn);
+	boolean existsByGameAndTurn(Game game, boolean turn);
 
-	Optional<Player> findByTurn(boolean turn);
+	Optional<Player> findByGameAndTurn(Game game, boolean turn);
 
-	List<Player> findByState(State state);
+	boolean existsByGameAndState(Game game, State state);
+
+	List<Player> findByGame(Game game);
+
+	List<Player> findByGameAndState(Game game, State state);
+
+	Optional<Player> findByGameAndUsername(Game game, String username);
 
 }
