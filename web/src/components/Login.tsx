@@ -71,23 +71,6 @@ export const Login = () => {
 
   const getWorkflowComponent = () => {
     switch (workflow) {
-      case 'NOT_VERIFIED':
-        return (
-          <ReCAPTCHA
-            sitekey={process.env.REACT_APP_GOOGLE_RECAPTCHA_SITE_KEY || ''}
-            theme="dark"
-            onChange={(clientToken) => {
-              setWorkflow('VERIFYING');
-              axios
-                .post('/api/recaptcha', { clientToken })
-                .then(() => setWorkflow('VERIFIED'))
-                .catch(({ response }) => {
-                  const { status } = response;
-                  setWorkflow(status === 403 ? 'NOT_VERIFIED' : 'UNREACHABLE');
-                });
-            }}
-          />
-        );
       case 'VERIFYING':
         return (
           <Space>
@@ -136,7 +119,35 @@ export const Login = () => {
             <Logo />
           </Divider>
           <br />
-          <Row justify="center">{getWorkflowComponent()}</Row>
+          <Row justify="center">
+            {/**
+             * Had to move the ReCAPTCHA component out of the 'getWorkflowComponent'
+             * to avoid the following issue. Read more about it here.
+             * https://github.com/google/recaptcha/issues/269#issuecomment-606838861
+             */}
+            <ReCAPTCHA
+              style={{
+                display: workflow === 'NOT_VERIFIED' ? 'block' : 'none',
+              }}
+              sitekey={process.env.REACT_APP_GOOGLE_RECAPTCHA_SITE_KEY || ''}
+              theme="dark"
+              onChange={(clientToken) => {
+                if (!clientToken) return;
+                setWorkflow('VERIFYING');
+                axios
+                  .post('/api/recaptcha', { clientToken })
+                  .then(() => setWorkflow('VERIFIED'))
+                  .catch(({ response }) => {
+                    const { status } = response;
+                    setWorkflow(
+                      status === 403 ? 'NOT_VERIFIED' : 'UNREACHABLE'
+                    );
+                  });
+              }}
+              onExpired={() => setWorkflow('NOT_VERIFIED')}
+            />
+            {getWorkflowComponent()}
+          </Row>
           <br />
           <Divider>
             <Button

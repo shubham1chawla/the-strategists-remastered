@@ -27,8 +27,8 @@ public class KickUpdateHandler extends AbstractUpdateHandler<KickUpdatePayload> 
 		}
 
 		// Persisting the activity and sending the update
-		val activity = Activity.ofKick(getAdminUsername(), player.getUsername());
-		sendUpdate(new KickUpdatePayload(saveActivity(activity), player.getId()));
+		val activity = Activity.ofKick(player);
+		sendUpdate(player.getGame(), new KickUpdatePayload(saveActivity(activity), player.getId()));
 	}
 
 }

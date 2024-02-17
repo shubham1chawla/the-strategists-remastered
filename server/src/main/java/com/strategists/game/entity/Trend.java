@@ -7,6 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -51,8 +53,14 @@ public class Trend implements Serializable {
 	@Column(nullable = true, precision = MathUtil.PRECISION)
 	private Double marketValue;
 
+	@JsonIgnore
+	@ManyToOne
+	@JoinColumn(name = "game_id", referencedColumnName = "id", nullable = false)
+	private Game game;
+
 	public static Trend fromPlayer(Player player) {
 		val trend = new Trend();
+		trend.setGame(player.getGame());
 		trend.setPlayerId(player.getId());
 		trend.setCash(player.getCash());
 		trend.setNetWorth(player.getNetWorth());
@@ -61,6 +69,7 @@ public class Trend implements Serializable {
 
 	public static Trend fromLand(Land land) {
 		val trend = new Trend();
+		trend.setGame(land.getGame());
 		trend.setLandId(land.getId());
 		trend.setMarketValue(land.getMarketValue());
 		return trend;

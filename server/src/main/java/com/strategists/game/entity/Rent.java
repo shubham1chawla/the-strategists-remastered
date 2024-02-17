@@ -1,6 +1,7 @@
 package com.strategists.game.entity;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,8 +9,10 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToOne;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+
+import org.springframework.util.Assert;
 
 import com.strategists.game.util.MathUtil;
 
@@ -28,15 +31,15 @@ public class Rent implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "source_id", referencedColumnName = "id")
 	private Player sourcePlayer;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "target_id", referencedColumnName = "id")
 	private Player targetPlayer;
 
-	@OneToOne
+	@ManyToOne
 	@JoinColumn(name = "land_id", referencedColumnName = "id")
 	private Land land;
 
@@ -44,6 +47,9 @@ public class Rent implements Serializable {
 	private Double rentAmount;
 
 	public Rent(Player sourcePlayer, Player targetPlayer, Land land, double rentAmount) {
+		Assert.isTrue(Objects.equals(sourcePlayer.getGameId(), targetPlayer.getGameId()), "Players' games must match!");
+		Assert.isTrue(Objects.equals(sourcePlayer.getGameId(), land.getGameId()), "Land's game must match!");
+
 		this.sourcePlayer = sourcePlayer;
 		this.targetPlayer = targetPlayer;
 		this.land = land;

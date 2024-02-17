@@ -9,7 +9,8 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AuthenticationResponse {
 
-	String username;
-	Type type;
+	private long gameId;
+	private String username;
+	private Type type;
 
 }

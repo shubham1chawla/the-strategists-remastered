@@ -22,12 +22,9 @@ public class StartUpdateHandler extends AbstractUpdateHandler<StartUpdatePayload
 		// Starting player returned from the method
 		val player = (Player) returnValue;
 
-		// Training the prediction model
-		trainPredictionModelAsync(false);
-
 		// Persisting the activity and sending the update
-		val activity = Activity.ofStart(getAdminUsername(), player.getUsername());
-		sendUpdate(new StartUpdatePayload(saveActivity(activity), player));
+		val activity = Activity.ofStart(player);
+		sendUpdate(player.getGame(), new StartUpdatePayload(saveActivity(activity), player));
 	}
 
 }

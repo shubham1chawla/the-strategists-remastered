@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Trend;
 import com.strategists.game.repository.LandRepository;
@@ -32,26 +33,23 @@ public class LandServiceImpl implements LandService {
 	private TrendRepository trendRepository;
 
 	@Override
-	public List<Land> getLands() {
-		return landRepository.findAll();
+	public void save(List<Land> lands) {
+		landRepository.saveAll(lands);
 	}
 
 	@Override
-	public Land getLandById(long id) {
-		val opt = landRepository.findById(id);
-		Assert.isTrue(opt.isPresent(), "No land found with ID: " + id);
-
-		return opt.get();
+	public List<Land> getLandsByGame(Game game) {
+		return landRepository.findByGame(game);
 	}
 
 	@Override
-	public int getCount() {
-		return (int) landRepository.count();
+	public int getCount(Game game) {
+		return (int) landRepository.countByGame(game);
 	}
 
 	@Override
-	public Land getLandByIndex(int index) {
-		return getLands().get(index);
+	public Land getLandByIndex(Game game, int index) {
+		return getLandsByGame(game).get(index);
 	}
 
 	@Override
@@ -69,20 +67,20 @@ public class LandServiceImpl implements LandService {
 	}
 
 	@Override
-	public void resetLands() {
-		val lands = getLands();
+	public void resetLands(Game game) {
+		val lands = getLandsByGame(game);
 		for (Land land : lands) {
 			land.getLandEvents().clear();
 		}
 
 		landRepository.saveAll(lands);
-		log.info("Reset lands completed");
+		log.info("Reseted lands for game ID: {}", game.getId());
 	}
 
 	@Override
 	@UpdateMapping(UpdateType.TREND)
-	public List<Trend> updateLandTrends() {
-		return trendRepository.saveAll(getLands().stream().map(Trend::fromLand).toList());
+	public List<Trend> updateLandTrends(Game game) {
+		return trendRepository.saveAll(getLandsByGame(game).stream().map(Trend::fromLand).toList());
 	}
 
 }

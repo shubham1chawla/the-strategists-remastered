@@ -1,10 +1,15 @@
 package com.strategists.game.update.handler;
 
+import javax.transaction.Transactional;
+
 import org.springframework.stereotype.Component;
 
 import com.strategists.game.entity.Activity;
+import com.strategists.game.entity.Game;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.ResetUpdatePayload;
+
+import lombok.val;
 
 @Component
 public class ResetUpdateHandler extends AbstractUpdateHandler<ResetUpdatePayload> {
@@ -15,12 +20,16 @@ public class ResetUpdateHandler extends AbstractUpdateHandler<ResetUpdatePayload
 	}
 
 	@Override
+	@Transactional
 	public void handle(Object returnValue, Object[] args) {
+		// Game instance from argument
+		val game = (Game) args[0];
+
 		// Resetting activities and trends
-		reset();
+		reset(game);
 
 		// Sending unsaved activity
-		sendUpdate(new ResetUpdatePayload(Activity.ofReset(getAdminUsername())));
+		sendUpdate(game, new ResetUpdatePayload(Activity.ofReset(game)));
 	}
 
 }

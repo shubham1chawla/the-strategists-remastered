@@ -30,8 +30,8 @@ public class PredictionUpdateHandler extends AbstractUpdateHandler<PredictionUpd
 		}
 
 		// Persisting the activity and sending the update
-		val activity = Activity.ofPrediction(getAdminUsername(), player.getUsername(), prediction.name());
-		sendUpdate(new PredictionUpdatePayload(saveActivity(activity), prediction));
+		val activity = Activity.ofPrediction(player, prediction);
+		sendUpdate(player.getGame(), new PredictionUpdatePayload(saveActivity(activity), prediction));
 	}
 
 }

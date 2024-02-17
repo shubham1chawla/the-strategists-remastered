@@ -1,17 +1,16 @@
 package com.strategists.game.service;
 
-import java.util.function.Predicate;
-
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import com.strategists.game.entity.Game;
 import com.strategists.game.update.payload.UpdatePayload;
 
 public interface UpdateService {
 
-	SseEmitter registerEmitter(String username);
+	SseEmitter registerEmitter(Game game, String username);
 
-	void sendUpdate(UpdatePayload<?> payload);
+	void sendUpdate(Game game, UpdatePayload<?> payload);
 
-	void sendUpdate(UpdatePayload<?> payload, Predicate<String> filter);
+	void sendPing();
 
 }

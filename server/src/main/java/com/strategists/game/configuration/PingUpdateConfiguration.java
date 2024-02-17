@@ -12,7 +12,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 
 import com.strategists.game.service.UpdateService;
-import com.strategists.game.update.payload.PingUpdatePayload;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -34,7 +33,7 @@ public class PingUpdateConfiguration {
 	@Scheduled(fixedRate = 30, timeUnit = TimeUnit.SECONDS)
 	public void ping() {
 		log.debug("Sending SSE ping...");
-		updateService.sendUpdate(new PingUpdatePayload());
+		updateService.sendPing();
 	}
 
 }

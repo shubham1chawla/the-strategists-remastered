@@ -9,12 +9,17 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.strategists.game.service.PredictionService.Prediction;
 import com.strategists.game.update.UpdateType;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.val;
 
 @Data
 @Entity
@@ -47,7 +52,13 @@ public class Activity implements Serializable {
 	@Column(nullable = true)
 	private String val5;
 
-	public Activity(UpdateType type, String... values) {
+	@JsonIgnore
+	@ManyToOne
+	@JoinColumn(name = "game_id", referencedColumnName = "id", nullable = false)
+	private Game game;
+
+	public Activity(Game game, UpdateType type, String... values) {
+		this.game = game;
 		this.type = type;
 		this.val1 = values.length > 0 ? values[0] : null;
 		this.val2 = values.length > 1 ? values[1] : null;
@@ -59,72 +70,65 @@ public class Activity implements Serializable {
 		}
 	}
 
-	public static Activity ofBankruptcy(String username) {
-		return new Activity(UpdateType.BANKRUPTCY, username);
+	public static Activity ofBankruptcy(Player player) {
+		return new Activity(player.getGame(), UpdateType.BANKRUPTCY, player.getUsername());
 	}
 
-	public static Activity ofBonus(String admin, String player, double amount) {
-		return new Activity(UpdateType.BONUS, admin, player, Double.toString(amount));
+	public static Activity ofEnd(Player player) {
+		return new Activity(player.getGame(), UpdateType.END, player.getUsername());
 	}
 
-	public static Activity ofCheat(String player) {
-		return new Activity(UpdateType.CHEAT, player);
+	public static Activity ofInvest(Player player, Land land, double ownership) {
+		return new Activity(player.getGame(), UpdateType.INVEST, player.getUsername(), Double.toString(ownership),
+				land.getName());
 	}
 
-	public static Activity ofEnd(String player) {
-		return new Activity(UpdateType.END, player);
+	public static Activity ofInvite(Player player) {
+		val game = player.getGame();
+		return new Activity(game, UpdateType.INVITE, game.getAdminUsername(), player.getEmail());
 	}
 
-	public static Activity ofEvent(String admin, String event, String land, int turns) {
-		return new Activity(UpdateType.EVENT, admin, event, land, Integer.toString(turns));
+	public static Activity ofJoin(Player player) {
+		return new Activity(player.getGame(), UpdateType.JOIN, player.getUsername());
 	}
 
-	public static Activity ofInvest(String buyer, double ownership, String land) {
-		return new Activity(UpdateType.INVEST, buyer, Double.toString(ownership), land);
+	public static Activity ofKick(Player player) {
+		val game = player.getGame();
+		return new Activity(game, UpdateType.KICK, game.getAdminUsername(), player.getUsername());
 	}
 
-	public static Activity ofInvite(String admin, String email) {
-		return new Activity(UpdateType.INVITE, admin, email);
+	public static Activity ofMove(Player player, int move, Land land) {
+		val game = player.getGame();
+		return new Activity(game, UpdateType.MOVE, player.getUsername(), Integer.toString(move), land.getName());
 	}
 
-	public static Activity ofJail(String player) {
-		return new Activity(UpdateType.JAIL, player);
+	public static Activity ofPrediction(Player player, Prediction prediction) {
+		val game = player.getGame();
+		return new Activity(game, UpdateType.PREDICTION, game.getAdminUsername(), player.getUsername(),
+				prediction.name());
 	}
 
-	public static Activity ofJoin(String player) {
-		return new Activity(UpdateType.JOIN, player);
+	public static Activity ofRent(Rent rent) {
+		val payer = rent.getSourcePlayer();
+		val payee = rent.getTargetPlayer();
+		val land = rent.getLand();
+		val amount = rent.getRentAmount();
+		return new Activity(payer.getGame(), UpdateType.RENT, payer.getUsername(), Double.toString(amount),
+				payee.getUsername(), land.getName());
 	}
 
-	public static Activity ofKick(String admin, String player) {
-		return new Activity(UpdateType.KICK, admin, player);
+	public static Activity ofReset(Game game) {
+		return new Activity(game, UpdateType.RESET, game.getAdminUsername());
 	}
 
-	public static Activity ofMove(String player, int move, String land) {
-		return new Activity(UpdateType.MOVE, player, Integer.toString(move), land);
+	public static Activity ofStart(Player player) {
+		val game = player.getGame();
+		return new Activity(game, UpdateType.START, game.getAdminUsername(), player.getUsername());
 	}
 
-	public static Activity ofPrediction(String admin, String player, String prediction) {
-		return new Activity(UpdateType.PREDICTION, admin, player, prediction);
-	}
-
-	public static Activity ofRent(String payer, double amount, String payee, String land) {
-		return new Activity(UpdateType.RENT, payer, Double.toString(amount), payee, land);
-	}
-
-	public static Activity ofReset(String admin) {
-		return new Activity(UpdateType.RESET, admin);
-	}
-
-	public static Activity ofStart(String admin, String player) {
-		return new Activity(UpdateType.START, admin, player);
-	}
-
-	public static Activity ofTrade(String from, double percent, String land, String to, double amount) {
-		return new Activity(UpdateType.TRADE, from, Double.toString(percent), land, to, Double.toString(amount));
-	}
-
-	public static Activity ofTurn(String from, String to) {
-		return new Activity(UpdateType.TURN, from, to);
+	public static Activity ofTurn(Player previousPlayer, Player currentPlayer) {
+		val game = previousPlayer.getGame();
+		return new Activity(game, UpdateType.TURN, previousPlayer.getUsername(), currentPlayer.getUsername());
 	}
 
 }

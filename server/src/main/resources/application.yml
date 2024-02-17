@@ -30,6 +30,7 @@ strategists:
     python-executable: ../prediction/.venv/bin/python
     python-script: ../prediction/main.py
   game:
+    default-map: india
     dice-size: 6
     rent-factor: 0.2
   configuration:

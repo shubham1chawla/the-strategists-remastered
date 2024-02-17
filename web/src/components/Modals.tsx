@@ -70,15 +70,16 @@ const prepareSliderMarks = (strategy: InvestmentStrategy): SliderMarks => {
 };
 
 export interface PlayerInvestModalProps extends BaseModalProps {
+  gameId: number;
   player: Player;
   land: Land;
   title: string;
 }
 
 export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
-  const { open, player, land, title, onCancel } = props;
+  const { open, gameId, player, land, title, onCancel } = props;
   const [ownership, setOwnership] = useState(0);
-  if (!open || !player || !land || !title || !onCancel) {
+  if (!open || !gameId || !player || !land || !title || !onCancel) {
     return null;
   }
 
@@ -86,7 +87,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
   const strategy = new InvestmentStrategy(player, land, ownership);
 
   const invest = async () => {
-    await axios.post(`/api/players/${player.id}/lands`, {
+    await axios.post(`/api/games/${gameId}/players/${player.id}/lands`, {
       landId: land.id,
       ownership,
     });
@@ -94,7 +95,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
     onCancel();
 
     // Ending player's turn after investing in any land
-    axios.put('/api/game');
+    axios.put(`/api/games/${gameId}/turn`);
   };
 
   return (
@@ -271,15 +272,15 @@ export const PortfolioModal = (props: Partial<PortfolioModalProps>) => {
  */
 
 export interface ResetModalProps extends BaseModalProps {
-  // No additional fields
+  gameId: number;
 }
 
 export const ResetModal = (props: ResetModalProps) => {
   const [checked, setChecked] = useState(false);
-  const { open, onCancel } = props;
+  const { open, onCancel, gameId } = props;
 
   const reset = async () => {
-    await axios.delete('/api/game');
+    await axios.delete(`/api/games/${gameId}`);
     cancel();
   };
 
@@ -338,7 +339,7 @@ export const ResetModal = (props: ResetModalProps) => {
 export const WinModal = () => {
   const lobby = useSelector((state: State) => state.lobby);
   const user = useSelector((state: State) => state.user);
-  const { type } = user;
+  const { gameId, type } = user;
   const { players, state } = lobby;
 
   const [showResetModal, setShowResetModal] = useState(false);
@@ -428,7 +429,11 @@ export const WinModal = () => {
         />
       </Modal>
       {showResetModal ? (
-        <ResetModal open={showResetModal} onCancel={closeResetModal} />
+        <ResetModal
+          open={showResetModal}
+          gameId={gameId || -1}
+          onCancel={closeResetModal}
+        />
       ) : null}
     </>
   );

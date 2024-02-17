@@ -49,6 +49,7 @@ export const Lobby = () => {
 
 const LobbyPlayers = () => {
   const { state, players } = useSelector((state: State) => state.lobby);
+  const { gameId } = useSelector((state: State) => state.user);
 
   // Sorting players in decreasing order of net-worth
   // Making a copy of players before sorting to avoid direct state mutation.
@@ -60,7 +61,7 @@ const LobbyPlayers = () => {
 
   const kickPlayer = (event: MouseEvent, { id }: Player) => {
     event.stopPropagation();
-    axios.delete('/api/players', { data: { playerId: id } });
+    axios.delete(`/api/games/${gameId}/players`, { data: { playerId: id } });
   };
 
   return (
@@ -131,6 +132,7 @@ interface Invite {
 
 const InvitePlayerForm = () => {
   const { state } = useSelector((state: State) => state.lobby);
+  const { gameId } = useSelector((state: State) => state.user);
   const [api, contextHolder] = notification.useNotification();
   const [form] = Form.useForm();
 
@@ -139,7 +141,7 @@ const InvitePlayerForm = () => {
 
   const invitePlayer = async (invite: Invite) => {
     try {
-      await axios.post('/api/players', invite);
+      await axios.post(`/api/games/${gameId}/players`, invite);
     } catch (error) {
       api.error({ message: `Unable to invite ${invite.email}` });
     }

@@ -3,6 +3,7 @@ import { UserActions } from '.';
 export interface UserState {
   type: 'ADMIN' | 'PLAYER';
   username?: string;
+  gameId?: number;
 }
 
 export const userReducer = (state = initialState(), action: any): UserState => {

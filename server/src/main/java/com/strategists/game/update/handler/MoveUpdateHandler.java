@@ -26,8 +26,8 @@ public class MoveUpdateHandler extends AbstractUpdateHandler<MoveUpdatePayload> 
 		val land = (Land) returnValue;
 
 		// Persisting the activity and sending the update
-		val activity = Activity.ofMove(player.getUsername(), move, land.getName());
-		sendUpdate(new MoveUpdatePayload(saveActivity(activity), player));
+		val activity = Activity.ofMove(player, move, land);
+		sendUpdate(player.getGame(), new MoveUpdatePayload(saveActivity(activity), player));
 	}
 
 }

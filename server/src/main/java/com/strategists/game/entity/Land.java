@@ -12,6 +12,8 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
@@ -19,6 +21,7 @@ import javax.persistence.Transient;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.strategists.game.util.MathUtil;
 
 import lombok.Data;
@@ -52,7 +55,7 @@ public class Land implements Serializable {
 	 * use this information to calculate the current market value of the land, which
 	 * is relevant.
 	 */
-	@JsonIgnore
+	@JsonProperty(access = Access.WRITE_ONLY)
 	@Column(nullable = false)
 	private Integer sensitivity;
 
@@ -61,9 +64,14 @@ public class Land implements Serializable {
 	 * the market value. Client should not be allowed to view this as it could
 	 * reveal the market value calculation formula.
 	 */
-	@JsonIgnore
+	@JsonProperty(access = Access.WRITE_ONLY)
 	@Column(nullable = false, precision = MathUtil.PRECISION)
 	private Double baseValue;
+
+	@JsonIgnore
+	@ManyToOne
+	@JoinColumn(name = "game_id", referencedColumnName = "id")
+	private Game game;
 
 	@ToString.Exclude
 	@JsonProperty("players")
@@ -105,6 +113,12 @@ public class Land implements Serializable {
 	@Transient
 	public double getDelta() {
 		return MathUtil.sum(landEvents, le -> DAMPENER * le.getEvent().getFactor() * le.getLevel() * le.getLife());
+	}
+
+	@Transient
+	@JsonIgnore
+	public long getGameId() {
+		return game.getId();
 	}
 
 	public void addEvent(Event event, int life, int level) {

@@ -30,11 +30,11 @@ public class EndUpdateHandler extends AbstractUpdateHandler<EndUpdatePayload> {
 		}
 
 		// Exporting data and training the prediction model
-		trainPredictionModelAsync(true);
+		trainPredictionModelAsync(player.getGame());
 
 		// Persisting the activity and sending the update
-		val activity = Activity.ofEnd(player.getUsername());
-		sendUpdate(new EndUpdatePayload(saveActivity(activity), player));
+		val activity = Activity.ofEnd(player);
+		sendUpdate(player.getGame(), new EndUpdatePayload(saveActivity(activity), player));
 	}
 
 }

@@ -16,7 +16,7 @@ import axios from 'axios';
 
 export const Actions = () => {
   const { players, lands } = useSelector((state: State) => state.lobby);
-  const { username } = useSelector((state: State) => state.user);
+  const { gameId, username } = useSelector((state: State) => state.user);
   const [showModal, setShowModal] = useState(false);
 
   // Finding user in lobby's players
@@ -47,6 +47,7 @@ export const Actions = () => {
     <>
       <PlayerInvestModal
         open={showModal}
+        gameId={gameId}
         player={player}
         land={land}
         title={title}
@@ -59,6 +60,7 @@ export const Actions = () => {
           <WaitingPrompt turnPlayer={turnPlayer} />
         ) : (
           <ActionButtons
+            gameId={gameId || -1}
             title={title}
             onInvestClick={() => setShowModal(true)}
             isInvestmentDisabled={!strategy.feasible}
@@ -103,13 +105,14 @@ const WaitingPrompt = (props: WaitingPromptProps) => {
  */
 
 interface ActionButtonsProps {
+  gameId: number;
   title: string;
   onInvestClick: () => void;
   isInvestmentDisabled: boolean;
 }
 
 const ActionButtons = (props: ActionButtonsProps) => {
-  const { title, onInvestClick, isInvestmentDisabled } = props;
+  const { gameId, title, onInvestClick, isInvestmentDisabled } = props;
   return (
     <>
       <Space.Compact size="large">
@@ -123,7 +126,7 @@ const ActionButtons = (props: ActionButtonsProps) => {
         </Button>
         <Button
           icon={<StepForwardOutlined />}
-          onClick={() => axios.put('/api/game')}
+          onClick={() => axios.put(`/api/games/${gameId}/turn`)}
         >
           Skip
         </Button>
