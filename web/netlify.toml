@@ -3,7 +3,7 @@
   publish = "build/"
 
 [[edge_functions]]
-  path = "/api/updates/*"
+  pattern = "/api/games/(.*)/sse"
   function = "proxy-sse"
 
 [[redirects]]
