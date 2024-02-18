@@ -26,9 +26,9 @@ export const parseActivity = (activity: Activity): string => {
     case 'MOVE':
       return `${val1} travelled ${val2} steps and reached ${val3}.`;
     case 'PREDICTION':
-      return val3 === 'BANKRUPT'
-        ? `${val1} predicted ${val2} is going to be bankrupt!`
-        : `${val1} predicted ${val2} is going to be the winner!`;
+      return val2 === 'BANKRUPT'
+        ? `${val1} predicted to go bankrupt!`
+        : `${val1} predicted to win!`;
     case 'RENT':
       return `${val1} paid ${val2} cash rent to ${val3} for ${val4}.`;
     case 'RESET':

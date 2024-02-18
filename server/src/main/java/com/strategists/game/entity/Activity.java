@@ -103,9 +103,7 @@ public class Activity implements Serializable {
 	}
 
 	public static Activity ofPrediction(Player player, Prediction prediction) {
-		val game = player.getGame();
-		return new Activity(game, UpdateType.PREDICTION, game.getAdminUsername(), player.getUsername(),
-				prediction.name());
+		return new Activity(player.getGame(), UpdateType.PREDICTION, player.getUsername(), prediction.name());
 	}
 
 	public static Activity ofRent(Rent rent) {

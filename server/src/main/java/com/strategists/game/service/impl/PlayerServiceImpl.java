@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -12,6 +13,7 @@ import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -41,6 +43,9 @@ import lombok.extern.log4j.Log4j2;
 public class PlayerServiceImpl implements PlayerService {
 
 	private static final Random RANDOM = new Random();
+
+	@Value("${strategists.admin.emails}")
+	private Set<String> adminEmails;
 
 	@PersistenceContext
 	private EntityManager em;
@@ -112,8 +117,8 @@ public class PlayerServiceImpl implements PlayerService {
 	@Override
 	@UpdateMapping(UpdateType.INVITE)
 	public Player sendInvite(Game game, String email, double cash) {
-		Assert.isTrue(!Objects.equals(game.getAdminEmail(), email), "Player email can't be same as admin's email!");
-		Assert.isTrue(!playerRepository.existsByEmail(email), email + " already exists!");
+		Assert.isTrue(!adminEmails.contains(email), "Can't add admins as players!");
+		Assert.isTrue(!playerRepository.existsByEmail(email), email + " already in a game!");
 
 		val player = new Player(game, email, cash);
 		log.info("Invited player {} to join game ID: {}", player.getUsername(), game.getId());

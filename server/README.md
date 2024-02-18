@@ -8,7 +8,7 @@ Follow the steps mentioned below to understand how to setup the Spring Boot appl
 
 ### General
 - Please refer to the `application.yml` file to view all the Spring and application-related configurations.
-- You will need to provide an admin's email address to run the application. Either create your own spring profile with the `strategists.admin.email` key, or pass it as a VM argument as `-Dstrategists.admin.email=<YOUR_EMAIL_ADDRESS>`. **DO NOT** hard-code an email address in the default `application.yml` file.
+- You will need to provide admins' email addresses (comma separated for multiple emails) to run the application. Either create your own spring profile with the `strategists.admin.emails` key, or pass it as a VM argument as `-Dstrategists.admin.emails=<EMAIL1>,<EMAIL2>`. **DO NOT** hard-code email addresses in the default `application.yml` file.
 - You will need to provide Google Recaptcha secret key to run the application. Either create your own spring profile with the `strategists.configuration.google-recaptcha-secret-key` key, or pass it as a VM argument as `-Dstrategists.configuration.google-recaptcha-secret-key=<SECRET_KEY>`. **DO NOT** hard-code it in the default `application.yml` file.
 - If you want to log auto-generated SQLs, change the `spring.jpa.show-sql` to `true` in the `application.yml` or pass it as a VM argument as `-Dspring.jpa.show-sql=true`. If you are changing the default `application.yml` file, **DO NOT** commit it to the repository.
 - H2 is enabled by default, if you want to disable it, change the `spring.h2.console.enabled` to `false` in the `application.yml` or pass it as a VM argument as `-Dspring.h2.console.enabled=false`. If you are changing the default `application.yml` file, **DO NOT** commit it to the repository.
@@ -16,7 +16,7 @@ Follow the steps mentioned below to understand how to setup the Spring Boot appl
 ### Docker
 - Before creating a Docker image, make sure you have created a dedicated `application-docker.yml` file in the resources directory along with `application.yml`.
 - Overwrite any default configuration in the dedicated `yml` file. **DO NOT** update the default `application.yml` file.
-- Make sure to add the `strategists.admin.email` key in the Docker's dedicated `yml` file. The application won't start otherwise as the admin's email address is not provided in the default `application.yml` file.
+- Make sure to add the `strategists.admin.emails` key in the Docker's dedicated `yml` file. The application won't start otherwise as admins' email addresses is not provided in the default `application.yml` file.
 - Make sure to add the `strategists.configuration.google-recaptcha-secret-key` key in the Docker's dedicated `yml` file. The application won't start otherwise as Google Recaptcha secret key is not provided in the default `application.yml` file.
 - Once you have created a dedicated `yml` file, you can build a Docker image from the **parent directory (outside server)** using the `docker buildx build -f server/Dockerfile -t <REPOSITORY_NAME>/strategists-service:<TAG_NAME> .` command.
 - To run the image, use the `docker run -e PROFILE=docker -p 8090:8090 <REPOSITORY_NAME>/strategists-service:<TAG_NAME>` command. This command assumes that your dedicated file is named `application-docker.yml`.
