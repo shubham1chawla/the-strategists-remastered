@@ -2,7 +2,7 @@ package com.strategists.game.service.impl;
 
 import java.io.File;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -34,12 +34,6 @@ import lombok.extern.log4j.Log4j2;
 @Service
 public class AuthenticationServiceImpl implements AuthenticationService {
 
-	@Value("${strategists.admin.username}")
-	private String adminUsername;
-
-	@Value("${strategists.admin.email}")
-	private String adminEmail;
-
 	@Value("${strategists.game.default-map}")
 	private String defaultGameMap;
 
@@ -48,6 +42,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	@Value("${strategists.configuration.google-recaptcha-secret-key}")
 	private String googleRecaptchaSecretKey;
+
+	@Value("${strategists.admin.emails}")
+	private Set<String> adminEmails;
 
 	@Autowired
 	private Map<String, File> gameMapFiles;
@@ -60,7 +57,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
 	@PostConstruct
 	public void setup() {
-		Assert.isTrue(EmailValidator.getInstance().isValid(adminEmail), "Setup a valid admin email id!");
+		validateAdminEmails();
 		Assert.hasText(googleRecaptchaAPIUrl, "Google Recaptcha API URL is not provided!");
 		Assert.hasText(googleRecaptchaSecretKey, "Google Recaptcha Secret key is not provided!");
 	}
@@ -69,18 +66,20 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	public AuthenticationResponse authenticate(GoogleLoginRequest request) {
 
 		// Checking if player is admin
-		if (Objects.equals(request.getEmail(), adminEmail)) {
+		if (adminEmails.contains(request.getEmail())) {
+
+			val username = request.getName().split("\\s+")[0] + "*";
 
 			// Checking if game exists for admin
 			Game game = null;
 			try {
-				game = gameService.getGameByAdminEmail(adminEmail);
+				game = gameService.getGameByAdminEmail(request.getEmail());
 			} catch (Exception ex) {
 				val gameMap = GameMap.from(gameMapFiles.get(defaultGameMap));
-				game = gameService.createGame(adminUsername, adminEmail, gameMap);
+				game = gameService.createGame(username, request.getEmail(), gameMap);
 			}
 
-			log.info("Authenticating admin {} as {}", request.getName(), adminUsername);
+			log.info("Authenticating admin {} as {}", request.getName(), username);
 			return new AuthenticationResponse(game.getId(), game.getAdminUsername(), Type.ADMIN);
 		}
 
@@ -108,6 +107,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 		val template = new RestTemplate();
 		val response = template.postForEntity(googleRecaptchaAPIUrl, entity, GoogleRecaptchaVerificationResponse.class);
 		return response.hasBody() && response.getBody().isSuccess();
+	}
+
+	private void validateAdminEmails() {
+		Assert.notEmpty(adminEmails, "At least one admin email is required!");
+		for (String adminEmail : adminEmails) {
+			Assert.isTrue(EmailValidator.getInstance().isValid(adminEmail), adminEmail + " is not valid!");
+		}
 	}
 
 }

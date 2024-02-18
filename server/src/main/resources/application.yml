@@ -20,8 +20,7 @@ spring:
       enabled: true
 strategists:
   admin:
-    username: Creator
-    email: 
+    emails: 
   prediction:
     enabled: true
     export-data-directory: ../prediction/data/
