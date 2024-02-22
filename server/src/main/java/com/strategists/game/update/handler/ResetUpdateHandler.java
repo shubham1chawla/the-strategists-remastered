@@ -30,6 +30,9 @@ public class ResetUpdateHandler extends AbstractUpdateHandler<ResetUpdatePayload
 
 		// Sending unsaved activity
 		sendUpdate(game, new ResetUpdatePayload(Activity.ofReset(game)));
+
+		// Removing previously scheduled task
+		unscheduleSkipPlayerTask(game);
 	}
 
 }

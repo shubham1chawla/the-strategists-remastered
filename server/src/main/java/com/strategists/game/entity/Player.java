@@ -25,10 +25,13 @@ import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.strategists.game.util.MathUtil;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.val;
@@ -37,15 +40,17 @@ import lombok.val;
 @Entity
 @NoArgsConstructor
 @Table(name = "players")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Player implements Serializable {
 
 	private static final long serialVersionUID = -7588097421340659821L;
 
 	public enum State {
-		INVITED, ACTIVE, BANKRUPT, JAIL;
+		INVITED, ACTIVE, BANKRUPT;
 	}
 
 	@Id
+	@EqualsAndHashCode.Include
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
@@ -64,18 +69,19 @@ public class Player implements Serializable {
 	@Column(nullable = false, precision = MathUtil.PRECISION)
 	private Double baseCash;
 
-	@Column(nullable = true, columnDefinition = "INTEGER DEFAULT 0")
+	@Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
 	private Integer index = 0;
 
-	@Column(nullable = true, columnDefinition = "VARCHAR(8) DEFAULT 'ACTIVE'")
+	@Column(nullable = false, columnDefinition = "VARCHAR(8) DEFAULT 'INVITED'")
 	@Enumerated(EnumType.STRING)
 	private State state = State.INVITED;
 
-	@Column(nullable = true, columnDefinition = "BOOLEAN DEFAULT FALSE")
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 	private boolean turn = false;
 
-	@Column(nullable = true, columnDefinition = "INTEGER DEFAULT 0")
-	private Integer remainingJailLife = 0;
+	@JsonInclude(Include.NON_NULL)
+	@Column(nullable = true, columnDefinition = "INTEGER DEFAULT NULL")
+	private Integer remainingSkipsCount;
 
 	@JsonIgnore
 	@ManyToOne
@@ -106,6 +112,7 @@ public class Player implements Serializable {
 		this.username = email.split("@")[0];
 		this.email = email;
 		this.baseCash = MathUtil.round(baseCash);
+		this.remainingSkipsCount = game.getAllowedSkipsCount();
 	}
 
 	/**
@@ -157,6 +164,12 @@ public class Player implements Serializable {
 	@JsonIgnore
 	public String getGamePlayerKey() {
 		return String.format("game-%s-player-%s", getGameId(), getUsername());
+	}
+
+	@Transient
+	@JsonInclude(Include.NON_NULL)
+	public Integer getAllowedSkipsCount() {
+		return game.getAllowedSkipsCount();
 	}
 
 	public void addLand(Land land, double ownership, double buyAmount) {

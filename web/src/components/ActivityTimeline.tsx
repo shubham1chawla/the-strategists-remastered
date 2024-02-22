@@ -5,6 +5,7 @@ import {
   BarsOutlined,
   BulbOutlined,
   CheckOutlined,
+  ClockCircleOutlined,
   CrownOutlined,
   DoubleRightOutlined,
   FallOutlined,
@@ -116,8 +117,6 @@ const getIcon = (type: UpdateType): ReactNode | undefined => {
   switch (type) {
     case 'BANKRUPTCY':
       return <Bankruptcy />;
-    case 'END':
-      return <CrownOutlined />;
     case 'INVEST':
       return <RiseOutlined />;
     case 'INVITE':
@@ -134,10 +133,14 @@ const getIcon = (type: UpdateType): ReactNode | undefined => {
       return <FallOutlined />;
     case 'RESET':
       return <StopOutlined />;
+    case 'SKIP':
+      return <ClockCircleOutlined />;
     case 'START':
       return <FireOutlined />;
     case 'TURN':
       return <CheckOutlined />;
+    case 'WIN':
+      return <CrownOutlined />;
     default:
       return undefined;
   }

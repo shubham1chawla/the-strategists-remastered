@@ -23,6 +23,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -45,10 +46,8 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
+@ConditionalOnProperty(name = "strategists.prediction.enabled", havingValue = "true")
 public class PredictionServiceImpl implements PredictionService {
-
-	@Value("${strategists.prediction.enabled}")
-	private boolean enabled;
 
 	@Value("${strategists.prediction.export-data-directory}")
 	private File exportDataDirectory;
@@ -73,21 +72,12 @@ public class PredictionServiceImpl implements PredictionService {
 
 	@PostConstruct
 	public void setup() {
-		if (enabled) {
-			validateDirectories();
-			trainPredictionModel();
-		} else {
-			log.info("Predictions are disabled.");
-		}
+		validateDirectories();
+		trainPredictionModel();
 	}
 
 	@Override
 	public void trainPredictionModel() {
-		// Short-circuiting the method if predictions are disabled.
-		if (!enabled) {
-			return;
-		}
-
 		log.info("Training prediction model...");
 
 		// Training the prediction model
@@ -109,13 +99,15 @@ public class PredictionServiceImpl implements PredictionService {
 	@Override
 	@Transactional
 	public void trainPredictionModel(Game game) {
-		// Short-circuiting the method if predictions are disabled.
-		if (!enabled) {
-			return;
-		}
 
 		// Exporting game data if requested
 		val orderedPlayers = playerService.getPlayersByGameOrderByBankruptcy(game);
+
+		// Checking if game data CSV should be exported
+		if (!shouldExportCSV(game, orderedPlayers)) {
+			log.warn("Skipped exporting CSV and training model for game ID: {}", game.getId());
+			return;
+		}
 		exportCSVFile(game, orderedPlayers, exportDataDirectory, "export-" + System.currentTimeMillis());
 
 		trainPredictionModel();
@@ -125,10 +117,6 @@ public class PredictionServiceImpl implements PredictionService {
 	@Transactional
 	@UpdateMapping(UpdateType.PREDICTION)
 	public Prediction executePredictionModel(Player player) {
-		// Short-circuiting the method if predictions are disabled.
-		if (!enabled) {
-			return Prediction.UNKNOWN;
-		}
 
 		// Fetching new reference
 		player = playerService.getPlayerById(player.getId());
@@ -376,6 +364,31 @@ public class PredictionServiceImpl implements PredictionService {
 		log.info("Export Data Directory: {}", exportDataDirectory.getAbsolutePath());
 		log.info("Model Out Directory: {}", modelOutDirectory.getAbsolutePath());
 		log.info("Predict File Directory: {}", predictFileDirectory.getAbsolutePath());
+	}
+
+	private boolean shouldExportCSV(Game game, List<Player> players) {
+
+		/**
+		 * Case 1 - If there is only one player in the game, it is not an ideal
+		 * representation and therefore should be filtered out.
+		 */
+		val case1 = players.size() > 1;
+
+		/**
+		 * Case 2 - If player skipping is not allowed, we can proceed with exporting the
+		 * game as we assume that all players played the game fairly, and none of the
+		 * players left the game during a session.
+		 */
+		val case2 = Objects.isNull(game.getAllowedSkipsCount());
+
+		/**
+		 * Case 3 - It is not worth exporting the game's CSV if any player stopped
+		 * playing, and was bankrupted due to inactivity. Such a game's session doesn't
+		 * reflect an ideal game, and therefore is filtered out.
+		 */
+		val case3 = players.stream().allMatch(player -> player.getRemainingSkipsCount() > 0);
+
+		return case1 && (case2 || case3);
 	}
 
 }

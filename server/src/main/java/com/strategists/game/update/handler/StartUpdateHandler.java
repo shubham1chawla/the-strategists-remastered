@@ -25,6 +25,9 @@ public class StartUpdateHandler extends AbstractUpdateHandler<StartUpdatePayload
 		// Persisting the activity and sending the update
 		val activity = Activity.ofStart(player);
 		sendUpdate(player.getGame(), new StartUpdatePayload(saveActivity(activity), player));
+
+		// Scheduling player skip task
+		scheduleSkipPlayerTask(player.getGame());
 	}
 
 }

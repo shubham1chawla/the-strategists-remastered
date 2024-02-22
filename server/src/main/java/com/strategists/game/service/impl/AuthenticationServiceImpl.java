@@ -37,13 +37,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 	@Value("${strategists.game.default-map}")
 	private String defaultGameMap;
 
-	@Value("${strategists.configuration.google-recaptcha-api-url}")
+	@Value("${strategists.security.google-recaptcha.api-url}")
 	private String googleRecaptchaAPIUrl;
 
-	@Value("${strategists.configuration.google-recaptcha-secret-key}")
+	@Value("${strategists.security.google-recaptcha.secret-key}")
 	private String googleRecaptchaSecretKey;
 
-	@Value("${strategists.admin.emails}")
+	@Value("${strategists.security.allowed-emails}")
 	private Set<String> adminEmails;
 
 	@Autowired

@@ -11,12 +11,15 @@ export interface Player {
   id: number;
   username: string;
   index: number;
-  state: 'INVITED' | 'ACTIVE' | 'BANKRUPT' | 'JAIL';
+  state: 'INVITED' | 'ACTIVE' | 'BANKRUPT';
   turn: boolean;
-  remainingJailLife: number;
   netWorth: number;
   cash: number;
   lands: PlayerLand[];
+
+  // Optional fields based on configuration
+  remainingSkipsCount?: number;
+  allowedSkipsCount?: number;
 }
 
 export interface Land {

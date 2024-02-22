@@ -18,6 +18,7 @@ import {
   StockOutlined,
   CrownOutlined,
   MailOutlined,
+  HeartOutlined,
 } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { Player, State } from '../redux';
@@ -51,13 +52,20 @@ const LobbyPlayers = () => {
   const { state, players } = useSelector((state: State) => state.lobby);
   const { gameId } = useSelector((state: State) => state.user);
 
-  // Sorting players in decreasing order of net-worth
+  // Sorting players in decreasing order of net-worth and remaining skips
   // Making a copy of players before sorting to avoid direct state mutation.
   // Reference to the issue -
   // https://stackoverflow.com/questions/41051302/react-and-redux-uncaught-error-a-state-mutation-was-detected-between-dispatche
-  const sortedPlayers = [...players].sort(
-    (p1, p2) => p2.netWorth - p1.netWorth
-  );
+  const sortedPlayers = [...players].sort((p1, p2) => {
+    if (
+      Number.isInteger(p1.remainingSkipsCount) &&
+      Number.isInteger(p2.remainingSkipsCount) &&
+      p1.netWorth === p2.netWorth
+    ) {
+      return (p2.remainingSkipsCount || 0) - (p1.remainingSkipsCount || 0);
+    }
+    return p2.netWorth - p1.netWorth;
+  });
 
   const kickPlayer = (event: MouseEvent, { id }: Player) => {
     event.stopPropagation();
@@ -113,6 +121,15 @@ const LobbyPlayers = () => {
               <Tooltip title={<>{player.username}'s net worth</>}>
                 <Tag icon={<StockOutlined />}>{player.netWorth}</Tag>
               </Tooltip>
+              {!!player.remainingSkipsCount && state === 'ACTIVE' && (
+                <Tooltip
+                  title={`Remaining skips allowed before ${player.username} will be declared bankrupt.`}
+                >
+                  <Tag icon={<HeartOutlined />}>
+                    {player.remainingSkipsCount}
+                  </Tag>
+                </Tooltip>
+              )}
             </Space>
           </Space>
         </List.Item>

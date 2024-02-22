@@ -19,8 +19,6 @@ spring:
     console:
       enabled: true
 strategists:
-  admin:
-    emails: 
   prediction:
     enabled: true
     export-data-directory: ../prediction/data/
@@ -33,6 +31,16 @@ strategists:
     dice-size: 6
     rent-factor: 0.2
   configuration:
-    enable-sse-ping: false
-    google-recaptcha-api-url: https://www.google.com/recaptcha/api/siteverify
-    google-recaptcha-secret-key: 
+    sse-ping:
+      enabled: false 
+    skip-player:
+      enabled: true
+      allowed-count: 3
+      timeout:
+        value: 60
+        unit: SECONDS
+  security:
+    allowed-emails:
+    google-recaptcha:
+      api-url: https://www.google.com/recaptcha/api/siteverify
+      secret-key:   

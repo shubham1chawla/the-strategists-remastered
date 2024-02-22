@@ -39,6 +39,8 @@ public interface PlayerService {
 
 	Player nextPlayer(Player currentPlayer);
 
+	void skipPlayer(Player player);
+
 	void invest(Player player, Land land, double ownership);
 
 	void payRent(Rent rent);

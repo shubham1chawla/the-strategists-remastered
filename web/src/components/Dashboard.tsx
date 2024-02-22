@@ -195,19 +195,8 @@ const Update = () => {
           const { lands, players } = payload;
           dispatch(LobbyActions.patchLands(lands));
           dispatch(LobbyActions.patchPlayers(players));
-
-          // Skipping turn if current player declared bankruptcy
-          for (const p of players as Player[]) {
-            if (p.turn && p.username === username && p.state === 'BANKRUPT') {
-              axios.put(`/api/games/${gameId}/turn`);
-              break;
-            }
-          }
           break;
         }
-        case 'END':
-          // Do nothing
-          break;
         case 'INVEST': {
           const { land, players } = payload;
           dispatch(LobbyActions.patchLands([land]));
@@ -250,6 +239,9 @@ const Update = () => {
         case 'TURN':
           dispatch(LobbyActions.patchPlayers(payload));
           break;
+        case 'WIN':
+          // Do nothing
+          break;
         default:
           console.warn(`Unsupported update type: ${type}`);
       }
@@ -259,7 +251,7 @@ const Update = () => {
         api.open({ message: parseActivity(activity) });
       }
     };
-  }, [api, dispatch, subscribedTypes, updates, username, gameId]);
+  }, [api, dispatch, subscribedTypes, updates, gameId]);
 
   /**
    * This useEffect will close the event source for the
@@ -396,7 +388,7 @@ const PlayerPanel = (props: PlayerPanelProps) => {
   const { player } = props;
   return (
     <div className="strategists-player-panel">
-      <PlayerStats player={player} />
+      <PlayerStats player={player} showRemainingSkipsCount />
       <ActivityTimeline />
       <Actions />
     </div>
