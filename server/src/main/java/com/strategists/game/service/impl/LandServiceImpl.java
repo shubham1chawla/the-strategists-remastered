@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import com.strategists.game.entity.Game;
+import com.strategists.game.entity.GameMap;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Trend;
 import com.strategists.game.repository.LandRepository;
@@ -33,8 +34,9 @@ public class LandServiceImpl implements LandService {
 	private TrendRepository trendRepository;
 
 	@Override
-	public void save(List<Land> lands) {
-		landRepository.saveAll(lands);
+	public void save(Game game, GameMap gameMap) {
+		gameMap.getLands().forEach(land -> land.setGame(game));
+		landRepository.saveAll(gameMap.getLands());
 	}
 
 	@Override

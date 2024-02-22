@@ -5,6 +5,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
+import javax.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -38,6 +40,12 @@ public class GameServiceImpl implements GameService {
 	@Value("${strategists.game.rent-factor}")
 	private Double rentFactor;
 
+	@Value("${strategists.configuration.skip-player.enabled:#{false}}")
+	private boolean skipPlayerEnabled;
+
+	@Value("${strategists.configuration.skip-player.allowed-count:#{null}}")
+	private Integer allowedSkipsCount;
+
 	@Autowired
 	private GameRepository gameRepository;
 
@@ -51,9 +59,13 @@ public class GameServiceImpl implements GameService {
 	public Game createGame(String adminUsername, String adminEmail, GameMap gameMap) {
 		Assert.state(!gameRepository.existsByAdminEmail(adminEmail), adminUsername + " already created a game!");
 
-		val game = gameRepository.save(new Game(adminUsername, adminEmail));
-		gameMap.getLands().forEach(land -> land.setGame(game));
-		landService.save(gameMap.getLands());
+		Game game = new Game(adminUsername, adminEmail);
+		game.setDiceSize(diceSize);
+		game.setRentFactor(rentFactor);
+		game.setAllowedSkipsCount(skipPlayerEnabled ? allowedSkipsCount : null);
+
+		game = gameRepository.save(game);
+		landService.save(game, gameMap);
 
 		log.info("Created game ID {} for admin: {}", game.getId(), adminUsername);
 		return game;
@@ -87,11 +99,12 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	@UpdateMapping(UpdateType.END)
+	@Transactional
+	@UpdateMapping(UpdateType.WIN)
 	public Player playTurn(Game game) {
 
 		// Checking if game has ended
-		val winner = getWinnerPlayer(game);
+		Optional<Player> winner = getWinnerPlayer(game);
 		if (winner.isPresent()) {
 			return winner.get();
 		}
@@ -100,7 +113,7 @@ public class GameServiceImpl implements GameService {
 		val player = playerService.nextPlayer(playerService.getCurrentPlayer(game));
 
 		// Moving the current player to a new position
-		val land = playerService.movePlayer(player, RANDOM.nextInt(diceSize) + 1);
+		val land = playerService.movePlayer(player, RANDOM.nextInt(game.getDiceSize()) + 1);
 
 		// Paying rent to players on current land
 		for (PlayerLand pl : new ArrayList<>(land.getPlayerLands())) {
@@ -112,17 +125,18 @@ public class GameServiceImpl implements GameService {
 			}
 
 			// Paying rent to target player
-			val rentAmount = rentFactor * (pl.getOwnership() / 100) * land.getMarketValue();
+			val rentAmount = game.getRentFactor() * (pl.getOwnership() / 100) * land.getMarketValue();
 			playerService.payRent(new Rent(player, targetPlayer, land, rentAmount));
-		}
-
-		// Checking if player is bankrupt
-		if (player.getCash() <= 0) {
-			playerService.bankruptPlayer(player);
 		}
 
 		// Updating trends
 		updateTrends(game);
+
+		// Checking if player is bankrupt
+		if (player.getCash() <= 0) {
+			playerService.bankruptPlayer(player);
+			return playTurn(game);
+		}
 
 		// No winner declared
 		return null;

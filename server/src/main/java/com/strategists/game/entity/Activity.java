@@ -74,18 +74,13 @@ public class Activity implements Serializable {
 		return new Activity(player.getGame(), UpdateType.BANKRUPTCY, player.getUsername());
 	}
 
-	public static Activity ofEnd(Player player) {
-		return new Activity(player.getGame(), UpdateType.END, player.getUsername());
-	}
-
 	public static Activity ofInvest(Player player, Land land, double ownership) {
 		return new Activity(player.getGame(), UpdateType.INVEST, player.getUsername(), Double.toString(ownership),
 				land.getName());
 	}
 
 	public static Activity ofInvite(Player player) {
-		val game = player.getGame();
-		return new Activity(game, UpdateType.INVITE, game.getAdminUsername(), player.getEmail());
+		return new Activity(player.getGame(), UpdateType.INVITE, player.getEmail());
 	}
 
 	public static Activity ofJoin(Player player) {
@@ -119,14 +114,21 @@ public class Activity implements Serializable {
 		return new Activity(game, UpdateType.RESET, game.getAdminUsername());
 	}
 
+	public static Activity ofSkip(Player player) {
+		return new Activity(player.getGame(), UpdateType.SKIP, player.getUsername());
+	}
+
 	public static Activity ofStart(Player player) {
-		val game = player.getGame();
-		return new Activity(game, UpdateType.START, game.getAdminUsername(), player.getUsername());
+		return new Activity(player.getGame(), UpdateType.START, player.getUsername());
 	}
 
 	public static Activity ofTurn(Player previousPlayer, Player currentPlayer) {
 		val game = previousPlayer.getGame();
 		return new Activity(game, UpdateType.TURN, previousPlayer.getUsername(), currentPlayer.getUsername());
+	}
+
+	public static Activity ofWin(Player player) {
+		return new Activity(player.getGame(), UpdateType.WIN, player.getUsername());
 	}
 
 }

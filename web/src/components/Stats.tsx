@@ -17,6 +17,8 @@ import {
   AuditOutlined,
   DollarCircleOutlined,
   DollarOutlined,
+  HeartFilled,
+  HeartOutlined,
   HomeOutlined,
   InfoCircleOutlined,
   PercentageOutlined,
@@ -41,10 +43,23 @@ import { CssVariables } from '../App';
 
 export interface PlayerStatsProps {
   player: Player;
+  showRemainingSkipsCount?: boolean;
 }
 
 export const PlayerStats = (props: PlayerStatsProps) => {
   const { player } = props;
+
+  // Determining whether to show remaining skip counts
+  const showRemainingSkipsCount =
+    !!player.remainingSkipsCount &&
+    !!player.allowedSkipsCount &&
+    !!props.showRemainingSkipsCount &&
+    player.state !== 'BANKRUPT';
+
+  const remainingSkipsCount = player.remainingSkipsCount || 0;
+  const allowedSkipsCount = player.allowedSkipsCount || 0;
+  const skipsCount = allowedSkipsCount - remainingSkipsCount;
+
   return (
     <div className="strategists-stats">
       <Row>
@@ -52,9 +67,19 @@ export const PlayerStats = (props: PlayerStatsProps) => {
           <Divider>
             <Space>
               <Tag icon={<UserOutlined />}>{player?.username}</Tag>
-              {player.state === 'BANKRUPT' ? (
+              {player.state === 'BANKRUPT' && (
                 <Tag icon={<AuditOutlined />}>Bankrupt</Tag>
-              ) : null}
+              )}
+              {showRemainingSkipsCount && (
+                <Tag>
+                  {[...Array(remainingSkipsCount)].map((_, i) => (
+                    <HeartFilled key={i} />
+                  ))}
+                  {[...Array(skipsCount)].map((_, i) => (
+                    <HeartOutlined key={i} />
+                  ))}
+                </Tag>
+              )}
             </Space>
           </Divider>
         </Col>

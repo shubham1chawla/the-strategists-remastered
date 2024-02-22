@@ -19,7 +19,7 @@ import lombok.extern.log4j.Log4j2;
 @EnableAsync
 @EnableScheduling
 @Configuration
-@ConditionalOnProperty(name = "strategists.configuration.enable-sse-ping", havingValue = "true")
+@ConditionalOnProperty(name = "strategists.configuration.sse-ping.enabled", havingValue = "true")
 public class PingUpdateConfiguration {
 
 	@Autowired

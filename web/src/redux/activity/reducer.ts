@@ -4,11 +4,9 @@ export type UpdateType =
   | 'BANKRUPTCY'
   | 'BONUS'
   | 'CHEAT'
-  | 'END'
   | 'EVENT'
   | 'INVEST'
   | 'INVITE'
-  | 'JAIL'
   | 'JOIN'
   | 'KICK'
   | 'MOVE'
@@ -16,30 +14,32 @@ export type UpdateType =
   | 'PREDICTION'
   | 'RENT'
   | 'RESET'
+  | 'SKIP'
   | 'START'
   | 'TRADE'
   | 'TREND'
-  | 'TURN';
+  | 'TURN'
+  | 'WIN';
 
 export const getSubscribableTypes = (): UpdateType[] => {
   return [
     'BANKRUPTCY',
     'BONUS',
     'CHEAT',
-    'END',
     'EVENT',
     'INVEST',
     'INVITE',
-    'JAIL',
     'JOIN',
     'KICK',
     'MOVE',
     'PREDICTION',
     'RENT',
     'RESET',
+    'SKIP',
     'START',
     'TRADE',
     'TURN',
+    'WIN',
   ];
 };
 

@@ -9,14 +9,14 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class EndUpdatePayload implements UpdatePayload<Player> {
+public class SkipUpdatePayload implements UpdatePayload<Player> {
 
 	private Activity activity;
 	private Player payload;
 
 	@Override
 	public UpdateType getType() {
-		return UpdateType.END;
+		return UpdateType.SKIP;
 	}
 
 }

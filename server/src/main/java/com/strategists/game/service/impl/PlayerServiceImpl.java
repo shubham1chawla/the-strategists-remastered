@@ -44,7 +44,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 	private static final Random RANDOM = new Random();
 
-	@Value("${strategists.admin.emails}")
+	@Value("${strategists.security.allowed-emails}")
 	private Set<String> adminEmails;
 
 	@PersistenceContext
@@ -226,7 +226,7 @@ public class PlayerServiceImpl implements PlayerService {
 			player.setTurn(true);
 			playerRepository.saveAll(List.of(currentPlayer, player));
 
-			log.info("Assigned turn to {} for game ID: ", player.getUsername(), game.getId());
+			log.info("Assigned turn to {} for game ID: {}", player.getUsername(), game.getId());
 			return player;
 
 		} while (!Objects.equals(currentPlayer.getId(), players.get(i).getId()));
@@ -236,12 +236,23 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
+	@UpdateMapping(UpdateType.SKIP)
+	public void skipPlayer(Player player) {
+		player.setRemainingSkipsCount(player.getRemainingSkipsCount() - 1);
+		playerRepository.save(player);
+
+		log.info("{}/{} skips remain for {} in game ID: {}", player.getRemainingSkipsCount(),
+				player.getAllowedSkipsCount(), player.getUsername(), player.getGameId());
+	}
+
+	@Override
 	@Transactional
 	@UpdateMapping(UpdateType.INVEST)
 	public void invest(Player player, Land land, double ownership) {
 		val buyAmount = land.getMarketValue() * (ownership / 100);
 		Assert.isTrue(land.getTotalOwnership() + ownership <= 100, "Can't buy more than 100% of a land!");
-		Assert.isTrue(player.getCash() > buyAmount, "You don't have enough cash to buy this land!");
+		Assert.isTrue(player.getCash() > buyAmount,
+				String.format("%s's %s cash < %s buying amount!", player.getUsername(), player.getCash(), buyAmount));
 
 		player.addLand(land, ownership, buyAmount);
 
@@ -262,7 +273,6 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	@Transactional
 	@UpdateMapping(UpdateType.RENT)
 	public void payRent(Rent rent) {
 		val source = rent.getSourcePlayer();
@@ -270,15 +280,17 @@ public class PlayerServiceImpl implements PlayerService {
 		val land = rent.getLand();
 		val amount = rent.getRentAmount();
 
-		/*
-		 * Adding rent instance to target player only to ensure that there is only rent
-		 * entry in the database.
-		 */
+		// Adding rent instance to target player only
 		target.addRent(rent);
 		playerRepository.save(target);
 
-		// Refreshing source player's entity to reflect correct cash
+		/**
+		 * After marking foreign key columns with @ManyToOne annotation, target player
+		 * received twice the rent. This was fixed by refreshing the target player's
+		 * entity too with source player.
+		 */
 		em.refresh(source);
+		em.refresh(target);
 
 		log.info("{} paid {} rent to {} for {} in game ID: {}", source.getUsername(), amount, target.getUsername(),
 				land.getName(), source.getGameId());
@@ -290,7 +302,7 @@ public class PlayerServiceImpl implements PlayerService {
 		player.setState(State.BANKRUPT);
 		playerRepository.save(player);
 
-		log.info("Updated {}'s state to {} in game: {}", player.getUsername(), player.getState(), player.getGame());
+		log.info("{} state updated to {} in game ID: {}", player.getUsername(), player.getState(), player.getGameId());
 	}
 
 	@Override
@@ -312,7 +324,7 @@ public class PlayerServiceImpl implements PlayerService {
 			player.setIndex(0);
 			player.setTurn(false);
 			player.setState(State.ACTIVE);
-			player.setRemainingJailLife(0);
+			player.setRemainingSkipsCount(player.getAllowedSkipsCount());
 		}
 
 		playerRepository.saveAll(players);

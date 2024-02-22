@@ -70,7 +70,7 @@ public class Land implements Serializable {
 
 	@JsonIgnore
 	@ManyToOne
-	@JoinColumn(name = "game_id", referencedColumnName = "id")
+	@JoinColumn(name = "game_id", referencedColumnName = "id", nullable = false)
 	private Game game;
 
 	@ToString.Exclude

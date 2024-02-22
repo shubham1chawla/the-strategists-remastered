@@ -46,7 +46,16 @@ public class Game implements Serializable {
 	@Column(nullable = false, unique = true)
 	private String adminEmail;
 
-	@Column(nullable = true, columnDefinition = "VARCHAR(6) DEFAULT 'LOBBY'")
+	@Column(nullable = false, unique = false)
+	private Integer diceSize;
+
+	@Column(nullable = false, unique = false)
+	private Double rentFactor;
+
+	@Column(nullable = true, unique = false)
+	private Integer allowedSkipsCount;
+
+	@Column(nullable = false, columnDefinition = "VARCHAR(6) DEFAULT 'LOBBY'")
 	@Enumerated(EnumType.STRING)
 	private State state = State.LOBBY;
 

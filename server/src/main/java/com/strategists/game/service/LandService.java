@@ -3,12 +3,13 @@ package com.strategists.game.service;
 import java.util.List;
 
 import com.strategists.game.entity.Game;
+import com.strategists.game.entity.GameMap;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Trend;
 
 public interface LandService {
 
-	void save(List<Land> lands);
+	void save(Game game, GameMap gameMap);
 
 	List<Land> getLandsByGame(Game game);
 

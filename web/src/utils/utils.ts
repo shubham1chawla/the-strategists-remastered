@@ -9,16 +9,12 @@ export const parseActivity = (activity: Activity): string => {
       return `${val1} gave ${val2} a bonus of ${val3} cash after completing one turn.`;
     case 'CHEAT':
       return `${val1} applied a cheat!`;
-    case 'END':
-      return `${val1} won The Strategists!`;
     case 'EVENT':
       return `${val1} caused ${val2} at ${val3} for ${val4} turns!`;
     case 'INVEST':
       return `${val1} invested in ${val2}% of ${val3}!`;
     case 'INVITE':
-      return `${val1} invited ${val2}!`;
-    case 'JAIL':
-      return `${val1} just got arrested!`;
+      return `${val1} invited to join The Strategists!`;
     case 'JOIN':
       return `${val1} accepted the invite!`;
     case 'KICK':
@@ -33,12 +29,16 @@ export const parseActivity = (activity: Activity): string => {
       return `${val1} paid ${val2} cash rent to ${val3} for ${val4}.`;
     case 'RESET':
       return `${val1} resetted The Strategists!`;
+    case 'SKIP':
+      return `${val1}'s turn skipped due to inactivity!`;
     case 'START':
-      return `${val1} started The Strategists! ${val2}'s turn to invest.`;
+      return `The Strategists started! ${val1}'s turn to invest.`;
     case 'TRADE':
       return `${val1} traded ${val2}% of ${val3} with ${val4} for ${val5} cash.`;
     case 'TURN':
       return `${val1} passed turn to ${val2}.`;
+    case 'WIN':
+      return `${val1} won The Strategists!`;
     default:
       console.error(activity);
       return `Unknwon activity type: ${type}`;

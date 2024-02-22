@@ -32,15 +32,15 @@ public class Rent implements Serializable {
 	private Long id;
 
 	@ManyToOne
-	@JoinColumn(name = "source_id", referencedColumnName = "id")
+	@JoinColumn(name = "source_id", referencedColumnName = "id", nullable = false)
 	private Player sourcePlayer;
 
 	@ManyToOne
-	@JoinColumn(name = "target_id", referencedColumnName = "id")
+	@JoinColumn(name = "target_id", referencedColumnName = "id", nullable = false)
 	private Player targetPlayer;
 
 	@ManyToOne
-	@JoinColumn(name = "land_id", referencedColumnName = "id")
+	@JoinColumn(name = "land_id", referencedColumnName = "id", nullable = false)
 	private Land land;
 
 	@Column(nullable = false, precision = MathUtil.PRECISION)
