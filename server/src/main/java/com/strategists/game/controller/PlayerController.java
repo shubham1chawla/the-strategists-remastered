@@ -1,12 +1,10 @@
 package com.strategists.game.controller;
 
-import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,12 +33,6 @@ public class PlayerController {
 
 	@Autowired
 	private LandService landService;
-
-	@GetMapping
-	public List<Player> getPlayers(@PathVariable long gameId) {
-		val game = gameService.getGameById(gameId);
-		return playerService.getPlayersByGame(game);
-	}
 
 	@PostMapping
 	public Player sendInvite(@PathVariable long gameId, @RequestBody InvitePlayerRequest request) {
