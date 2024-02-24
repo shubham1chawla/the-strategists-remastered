@@ -23,9 +23,11 @@ import {
 import {
   Activity,
   ActivityActions,
+  Land,
   LobbyActions,
   Player,
   State,
+  Trend,
   TrendActions,
   UpdateType,
   UserActions,
@@ -37,39 +39,31 @@ import axios from 'axios';
  * -----  UTILITIES DEFINED BELOW  -----
  */
 
+interface GameResponse {
+  state: 'LOBBY' | 'ACTIVE';
+  players: Player[];
+  lands: Land[];
+  activities: Activity[];
+  trends: Trend[];
+}
+
 const syncGameStates = (
   gameId: number,
   dispatch: Dispatch<AnyAction>
 ): void => {
-  // Defining all the GET calls to sync with server
-  const prefix = `/api/games/${gameId}`;
-  [
-    {
-      url: `${prefix}/players`,
-      action: LobbyActions.setPlayers,
-    },
-    {
-      url: `${prefix}/activities`,
-      action: ActivityActions.setActivities,
-    },
-    {
-      url: `${prefix}/lands`,
-      action: LobbyActions.setLands,
-    },
-    {
-      url: `${prefix}/state`,
-      action: LobbyActions.setState,
-    },
-    {
-      url: `${prefix}/trends`,
-      action: TrendActions.setTrends,
-    },
-  ].forEach(({ url, action }) =>
-    axios
-      .get(url)
-      .then(({ data }) => dispatch(action(data)))
-      .catch(console.error)
-  );
+  axios
+    .get<GameResponse>(`/api/games/${gameId}`)
+    .then(({ data }) => {
+      const { state, players, lands, activities, trends } = data;
+      [
+        LobbyActions.setState(state),
+        LobbyActions.setPlayers(players),
+        LobbyActions.setLands(lands),
+        ActivityActions.setActivities(activities),
+        TrendActions.setTrends(trends),
+      ].forEach(dispatch);
+    })
+    .catch(console.error);
 };
 
 /**

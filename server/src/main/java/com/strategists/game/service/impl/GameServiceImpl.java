@@ -5,8 +5,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 
-import javax.transaction.Transactional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -99,7 +97,6 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	@Transactional
 	@UpdateMapping(UpdateType.WIN)
 	public Player playTurn(Game game) {
 

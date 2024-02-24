@@ -273,6 +273,7 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
+	@Transactional
 	@UpdateMapping(UpdateType.RENT)
 	public void payRent(Rent rent) {
 		val source = rent.getSourcePlayer();
