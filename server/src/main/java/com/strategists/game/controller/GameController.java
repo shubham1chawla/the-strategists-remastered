@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.strategists.game.repository.ActivityRepository;
@@ -69,6 +70,22 @@ public class GameController {
 
 		} catch (Exception ex) {
 			log.warn(ex.getMessage());
+			return ResponseEntity.notFound().build();
+		}
+	}
+
+	@GetMapping
+	public ResponseEntity<EnterGameResponse> findGame(@RequestParam(name = "credential", required = true) String jwt) {
+		try {
+
+			// Converting JWT string to credential instance
+			val credential = GoogleOAuthCredential.fromJWT(jwt);
+
+			// Finding player and associated game information
+			val player = playerService.getPlayerByEmail(credential.getEmail());
+			return ResponseEntity.ok(EnterGameResponse.fromPlayer(player));
+
+		} catch (Exception ex) {
 			return ResponseEntity.notFound().build();
 		}
 	}

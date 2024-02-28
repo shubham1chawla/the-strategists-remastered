@@ -101,9 +101,9 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	public Player getPlayerByUsername(Game game, String username) {
-		val opt = playerRepository.findByGameAndUsername(game, username);
-		Assert.isTrue(opt.isPresent(), "No player found with username: " + username);
+	public Player getPlayerByEmail(String email) {
+		val opt = playerRepository.findByEmail(email);
+		Assert.isTrue(opt.isPresent(), "No player found with requested email!");
 		return opt.get();
 	}
 

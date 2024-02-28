@@ -20,7 +20,7 @@ public interface PlayerService {
 
 	boolean existsByEmail(String email);
 
-	Player getPlayerByUsername(Game game, String username);
+	Player getPlayerByEmail(String email);
 
 	Player addPlayer(Game game, String email, String name);
 

@@ -30,6 +30,7 @@ type Workflow =
   | 'VERIFYING'
   | 'UNREACHABLE'
   | 'VERIFIED'
+  | 'RESUME'
   | 'ACTIONS'
   | 'JOIN_ACTION'
   | 'ENTERING';
@@ -61,6 +62,18 @@ export const Login = () => {
       .catch(() => setJoinDisabled(true));
   }, [form, joinFormValues]);
 
+  // Checking if player already part of a game
+  useEffect(() => {
+    if (workflow !== 'RESUME') return;
+    axios
+      .get<LoginState>(`/api/games?credential=${credential}`)
+      .then(({ data }) => {
+        dispatch(LoginActions.login(data));
+        navigate('/dashboard');
+      })
+      .catch(() => setWorkflow('ACTIONS'));
+  }, [workflow]);
+
   const handleGoogleLoginSuccess = ({
     credential,
   }: GoogleCredentialResponse) => {
@@ -69,7 +82,7 @@ export const Login = () => {
       return;
     }
     setCredential(credential);
-    setWorkflow('ACTIONS');
+    setWorkflow('RESUME');
   };
 
   const handleGoogleLoginError = () => {
@@ -130,6 +143,13 @@ export const Login = () => {
             text="signin_with"
             useOneTap
           />
+        );
+      case 'RESUME':
+        return (
+          <Space>
+            <LoadingOutlined />
+            Checking if you are part of any game...
+          </Space>
         );
       case 'ACTIONS':
         return (
