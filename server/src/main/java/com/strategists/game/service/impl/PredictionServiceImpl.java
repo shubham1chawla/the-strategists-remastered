@@ -105,7 +105,7 @@ public class PredictionServiceImpl implements PredictionService {
 
 		// Checking if game data CSV should be exported
 		if (!shouldExportCSV(game, orderedPlayers)) {
-			log.warn("Skipped exporting CSV and training model for game ID: {}", game.getId());
+			log.warn("Skipped exporting CSV and training model for game: {}", game.getCode());
 			return;
 		}
 		exportCSVFile(game, orderedPlayers, exportDataDirectory, "export-" + System.currentTimeMillis());
@@ -120,7 +120,7 @@ public class PredictionServiceImpl implements PredictionService {
 
 		// Fetching new reference
 		player = playerService.getPlayerById(player.getId());
-		log.info("Testing prediction model on {} for game ID: {}", player.getUsername(), player.getGameId());
+		log.info("Testing prediction model on {} for game: {}", player.getUsername(), player.getGameCode());
 
 		// Exporting player data
 		val csv = exportCSVFile(player.getGame(), List.of(player), predictFileDirectory, player.getGamePlayerKey());
@@ -152,7 +152,7 @@ public class PredictionServiceImpl implements PredictionService {
 		val result = Integer.valueOf(output.get(2).split(" ")[1]);
 		val prediction = result == 1 ? Prediction.WINNER : Prediction.BANKRUPT;
 
-		log.info("{} predicted to be {} for game ID: {}", player.getUsername(), prediction, player.getGameId());
+		log.info("{} predicted to be {} for game: {}", player.getUsername(), prediction, player.getGameCode());
 		return result == 1 ? Prediction.WINNER : Prediction.BANKRUPT;
 	}
 

@@ -70,7 +70,7 @@ public class Land implements Serializable {
 
 	@JsonIgnore
 	@ManyToOne
-	@JoinColumn(name = "game_id", referencedColumnName = "id", nullable = false)
+	@JoinColumn(name = "game_code", referencedColumnName = "code", nullable = false)
 	private Game game;
 
 	@ToString.Exclude
@@ -117,8 +117,8 @@ public class Land implements Serializable {
 
 	@Transient
 	@JsonIgnore
-	public long getGameId() {
-		return game.getId();
+	public String getGameCode() {
+		return game.getCode();
 	}
 
 	public void addEvent(Event event, int life, int level) {

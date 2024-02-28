@@ -47,8 +47,8 @@ public class Rent implements Serializable {
 	private Double rentAmount;
 
 	public Rent(Player sourcePlayer, Player targetPlayer, Land land, double rentAmount) {
-		Assert.isTrue(Objects.equals(sourcePlayer.getGameId(), targetPlayer.getGameId()), "Players' games must match!");
-		Assert.isTrue(Objects.equals(sourcePlayer.getGameId(), land.getGameId()), "Land's game must match!");
+		Assert.isTrue(Objects.equals(sourcePlayer.getGame(), targetPlayer.getGame()), "Players' games must match!");
+		Assert.isTrue(Objects.equals(sourcePlayer.getGame(), land.getGame()), "Land's game must match!");
 
 		this.sourcePlayer = sourcePlayer;
 		this.targetPlayer = targetPlayer;

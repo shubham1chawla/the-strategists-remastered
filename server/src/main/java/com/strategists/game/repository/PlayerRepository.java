@@ -13,6 +13,8 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
 
 	boolean existsByGameAndUsername(Game game, String username);
 
+	boolean existsByGameAndHost(Game game, boolean host);
+
 	boolean existsByEmail(String email);
 
 	Optional<Player> findByEmail(String email);
@@ -20,8 +22,6 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
 	boolean existsByGameAndTurn(Game game, boolean turn);
 
 	Optional<Player> findByGameAndTurn(Game game, boolean turn);
-
-	boolean existsByGameAndState(Game game, State state);
 
 	List<Player> findByGame(Game game);
 

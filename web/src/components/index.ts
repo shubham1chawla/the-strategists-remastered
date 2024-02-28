@@ -10,3 +10,4 @@ export * from './Map';
 export * from './Modals';
 export * from './NotFound';
 export * from './Stats';
+export * from './Update';

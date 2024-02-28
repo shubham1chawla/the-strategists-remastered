@@ -37,7 +37,7 @@ public class Activity implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private UpdateType type;
 
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private String val1;
 
 	@Column(nullable = true)
@@ -54,7 +54,7 @@ public class Activity implements Serializable {
 
 	@JsonIgnore
 	@ManyToOne
-	@JoinColumn(name = "game_id", referencedColumnName = "id", nullable = false)
+	@JoinColumn(name = "game_code", referencedColumnName = "code", nullable = false)
 	private Game game;
 
 	public Activity(Game game, UpdateType type, String... values) {
@@ -79,17 +79,12 @@ public class Activity implements Serializable {
 				land.getName());
 	}
 
-	public static Activity ofInvite(Player player) {
-		return new Activity(player.getGame(), UpdateType.INVITE, player.getEmail());
-	}
-
 	public static Activity ofJoin(Player player) {
 		return new Activity(player.getGame(), UpdateType.JOIN, player.getUsername());
 	}
 
 	public static Activity ofKick(Player player) {
-		val game = player.getGame();
-		return new Activity(game, UpdateType.KICK, game.getAdminUsername(), player.getUsername());
+		return new Activity(player.getGame(), UpdateType.KICK, player.getUsername());
 	}
 
 	public static Activity ofMove(Player player, int move, Land land) {
@@ -111,7 +106,7 @@ public class Activity implements Serializable {
 	}
 
 	public static Activity ofReset(Game game) {
-		return new Activity(game, UpdateType.RESET, game.getAdminUsername());
+		return new Activity(game, UpdateType.RESET);
 	}
 
 	public static Activity ofSkip(Player player) {

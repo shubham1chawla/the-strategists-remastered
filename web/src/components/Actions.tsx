@@ -16,15 +16,15 @@ import axios from 'axios';
 
 export const Actions = () => {
   const { players, lands } = useSelector((state: State) => state.lobby);
-  const { gameId, username } = useSelector((state: State) => state.user);
+  const { gameCode, playerId } = useSelector((state: State) => state.login);
   const [showModal, setShowModal] = useState(false);
 
   // Finding user in lobby's players
-  const player = players.find((p) => p.username === username);
+  const player = players.find((p) => p.id === playerId);
   const turnPlayer = player?.turn ? player : players.find((p) => p.turn);
   const land = player ? lands[player.index] : undefined;
 
-  if (!player || !land) {
+  if (!player || !land || !gameCode) {
     return null;
   }
 
@@ -47,7 +47,7 @@ export const Actions = () => {
     <>
       <PlayerInvestModal
         open={showModal}
-        gameId={gameId}
+        gameCode={gameCode}
         player={player}
         land={land}
         title={title}
@@ -60,7 +60,7 @@ export const Actions = () => {
           <WaitingPrompt turnPlayer={turnPlayer} />
         ) : (
           <ActionButtons
-            gameId={gameId || -1}
+            gameCode={gameCode}
             title={title}
             onInvestClick={() => setShowModal(true)}
             isInvestmentDisabled={!strategy.feasible}
@@ -105,14 +105,14 @@ const WaitingPrompt = (props: WaitingPromptProps) => {
  */
 
 interface ActionButtonsProps {
-  gameId: number;
+  gameCode: string;
   title: string;
   onInvestClick: () => void;
   isInvestmentDisabled: boolean;
 }
 
 const ActionButtons = (props: ActionButtonsProps) => {
-  const { gameId, title, onInvestClick, isInvestmentDisabled } = props;
+  const { gameCode, title, onInvestClick, isInvestmentDisabled } = props;
   return (
     <>
       <Space.Compact size="large">
@@ -126,7 +126,7 @@ const ActionButtons = (props: ActionButtonsProps) => {
         </Button>
         <Button
           icon={<StepForwardOutlined />}
-          onClick={() => axios.put(`/api/games/${gameId}/turn`)}
+          onClick={() => axios.put(`/api/games/${gameCode}/turn`)}
         >
           Skip
         </Button>

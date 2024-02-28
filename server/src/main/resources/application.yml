@@ -10,7 +10,7 @@ spring:
     password:
     hikari:
       maximum-pool-size: 64
-      connection-timeout: 60000
+      connection-timeout: 120000
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     defer-datasource-initialization: true
@@ -33,6 +33,7 @@ strategists:
     default-map: india
     dice-size: 6
     rent-factor: 0.2
+    code-length: 4
   configuration:
     sse-ping:
       enabled: false 

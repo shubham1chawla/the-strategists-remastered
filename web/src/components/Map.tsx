@@ -1,17 +1,16 @@
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { Alert, Divider } from 'antd';
 import cytoscape, {
   Core,
   EventObjectNode,
   Position,
   Stylesheet,
 } from 'cytoscape';
-import popper from 'cytoscape-popper';
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { CssVariables } from '../App';
 import { Land, Player, State } from '../redux';
 import { LandStats, PlayerStats, PortfolioModal, PortfolioModalProps } from '.';
-import { Divider, Space } from 'antd';
-import { InfoCircleOutlined } from '@ant-design/icons';
+import popper from 'cytoscape-popper';
 
 /**
  * -----  MAP COMPONENT BELOW  -----
@@ -310,6 +309,11 @@ interface MapTooltipBodyProps {
 
 const MapTooltipBody = (props: Partial<MapTooltipBodyProps>) => {
   const { player, land } = props;
+  const message = player
+    ? `Click to check ${player.username}'s portfolio.`
+    : land
+    ? `Click to check ${land.name}'s investments`
+    : null;
   return (
     <>
       {player ? (
@@ -318,14 +322,7 @@ const MapTooltipBody = (props: Partial<MapTooltipBodyProps>) => {
         <LandStats land={land} />
       ) : null}
       <Divider>
-        <Space>
-          <InfoCircleOutlined />
-          {player ? (
-            <span>Click to check {player.username}'s portfolio.</span>
-          ) : land ? (
-            <span>Click to check {land.name}'s investments</span>
-          ) : null}
-        </Space>
+        <Alert type="info" message={message} banner />
       </Divider>
     </>
   );

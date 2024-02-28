@@ -1,41 +1,65 @@
 import { useEffect, useState } from 'react';
-import { Alert, Button, Divider, Row, Space, notification } from 'antd';
+import {
+  Alert,
+  Button,
+  Card,
+  Divider,
+  Form,
+  Input,
+  Row,
+  Space,
+  notification,
+} from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { State, UserActions } from '../redux';
-import { GithubOutlined, LoadingOutlined } from '@ant-design/icons';
+import { LoginActions, LoginState, State } from '../redux';
+import {
+  AppstoreAddOutlined,
+  AppstoreOutlined,
+  ArrowLeftOutlined,
+  GithubOutlined,
+  LoadingOutlined,
+} from '@ant-design/icons';
 import { GoogleCredentialResponse, GoogleLogin } from '@react-oauth/google';
-import { jwtDecode } from 'jwt-decode';
 import { Logo } from '.';
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
-
-interface GoogleUser {
-  name: string;
-  email: string;
-}
 
 type Workflow =
   | 'NOT_VERIFIED'
   | 'VERIFYING'
   | 'UNREACHABLE'
   | 'VERIFIED'
-  | 'SIGNING_IN';
+  | 'ACTIONS'
+  | 'JOIN_ACTION'
+  | 'ENTERING';
 
 export const Login = () => {
-  const user = useSelector((state: State) => state.user);
+  const { gameCode } = useSelector((state: State) => state.login);
   const [workflow, setWorkflow] = useState<Workflow>('NOT_VERIFIED');
+  const [credential, setCredential] = useState<string | null>(null);
+  const [joinDisabled, setJoinDisabled] = useState(true);
   const [api, contextHolder] = notification.useNotification();
+  const [form] = Form.useForm<{ code: string }>();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   // Redirecting to dashboard if user logged-in
   useEffect(() => {
-    if (!user.username) {
+    if (!gameCode) {
       return;
     }
     navigate('/dashboard');
-  }, [navigate, user.username]);
+  }, [navigate, gameCode]);
+
+  // Checking if join form should be enabled
+  const joinFormValues = Form.useWatch([], form);
+  useEffect(() => {
+    form
+      .validateFields({ validateOnly: true })
+      .then(() => setJoinDisabled(false))
+      .catch(() => setJoinDisabled(true));
+  }, [form, joinFormValues]);
 
   const handleGoogleLoginSuccess = ({
     credential,
@@ -44,22 +68,8 @@ export const Login = () => {
       handleGoogleLoginError();
       return;
     }
-    const user: GoogleUser = jwtDecode(credential);
-    setWorkflow('SIGNING_IN');
-    axios
-      .post('/api/authenticate', user)
-      .then(({ data }) => {
-        dispatch(UserActions.setUser(data));
-        navigate('/dashboard');
-      })
-      .catch(({ response }) => {
-        const message =
-          response.status === 404
-            ? 'Your email is not included in the ongoing session of The Strategists!'
-            : 'Something went wrong, please try again later!';
-        api.error({ message });
-        setWorkflow('VERIFIED');
-      });
+    setCredential(credential);
+    setWorkflow('ACTIONS');
   };
 
   const handleGoogleLoginError = () => {
@@ -67,6 +77,37 @@ export const Login = () => {
       'Google authentication failed. Please contact the developers to address your issue!';
     api.error({ message });
     setWorkflow('VERIFIED');
+  };
+
+  const handleEnterAction = (code?: string) => {
+    setWorkflow('ENTERING');
+    const url = code ? `/api/games/${code}/players` : '/api/games';
+    axios
+      .post<LoginState>(url, { credential })
+      .then(({ data }) => {
+        dispatch(LoginActions.login(data));
+        navigate('/dashboard');
+      })
+      .catch(({ response }) => {
+        switch (response.status) {
+          case 404:
+            api.error({ message: 'No game found for the entered code!' });
+            break;
+          case 403:
+            api.error({
+              message: 'You are not authorized to create a game!',
+              description: 'Please contact the developers to grant access.',
+            });
+            break;
+          default:
+            api.error({
+              message: 'Unable to join the game!',
+              description:
+                'Please contact the developers if this problem persists.',
+            });
+        }
+        setWorkflow(code ? 'JOIN_ACTION' : 'ACTIONS');
+      });
   };
 
   const getWorkflowComponent = () => {
@@ -90,11 +131,110 @@ export const Login = () => {
             useOneTap
           />
         );
-      case 'SIGNING_IN':
+      case 'ACTIONS':
+        return (
+          <Space>
+            <Card
+              className="strategists-login__workflows__card"
+              onClick={() => handleEnterAction()}
+              hoverable
+            >
+              <Card.Meta
+                title={
+                  <Space>
+                    <AppstoreAddOutlined />
+                    Create Game
+                  </Space>
+                }
+                description="A new session for you and your friends to play The Strategists!"
+              />
+            </Card>
+            <Card
+              className="strategists-login__workflows__card"
+              onClick={() => setWorkflow('JOIN_ACTION')}
+              hoverable
+            >
+              <Card.Meta
+                title={
+                  <Space>
+                    <AppstoreOutlined />
+                    Join Game
+                  </Space>
+                }
+                description="Enter existing session hosted by your friends to play The Strategists!"
+              />
+            </Card>
+          </Space>
+        );
+      case 'JOIN_ACTION':
+        return (
+          <div className="strategists-login__workflows__join">
+            <Card bordered={false} size="small">
+              <Card.Meta
+                title={
+                  <Space>
+                    <Button
+                      className="strategists-login__workflows__join__back-button"
+                      size="large"
+                      type="link"
+                      icon={<ArrowLeftOutlined />}
+                      onClick={() => setWorkflow('ACTIONS')}
+                    >
+                      Join Game
+                    </Button>
+                  </Space>
+                }
+              />
+              <Form
+                className="strategists-login__workflows__join__form"
+                form={form}
+                layout="inline"
+                onFinish={({ code }) => handleEnterAction(code)}
+                onFinishFailed={console.error}
+              >
+                <Space.Compact>
+                  <Form.Item
+                    name="code"
+                    rules={[
+                      {
+                        required: true,
+                        type: 'string',
+                        len: 4,
+                        whitespace: false,
+                        pattern: /[A-Z]/,
+                        validateTrigger: ['onChange', 'onBlur'],
+                      },
+                    ]}
+                    noStyle
+                  >
+                    <Input
+                      type="text"
+                      placeholder="Enter game's code"
+                      prefix={<AppstoreOutlined />}
+                      size="large"
+                      required
+                    />
+                  </Form.Item>
+                  <Form.Item noStyle>
+                    <Button
+                      htmlType="submit"
+                      type="primary"
+                      size="large"
+                      disabled={joinDisabled}
+                    >
+                      Join
+                    </Button>
+                  </Form.Item>
+                </Space.Compact>
+              </Form>
+            </Card>
+          </div>
+        );
+      case 'ENTERING':
         return (
           <Space>
             <LoadingOutlined />
-            Signing you in...
+            Entering...
           </Space>
         );
       case 'UNREACHABLE':
@@ -114,7 +254,7 @@ export const Login = () => {
     <>
       {contextHolder}
       <main className="strategists-login strategists-wallpaper">
-        <section className="strategists-login__card strategists-glossy">
+        <section className="strategists-login__workflows strategists-glossy">
           <Divider>
             <Logo />
           </Divider>

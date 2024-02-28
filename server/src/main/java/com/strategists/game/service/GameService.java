@@ -1,16 +1,14 @@
 package com.strategists.game.service;
 
 import com.strategists.game.entity.Game;
-import com.strategists.game.entity.GameMap;
 import com.strategists.game.entity.Player;
+import com.strategists.game.request.GoogleOAuthCredential;
 
 public interface GameService {
 
-	Game createGame(String adminUsername, String adminEmail, GameMap gameMap);
+	Player createGame(GoogleOAuthCredential body);
 
-	Game getGameByAdminEmail(String adminEmail);
-
-	Game getGameById(long id);
+	Game getGameByCode(String code);
 
 	void startGame(Game game);
 

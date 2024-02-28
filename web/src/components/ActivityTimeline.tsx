@@ -11,7 +11,6 @@ import {
   FallOutlined,
   FireOutlined,
   InfoCircleOutlined,
-  MailOutlined,
   RiseOutlined,
   SettingOutlined,
   StopOutlined,
@@ -119,8 +118,6 @@ const getIcon = (type: UpdateType): ReactNode | undefined => {
       return <Bankruptcy />;
     case 'INVEST':
       return <RiseOutlined />;
-    case 'INVITE':
-      return <MailOutlined />;
     case 'JOIN':
       return <UserAddOutlined />;
     case 'KICK':

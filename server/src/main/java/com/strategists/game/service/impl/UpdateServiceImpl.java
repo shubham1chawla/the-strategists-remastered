@@ -2,7 +2,6 @@ package com.strategists.game.service.impl;
 
 import java.io.IOException;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
@@ -31,7 +30,7 @@ public class UpdateServiceImpl implements UpdateService {
 
 	@Override
 	public SseEmitter registerEmitter(Game game, String username) {
-		val emitterKey = getKey(game, username);
+		val emitterKey = playerService.getPlayerByUsername(game, username).getGamePlayerKey();
 		emitters.computeIfAbsent(emitterKey, key -> {
 			val emitter = new SseEmitter(-1L);
 			emitter.onCompletion(() -> emitters.remove(key));
@@ -61,17 +60,8 @@ public class UpdateServiceImpl implements UpdateService {
 		});
 	}
 
-	private String getKey(Game game, String username) {
-		if (Objects.equals(game.getAdminUsername(), username)) {
-			return String.format("game-%s-admin-%s", game.getId(), game.getAdminUsername());
-		} else {
-			val player = playerService.getPlayerByUsername(game, username);
-			return player.getGamePlayerKey();
-		}
-	}
-
 	private boolean filterByGame(Game game, String emitterKey) {
-		val prefix = String.format("game-%s", game.getId());
+		val prefix = String.format("game-%s", game.getCode());
 		return emitterKey.startsWith(prefix);
 	}
 

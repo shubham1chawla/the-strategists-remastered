@@ -1,11 +1,9 @@
-import { Dispatch, useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { AnyAction } from 'redux';
 import { useNavigate } from 'react-router-dom';
-import { Button, Col, Row, Tabs, Tooltip, notification } from 'antd';
+import { Button, Col, Row, Tabs, Tooltip } from 'antd';
 import { googleLogout } from '@react-oauth/google';
 import {
-  DisconnectOutlined,
   LogoutOutlined,
   PlayCircleFilled,
   StopFilled,
@@ -19,62 +17,19 @@ import {
   PlayerStats,
   ResetModal,
   WinModal,
+  Update,
 } from '.';
-import {
-  Activity,
-  ActivityActions,
-  Land,
-  LobbyActions,
-  Player,
-  State,
-  Trend,
-  TrendActions,
-  UpdateType,
-  UserActions,
-} from '../redux';
-import { parseActivity } from '../utils';
+import { LoginActions, Player, State } from '../redux';
+import { syncGameStates } from '../utils';
 import axios from 'axios';
-
-/**
- * -----  UTILITIES DEFINED BELOW  -----
- */
-
-interface GameResponse {
-  state: 'LOBBY' | 'ACTIVE';
-  players: Player[];
-  lands: Land[];
-  activities: Activity[];
-  trends: Trend[];
-}
-
-const syncGameStates = (
-  gameId: number,
-  dispatch: Dispatch<AnyAction>
-): void => {
-  axios
-    .get<GameResponse>(`/api/games/${gameId}`)
-    .then(({ data }) => {
-      const { state, players, lands, activities, trends } = data;
-      [
-        LobbyActions.setState(state),
-        LobbyActions.setPlayers(players),
-        LobbyActions.setLands(lands),
-        ActivityActions.setActivities(activities),
-        TrendActions.setTrends(trends),
-      ].forEach(dispatch);
-    })
-    .catch(console.error);
-};
 
 /**
  * -----  DASHBOARD COMPONENT BELOW  -----
  */
 
 export const Dashboard = () => {
-  const lobby = useSelector((state: State) => state.lobby);
-  const user = useSelector((state: State) => state.user);
-  const { gameId, username, type } = user;
-  const { players } = lobby;
+  const { state, players } = useSelector((state: State) => state.lobby);
+  const { gameCode, playerId } = useSelector((state: State) => state.login);
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -86,13 +41,13 @@ export const Dashboard = () => {
 
   // Checking if user is logged-in
   useEffect(() => {
-    if (!gameId) {
+    if (!gameCode) {
       navigate('/login');
       return;
     }
 
     // Syncing game's state
-    syncGameStates(gameId, dispatch);
+    syncGameStates(gameCode, dispatch);
 
     // Dashboard component's unmount event
     window.addEventListener('beforeunload', alertUser);
@@ -100,22 +55,26 @@ export const Dashboard = () => {
       // Removing listener if user logouts
       window.removeEventListener('beforeunload', alertUser);
     };
-  }, [dispatch, navigate, gameId]);
+  }, [dispatch, navigate, gameCode]);
 
   // Determining player
-  const player = players.find((player) => player.username === username);
+  const player = players.find((p) => p.id === playerId);
+  if (!gameCode || !player) return null;
 
   return (
     <>
       <Update />
       <Row className="strategists-dashboard strategists-wallpaper">
-        <Col className="strategists-glossy" flex="30%">
-          <Navigation />
-          {type === 'ADMIN' ? (
-            <AdminPanel />
-          ) : player ? (
-            <PlayerPanel player={player} />
-          ) : null}
+        <Col
+          className="strategists-dashboard__panel strategists-glossy"
+          flex="30%"
+        >
+          <PlayerPanel
+            gameCode={gameCode}
+            player={player}
+            state={state}
+            players={players}
+          />
         </Col>
         <Col flex="70%">
           <Map />
@@ -127,161 +86,69 @@ export const Dashboard = () => {
 };
 
 /**
- * -----  UPDATE COMPONENT BELOW  -----
+ * -----  PLAYER PANEL COMPONENT BELOW  -----
  */
 
-interface UpdatePayload {
-  type: UpdateType;
-  activity?: Activity;
-  payload: any;
+interface PlayerPanelProps {
+  gameCode: string;
+  player: Player;
+  state: 'LOBBY' | 'ACTIVE';
+  players: Player[];
 }
 
-const Update = () => {
-  const activity = useSelector((state: State) => state.activity);
-  const user = useSelector((state: State) => state.user);
-  const { subscribedTypes } = activity;
-  const { gameId, username } = user;
-  const [api, contextHolder] = notification.useNotification();
+const PlayerPanel = (props: PlayerPanelProps) => {
+  const { player, state } = props;
+  const [activeKey, setActiveKey] = useState(state);
 
-  const dispatch = useDispatch();
-
-  /**
-   * This useMemo ensures that we'll change the event source's instance
-   * only when the username changes.
-   */
-  const updates = useMemo(() => {
-    return !username
-      ? null
-      : new EventSource(`/api/games/${gameId}/sse?username=${username}`);
-  }, [gameId, username]);
-
-  /**
-   * This useEffect will only update the event source's onmessage hook.
-   */
+  // Switching tabs when game's state changes
   useEffect(() => {
-    if (!updates || !gameId) return;
+    setActiveKey(state);
+  }, [state]);
 
-    // Setting up onerror startegy for the event source
-    updates.onerror = (error) => {
-      console.error(error);
-
-      // Preventing reconnection using the same instance.
-      updates.close();
-
-      // Showing notification to the user, urging them to refresh the page.
-      api.error({
-        icon: <DisconnectOutlined />,
-        message: 'Disconnected!',
-        description:
-          'We lost the connection to our servers. Refresh the page to reconnect!',
-        duration: 0,
-        onClose: () => window.location.reload(),
-      });
-    };
-
-    // Setting up on message strategy for the event source
-    updates.onmessage = (message: MessageEvent<any>) => {
-      const { type, payload, activity }: UpdatePayload = JSON.parse(
-        message.data
-      );
-      switch (type) {
-        case 'BANKRUPTCY': {
-          const { lands, players } = payload;
-          dispatch(LobbyActions.patchLands(lands));
-          dispatch(LobbyActions.patchPlayers(players));
-          break;
-        }
-        case 'INVEST': {
-          const { land, players } = payload;
-          dispatch(LobbyActions.patchLands([land]));
-          dispatch(LobbyActions.patchPlayers(players));
-          break;
-        }
-        case 'INVITE':
-          dispatch(LobbyActions.addPlayer(payload));
-          break;
-        case 'JOIN':
-          dispatch(LobbyActions.patchPlayers([payload]));
-          break;
-        case 'KICK':
-          dispatch(LobbyActions.kickPlayer(payload));
-          break;
-        case 'MOVE':
-          dispatch(LobbyActions.patchPlayers([payload]));
-          break;
-        case 'PING':
-        case 'PREDICTION':
-          // Do nothing
-          break;
-        case 'RENT':
-          dispatch(LobbyActions.patchPlayers(payload));
-          break;
-        case 'RESET':
-          /**
-           * Unknown issue here. Some clients refresh game's state but some don't (rarely).
-           * Adding the setTimeout seems to work here but root cause is still unknown.
-           */
-          setTimeout(() => syncGameStates(gameId, dispatch));
-          break;
-        case 'START':
-          dispatch(LobbyActions.patchPlayers([payload]));
-          dispatch(LobbyActions.setState('ACTIVE'));
-          break;
-        case 'TREND':
-          dispatch(TrendActions.addTrends(payload));
-          break;
-        case 'TURN':
-          dispatch(LobbyActions.patchPlayers(payload));
-          break;
-        case 'WIN':
-          // Do nothing
-          break;
-        default:
-          console.warn(`Unsupported update type: ${type}`);
-      }
-      if (!activity) return;
-      dispatch(ActivityActions.addActivity(activity));
-      if (subscribedTypes.includes(type)) {
-        api.open({ message: parseActivity(activity) });
-      }
-    };
-  }, [api, dispatch, subscribedTypes, updates, gameId]);
-
-  /**
-   * This useEffect will close the event source for the
-   * current user if they decide to logout or closes the tab.
-   */
-  useEffect(() => {
-    return () => {
-      if (!updates) {
-        return;
-      }
-      updates.onmessage = null;
-      updates.onerror = null;
-      updates.close();
-    };
-  }, [updates]);
-
-  return <>{contextHolder}</>;
+  return (
+    <>
+      <Navigation {...props} />
+      <PlayerStats player={player} showRemainingSkipsCount />
+      <Tabs
+        centered
+        defaultActiveKey="LOBBY"
+        activeKey={activeKey}
+        onChange={(key) => setActiveKey(key as 'LOBBY' | 'ACTIVE')}
+        size="large"
+        items={[
+          {
+            key: 'LOBBY',
+            label: `Lobby`,
+            children: <Lobby />,
+          },
+          {
+            key: 'ACTIVE',
+            label: `Timeline`,
+            children: <ActivityTimeline />,
+          },
+        ]}
+      />
+      <Actions />
+    </>
+  );
 };
 
 /**
  * -----  NAVIGATION COMPONENT BELOW  -----
  */
 
-const Navigation = () => {
-  const lobby = useSelector((state: State) => state.lobby);
-  const user = useSelector((state: State) => state.user);
-  const { gameId, type } = user;
-  const { state, players } = lobby;
+interface NavigationProps extends PlayerPanelProps {
+  // No additional fields needed
+}
 
-  const dispatch = useDispatch();
-
+const Navigation = (props: NavigationProps) => {
+  const { gameCode, player, state, players } = props;
   const [showResetModal, setShowResetModal] = useState(false);
+  const dispatch = useDispatch();
 
   const start = () => {
     if (state === 'ACTIVE') return;
-    axios.put(`/api/games/${gameId}/start`);
+    axios.put(`/api/games/${gameCode}/start`);
   };
 
   const reset = () => {
@@ -291,7 +158,7 @@ const Navigation = () => {
 
   const logout = () => {
     googleLogout();
-    dispatch(UserActions.unsetUser());
+    dispatch(LoginActions.logout());
   };
 
   return (
@@ -308,13 +175,11 @@ const Navigation = () => {
         </Tooltip>
         <Logo />
       </header>
-      {type === 'ADMIN' ? (
+      {player?.host ? (
         <Tooltip
           title={
             !players.length
               ? 'Add players to start The Strategists!'
-              : !!players.find((p) => p.state === 'INVITED')
-              ? 'All players must accept the invite!'
               : state === 'ACTIVE'
               ? 'Reset The Strategists!'
               : 'Start The Strategists!'
@@ -323,10 +188,7 @@ const Navigation = () => {
           <Button
             type="primary"
             htmlType="submit"
-            disabled={
-              state === 'LOBBY' &&
-              (!players.length || !!players.find((p) => p.state === 'INVITED'))
-            }
+            disabled={state === 'LOBBY' && !players.length}
             onClick={() => (state === 'ACTIVE' ? reset() : start())}
           >
             {state === 'LOBBY' ? <PlayCircleFilled /> : <StopFilled />}
@@ -335,56 +197,9 @@ const Navigation = () => {
       ) : null}
       <ResetModal
         open={showResetModal}
-        gameId={gameId || -1}
+        gameCode={gameCode}
         onCancel={() => setShowResetModal(false)}
       />
     </nav>
-  );
-};
-
-/**
- * -----  ADMIN PANEL COMPONENT BELOW  -----
- */
-
-const AdminPanel = () => {
-  return (
-    <Tabs
-      centered
-      defaultActiveKey="1"
-      size="large"
-      items={[
-        {
-          key: '1',
-          label: `Lobby`,
-          children: <Lobby />,
-          className: 'strategists-tab-body strategists-lobby',
-        },
-        {
-          key: '2',
-          label: `Timeline`,
-          children: <ActivityTimeline />,
-          className: 'strategists-tab-body',
-        },
-      ]}
-    />
-  );
-};
-
-/**
- * -----  PLAYER PANEL COMPONENT BELOW  -----
- */
-
-interface PlayerPanelProps {
-  player: Player;
-}
-
-const PlayerPanel = (props: PlayerPanelProps) => {
-  const { player } = props;
-  return (
-    <div className="strategists-player-panel">
-      <PlayerStats player={player} showRemainingSkipsCount />
-      <ActivityTimeline />
-      <Actions />
-    </div>
   );
 };

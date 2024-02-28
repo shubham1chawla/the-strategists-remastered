@@ -9,7 +9,7 @@ import com.strategists.game.entity.Land;
 
 public interface LandRepository extends JpaRepository<Land, Long> {
 
-	List<Land> findByGame(Game game);
+	List<Land> findByGameOrderById(Game game);
 
 	long countByGame(Game game);
 

@@ -1,4 +1,42 @@
-import { Activity, Land, Player } from '../redux';
+import { Dispatch } from 'react';
+import { AnyAction } from 'redux';
+import {
+  Activity,
+  ActivityActions,
+  Land,
+  LobbyActions,
+  Player,
+  Trend,
+  TrendActions,
+} from '../redux';
+import axios from 'axios';
+
+interface GameResponse {
+  state: 'LOBBY' | 'ACTIVE';
+  players: Player[];
+  lands: Land[];
+  activities: Activity[];
+  trends: Trend[];
+}
+
+export const syncGameStates = (
+  gameCode: string,
+  dispatch: Dispatch<AnyAction>
+): void => {
+  axios
+    .get<GameResponse>(`/api/games/${gameCode}`)
+    .then(({ data }) => {
+      const { state, players, lands, activities, trends } = data;
+      [
+        LobbyActions.setState(state),
+        LobbyActions.setPlayers(players),
+        LobbyActions.setLands(lands),
+        ActivityActions.setActivities(activities),
+        TrendActions.setTrends(trends),
+      ].forEach(dispatch);
+    })
+    .catch(console.error);
+};
 
 export const parseActivity = (activity: Activity): string => {
   const { type, val1, val2, val3, val4, val5 } = activity;
@@ -13,12 +51,10 @@ export const parseActivity = (activity: Activity): string => {
       return `${val1} caused ${val2} at ${val3} for ${val4} turns!`;
     case 'INVEST':
       return `${val1} invested in ${val2}% of ${val3}!`;
-    case 'INVITE':
-      return `${val1} invited to join The Strategists!`;
     case 'JOIN':
-      return `${val1} accepted the invite!`;
+      return `${val1} joined The Strategists!`;
     case 'KICK':
-      return `${val1} kicked ${val2} out!`;
+      return `Host kicked ${val1} out!`;
     case 'MOVE':
       return `${val1} travelled ${val2} steps and reached ${val3}.`;
     case 'PREDICTION':
@@ -28,7 +64,7 @@ export const parseActivity = (activity: Activity): string => {
     case 'RENT':
       return `${val1} paid ${val2} cash rent to ${val3} for ${val4}.`;
     case 'RESET':
-      return `${val1} resetted The Strategists!`;
+      return `Host resetted The Strategists!`;
     case 'SKIP':
       return `${val1}'s turn skipped due to inactivity!`;
     case 'START':
@@ -40,7 +76,7 @@ export const parseActivity = (activity: Activity): string => {
     case 'WIN':
       return `${val1} won The Strategists!`;
     default:
-      console.error(activity);
+      console.warn(activity);
       return `Unknwon activity type: ${type}`;
   }
 };

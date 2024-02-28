@@ -1,9 +1,13 @@
 package com.strategists.game.service.impl;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
+
+import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,6 +21,7 @@ import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
 import com.strategists.game.repository.GameRepository;
+import com.strategists.game.request.GoogleOAuthCredential;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
@@ -28,21 +33,31 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
+@Transactional
 public class GameServiceImpl implements GameService {
 
 	private static final Random RANDOM = new Random();
 
 	@Value("${strategists.game.dice-size}")
-	private Integer diceSize;
+	private int diceSize;
 
 	@Value("${strategists.game.rent-factor}")
-	private Double rentFactor;
+	private double rentFactor;
+
+	@Value("${strategists.game.code-length}")
+	private int codeLength;
+
+	@Value("${strategists.game.default-map}")
+	private String defaultGameMap;
 
 	@Value("${strategists.configuration.skip-player.enabled:#{false}}")
 	private boolean skipPlayerEnabled;
 
 	@Value("${strategists.configuration.skip-player.allowed-count:#{null}}")
 	private Integer allowedSkipsCount;
+
+	@Autowired
+	private Map<String, File> gameMapFiles;
 
 	@Autowired
 	private GameRepository gameRepository;
@@ -54,32 +69,39 @@ public class GameServiceImpl implements GameService {
 	private LandService landService;
 
 	@Override
-	public Game createGame(String adminUsername, String adminEmail, GameMap gameMap) {
-		Assert.state(!gameRepository.existsByAdminEmail(adminEmail), adminUsername + " already created a game!");
+	public Player createGame(GoogleOAuthCredential body) {
+		val email = body.getEmail();
 
-		Game game = new Game(adminUsername, adminEmail);
+		Assert.hasText(email, "No email found in the request!");
+		Assert.state(!playerService.existsByEmail(email), email + " already part of a game!");
+
+		val gameMap = GameMap.from(gameMapFiles.get(defaultGameMap));
+		Assert.notNull(gameMap, defaultGameMap + " game map doesn't exist!");
+
+		Game game = new Game();
 		game.setDiceSize(diceSize);
 		game.setRentFactor(rentFactor);
+		game.setPlayerBaseCash(gameMap.getPlayerBaseCash());
 		game.setAllowedSkipsCount(skipPlayerEnabled ? allowedSkipsCount : null);
 
+		// Setting up share-able code for game
+		do {
+			game.setCode(generateCode());
+		} while (gameRepository.existsById(game.getCode()));
 		game = gameRepository.save(game);
+		log.info("Created game: {}", game.getCode());
+
+		// Saving lands associated with the game
 		landService.save(game, gameMap);
 
-		log.info("Created game ID {} for admin: {}", game.getId(), adminUsername);
-		return game;
+		// Creating player for requesting user
+		return playerService.addPlayer(game, email, body.getName(), true);
 	}
 
 	@Override
-	public Game getGameByAdminEmail(String adminEmail) {
-		val opt = gameRepository.findByAdminEmail(adminEmail);
-		Assert.isTrue(opt.isPresent(), "No game found for admin: " + adminEmail);
-		return opt.get();
-	}
-
-	@Override
-	public Game getGameById(long id) {
-		val opt = gameRepository.findById(id);
-		Assert.isTrue(opt.isPresent(), "No game found for ID: " + id);
+	public Game getGameByCode(String code) {
+		val opt = gameRepository.findById(code);
+		Assert.isTrue(opt.isPresent(), "No game found for code: " + code);
 		return opt.get();
 	}
 
@@ -117,7 +139,7 @@ public class GameServiceImpl implements GameService {
 			val targetPlayer = pl.getPlayer();
 
 			// Avoiding self rent payment and bankrupt players
-			if (Objects.equals(targetPlayer.getId(), player.getId()) || targetPlayer.isBankrupt()) {
+			if (Objects.equals(targetPlayer, player) || targetPlayer.isBankrupt()) {
 				continue;
 			}
 
@@ -160,13 +182,22 @@ public class GameServiceImpl implements GameService {
 		}
 
 		val winner = activePlayers.get(0);
-		log.info("Found winner {} for game ID: {}", winner.getUsername(), game.getId());
+		log.info("Found winner {} for game: {}", winner.getUsername(), game.getCode());
 		return Optional.of(winner);
 	}
 
 	private void updateTrends(Game game) {
 		playerService.updatePlayerTrends(game);
 		landService.updateLandTrends(game);
+	}
+
+	private String generateCode() {
+		val builder = new StringBuilder();
+		for (int i = 0; i < codeLength; i++) {
+			val c = (char) ('A' + RANDOM.nextInt(26));
+			builder.append(c);
+		}
+		return builder.toString();
 	}
 
 }

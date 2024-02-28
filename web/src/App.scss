@@ -16,21 +16,18 @@ Please refer to the documentation before contributing - https://getbem.com/
 
   --base-unit-size: 1.2rem;
 
-  // height of navbar set manually
-  --strategists-nav-height: calc(6 * var(--base-unit-size));
-
-  // height of ant buttons and padding calculated
-  --strategists-actions-height: calc(40px + 2 * var(--ant-lg-padding));
-
   // large ant-list-item height
   --ant-lg-padding: 24px;
+
+  // Similar to default ant-card-hoverable transition
+  --ant-transition: all 0.2s ease;
 
   // Allows us to use rems, 62.5% = 1 rem = 10px
   font-size: 62.5%;
 }
 
 body {
-  height: 100vh;
+  height: 100svh;
   width: 100%;
   color: var(--text-color);
   background-color: var(--dark-color);
@@ -41,8 +38,7 @@ nav.strategists-nav {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  height: var(--strategists-nav-height);
-  padding: 0px var(--ant-lg-padding);
+  padding: var(--ant-lg-padding);
   width: 100%;
   box-sizing: border-box;
   justify-content: space-between;
@@ -64,15 +60,6 @@ h1.strategists-logo {
   span {
     font-weight: 100;
   }
-}
-
-.strategists-tab-body {
-  // Total height - large ant-tabs-nav height - header's height - bottom's margin
-  height: calc(100vh - 57.14px - 72px - 16px) !important;
-}
-
-.strategists-empty {
-  color: var(--text-color);
 }
 
 .strategists-wallpaper {
@@ -104,7 +91,7 @@ h1.strategists-logo {
   align-items: center;
   justify-content: center;
 
-  &__card {
+  &__workflows {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -113,11 +100,37 @@ h1.strategists-logo {
     border-radius: 4px;
     box-sizing: border-box;
 
-    &__form {
-      margin: auto;
+    &__card {
+      border-color: var(--accent-color);
+      transition: var(--ant-transition);
 
-      .ant-input-suffix .anticon {
+      &:hover {
+        border-color: var(--accent-color-hover);
+        background-color: var(--dark-color);
+      }
+    }
+
+    &__join {
+      width: 60%;
+      display: flex;
+      flex-direction: column;
+
+      &__back-button {
+        padding: 0;
         color: var(--text-color);
+
+        &:hover {
+          color: var(--accent-color-hover) !important;
+        }
+      }
+
+      &__form {
+        margin-top: var(--ant-lg-padding);
+
+        .ant-space-compact,
+        .ant-input-number-affix-wrapper {
+          width: 100%;
+        }
       }
     }
   }
@@ -132,17 +145,31 @@ h1.strategists-logo {
   .ant-col {
     height: 100%;
   }
-}
 
-.strategists-player-panel {
-  height: calc(100% - var(--strategists-nav-height));
-  display: flex;
-  flex-direction: column;
-  flex: 1 auto 1;
+  &__panel {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto 1;
 
-  .strategists-actions {
-    box-sizing: border-box;
-    padding: var(--ant-lg-padding);
+    .ant-tabs {
+      flex-basis: 100%;
+      overflow-y: scroll;
+
+      .ant-tabs-content,
+      .ant-tabs-tabpane {
+        height: 100%;
+      }
+    }
+
+    // Ensuring that lobby players & activities are scrollable inside tabs
+    .strategists-activity,
+    .strategists-lobby {
+      height: 100%;
+      overflow-y: scroll;
+      display: flex;
+      flex-direction: column;
+      flex: 1 auto;
+    }
   }
 }
 
@@ -152,15 +179,13 @@ h1.strategists-logo {
   .ant-divider {
     margin: 0;
   }
-
-  .ant-card-body {
-    padding: calc(var(--ant-lg-padding) * 0.5) var(--ant-lg-padding);
-  }
 }
 
 // ----- ACTIONS COMPONENT'S CSS DEFINED BELOW ----- //
 
 .strategists-actions {
+  padding: var(--ant-lg-padding);
+
   &__modal {
     &__slider-card {
       border-color: var(--accent-color);
@@ -202,19 +227,9 @@ h1.strategists-logo {
 // ----- ACTIVITY COMPONENT'S CSS DEFINED BELOW ----- //
 
 .strategists-activity {
-  height: 100%;
-  overflow-y: scroll;
-  display: flex;
-  flex-direction: column;
-  flex: 1 auto;
-
   &__filters {
     margin-top: var(--base-unit-size);
     width: 100%;
-
-    .ant-select-selection-item {
-      background-color: var(--accent-color) !important;
-    }
   }
 
   .ant-collapse-header,
@@ -237,12 +252,8 @@ h1.strategists-logo {
 // ----- LOBBY COMPONENT'S CSS DEFINED BELOW ----- //
 
 .strategists-lobby {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  flex: auto 1;
-
   &__players {
+    flex-basis: 100%;
     overflow-y: scroll;
 
     &__player {
@@ -255,26 +266,6 @@ h1.strategists-logo {
         &__kick {
           display: block !important;
         }
-      }
-    }
-  }
-
-  &__form {
-    box-sizing: border-box;
-    padding: var(--ant-lg-padding);
-
-    .ant-space-compact {
-      width: 100%;
-
-      // Overriding username's input css
-      .ant-input-affix-wrapper {
-        flex-basis: calc(100% - 150px);
-      }
-
-      // Overriding cash's input css
-      .ant-input-number-affix-wrapper {
-        flex-basis: calc(150px - 40px);
-        border-radius: 0px;
       }
     }
   }
@@ -312,40 +303,11 @@ h1.strategists-logo {
 // ----- GLOBAL ANTD OVERRIDES DEFINED BELOW ----- //
 
 .ant-tag {
-  background-color: transparent;
-}
-
-.ant-btn-primary {
-  box-shadow: none;
-}
-
-.ant-modal-close {
-  color: var(--text-color) !important;
+  margin-inline-end: 0;
 }
 
 .ant-notification-notice-icon {
   color: var(--accent-color) !important;
-}
-
-.ant-notification-notice-close {
-  color: var(--text-color) !important;
-}
-
-.ant-statistic-title {
-  color: var(--text-color) !important;
-}
-
-.ant-select-arrow {
-  color: var(--text-color) !important;
-}
-
-.ant-select-item-group {
-  color: var(--accent-color) !important;
-}
-
-.ant-select-dropdown
-  .ant-select-item-option-selected:not(.ant-select-item-option-disabled) {
-  background-color: var(--dark-color);
 }
 
 .g2-tooltip {

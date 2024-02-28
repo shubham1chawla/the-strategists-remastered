@@ -2,14 +2,14 @@ import { configureStore } from '@reduxjs/toolkit';
 import { ActivityState, activityReducer } from './activity';
 import { LobbyState, lobbyReducer } from './lobby';
 import { TrendState, trendReducer } from './trend';
-import { UserState, userReducer } from './user';
+import { LoginState, loginReducer } from './login';
 import logger from 'redux-logger';
 
 export interface State {
   activity: ActivityState;
   lobby: LobbyState;
   trend: TrendState;
-  user: UserState;
+  login: LoginState;
 }
 
 export const store = configureStore({
@@ -17,7 +17,7 @@ export const store = configureStore({
     activity: activityReducer,
     lobby: lobbyReducer,
     trend: trendReducer,
-    user: userReducer,
+    login: loginReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
   middleware: (defaultMiddlewares) => {

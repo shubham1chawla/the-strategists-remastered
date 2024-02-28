@@ -1,9 +1,9 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { Dashboard, Login, NotFound } from './components';
 import { Provider } from 'react-redux';
-import { store } from './redux';
-import { ConfigProvider } from 'antd';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { ConfigProvider, Space } from 'antd';
 import { CoffeeOutlined } from '@ant-design/icons';
+import { Dashboard, Login, NotFound } from './components';
+import { store } from './redux';
 import './App.scss';
 
 /**
@@ -12,6 +12,7 @@ import './App.scss';
 export const CssVariables = {
   '--font-family': `'IBM Plex Sans', sans-serif`,
   '--text-color': '#f5f6fa',
+  '--text-color-rgb': '245, 246, 250',
   '--dark-color': '#18191a',
   '--dark-color-rgb': '24, 25, 26',
   '--accent-color': '#eb3b5a',
@@ -27,11 +28,26 @@ export const App = () => {
   return (
     <ConfigProvider
       renderEmpty={() => (
-        <span className="strategists-empty">
+        <Space>
           <CoffeeOutlined /> Nothing to show here!
-        </span>
+        </Space>
       )}
       theme={{
+        components: {
+          Collapse: {
+            headerBg: 'transparent',
+          },
+          Select: {
+            multipleItemBg: CssVariables['--accent-color'],
+          },
+          Table: {
+            headerBg: 'transparent',
+          },
+          Tag: {
+            defaultBg: 'transparent',
+            defaultColor: CssVariables['--text-color'],
+          },
+        },
         token: {
           borderRadius: 4,
           colorBgBase: CssVariables['--dark-color'],
@@ -44,6 +60,13 @@ export const App = () => {
           colorWarningBg: 'transparent',
           colorText: CssVariables['--text-color'],
           colorTextPlaceholder: CssVariables['--text-color'],
+          colorTextBase: CssVariables['--text-color'],
+          colorInfo: CssVariables['--accent-color'],
+          colorInfoBg: 'transparent',
+          colorPrimaryBg: 'transparent',
+          colorBorderSecondary: `rgba(${CssVariables['--text-color-rgb']}, 0.06)`,
+          colorBgSpotlight: CssVariables['--dark-color'],
+          colorBgContainerDisabled: 'transparent',
           fontFamily: CssVariables['--font-family'],
         },
       }}
