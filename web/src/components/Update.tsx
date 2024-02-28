@@ -6,6 +6,7 @@ import {
   Activity,
   ActivityActions,
   LobbyActions,
+  LoginActions,
   State,
   TrendActions,
   UpdateType,
@@ -25,23 +26,18 @@ interface UpdatePayload {
 export const Update = () => {
   const { subscribedTypes } = useSelector((state: State) => state.activity);
   const { gameCode, playerId } = useSelector((state: State) => state.login);
-  const { players } = useSelector((state: State) => state.lobby);
   const [api, contextHolder] = notification.useNotification();
   const dispatch = useDispatch();
-
-  // Determining player
-  const player = players.find((p) => p.id === playerId);
-  const username = player?.username;
 
   /**
    * This useMemo ensures that we'll change the event source's instance
    * only when the username and game code changes.
    */
   const updates = useMemo(() => {
-    return !username
+    return !playerId
       ? null
-      : new EventSource(`/api/games/${gameCode}/sse?username=${username}`);
-  }, [gameCode, username]);
+      : new EventSource(`/api/games/${gameCode}/sse?playerId=${playerId}`);
+  }, [gameCode, playerId]);
 
   /**
    * This useEffect will only update the event source's onmessage hook.
@@ -89,6 +85,10 @@ export const Update = () => {
           dispatch(LobbyActions.addPlayer(payload));
           break;
         case 'KICK':
+          // Logging out if current player is kicked
+          if (payload === playerId) {
+            dispatch(LoginActions.logout());
+          }
           dispatch(LobbyActions.kickPlayer(payload));
           break;
         case 'MOVE':
@@ -130,7 +130,7 @@ export const Update = () => {
         api.open({ message: parseActivity(activity) });
       }
     };
-  }, [api, dispatch, subscribedTypes, updates, gameCode]);
+  }, [api, dispatch, subscribedTypes, updates, gameCode, playerId]);
 
   /**
    * This useEffect will close the event source for the
