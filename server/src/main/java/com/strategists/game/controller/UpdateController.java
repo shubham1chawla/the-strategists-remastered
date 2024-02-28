@@ -14,7 +14,7 @@ import com.strategists.game.service.UpdateService;
 import lombok.val;
 
 @RestController
-@RequestMapping("/api/games/{gameId}/sse")
+@RequestMapping("/api/games/{code}/sse")
 public class UpdateController {
 
 	@Autowired
@@ -24,8 +24,8 @@ public class UpdateController {
 	private UpdateService updateService;
 
 	@GetMapping
-	public SseEmitter getSseEmitter(@PathVariable long gameId, @RequestParam(required = true) String username) {
-		val game = gameService.getGameById(gameId);
+	public SseEmitter getSseEmitter(@PathVariable String code, @RequestParam(required = true) String username) {
+		val game = gameService.getGameByCode(code);
 		return updateService.registerEmitter(game, username);
 	}
 

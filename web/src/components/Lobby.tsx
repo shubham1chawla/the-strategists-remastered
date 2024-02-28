@@ -1,35 +1,18 @@
 import { MouseEvent } from 'react';
+import { Alert, Button, List, Row, Space, Tag, Tooltip } from 'antd';
 import {
-  Button,
-  Form,
-  Input,
-  InputNumber,
-  List,
-  Space,
-  Tag,
-  Tooltip,
-  notification,
-} from 'antd';
-import {
-  UserAddOutlined,
   UserDeleteOutlined,
   UserOutlined,
   WalletOutlined,
   StockOutlined,
   CrownOutlined,
-  MailOutlined,
   HeartOutlined,
+  UserAddOutlined,
+  StarOutlined,
 } from '@ant-design/icons';
 import { useSelector } from 'react-redux';
 import { Player, State } from '../redux';
 import axios from 'axios';
-
-/**
- * -----  UTILITIES DEFINED BELOW  -----
- */
-
-const MIN_CASH_AMOUNT = 100;
-const MAX_CASH_AMOUNT = 9999;
 
 /**
  * -----  LOBBY COMPONENT BELOW  -----
@@ -37,10 +20,10 @@ const MAX_CASH_AMOUNT = 9999;
 
 export const Lobby = () => {
   return (
-    <>
+    <div className="strategists-lobby">
       <LobbyPlayers />
-      <InvitePlayerForm />
-    </>
+      <GameCode />
+    </div>
   );
 };
 
@@ -50,7 +33,10 @@ export const Lobby = () => {
 
 const LobbyPlayers = () => {
   const { state, players } = useSelector((state: State) => state.lobby);
-  const { gameId } = useSelector((state: State) => state.user);
+  const { gameCode, playerId } = useSelector((state: State) => state.login);
+
+  // Determining player
+  const player = players.find((p) => p.id === playerId);
 
   // Sorting players in decreasing order of net-worth and remaining skips
   // Making a copy of players before sorting to avoid direct state mutation.
@@ -69,7 +55,7 @@ const LobbyPlayers = () => {
 
   const kickPlayer = (event: MouseEvent, { id }: Player) => {
     event.stopPropagation();
-    axios.delete(`/api/games/${gameId}/players`, { data: { playerId: id } });
+    axios.delete(`/api/games/${gameCode}/players`, { data: { playerId: id } });
   };
 
   return (
@@ -77,59 +63,60 @@ const LobbyPlayers = () => {
       className="strategists-lobby__players"
       size="large"
       dataSource={sortedPlayers}
-      renderItem={(player: Player, index: number) => (
+      renderItem={(p: Player, index: number) => (
         <List.Item
           className={
             'strategists-lobby__players__player' +
-            (player.state === 'BANKRUPT' ? ' strategists-striped' : '')
+            (p.state === 'BANKRUPT' ? ' strategists-striped' : '')
           }
           extra={
-            <Tooltip
-              title={
-                state === 'ACTIVE'
-                  ? `The Strategists in session, you can't kick ${player.username} now!`
-                  : `Kick ${player.username} out!`
-              }
-            >
-              <Button
-                disabled={state === 'ACTIVE'}
-                className="strategists-lobby__players__player__kick"
-                type="text"
-                shape="circle"
-                onClick={(event) => kickPlayer(event, player)}
-                icon={<UserDeleteOutlined />}
-              />
-            </Tooltip>
+            player?.host &&
+            p.id !== player.id && (
+              <Tooltip
+                title={
+                  state === 'ACTIVE'
+                    ? `The Strategists in session, you can't kick ${p.username} now!`
+                    : `Kick ${p.username} out!`
+                }
+              >
+                <Button
+                  disabled={state === 'ACTIVE'}
+                  className="strategists-lobby__players__player__kick"
+                  type="text"
+                  shape="circle"
+                  onClick={(event) => kickPlayer(event, p)}
+                  icon={<UserDeleteOutlined />}
+                />
+              </Tooltip>
+            )
           }
         >
           <Space direction="vertical">
             <Space>
-              <UserOutlined /> {player.username}
+              <UserOutlined /> {p.username}
             </Space>
             <Space>
-              {state === 'ACTIVE' && player.state !== 'BANKRUPT' ? (
-                <Tooltip title={<>{player.username}'s rank</>}>
+              {state === 'ACTIVE' && p.state !== 'BANKRUPT' && (
+                <Tooltip title={<>{p.username}'s rank</>}>
                   <Tag icon={<CrownOutlined />}>#{index + 1}</Tag>
                 </Tooltip>
-              ) : null}
-              {player.state === 'INVITED' && (
-                <Tag icon={<MailOutlined />}>Invited</Tag>
               )}
-              <Tooltip title={<>{player.username}'s cash</>}>
-                <Tag icon={<WalletOutlined />}>{player.cash}</Tag>
+              <Tooltip title={<>{p.username}'s cash</>}>
+                <Tag icon={<WalletOutlined />}>{p.cash}</Tag>
               </Tooltip>
-              <Tooltip title={<>{player.username}'s net worth</>}>
-                <Tag icon={<StockOutlined />}>{player.netWorth}</Tag>
+              <Tooltip title={<>{p.username}'s net worth</>}>
+                <Tag icon={<StockOutlined />}>{p.netWorth}</Tag>
               </Tooltip>
-              {!!player.remainingSkipsCount && state === 'ACTIVE' && (
-                <Tooltip
-                  title={`Remaining skips allowed before ${player.username} will be declared bankrupt.`}
-                >
-                  <Tag icon={<HeartOutlined />}>
-                    {player.remainingSkipsCount}
-                  </Tag>
-                </Tooltip>
-              )}
+              {!!p.remainingSkipsCount &&
+                player?.host &&
+                state === 'ACTIVE' && (
+                  <Tooltip
+                    title={`Remaining skips allowed before ${p.username} will be declared bankrupt.`}
+                  >
+                    <Tag icon={<HeartOutlined />}>{p.remainingSkipsCount}</Tag>
+                  </Tooltip>
+                )}
+              {p.host && <Tag icon={<StarOutlined />}>Host</Tag>}
             </Space>
           </Space>
         </List.Item>
@@ -139,81 +126,28 @@ const LobbyPlayers = () => {
 };
 
 /**
- * -----  ADD PLAYER FORM COMPONENT BELOW  -----
+ * -----  GAME CODE COMPONENT BELOW  -----
  */
 
-interface Invite {
-  email: string;
-  cash: number;
-}
-
-const InvitePlayerForm = () => {
+export const GameCode = () => {
+  const { gameCode } = useSelector((state: State) => state.login);
   const { state } = useSelector((state: State) => state.lobby);
-  const { gameId } = useSelector((state: State) => state.user);
-  const [api, contextHolder] = notification.useNotification();
-  const [form] = Form.useForm();
 
-  // Hiding invite player form when game starts
   if (state === 'ACTIVE') return null;
 
-  const invitePlayer = async (invite: Invite) => {
-    try {
-      await axios.post(`/api/games/${gameId}/players`, invite);
-    } catch (error) {
-      api.error({ message: `Unable to invite ${invite.email}` });
-    }
-    form.resetFields();
-  };
-
   return (
-    <>
-      {contextHolder}
-      <Form
-        layout="inline"
-        form={form}
-        name="basic"
-        className="strategists-lobby__form"
-        onFinish={invitePlayer}
-        onFinishFailed={() =>
-          api.error({ message: 'Incorrect player details!' })
+    <Row justify="center">
+      <Alert
+        type="info"
+        message={
+          <Space>
+            Use code <Tag icon={<UserAddOutlined />}>{gameCode}</Tag> to join
+            The Strategists.
+          </Space>
         }
-      >
-        <Space.Compact size="large">
-          <Form.Item
-            noStyle
-            name="email"
-            rules={[{ required: true, type: 'email' }]}
-          >
-            <Input
-              placeholder="Enter player's email"
-              prefix={<UserOutlined />}
-              type="email"
-              required
-            />
-          </Form.Item>
-          <Form.Item
-            noStyle
-            name="cash"
-            rules={[{ required: true, type: 'number' }]}
-          >
-            <InputNumber
-              placeholder="Cash"
-              min={MIN_CASH_AMOUNT}
-              max={MAX_CASH_AMOUNT}
-              prefix={<WalletOutlined />}
-              required
-              type="number"
-            />
-          </Form.Item>
-          <Form.Item noStyle>
-            <Button
-              type="primary"
-              htmlType="submit"
-              icon={<UserAddOutlined />}
-            />
-          </Form.Item>
-        </Space.Compact>
-      </Form>
-    </>
+        showIcon
+        banner
+      />
+    </Row>
   );
 };

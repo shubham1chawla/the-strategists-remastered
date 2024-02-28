@@ -53,7 +53,7 @@ public class SkipPlayerServiceImpl implements SkipPlayerService {
 	private PlayerService playerService;
 
 	private ThreadPoolTaskScheduler scheduler;
-	private Map<Long, ScheduledFuture<?>> futures;
+	private Map<String, ScheduledFuture<?>> futures;
 
 	@PostConstruct
 	public void setup() {
@@ -87,7 +87,7 @@ public class SkipPlayerServiceImpl implements SkipPlayerService {
 		val future = scheduler.schedule(() -> {
 
 			// Setting up thread name
-			Thread.currentThread().setName(String.format("%s-%s", SKIP_PLAYER_SCHEDULER, game.getId()));
+			Thread.currentThread().setName(String.format("%s-%s", SKIP_PLAYER_SCHEDULER, game.getCode()));
 
 			// Checking if future was cancelled
 			if (Thread.currentThread().isInterrupted()) {
@@ -102,7 +102,7 @@ public class SkipPlayerServiceImpl implements SkipPlayerService {
 
 				// Fetching the current player
 				val player = playerService.getCurrentPlayer(game);
-				log.info("Skipping {}'s turn in game ID: {}", player.getUsername(), player.getGameId());
+				log.info("Skipping {}'s turn in game: {}", player.getUsername(), player.getGameCode());
 
 				// Declaring the player bankrupt if player skipped more than a few times
 				playerService.skipPlayer(player);
@@ -116,17 +116,17 @@ public class SkipPlayerServiceImpl implements SkipPlayerService {
 			});
 
 		}, date);
-		futures.put(game.getId(), future);
+		futures.put(game.getCode(), future);
 
-		log.info("Scheduled skip player task for game ID: {}", game.getId());
+		log.info("Scheduled skip player task for game: {}", game.getCode());
 	}
 
 	@Override
 	public void unschedule(Game game) {
-		if (!futures.containsKey(game.getId())) {
+		if (!futures.containsKey(game.getCode())) {
 			return;
 		}
-		val future = futures.get(game.getId());
+		val future = futures.get(game.getCode());
 
 		/**
 		 * Since we are canceling the future and interrupting the thread, you shouldn't
@@ -135,8 +135,8 @@ public class SkipPlayerServiceImpl implements SkipPlayerService {
 		 */
 		future.cancel(true);
 
-		futures.remove(game.getId());
-		log.info("Unscheduled previous skip player task for game ID: {}", game.getId());
+		futures.remove(game.getCode());
+		log.info("Unscheduled previous skip player task for game: {}", game.getCode());
 	}
 
 }

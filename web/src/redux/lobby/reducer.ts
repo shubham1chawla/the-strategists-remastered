@@ -11,8 +11,9 @@ export interface Player {
   id: number;
   username: string;
   index: number;
-  state: 'INVITED' | 'ACTIVE' | 'BANKRUPT';
+  state: 'ACTIVE' | 'BANKRUPT';
   turn: boolean;
+  host: boolean;
   netWorth: number;
   cash: number;
   lands: PlayerLand[];
@@ -71,15 +72,12 @@ export const lobbyReducer = (
 
     case LobbyActions.Types.PATCH_PLAYERS: {
       const patches = new Map<number, Player>();
-      for (const player of (payload as Player[]) || []) {
-        patches.set(player.id, player);
+      for (const p of (payload as Player[]) || []) {
+        patches.set(p.id, p);
       }
       return {
         ...state,
-        players: state.players.map((player) => {
-          const patch = patches.get(player.id);
-          return patch ? patch : player;
-        }),
+        players: state.players.map((p) => patches.get(p.id) || p),
       };
     }
 

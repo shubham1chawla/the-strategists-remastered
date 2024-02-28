@@ -43,7 +43,7 @@ import {
   Trends,
   VisualPortfolio,
 } from '.';
-import { Land, Player, State, UserActions } from '../redux';
+import { Land, LoginActions, Player, State } from '../redux';
 import { InvestmentStrategy } from '../utils';
 import axios from 'axios';
 
@@ -70,16 +70,16 @@ const prepareSliderMarks = (strategy: InvestmentStrategy): SliderMarks => {
 };
 
 export interface PlayerInvestModalProps extends BaseModalProps {
-  gameId: number;
+  gameCode: string;
   player: Player;
   land: Land;
   title: string;
 }
 
 export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
-  const { open, gameId, player, land, title, onCancel } = props;
+  const { open, gameCode, player, land, title, onCancel } = props;
   const [ownership, setOwnership] = useState(0);
-  if (!open || !gameId || !player || !land || !title || !onCancel) {
+  if (!open || !gameCode || !player || !land || !title || !onCancel) {
     return null;
   }
 
@@ -87,7 +87,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
   const strategy = new InvestmentStrategy(player, land, ownership);
 
   const invest = async () => {
-    await axios.post(`/api/games/${gameId}/players/${player.id}/lands`, {
+    await axios.post(`/api/games/${gameCode}/players/${player.id}/lands`, {
       landId: land.id,
       ownership,
     });
@@ -95,7 +95,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
     onCancel();
 
     // Ending player's turn after investing in any land
-    axios.put(`/api/games/${gameId}/turn`);
+    axios.put(`/api/games/${gameCode}/turn`);
   };
 
   return (
@@ -272,15 +272,15 @@ export const PortfolioModal = (props: Partial<PortfolioModalProps>) => {
  */
 
 export interface ResetModalProps extends BaseModalProps {
-  gameId: number;
+  gameCode: string;
 }
 
 export const ResetModal = (props: ResetModalProps) => {
   const [checked, setChecked] = useState(false);
-  const { open, onCancel, gameId } = props;
+  const { open, onCancel, gameCode } = props;
 
   const reset = async () => {
-    await axios.delete(`/api/games/${gameId}`);
+    await axios.delete(`/api/games/${gameCode}`);
     cancel();
   };
 
@@ -337,14 +337,14 @@ export const ResetModal = (props: ResetModalProps) => {
  */
 
 export const WinModal = () => {
-  const lobby = useSelector((state: State) => state.lobby);
-  const user = useSelector((state: State) => state.user);
-  const { gameId, type } = user;
-  const { players, state } = lobby;
-
+  const { players, state } = useSelector((state: State) => state.lobby);
+  const { gameCode, playerId } = useSelector((state: State) => state.login);
   const [showResetModal, setShowResetModal] = useState(false);
-
   const dispatch = useDispatch();
+
+  // Determining player
+  const loggedInPlayer = players.find((p) => p.id === playerId);
+
   const closeResetModal = () => setShowResetModal(false);
   const openResetModal = () => setShowResetModal(true);
 
@@ -354,7 +354,7 @@ export const WinModal = () => {
     state === 'ACTIVE' && activePlayers.length === 1
       ? activePlayers[0]
       : undefined;
-  if (!player) return null;
+  if (!player || !gameCode) return null;
 
   return (
     <>
@@ -372,7 +372,7 @@ export const WinModal = () => {
         }
         footer={
           <Row justify="space-between" align="middle">
-            {type === 'ADMIN' ? (
+            {loggedInPlayer?.host ? (
               <>
                 <Space>
                   <InfoCircleOutlined />
@@ -395,7 +395,7 @@ export const WinModal = () => {
                 <Button
                   type="primary"
                   icon={<LogoutOutlined />}
-                  onClick={() => dispatch(UserActions.unsetUser())}
+                  onClick={() => dispatch(LoginActions.logout())}
                 >
                   Logout
                 </Button>
@@ -428,13 +428,13 @@ export const WinModal = () => {
           ]}
         />
       </Modal>
-      {showResetModal ? (
+      {showResetModal && (
         <ResetModal
           open={showResetModal}
-          gameId={gameId || -1}
+          gameCode={gameCode}
           onCancel={closeResetModal}
         />
-      ) : null}
+      )}
     </>
   );
 };

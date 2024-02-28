@@ -7,7 +7,6 @@ import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.Rent;
 import com.strategists.game.entity.Trend;
-import com.strategists.game.request.GoogleLoginRequest;
 
 public interface PlayerService {
 
@@ -19,13 +18,13 @@ public interface PlayerService {
 
 	Player getPlayerById(long id);
 
-	Player getPlayerByEmail(String email);
+	boolean existsByEmail(String email);
 
 	Player getPlayerByUsername(Game game, String username);
 
-	Player sendInvite(Game game, String email, double cash);
+	Player addPlayer(Game game, String email, String name);
 
-	Player acceptInvite(GoogleLoginRequest request);
+	Player addPlayer(Game game, String email, String name, boolean host);
 
 	Player kickPlayer(long playerId);
 

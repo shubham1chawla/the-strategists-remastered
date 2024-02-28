@@ -46,7 +46,7 @@ public class Player implements Serializable {
 	private static final long serialVersionUID = -7588097421340659821L;
 
 	public enum State {
-		INVITED, ACTIVE, BANKRUPT;
+		ACTIVE, BANKRUPT;
 	}
 
 	@Id
@@ -61,23 +61,18 @@ public class Player implements Serializable {
 	@Column(nullable = false, unique = true)
 	private String email;
 
-	/**
-	 * Player's cash will be dynamically calculated based on their investments.
-	 * Check {@link Player#getCash()} for details.
-	 */
-	@JsonIgnore
-	@Column(nullable = false, precision = MathUtil.PRECISION)
-	private Double baseCash;
-
 	@Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
 	private Integer index = 0;
 
-	@Column(nullable = false, columnDefinition = "VARCHAR(8) DEFAULT 'INVITED'")
+	@Column(nullable = false, columnDefinition = "VARCHAR(8) DEFAULT 'ACTIVE'")
 	@Enumerated(EnumType.STRING)
-	private State state = State.INVITED;
+	private State state = State.ACTIVE;
 
 	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 	private boolean turn = false;
+
+	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+	private boolean host = false;
 
 	@JsonInclude(Include.NON_NULL)
 	@Column(nullable = true, columnDefinition = "INTEGER DEFAULT NULL")
@@ -85,7 +80,7 @@ public class Player implements Serializable {
 
 	@JsonIgnore
 	@ManyToOne
-	@JoinColumn(name = "game_id", referencedColumnName = "id", nullable = false)
+	@JoinColumn(name = "game_code", referencedColumnName = "code", nullable = false)
 	private Game game;
 
 	@ToString.Exclude
@@ -104,14 +99,13 @@ public class Player implements Serializable {
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "sourcePlayer", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<Rent> paidRents;
 
-	public Player(Game game, String email, double baseCash) {
+	public Player(Game game, String email) {
 		Assert.isTrue(EmailValidator.getInstance().isValid(email), "Email is not valid!");
-		Assert.isTrue(baseCash > 0, "Cash can't be negative!");
+		Assert.notNull(game.getPlayerBaseCash(), "Cash can't be null!");
+		Assert.isTrue(game.getPlayerBaseCash() > 0, "Cash can't be negative!");
 
 		this.game = game;
-		this.username = email.split("@")[0];
 		this.email = email;
-		this.baseCash = MathUtil.round(baseCash);
 		this.remainingSkipsCount = game.getAllowedSkipsCount();
 	}
 
@@ -124,7 +118,7 @@ public class Player implements Serializable {
 	@Transient
 	@JsonProperty("cash")
 	public double getCash() {
-		val credits = baseCash + MathUtil.sum(receivedRents, Rent::getRentAmount);
+		val credits = getBaseCash() + MathUtil.sum(receivedRents, Rent::getRentAmount);
 		val debits = MathUtil.sum(paidRents, Rent::getRentAmount) + MathUtil.sum(playerLands, PlayerLand::getBuyAmount);
 		return MathUtil.round(credits - debits);
 	}
@@ -144,26 +138,26 @@ public class Player implements Serializable {
 
 	@Transient
 	@JsonIgnore
-	public boolean isInvited() {
-		return State.INVITED.equals(state);
-	}
-
-	@Transient
-	@JsonIgnore
 	public boolean isBankrupt() {
 		return State.BANKRUPT.equals(state);
 	}
 
 	@Transient
 	@JsonIgnore
-	public long getGameId() {
-		return game.getId();
+	public String getGameCode() {
+		return game.getCode();
 	}
 
 	@Transient
 	@JsonIgnore
 	public String getGamePlayerKey() {
-		return String.format("game-%s-player-%s", getGameId(), getUsername());
+		return String.format("game-%s-player-%s", getGameCode(), getUsername());
+	}
+
+	@Transient
+	@JsonIgnore
+	public double getBaseCash() {
+		return game.getPlayerBaseCash();
 	}
 
 	@Transient

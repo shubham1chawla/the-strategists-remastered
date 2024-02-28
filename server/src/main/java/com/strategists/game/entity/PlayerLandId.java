@@ -29,7 +29,7 @@ public class PlayerLandId implements Serializable {
 		Assert.notNull(land, "Land can't be null!");
 		Assert.notNull(player.getGame(), "Player must be associated with a game!");
 		Assert.notNull(land.getGame(), "Land must be associated with a game!");
-		Assert.isTrue(Objects.equals(player.getGameId(), land.getGameId()), "Game IDs must match!");
+		Assert.isTrue(Objects.equals(player.getGame(), land.getGame()), "Games must match!");
 
 		this.player = player;
 		this.land = land;

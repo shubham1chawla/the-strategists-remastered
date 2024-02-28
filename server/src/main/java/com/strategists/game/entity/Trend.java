@@ -55,7 +55,7 @@ public class Trend implements Serializable {
 
 	@JsonIgnore
 	@ManyToOne
-	@JoinColumn(name = "game_id", referencedColumnName = "id", nullable = false)
+	@JoinColumn(name = "game_code", referencedColumnName = "code", nullable = false)
 	private Game game;
 
 	public static Trend fromPlayer(Player player) {

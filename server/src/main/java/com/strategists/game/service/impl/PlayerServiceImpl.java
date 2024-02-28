@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -13,7 +12,6 @@ import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -29,7 +27,6 @@ import com.strategists.game.entity.Trend;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.PlayerRepository;
 import com.strategists.game.repository.TrendRepository;
-import com.strategists.game.request.GoogleLoginRequest;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 import com.strategists.game.update.UpdateMapping;
@@ -40,12 +37,10 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
+@Transactional
 public class PlayerServiceImpl implements PlayerService {
 
 	private static final Random RANDOM = new Random();
-
-	@Value("${strategists.security.allowed-emails}")
-	private Set<String> adminEmails;
 
 	@PersistenceContext
 	private EntityManager em;
@@ -101,10 +96,8 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	public Player getPlayerByEmail(String email) {
-		val opt = playerRepository.findByEmail(email);
-		Assert.isTrue(opt.isPresent(), "No player found with email: " + email);
-		return opt.get();
+	public boolean existsByEmail(String email) {
+		return playerRepository.existsByEmail(email);
 	}
 
 	@Override
@@ -115,37 +108,36 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	@UpdateMapping(UpdateType.INVITE)
-	public Player sendInvite(Game game, String email, double cash) {
-		Assert.isTrue(!adminEmails.contains(email), "Can't add admins as players!");
-		Assert.isTrue(!playerRepository.existsByEmail(email), email + " already in a game!");
-
-		val player = new Player(game, email, cash);
-		log.info("Invited player {} to join game ID: {}", player.getUsername(), game.getId());
-		return playerRepository.save(player);
+	@UpdateMapping(UpdateType.JOIN)
+	public Player addPlayer(Game game, String email, String name) {
+		return addPlayer(game, email, name, false);
 	}
 
 	@Override
-	@UpdateMapping(UpdateType.JOIN)
-	public Player acceptInvite(GoogleLoginRequest request) {
-		val player = getPlayerByEmail(request.getEmail());
+	public Player addPlayer(Game game, String email, String name, boolean host) {
+		Assert.state(!existsByEmail(email), email + " already in a game!");
+		if (host) {
+			Assert.state(!playerRepository.existsByGameAndHost(game, host),
+					"Host already assigned to the game: " + game.getCode());
+		}
+
+		// Creating player's instance
+		val player = new Player(game, email);
+		player.setHost(host);
 
 		// Generating valid username for the player
+		val split = name.split("\\s+");
 		int count = 0;
-		val split = request.getName().split("\\s+");
-		String username = split[0];
-		while (playerRepository.existsByGameAndUsername(player.getGame(), username)) {
-			username = String.format("%s-%s", split[0], ++count);
+		player.setUsername(split[0]);
+		while (playerRepository.existsByGameAndUsername(game, player.getUsername())) {
+			player.setUsername(String.format("%s-%s", split[0], ++count));
 		}
-		player.setUsername(username);
-		player.setState(State.ACTIVE);
 
-		log.info("{} accepted the invite for game ID: {}", player.getUsername(), player.getGameId());
+		log.info("{} (host? {}) joined game: {}", player.getUsername(), player.isHost(), player.getGameCode());
 		return playerRepository.save(player);
 	}
 
 	@Override
-	@Transactional
 	@UpdateMapping(UpdateType.KICK)
 	public Player kickPlayer(long playerId) {
 		try {
@@ -167,23 +159,22 @@ public class PlayerServiceImpl implements PlayerService {
 	@Override
 	@UpdateMapping(UpdateType.START)
 	public Player assignTurn(Game game) {
-		Assert.state(!playerRepository.existsByGameAndState(game, State.INVITED), "Players must accept the invite!");
 		Assert.state(!isTurnAssigned(game), "Turn already assigned!");
 
-		log.info("Randomly assigning turn to a player for game ID: {}", game.getId());
+		log.info("Randomly assigning turn to a player for game: {}", game.getCode());
 		val players = getPlayersByGame(game);
 		val player = players.get(RANDOM.nextInt(players.size()));
 		player.setTurn(true);
 		playerRepository.save(player);
 
-		log.info("Assigned turn to {} for game ID: {}", player.getUsername(), game.getId());
+		log.info("Assigned turn to {} for game: {}", player.getUsername(), game.getCode());
 		return player;
 	}
 
 	@Override
 	public Player getCurrentPlayer(Game game) {
 		val opt = playerRepository.findByGameAndTurn(game, true);
-		Assert.state(opt.isPresent(), "No player has the turn for game ID: " + game.getId());
+		Assert.state(opt.isPresent(), "No player has the turn for game: " + game.getCode());
 
 		return opt.get();
 	}
@@ -193,11 +184,11 @@ public class PlayerServiceImpl implements PlayerService {
 	public Land movePlayer(Player player, int move) {
 		val game = player.getGame();
 		player.setIndex((player.getIndex() + move) % landService.getCount(game));
-		playerRepository.save(player);
+		playerRepository.saveAndFlush(player);
 
 		val index = player.getIndex();
 		val land = landService.getLandByIndex(game, index);
-		log.info("{} moved to {} ({}) for game ID: {}", player.getUsername(), land.getName(), index, game.getId());
+		log.info("{} moved to {} ({}) for game: {}", player.getUsername(), land.getName(), index, game.getCode());
 		return land;
 	}
 
@@ -207,7 +198,7 @@ public class PlayerServiceImpl implements PlayerService {
 		Assert.state(currentPlayer.isTurn(), currentPlayer.getUsername() + " doesn't have current turn!");
 
 		val game = currentPlayer.getGame();
-		log.info("Finding next player of {} for game ID: {}", currentPlayer.getUsername(), game.getId());
+		log.info("Finding next player of {} for game: {}", currentPlayer.getUsername(), game.getCode());
 
 		val players = getPlayersByGame(game);
 		int i = players.indexOf(currentPlayer);
@@ -226,12 +217,12 @@ public class PlayerServiceImpl implements PlayerService {
 			player.setTurn(true);
 			playerRepository.saveAll(List.of(currentPlayer, player));
 
-			log.info("Assigned turn to {} for game ID: {}", player.getUsername(), game.getId());
+			log.info("Assigned turn to {} for game: {}", player.getUsername(), game.getCode());
 			return player;
 
 		} while (!Objects.equals(currentPlayer.getId(), players.get(i).getId()));
 
-		log.warn("No suitable next player found for game ID: {}", game.getId());
+		log.warn("No suitable next player found for game: {}", game.getCode());
 		return null;
 	}
 
@@ -241,12 +232,11 @@ public class PlayerServiceImpl implements PlayerService {
 		player.setRemainingSkipsCount(player.getRemainingSkipsCount() - 1);
 		playerRepository.save(player);
 
-		log.info("{}/{} skips remain for {} in game ID: {}", player.getRemainingSkipsCount(),
-				player.getAllowedSkipsCount(), player.getUsername(), player.getGameId());
+		log.info("{}/{} skips remain for {} in game: {}", player.getRemainingSkipsCount(),
+				player.getAllowedSkipsCount(), player.getUsername(), player.getGameCode());
 	}
 
 	@Override
-	@Transactional
 	@UpdateMapping(UpdateType.INVEST)
 	public void invest(Player player, Land land, double ownership) {
 		val buyAmount = land.getMarketValue() * (ownership / 100);
@@ -268,12 +258,11 @@ public class PlayerServiceImpl implements PlayerService {
 		// Refreshing land's entity to reflect this investment
 		em.refresh(land);
 
-		log.info("{} invested {}% in {} for {} in game ID: {}", player.getUsername(), ownership, land.getName(),
-				buyAmount, player.getGameId());
+		log.info("{} invested {}% in {} for {} in game: {}", player.getUsername(), ownership, land.getName(), buyAmount,
+				player.getGameCode());
 	}
 
 	@Override
-	@Transactional
 	@UpdateMapping(UpdateType.RENT)
 	public void payRent(Rent rent) {
 		val source = rent.getSourcePlayer();
@@ -293,8 +282,8 @@ public class PlayerServiceImpl implements PlayerService {
 		em.refresh(source);
 		em.refresh(target);
 
-		log.info("{} paid {} rent to {} for {} in game ID: {}", source.getUsername(), amount, target.getUsername(),
-				land.getName(), source.getGameId());
+		log.info("{} paid {} rent to {} for {} in game: {}", source.getUsername(), amount, target.getUsername(),
+				land.getName(), source.getGameCode());
 	}
 
 	@Override
@@ -303,7 +292,7 @@ public class PlayerServiceImpl implements PlayerService {
 		player.setState(State.BANKRUPT);
 		playerRepository.save(player);
 
-		log.info("{} state updated to {} in game ID: {}", player.getUsername(), player.getState(), player.getGameId());
+		log.info("{} state updated to {} in game: {}", player.getUsername(), player.getState(), player.getGameCode());
 	}
 
 	@Override
@@ -329,7 +318,7 @@ public class PlayerServiceImpl implements PlayerService {
 		}
 
 		playerRepository.saveAll(players);
-		log.info("Reseted players for game ID: {}", game.getId());
+		log.info("Reseted players for game: {}", game.getCode());
 	}
 
 	@Override

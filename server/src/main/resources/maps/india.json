@@ -2,6 +2,7 @@
     "id": "india",
     "name": "India",
     "description": "Incredible India",
+    "playerBaseCash": 1000,
     "lands": [
         {
             "name": "Srinagar",

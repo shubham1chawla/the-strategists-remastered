@@ -41,7 +41,7 @@ public class LandServiceImpl implements LandService {
 
 	@Override
 	public List<Land> getLandsByGame(Game game) {
-		return landRepository.findByGame(game);
+		return landRepository.findByGameOrderById(game);
 	}
 
 	@Override
@@ -76,7 +76,7 @@ public class LandServiceImpl implements LandService {
 		}
 
 		landRepository.saveAll(lands);
-		log.info("Reseted lands for game ID: {}", game.getId());
+		log.info("Reseted lands for game: {}", game.getCode());
 	}
 
 	@Override
