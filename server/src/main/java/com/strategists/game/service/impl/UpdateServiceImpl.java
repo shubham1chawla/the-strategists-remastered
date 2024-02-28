@@ -5,13 +5,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import com.strategists.game.entity.Game;
-import com.strategists.game.service.PlayerService;
+import com.strategists.game.entity.Player;
 import com.strategists.game.service.UpdateService;
 import com.strategists.game.update.payload.PingUpdatePayload;
 import com.strategists.game.update.payload.UpdatePayload;
@@ -23,14 +22,11 @@ import lombok.extern.log4j.Log4j2;
 @Service
 public class UpdateServiceImpl implements UpdateService {
 
-	@Autowired
-	private PlayerService playerService;
-
 	private Map<String, SseEmitter> emitters = new ConcurrentHashMap<>();
 
 	@Override
-	public SseEmitter registerEmitter(Game game, String username) {
-		val emitterKey = playerService.getPlayerByUsername(game, username).getGamePlayerKey();
+	public SseEmitter registerEmitter(Player player) {
+		val emitterKey = player.getGamePlayerKey();
 		emitters.computeIfAbsent(emitterKey, key -> {
 			val emitter = new SseEmitter(-1L);
 			emitter.onCompletion(() -> emitters.remove(key));
