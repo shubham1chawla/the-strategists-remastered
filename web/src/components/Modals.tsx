@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import {
   Alert,
   Button,
@@ -43,7 +43,7 @@ import {
   Trends,
   VisualPortfolio,
 } from '.';
-import { Land, LoginActions, Player, State } from '../redux';
+import { Land, LoginActions, Player, useLobby, useLogin } from '../redux';
 import { InvestmentStrategy } from '../utils';
 import axios from 'axios';
 
@@ -337,31 +337,18 @@ export const ResetModal = (props: ResetModalProps) => {
  */
 
 export const WinModal = () => {
-  const { players, state } = useSelector((state: State) => state.lobby);
-  const { gameCode, playerId } = useSelector((state: State) => state.login);
+  const { gameCode, player } = useLogin();
+  const { winnerPlayer } = useLobby();
   const [showResetModal, setShowResetModal] = useState(false);
   const dispatch = useDispatch();
 
-  // Determining player
-  const loggedInPlayer = players.find((p) => p.id === playerId);
-
-  const closeResetModal = () => setShowResetModal(false);
-  const openResetModal = () => setShowResetModal(true);
-
-  // determining whether to show win modal
-  const activePlayers = players.filter((player) => player.state === 'ACTIVE');
-  const player =
-    state === 'ACTIVE' && activePlayers.length === 1
-      ? activePlayers[0]
-      : undefined;
-  if (!player || !gameCode) return null;
-
+  if (!gameCode || !winnerPlayer) return null;
   return (
     <>
       <Confetti type="multiple" />
       <Modal
-        open={!!player}
-        onCancel={closeResetModal}
+        open={!!winnerPlayer}
+        onCancel={() => setShowResetModal(false)}
         closable={false}
         maskClosable={false}
         title={
@@ -372,7 +359,7 @@ export const WinModal = () => {
         }
         footer={
           <Row justify="space-between" align="middle">
-            {loggedInPlayer?.host ? (
+            {player?.host ? (
               <>
                 <Space>
                   <InfoCircleOutlined />
@@ -381,7 +368,7 @@ export const WinModal = () => {
                 <Button
                   type="primary"
                   icon={<StopFilled />}
-                  onClick={openResetModal}
+                  onClick={() => setShowResetModal(true)}
                 >
                   Reset
                 </Button>
@@ -404,7 +391,7 @@ export const WinModal = () => {
           </Row>
         }
       >
-        <PlayerStats player={player} />
+        <PlayerStats player={winnerPlayer} />
         <Tabs
           centered
           defaultActiveKey="1"
@@ -413,7 +400,7 @@ export const WinModal = () => {
             {
               key: '1',
               label: 'Trends',
-              children: <Trends perspective="player" id={player.id} />,
+              children: <Trends perspective="player" id={winnerPlayer.id} />,
             },
             {
               key: '2',
@@ -421,7 +408,7 @@ export const WinModal = () => {
               children: (
                 <VisualPortfolio
                   perspective="player"
-                  playerLands={player.lands}
+                  playerLands={winnerPlayer.lands}
                 />
               ),
             },
@@ -432,7 +419,7 @@ export const WinModal = () => {
         <ResetModal
           open={showResetModal}
           gameCode={gameCode}
-          onCancel={closeResetModal}
+          onCancel={() => setShowResetModal(false)}
         />
       )}
     </>

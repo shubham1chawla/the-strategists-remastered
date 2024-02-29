@@ -8,20 +8,17 @@ import {
 } from '@ant-design/icons';
 import { Button, Dropdown, Space } from 'antd';
 import { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { Player, State } from '../redux';
+import { Player, useLobby, useLogin } from '../redux';
 import { InvestmentStrategy } from '../utils';
 import { PlayerInvestModal } from '.';
 import axios from 'axios';
 
 export const Actions = () => {
-  const { players, lands } = useSelector((state: State) => state.lobby);
-  const { gameCode, playerId } = useSelector((state: State) => state.login);
+  const { gameCode, player } = useLogin();
+  const { turnPlayer, lands } = useLobby();
   const [showModal, setShowModal] = useState(false);
 
-  // Finding user in lobby's players
-  const player = players.find((p) => p.id === playerId);
-  const turnPlayer = player?.turn ? player : players.find((p) => p.turn);
+  // Determining player's current land
   const land = player ? lands[player.index] : undefined;
 
   if (!player || !land || !gameCode) {

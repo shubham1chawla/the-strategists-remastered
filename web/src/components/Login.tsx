@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import {
   Alert,
   Button,
@@ -10,9 +12,6 @@ import {
   Space,
   notification,
 } from 'antd';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { LoginActions, LoginState, State } from '../redux';
 import {
   AppstoreAddOutlined,
   AppstoreOutlined,
@@ -22,6 +21,7 @@ import {
 } from '@ant-design/icons';
 import { GoogleCredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { Logo } from '.';
+import { LoginActions, LoginState, useLogin } from '../redux';
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
 
@@ -36,7 +36,7 @@ type Workflow =
   | 'ENTERING';
 
 export const Login = () => {
-  const { gameCode } = useSelector((state: State) => state.login);
+  const { gameCode } = useLogin();
   const [workflow, setWorkflow] = useState<Workflow>('NOT_VERIFIED');
   const [credential, setCredential] = useState<string | null>(null);
   const [joinDisabled, setJoinDisabled] = useState(true);
@@ -72,7 +72,7 @@ export const Login = () => {
         navigate('/dashboard');
       })
       .catch(() => setWorkflow('ACTIONS'));
-  }, [workflow]);
+  }, [workflow, credential, dispatch, navigate]);
 
   const handleGoogleLoginSuccess = ({
     credential,

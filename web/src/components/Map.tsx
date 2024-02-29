@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useSelector } from 'react-redux';
 import { Alert, Divider } from 'antd';
 import cytoscape, {
   Core,
@@ -8,7 +7,7 @@ import cytoscape, {
   Stylesheet,
 } from 'cytoscape';
 import { CssVariables } from '../App';
-import { Land, Player, State } from '../redux';
+import { Land, Player, useLobby } from '../redux';
 import { LandStats, PlayerStats, PortfolioModal, PortfolioModalProps } from '.';
 import popper from 'cytoscape-popper';
 
@@ -200,7 +199,7 @@ const prepareMap = (cy: Core, lands: Land[], players: Player[]): void => {
 };
 
 export const Map = () => {
-  const { players, lands } = useSelector((state: State) => state.lobby);
+  const { players, lands } = useLobby();
 
   // setting up references to DOM elements
   const container = useRef<HTMLDivElement>(null);

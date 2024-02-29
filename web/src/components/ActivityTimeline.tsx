@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Collapse, Select, Space, Timeline, notification } from 'antd';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import {
   BarsOutlined,
   BulbOutlined,
@@ -20,23 +20,16 @@ import {
 import { Bankruptcy } from '.';
 import {
   ActivityActions,
-  State,
   UpdateType,
   getSubscribableTypes,
+  useActivities,
 } from '../redux';
 import { parseActivity } from '../utils';
 
 export const ActivityTimeline = () => {
-  const { activities, subscribedTypes } = useSelector(
-    (state: State) => state.activity
-  );
-  const dispatch = useDispatch();
+  const { filteredActivites, subscribedTypes } = useActivities();
   const [api, contextHolder] = notification.useNotification({ maxCount: 3 });
-
-  // Extracting filtered activities
-  const filteredActivites = activities.filter(({ type }) =>
-    subscribedTypes.includes(type)
-  );
+  const dispatch = useDispatch();
 
   const formatUpdateType = (type: UpdateType): string => {
     return type.charAt(0) + type.slice(1).toLowerCase();

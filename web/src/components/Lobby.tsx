@@ -10,8 +10,7 @@ import {
   UserAddOutlined,
   StarOutlined,
 } from '@ant-design/icons';
-import { useSelector } from 'react-redux';
-import { Player, State } from '../redux';
+import { Player, useLobby, useLogin } from '../redux';
 import axios from 'axios';
 
 /**
@@ -32,26 +31,8 @@ export const Lobby = () => {
  */
 
 const LobbyPlayers = () => {
-  const { state, players } = useSelector((state: State) => state.lobby);
-  const { gameCode, playerId } = useSelector((state: State) => state.login);
-
-  // Determining player
-  const player = players.find((p) => p.id === playerId);
-
-  // Sorting players in decreasing order of net-worth and remaining skips
-  // Making a copy of players before sorting to avoid direct state mutation.
-  // Reference to the issue -
-  // https://stackoverflow.com/questions/41051302/react-and-redux-uncaught-error-a-state-mutation-was-detected-between-dispatche
-  const sortedPlayers = [...players].sort((p1, p2) => {
-    if (
-      Number.isInteger(p1.remainingSkipsCount) &&
-      Number.isInteger(p2.remainingSkipsCount) &&
-      p1.netWorth === p2.netWorth
-    ) {
-      return (p2.remainingSkipsCount || 0) - (p1.remainingSkipsCount || 0);
-    }
-    return p2.netWorth - p1.netWorth;
-  });
+  const { gameCode, player } = useLogin();
+  const { state, sortedPlayers } = useLobby();
 
   const kickPlayer = (event: MouseEvent, { id }: Player) => {
     event.stopPropagation();
@@ -130,8 +111,8 @@ const LobbyPlayers = () => {
  */
 
 export const GameCode = () => {
-  const { gameCode } = useSelector((state: State) => state.login);
-  const { state } = useSelector((state: State) => state.lobby);
+  const { gameCode } = useLogin();
+  const { state } = useLobby();
 
   if (state === 'ACTIVE') return null;
 
