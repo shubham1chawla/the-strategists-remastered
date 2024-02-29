@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { ActivityState, activityReducer } from './activity';
 import { LobbyState, lobbyReducer } from './lobby';
-import { TrendState, trendReducer } from './trend';
+import { TrendState, trendReducer } from './trends';
 import { LoginState, loginReducer } from './login';
 import logger from 'redux-logger';
 

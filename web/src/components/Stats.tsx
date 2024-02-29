@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
 import {
   Card,
   Col,
@@ -33,7 +32,8 @@ import {
   Player,
   PlayerLand,
   PlayerTrend,
-  State,
+  useLobby,
+  useTrends,
 } from '../redux';
 import { CssVariables } from '../App';
 
@@ -208,7 +208,7 @@ export const Portfolio = (props: PortfolioProps) => {
 };
 
 export const TabularPortfolio = (props: PortfolioProps) => {
-  const { players, lands } = useSelector((state: State) => state.lobby);
+  const { players, lands } = useLobby();
   return (
     <Table
       pagination={false}
@@ -219,7 +219,7 @@ export const TabularPortfolio = (props: PortfolioProps) => {
 };
 
 export const VisualPortfolio = (props: PortfolioProps) => {
-  const { players, lands } = useSelector((state: State) => state.lobby);
+  const { players, lands } = useLobby();
 
   useEffect(() => {
     const items = getPortfolioItems(props, players, lands);
@@ -288,7 +288,7 @@ export interface TrendsProps {
 }
 
 export const Trends = (props: TrendsProps) => {
-  const trends = useSelector((state: State) => state.trend);
+  const trends = useTrends();
   const { perspective, id } = props;
 
   useEffect(() => {

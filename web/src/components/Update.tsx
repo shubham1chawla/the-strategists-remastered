@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { notification } from 'antd';
 import { DisconnectOutlined } from '@ant-design/icons';
 import {
@@ -7,9 +7,10 @@ import {
   ActivityActions,
   LobbyActions,
   LoginActions,
-  State,
   TrendActions,
   UpdateType,
+  useActivities,
+  useLogin,
 } from '../redux';
 import { parseActivity, syncGameStates } from '../utils';
 
@@ -24,8 +25,8 @@ interface UpdatePayload {
 }
 
 export const Update = () => {
-  const { subscribedTypes } = useSelector((state: State) => state.activity);
-  const { gameCode, playerId } = useSelector((state: State) => state.login);
+  const { gameCode, playerId } = useLogin();
+  const { subscribedTypes } = useActivities();
   const [api, contextHolder] = notification.useNotification();
   const dispatch = useDispatch();
 
@@ -34,7 +35,7 @@ export const Update = () => {
    * only when the username and game code changes.
    */
   const updates = useMemo(() => {
-    return !playerId
+    return !gameCode || !playerId
       ? null
       : new EventSource(`/api/games/${gameCode}/sse?playerId=${playerId}`);
   }, [gameCode, playerId]);

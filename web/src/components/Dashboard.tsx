@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Button, Col, Row, Tabs, Tooltip } from 'antd';
 import { googleLogout } from '@react-oauth/google';
@@ -19,7 +19,7 @@ import {
   WinModal,
   Update,
 } from '.';
-import { LoginActions, Player, State } from '../redux';
+import { LoginActions, Player, useLobby, useLogin } from '../redux';
 import { syncGameStates } from '../utils';
 import axios from 'axios';
 
@@ -28,8 +28,8 @@ import axios from 'axios';
  */
 
 export const Dashboard = () => {
-  const { state, players } = useSelector((state: State) => state.lobby);
-  const { gameCode, playerId } = useSelector((state: State) => state.login);
+  const { gameCode, player } = useLogin();
+  const { state, players } = useLobby();
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -58,7 +58,6 @@ export const Dashboard = () => {
   }, [dispatch, navigate, gameCode]);
 
   // Determining player
-  const player = players.find((p) => p.id === playerId);
   if (!gameCode || !player) return null;
 
   return (
