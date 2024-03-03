@@ -74,6 +74,10 @@ public class Activity implements Serializable {
 		return new Activity(player.getGame(), UpdateType.BANKRUPTCY, player.getUsername());
 	}
 
+	public static Activity ofCreate(Player player) {
+		return new Activity(player.getGame(), UpdateType.CREATE, player.getUsername(), player.getGameCode());
+	}
+
 	public static Activity ofInvest(Player player, Land land, double ownership) {
 		return new Activity(player.getGame(), UpdateType.INVEST, player.getUsername(), Double.toString(ownership),
 				land.getName());

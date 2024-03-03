@@ -56,10 +56,16 @@ export const Login = () => {
   // Checking if join form should be enabled
   const joinFormValues = Form.useWatch([], form);
   useEffect(() => {
-    form
-      .validateFields({ validateOnly: true })
-      .then(() => setJoinDisabled(false))
-      .catch(() => setJoinDisabled(true));
+    const code: string | undefined = form.getFieldValue('code');
+    if (code) {
+      form.setFieldValue('code', code.toUpperCase());
+      form
+        .validateFields({ validateOnly: true })
+        .then(() => setJoinDisabled(false))
+        .catch(() => setJoinDisabled(true));
+    } else {
+      setJoinDisabled(true);
+    }
   }, [form, joinFormValues]);
 
   // Checking if player already part of a game
@@ -232,6 +238,7 @@ export const Login = () => {
                       placeholder="Enter game's code"
                       prefix={<AppstoreOutlined />}
                       size="large"
+                      autoFocus
                       required
                     />
                   </Form.Item>

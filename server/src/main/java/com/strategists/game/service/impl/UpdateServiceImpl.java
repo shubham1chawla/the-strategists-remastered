@@ -51,7 +51,8 @@ public class UpdateServiceImpl implements UpdateService {
 			try {
 				entry.getValue().send(payload, MediaType.APPLICATION_JSON);
 			} catch (IOException ex) {
-				log.debug(ex.getMessage(), ex);
+				log.error(ex.getMessage());
+				log.debug(ex);
 			}
 		});
 	}

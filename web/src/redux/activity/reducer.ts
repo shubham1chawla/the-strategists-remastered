@@ -4,6 +4,7 @@ export type UpdateType =
   | 'BANKRUPTCY'
   | 'BONUS'
   | 'CHEAT'
+  | 'CREATE'
   | 'EVENT'
   | 'INVEST'
   | 'JOIN'
@@ -25,6 +26,7 @@ export const getSubscribableTypes = (): UpdateType[] => {
     'BANKRUPTCY',
     'BONUS',
     'CHEAT',
+    'CREATE',
     'EVENT',
     'INVEST',
     'JOIN',

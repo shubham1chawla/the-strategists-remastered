@@ -75,7 +75,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 		// Adding players in order of bankruptcy
 		val orderedPlayers = new ArrayList<Player>(players.size());
-		for (Activity activity : activityRepository.findByGameAndType(game, UpdateType.BANKRUPTCY)) {
+		for (Activity activity : activityRepository.findByGameAndTypeOrderById(game, UpdateType.BANKRUPTCY)) {
 			orderedPlayers.add(players.get(activity.getVal1()));
 		}
 
@@ -184,6 +184,11 @@ public class PlayerServiceImpl implements PlayerService {
 	public Land movePlayer(Player player, int move) {
 		val game = player.getGame();
 		player.setIndex((player.getIndex() + move) % landService.getCount(game));
+
+		/**
+		 * Had to use flush because rent method refreshes the source player and revert's
+		 * player's index back to previous land. This ensures that it doesn't do that.
+		 */
 		playerRepository.saveAndFlush(player);
 
 		val index = player.getIndex();

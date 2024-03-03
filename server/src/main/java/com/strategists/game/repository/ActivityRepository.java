@@ -12,7 +12,7 @@ public interface ActivityRepository extends JpaRepository<Activity, Long> {
 
 	List<Activity> findByGameOrderByIdDesc(Game game);
 
-	List<Activity> findByGameAndType(Game game, UpdateType type);
+	List<Activity> findByGameAndTypeOrderById(Game game, UpdateType type);
 
 	long deleteByGame(Game game);
 

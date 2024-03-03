@@ -34,15 +34,19 @@ public class Game implements Serializable {
 	@EqualsAndHashCode.Include
 	private String code;
 
+	@JsonIgnore
 	@Column(nullable = false, unique = false, precision = MathUtil.PRECISION)
 	private Double playerBaseCash;
 
+	@JsonIgnore
 	@Column(nullable = false, unique = false)
 	private Integer diceSize;
 
+	@JsonIgnore
 	@Column(nullable = false, unique = false)
 	private Double rentFactor;
 
+	@JsonIgnore
 	@Column(nullable = true, unique = false)
 	private Integer allowedSkipsCount;
 

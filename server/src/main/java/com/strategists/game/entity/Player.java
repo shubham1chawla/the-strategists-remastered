@@ -151,7 +151,7 @@ public class Player implements Serializable {
 	@Transient
 	@JsonIgnore
 	public String getGamePlayerKey() {
-		return String.format("game-%s-player-%s", getGameCode(), getUsername());
+		return String.format("game-%s-player-%s", getGameCode(), getId());
 	}
 
 	@Transient

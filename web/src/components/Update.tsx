@@ -76,6 +76,9 @@ export const Update = () => {
           dispatch(LobbyActions.patchPlayers(players));
           break;
         }
+        case 'CREATE':
+          // Do nothing
+          break;
         case 'INVEST': {
           const { land, players } = payload;
           dispatch(LobbyActions.patchLands([land]));
