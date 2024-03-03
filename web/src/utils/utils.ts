@@ -47,6 +47,8 @@ export const parseActivity = (activity: Activity): string => {
       return `${val1} gave ${val2} a bonus of ${val3} cash after completing one turn.`;
     case 'CHEAT':
       return `${val1} applied a cheat!`;
+    case 'CREATE':
+      return `${val1} created game ${val2}`;
     case 'EVENT':
       return `${val1} caused ${val2} at ${val3} for ${val4} turns!`;
     case 'INVEST':

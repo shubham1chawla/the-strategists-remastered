@@ -69,6 +69,7 @@ public class GameServiceImpl implements GameService {
 	private LandService landService;
 
 	@Override
+	@UpdateMapping(UpdateType.CREATE)
 	public Player createGame(GoogleOAuthCredential body) {
 		val email = body.getEmail();
 

@@ -2,6 +2,7 @@ import { ReactNode } from 'react';
 import { Collapse, Select, Space, Timeline, notification } from 'antd';
 import { useDispatch } from 'react-redux';
 import {
+  AppstoreAddOutlined,
   BarsOutlined,
   BulbOutlined,
   CheckOutlined,
@@ -109,6 +110,8 @@ const getIcon = (type: UpdateType): ReactNode | undefined => {
   switch (type) {
     case 'BANKRUPTCY':
       return <Bankruptcy />;
+    case 'CREATE':
+      return <AppstoreAddOutlined />;
     case 'INVEST':
       return <RiseOutlined />;
     case 'JOIN':
