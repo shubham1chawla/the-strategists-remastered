@@ -35,7 +35,7 @@ strategists:
     rent-factor: 0.2
     code-length: 4
     min-players-count: 2
-    max-players-count: 4
+    max-players-count: 6
   configuration:
     sse-ping:
       enabled: false 

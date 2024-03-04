@@ -33,7 +33,7 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
 	private SkipPlayerService skipPlayerService;
 
 	protected Activity saveActivity(Activity activity) {
-		return activityRepository.save(activity);
+		return activityRepository.saveAndFlush(activity);
 	}
 
 	protected void reset(Game game) {

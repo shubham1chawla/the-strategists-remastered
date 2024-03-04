@@ -302,7 +302,7 @@ public class PlayerServiceImpl implements PlayerService {
 	@UpdateMapping(UpdateType.BANKRUPTCY)
 	public void bankruptPlayer(Player player) {
 		player.setState(State.BANKRUPT);
-		playerRepository.save(player);
+		playerRepository.saveAndFlush(player);
 
 		log.info("{} state updated to {} in game: {}", player.getUsername(), player.getState(), player.getGameCode());
 	}
