@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 
@@ -14,6 +13,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.util.Assert;
 
 import com.strategists.game.entity.Game;
 import com.strategists.game.service.GameService;
@@ -37,12 +37,6 @@ public class SkipPlayerServiceImpl implements SkipPlayerService {
 	@Value("#{'${strategists.security.allowed-emails}'.split(',').length}")
 	private int threadPoolSize;
 
-	@Value("${strategists.configuration.skip-player.timeout.value}")
-	private int timeoutValue;
-
-	@Value("${strategists.configuration.skip-player.timeout.unit}")
-	private TimeUnit timeoutUnit;
-
 	@Autowired
 	private TransactionTemplate template;
 
@@ -57,7 +51,7 @@ public class SkipPlayerServiceImpl implements SkipPlayerService {
 
 	@PostConstruct
 	public void setup() {
-		log.info("Skipping players every {} seconds.", timeoutUnit.toSeconds(timeoutValue));
+		log.info("Skipping players enabled.");
 
 		// Setting up scheduler
 		scheduler = new ThreadPoolTaskScheduler();
@@ -72,6 +66,9 @@ public class SkipPlayerServiceImpl implements SkipPlayerService {
 	@Override
 	public void schedule(Game game) {
 
+		// Checking if skip player timeout is set for the game
+		Assert.notNull(game.getSkipPlayerTimeout(), "Skip player timeout not set for game: " + game.getCode());
+
 		/**
 		 * Canceling the executing of the thread here is justifiable even if there are
 		 * database-related calls post this point. All such calls are done on a separate
@@ -83,7 +80,7 @@ public class SkipPlayerServiceImpl implements SkipPlayerService {
 		 */
 		unschedule(game);
 
-		val date = new Date(System.currentTimeMillis() + timeoutUnit.toMillis(timeoutValue));
+		val date = new Date(System.currentTimeMillis() + game.getSkipPlayerTimeout());
 		val future = scheduler.schedule(() -> {
 
 			// Setting up thread name

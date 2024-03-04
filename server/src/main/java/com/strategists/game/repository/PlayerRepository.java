@@ -23,6 +23,8 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
 
 	Optional<Player> findByGameAndTurn(Game game, boolean turn);
 
+	long countByGame(Game game);
+
 	List<Player> findByGame(Game game);
 
 	List<Player> findByGameAndState(Game game, State state);

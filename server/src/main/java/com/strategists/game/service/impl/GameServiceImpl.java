@@ -38,6 +38,13 @@ public class GameServiceImpl implements GameService {
 
 	private static final Random RANDOM = new Random();
 
+	/**
+	 * ---------- REQUIRED CONFIGURATIONS BELOW ----------
+	 */
+
+	@Value("${strategists.game.default-map}")
+	private String defaultGameMap;
+
 	@Value("${strategists.game.dice-size}")
 	private int diceSize;
 
@@ -47,14 +54,28 @@ public class GameServiceImpl implements GameService {
 	@Value("${strategists.game.code-length}")
 	private int codeLength;
 
-	@Value("${strategists.game.default-map}")
-	private String defaultGameMap;
+	@Value("${strategists.game.min-players-count}")
+	private int minPlayersCount;
+
+	@Value("${strategists.game.max-players-count}")
+	private int maxPlayersCount;
+
+	/**
+	 * ---------- OPTIONAL CONFIGURATIONS BELOW ----------
+	 */
 
 	@Value("${strategists.configuration.skip-player.enabled:#{false}}")
 	private boolean skipPlayerEnabled;
 
 	@Value("${strategists.configuration.skip-player.allowed-count:#{null}}")
 	private Integer allowedSkipsCount;
+
+	@Value("${strategists.configuration.skip-player.timeout:#{null}}")
+	private Integer skipPlayerTimeout;
+
+	/**
+	 * ---------- DEPENDENCIES BELOW ----------
+	 */
 
 	@Autowired
 	private Map<String, File> gameMapFiles;
@@ -70,20 +91,30 @@ public class GameServiceImpl implements GameService {
 
 	@Override
 	@UpdateMapping(UpdateType.CREATE)
-	public Player createGame(GoogleOAuthCredential body) {
-		val email = body.getEmail();
+	public Player createGame(GoogleOAuthCredential credential) {
+		val email = credential.getEmail();
 
+		// Checking if requesting user is not part of any other game
 		Assert.hasText(email, "No email found in the request!");
 		Assert.state(!playerService.existsByEmail(email), email + " already part of a game!");
 
+		// Preparing game map's instance
 		val gameMap = GameMap.from(gameMapFiles.get(defaultGameMap));
 		Assert.notNull(gameMap, defaultGameMap + " game map doesn't exist!");
 
+		// Setting up game's instance with required configurations
 		Game game = new Game();
+		game.setPlayerBaseCash(gameMap.getPlayerBaseCash());
+		game.setMinPlayersCount(minPlayersCount);
+		game.setMaxPlayersCount(maxPlayersCount);
 		game.setDiceSize(diceSize);
 		game.setRentFactor(rentFactor);
-		game.setPlayerBaseCash(gameMap.getPlayerBaseCash());
-		game.setAllowedSkipsCount(skipPlayerEnabled ? allowedSkipsCount : null);
+
+		// Setting optional configurations
+		if (skipPlayerEnabled) {
+			game.setAllowedSkipsCount(allowedSkipsCount);
+			game.setSkipPlayerTimeout(skipPlayerTimeout);
+		}
 
 		// Setting up share-able code for game
 		do {
@@ -96,7 +127,7 @@ public class GameServiceImpl implements GameService {
 		landService.save(game, gameMap);
 
 		// Creating player for requesting user
-		return playerService.addPlayer(game, email, body.getName(), true);
+		return playerService.addPlayer(game, email, credential.getName(), true);
 	}
 
 	@Override

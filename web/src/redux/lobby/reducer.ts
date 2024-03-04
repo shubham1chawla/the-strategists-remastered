@@ -38,12 +38,16 @@ export interface LobbyState {
   players: Player[];
   lands: Land[];
   state: 'LOBBY' | 'ACTIVE';
+  minPlayersCount: number;
+  maxPlayersCount: number;
 }
 
 const initialState: LobbyState = {
   players: [],
   lands: [],
   state: 'LOBBY',
+  minPlayersCount: 0,
+  maxPlayersCount: 0,
 };
 
 export const lobbyReducer = (
@@ -52,6 +56,19 @@ export const lobbyReducer = (
 ): LobbyState => {
   const { type, payload } = action;
   switch (type) {
+    case LobbyActions.Types.SET_STATE:
+      return {
+        ...state,
+        state: payload,
+      };
+
+    case LobbyActions.Types.SET_PLAYERS_COUNT_CONSTRAINTS:
+      return {
+        ...state,
+        minPlayersCount: payload[0],
+        maxPlayersCount: payload[1],
+      };
+
     case LobbyActions.Types.SET_PLAYERS:
       return {
         ...state,
@@ -85,12 +102,6 @@ export const lobbyReducer = (
       return {
         ...state,
         lands: [...payload],
-      };
-
-    case LobbyActions.Types.SET_STATE:
-      return {
-        ...state,
-        state: payload,
       };
 
     case LobbyActions.Types.PATCH_LANDS: {

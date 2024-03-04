@@ -35,7 +35,8 @@ public class UpdateAspect {
 		try {
 			returnValue = joinPoint.proceed();
 		} catch (Throwable ex) {
-			log.error("Exception occurred processing update type: {}", mapping.value(), ex);
+			log.warn("Exception occurred processing update type: {}", mapping.value());
+			log.debug(ex);
 			throw ex;
 		}
 

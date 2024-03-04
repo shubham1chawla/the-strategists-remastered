@@ -46,10 +46,7 @@ const LobbyPlayers = () => {
       dataSource={sortedPlayers}
       renderItem={(p: Player, index: number) => (
         <List.Item
-          className={
-            'strategists-lobby__players__player' +
-            (p.state === 'BANKRUPT' ? ' strategists-striped' : '')
-          }
+          className={p.state === 'BANKRUPT' ? 'strategists-striped' : ''}
           extra={
             player?.host &&
             p.id !== player.id && (
@@ -62,7 +59,6 @@ const LobbyPlayers = () => {
               >
                 <Button
                   disabled={state === 'ACTIVE'}
-                  className="strategists-lobby__players__player__kick"
                   type="text"
                   shape="circle"
                   onClick={(event) => kickPlayer(event, p)}

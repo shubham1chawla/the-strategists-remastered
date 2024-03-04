@@ -29,7 +29,7 @@ import axios from 'axios';
 
 export const Dashboard = () => {
   const { gameCode, player } = useLogin();
-  const { state, players } = useLobby();
+  const { state, players, minPlayersCount, maxPlayersCount } = useLobby();
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -73,6 +73,8 @@ export const Dashboard = () => {
             player={player}
             state={state}
             players={players}
+            minPlayersCount={minPlayersCount}
+            maxPlayersCount={maxPlayersCount}
           />
         </Col>
         <Col flex="70%">
@@ -93,6 +95,8 @@ interface PlayerPanelProps {
   player: Player;
   state: 'LOBBY' | 'ACTIVE';
   players: Player[];
+  minPlayersCount: number;
+  maxPlayersCount: number;
 }
 
 const PlayerPanel = (props: PlayerPanelProps) => {
@@ -141,7 +145,8 @@ interface NavigationProps extends PlayerPanelProps {
 }
 
 const Navigation = (props: NavigationProps) => {
-  const { gameCode, player, state, players } = props;
+  const { gameCode, player, state, players, minPlayersCount, maxPlayersCount } =
+    props;
   const [showResetModal, setShowResetModal] = useState(false);
   const dispatch = useDispatch();
 
@@ -174,26 +179,32 @@ const Navigation = (props: NavigationProps) => {
         </Tooltip>
         <Logo />
       </header>
-      {player?.host ? (
+      {player?.host && (
         <Tooltip
           title={
-            !players.length
-              ? 'Add players to start The Strategists!'
+            players.length < minPlayersCount
+              ? `At least ${minPlayersCount} players required to start The Strategists!`
+              : players.length > maxPlayersCount
+              ? `At most ${maxPlayersCount} players required to start The Strategists!`
               : state === 'ACTIVE'
-              ? 'Reset The Strategists!'
-              : 'Start The Strategists!'
+              ? 'Reset this session of The Strategists!'
+              : 'Start this session of The Strategists!'
           }
         >
           <Button
             type="primary"
             htmlType="submit"
-            disabled={state === 'LOBBY' && !players.length}
+            disabled={
+              state === 'LOBBY' &&
+              (players.length < minPlayersCount ||
+                players.length > maxPlayersCount)
+            }
             onClick={() => (state === 'ACTIVE' ? reset() : start())}
           >
             {state === 'LOBBY' ? <PlayCircleFilled /> : <StopFilled />}
           </Button>
         </Tooltip>
-      ) : null}
+      )}
       <ResetModal
         open={showResetModal}
         gameCode={gameCode}
