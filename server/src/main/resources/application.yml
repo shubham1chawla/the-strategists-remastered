@@ -34,15 +34,15 @@ strategists:
     dice-size: 6
     rent-factor: 0.2
     code-length: 4
+    min-players-count: 2
+    max-players-count: 4
   configuration:
     sse-ping:
       enabled: false 
     skip-player:
       enabled: true
       allowed-count: 3
-      timeout:
-        value: 60
-        unit: SECONDS
+      timeout: 60000
   security:
     allowed-emails:
     google-recaptcha:

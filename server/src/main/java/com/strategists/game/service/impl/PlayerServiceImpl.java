@@ -70,8 +70,13 @@ public class PlayerServiceImpl implements PlayerService {
 	@Override
 	public List<Player> getPlayersByGameOrderByBankruptcy(Game game) {
 		// Mapping players with their user name
-		val players = getPlayersByGame(game).stream()
-				.collect(Collectors.toMap(Player::getUsername, Function.identity()));
+		val players = getPlayersByGame(game).stream().map(player -> {
+
+			// Refreshing player entities
+			em.refresh(player);
+			return player;
+
+		}).collect(Collectors.toMap(Player::getUsername, Function.identity()));
 
 		// Adding players in order of bankruptcy
 		val orderedPlayers = new ArrayList<Player>(players.size());
@@ -116,6 +121,8 @@ public class PlayerServiceImpl implements PlayerService {
 	@Override
 	public Player addPlayer(Game game, String email, String name, boolean host) {
 		Assert.state(!existsByEmail(email), email + " already in a game!");
+		Assert.state(playerRepository.countByGame(game) < game.getMaxPlayersCount(),
+				"Max count reached! Can't add more players to game: " + game.getCode());
 		if (host) {
 			Assert.state(!playerRepository.existsByGameAndHost(game, host),
 					"Host already assigned to the game: " + game.getCode());

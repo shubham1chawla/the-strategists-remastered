@@ -10,7 +10,11 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.springframework.util.Assert;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.strategists.game.util.MathUtil;
 
 import lombok.Data;
@@ -34,6 +38,12 @@ public class Game implements Serializable {
 	@EqualsAndHashCode.Include
 	private String code;
 
+	@Column(nullable = false, unique = false)
+	private Integer minPlayersCount;
+
+	@Column(nullable = false, unique = false)
+	private Integer maxPlayersCount;
+
 	@JsonIgnore
 	@Column(nullable = false, unique = false, precision = MathUtil.PRECISION)
 	private Double playerBaseCash;
@@ -50,6 +60,10 @@ public class Game implements Serializable {
 	@Column(nullable = true, unique = false)
 	private Integer allowedSkipsCount;
 
+	@JsonInclude(Include.NON_NULL)
+	@Column(nullable = true, unique = false)
+	private Integer skipPlayerTimeout;
+
 	@Column(nullable = false, columnDefinition = "VARCHAR(6) DEFAULT 'LOBBY'")
 	@Enumerated(EnumType.STRING)
 	private State state = State.LOBBY;
@@ -64,6 +78,16 @@ public class Game implements Serializable {
 	@JsonIgnore
 	public boolean isActive() {
 		return State.ACTIVE.equals(state);
+	}
+
+	public void setAllowedSkipsCount(int allowedSkipsCount) {
+		Assert.isTrue(allowedSkipsCount > 0, "Allowed skips should be greater than 0!");
+		this.allowedSkipsCount = allowedSkipsCount;
+	}
+
+	public void setSkipPlayerTimeout(int skipPlayerTimeout) {
+		Assert.isTrue(skipPlayerTimeout > 10000, "Skip player timeout should be more than 10 seconds!");
+		this.skipPlayerTimeout = skipPlayerTimeout;
 	}
 
 }

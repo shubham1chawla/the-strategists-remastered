@@ -13,6 +13,8 @@ import axios from 'axios';
 
 interface GameResponse {
   state: 'LOBBY' | 'ACTIVE';
+  minPlayersCount: number;
+  maxPlayersCount: number;
   players: Player[];
   lands: Land[];
   activities: Activity[];
@@ -26,9 +28,21 @@ export const syncGameStates = (
   axios
     .get<GameResponse>(`/api/games/${gameCode}`)
     .then(({ data }) => {
-      const { state, players, lands, activities, trends } = data;
+      const {
+        state,
+        minPlayersCount,
+        maxPlayersCount,
+        players,
+        lands,
+        activities,
+        trends,
+      } = data;
       [
         LobbyActions.setState(state),
+        LobbyActions.setPlayersCountConstraints(
+          minPlayersCount,
+          maxPlayersCount
+        ),
         LobbyActions.setPlayers(players),
         LobbyActions.setLands(lands),
         ActivityActions.setActivities(activities),

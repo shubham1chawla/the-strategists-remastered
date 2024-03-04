@@ -255,19 +255,6 @@ h1.strategists-logo {
   &__players {
     flex-basis: 100%;
     overflow-y: scroll;
-
-    &__player {
-      &__kick {
-        display: none !important;
-      }
-
-      // Hovering row will reveal player's password div & kick button
-      &:hover .strategists-lobby__players__player {
-        &__kick {
-          display: block !important;
-        }
-      }
-    }
   }
 }
 
