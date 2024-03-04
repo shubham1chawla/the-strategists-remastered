@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Divider } from 'antd';
 import cytoscape, {
   Core,
@@ -70,7 +70,7 @@ const prepareStyles = (): Stylesheet[] => {
 };
 
 const prepareLands = (cy: Core, lands: Land[]): void => {
-  // adding lands' nodes
+  // Adding lands' nodes
   lands.forEach((land) => {
     cy.add({
       data: { land, name: land.name, id: land.id } as any,
@@ -80,7 +80,7 @@ const prepareLands = (cy: Core, lands: Land[]): void => {
     });
   });
 
-  // adding n-1 edges
+  // Adding n-1 edges
   for (let i = 1; i < lands.length; i++) {
     const prev = lands[i - 1];
     const curr = lands[i];
@@ -95,7 +95,7 @@ const prepareLands = (cy: Core, lands: Land[]): void => {
     });
   }
 
-  // adding last edge
+  // Adding last edge
   cy.add({
     data: {
       id: `${lands[lands.length - 1].id}->${lands[0].id}`,
@@ -119,21 +119,21 @@ const calculateMiddle = (lands: Land[]): Position => {
 };
 
 const preparePlayers = (cy: Core, lands: Land[], players: Player[]): void => {
-  // finding players per index
+  // Finding players per index
   const counts = Array(lands.length).fill(0);
   players.forEach((player) => counts[player.index]++);
 
-  // adding players
+  // Adding players
   players.forEach((player) => {
     // Checking if player is not bankrupt
     if (player.state === 'BANKRUPT') {
       return;
     }
 
-    // player's current land
+    // Player's current land
     const land = lands[player.index];
 
-    // calculating middle of adjusting lands
+    // Calculating middle of adjusting lands
     const middle = calculateMiddle([
       lands[(player.index - 1 + lands.length) % lands.length],
       land,
@@ -150,7 +150,7 @@ const preparePlayers = (cy: Core, lands: Land[], players: Player[]): void => {
       classes: 'player',
     });
 
-    // adding player's edge
+    // Adding player's edge
     cy.add({
       data: {
         id: `${player.username}->${land.id}`,
@@ -166,7 +166,7 @@ const preparePlayers = (cy: Core, lands: Land[], players: Player[]): void => {
       return;
     }
 
-    // preparing blink animation for current player
+    // Preparing blink animation for current player
     const animation = node.animation({
       duration: 500,
       easing: 'ease',
@@ -177,35 +177,41 @@ const preparePlayers = (cy: Core, lands: Land[], players: Player[]): void => {
       },
     });
 
-    // creating callback for animation to replay alternatingly
+    // Creating callback for animation to replay alternatingly
     const callback = (): Promise<any> =>
       animation.play().reverse().play().promise('complete').then(callback);
     callback();
   });
 };
 
-const prepareMap = (cy: Core, lands: Land[], players: Player[]): void => {
-  // clearing previous nodes and edges
+const prepareMap = (
+  cy: Core | null,
+  lands: Land[],
+  players: Player[]
+): void => {
+  if (!cy || !lands.length) return;
+
+  // Clearing previous nodes and edges
   cy.remove(cy.elements());
 
-  // adding land nodes and edges
+  // Adding land nodes and edges
   prepareLands(cy, lands);
 
-  // adding player nodes and edges
+  // Adding player nodes and edges
   preparePlayers(cy, lands, players);
 
-  // adjusting zoom
+  // Adjusting zoom
   cy.fit(undefined, Number.MAX_VALUE);
 };
 
 export const Map = () => {
   const { players, lands } = useLobby();
 
-  // setting up references to DOM elements
-  const container = useRef<HTMLDivElement>(null);
-  const tooltip = useRef<HTMLDivElement>(null);
+  // Setting up references to DOM elements
+  const tooltip = useRef<HTMLDivElement | null>(null);
 
-  // setting up state variables
+  // Setting up state variables
+  const [cy, setCy] = useState<Core | null>(null);
   const [isMapTooltipHidden, setMapTooltipHidden] = useState(true);
   const [mapTooltipBodyProps, setMapTooltipBodyProps] =
     useState<Partial<MapTooltipBodyProps> | null>(null);
@@ -213,16 +219,14 @@ export const Map = () => {
     null
   );
 
-  // memoizing styles since they won't change
-  const style = useMemo(prepareStyles, []);
+  // Setting up cytoscape
+  const container = useCallback((current: HTMLDivElement | null) => {
+    if (!current) return;
 
-  useEffect(() => {
-    if (!lands.length) {
-      return;
-    }
-
-    // setting up cytoscape
+    // Setting up popper js support for tooltips
     cytoscape.use(popper);
+
+    // Creating cytoscape instance
     const cy = cytoscape({
       autolock: true,
       maxZoom: 1.5,
@@ -230,11 +234,11 @@ export const Map = () => {
       layout: {
         name: 'preset',
       },
-      style,
-      container: container.current,
+      style: prepareStyles(),
+      container: current,
     });
 
-    // adding onclick hook for map modal
+    // Adding onclick hook for map modal
     cy.on('click', 'node', (event: EventObjectNode) => {
       const { player, land } = event.target.data();
       setModalProps({
@@ -246,7 +250,7 @@ export const Map = () => {
       setMapTooltipHidden(true);
     });
 
-    // adding mousemove hook for map tooltip
+    // Adding mousemove hook for map tooltip
     cy.on('mousemove', 'node', ({ target }: EventObjectNode) => {
       const { land, player } = target.data();
       setMapTooltipBodyProps({
@@ -271,14 +275,17 @@ export const Map = () => {
       setMapTooltipHidden(false);
     });
 
-    // adding mouseout hook to remove tooltip
+    // Adding mouseout hook to remove tooltip
     cy.on('mouseout', 'node', (_: EventObjectNode) => {
       setMapTooltipHidden(true);
     });
 
-    // setting up map elements
-    prepareMap(cy, lands, players);
-  }, [style, players, lands]);
+    // Setting up cytoscape instance's state
+    setCy(cy);
+  }, []);
+
+  // Setting up map elements
+  useEffect(() => prepareMap(cy, lands, players), [cy, players, lands]);
 
   return (
     <>
