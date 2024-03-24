@@ -10,6 +10,7 @@ import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Player;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.TrendRepository;
+import com.strategists.game.service.CleanUpService;
 import com.strategists.game.service.PredictionService;
 import com.strategists.game.service.SkipPlayerService;
 import com.strategists.game.service.UpdateService;
@@ -34,6 +35,9 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
 
 	@Autowired(required = false)
 	private SkipPlayerService skipPlayerService;
+
+	@Autowired(required = false)
+	private CleanUpService cleanUpService;
 
 	protected Activity saveActivity(Activity activity) {
 		return activityRepository.saveAndFlush(activity);
@@ -77,6 +81,18 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
 	protected void unscheduleSkipPlayerTask(Game game) {
 		if (Objects.nonNull(skipPlayerService)) {
 			skipPlayerService.unschedule(game);
+		}
+	}
+
+	protected void scheduleCleanUpTask(Game game) {
+		if (Objects.nonNull(cleanUpService)) {
+			cleanUpService.schedule(game);
+		}
+	}
+
+	protected void unscheduleCleanUpTask(Game game) {
+		if (Objects.nonNull(cleanUpService)) {
+			cleanUpService.unschedule(game);
 		}
 	}
 

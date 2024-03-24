@@ -44,6 +44,9 @@ public class WinUpdateHandler extends AbstractUpdateHandler<WinUpdatePayload> {
 
 		// Removing previously scheduled task
 		unscheduleSkipPlayerTask(game);
+
+		// Scheduling clean-up task
+		scheduleCleanUpTask(game);
 	}
 
 }
