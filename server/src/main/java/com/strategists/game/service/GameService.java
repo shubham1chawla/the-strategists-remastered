@@ -6,7 +6,7 @@ import com.strategists.game.request.GoogleOAuthCredential;
 
 public interface GameService {
 
-	Player createGame(GoogleOAuthCredential body);
+	Player createGame(GoogleOAuthCredential credential);
 
 	Game getGameByCode(String code);
 
@@ -15,5 +15,7 @@ public interface GameService {
 	Player playTurn(Game game);
 
 	void resetGame(Game game);
+
+	void deleteGame(Game game);
 
 }

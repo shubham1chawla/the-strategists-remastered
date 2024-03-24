@@ -37,6 +37,9 @@ strategists:
     min-players-count: 2
     max-players-count: 6
   configuration:
+    clean-up:
+      enabled: true
+      delay: 300000
     sse-ping:
       enabled: false 
     skip-player:

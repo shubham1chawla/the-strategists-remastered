@@ -76,6 +76,9 @@ export const Update = () => {
           dispatch(LobbyActions.patchPlayers(players));
           break;
         }
+        case 'CLEAN_UP':
+          dispatch(LoginActions.logout());
+          break;
         case 'CREATE':
           // Do nothing
           break;
@@ -111,6 +114,9 @@ export const Update = () => {
            * Adding the setTimeout seems to work here but root cause is still unknown.
            */
           setTimeout(() => syncGameStates(gameCode, dispatch));
+          break;
+        case 'SKIP':
+          dispatch(LobbyActions.patchPlayers([payload]));
           break;
         case 'START':
           dispatch(LobbyActions.patchPlayers([payload]));

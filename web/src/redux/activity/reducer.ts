@@ -4,6 +4,7 @@ export type UpdateType =
   | 'BANKRUPTCY'
   | 'BONUS'
   | 'CHEAT'
+  | 'CLEAN_UP'
   | 'CREATE'
   | 'EVENT'
   | 'INVEST'
@@ -45,7 +46,7 @@ export const getSubscribableTypes = (): UpdateType[] => {
 
 export interface Activity {
   type: UpdateType;
-  val1: string;
+  val1: string | null;
   val2: string | null;
   val3: string | null;
   val4: string | null;

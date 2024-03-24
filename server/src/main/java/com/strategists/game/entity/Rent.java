@@ -12,6 +12,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.util.Assert;
 
 import com.strategists.game.util.MathUtil;
@@ -33,10 +35,12 @@ public class Rent implements Serializable {
 
 	@ManyToOne
 	@JoinColumn(name = "source_id", referencedColumnName = "id", nullable = false)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Player sourcePlayer;
 
 	@ManyToOne
 	@JoinColumn(name = "target_id", referencedColumnName = "id", nullable = false)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Player targetPlayer;
 
 	@ManyToOne

@@ -15,6 +15,9 @@ import com.strategists.game.service.SkipPlayerService;
 import com.strategists.game.service.UpdateService;
 import com.strategists.game.update.payload.UpdatePayload;
 
+import lombok.extern.log4j.Log4j2;
+
+@Log4j2
 public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implements UpdateHandler {
 
 	@Autowired
@@ -43,13 +46,25 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
 
 	protected void trainPredictionModelAsync(Game game) {
 		if (Objects.nonNull(predictionService)) {
-			CompletableFuture.runAsync(() -> predictionService.trainPredictionModel(game));
+			CompletableFuture.runAsync(() -> {
+				try {
+					predictionService.trainPredictionModel(game);
+				} catch (Exception ex) {
+					log.error("Failed to train prediction model!", ex);
+				}
+			});
 		}
 	}
 
 	protected void executePredictionModelAsync(Player player) {
 		if (Objects.nonNull(predictionService)) {
-			CompletableFuture.runAsync(() -> predictionService.executePredictionModel(player));
+			CompletableFuture.runAsync(() -> {
+				try {
+					predictionService.executePredictionModel(player);
+				} catch (Exception ex) {
+					log.error("Failed to execute prediction model!", ex);
+				}
+			});
 		}
 	}
 

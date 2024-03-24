@@ -18,6 +18,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -71,6 +74,7 @@ public class Land implements Serializable {
 	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "game_code", referencedColumnName = "code", nullable = false)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Game game;
 
 	@ToString.Exclude

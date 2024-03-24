@@ -21,6 +21,8 @@ import javax.persistence.Table;
 import javax.persistence.Transient;
 
 import org.apache.commons.validator.routines.EmailValidator;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.util.Assert;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -64,15 +66,18 @@ public class Player implements Serializable {
 	@Column(nullable = false, columnDefinition = "INTEGER DEFAULT 0")
 	private Integer index = 0;
 
-	@Column(nullable = false, columnDefinition = "VARCHAR(8) DEFAULT 'ACTIVE'")
+	@Column(nullable = false, unique = false)
 	@Enumerated(EnumType.STRING)
-	private State state = State.ACTIVE;
+	private State state;
 
 	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 	private boolean turn = false;
 
 	@Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
 	private boolean host = false;
+
+	@Column(nullable = true)
+	private Integer bankruptcyOrder;
 
 	@JsonInclude(Include.NON_NULL)
 	@Column(nullable = true, columnDefinition = "INTEGER DEFAULT NULL")
@@ -81,6 +86,7 @@ public class Player implements Serializable {
 	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "game_code", referencedColumnName = "code", nullable = false)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Game game;
 
 	@ToString.Exclude
