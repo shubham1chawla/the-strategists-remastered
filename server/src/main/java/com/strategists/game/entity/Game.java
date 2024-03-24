@@ -1,6 +1,7 @@
 package com.strategists.game.entity;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,6 +21,7 @@ import com.strategists.game.util.MathUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.val;
 
 @Data
 @Entity
@@ -64,9 +66,17 @@ public class Game implements Serializable {
 	@Column(nullable = true, unique = false)
 	private Integer skipPlayerTimeout;
 
-	@Column(nullable = false, columnDefinition = "VARCHAR(6) DEFAULT 'LOBBY'")
+	@JsonIgnore
+	@Column(nullable = true, unique = false)
+	private Integer cleanUpDelay;
+
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
-	private State state = State.LOBBY;
+	private State state;
+
+	@JsonIgnore
+	@Column(nullable = true, unique = false)
+	private Long endedAt;
 
 	@Transient
 	@JsonIgnore
@@ -78,6 +88,16 @@ public class Game implements Serializable {
 	@JsonIgnore
 	public boolean isActive() {
 		return State.ACTIVE.equals(state);
+	}
+
+	@Transient
+	@JsonIgnore
+	public boolean isStale() {
+		if (Objects.isNull(endedAt) || Objects.isNull(cleanUpDelay)) {
+			return false;
+		}
+		val diff = System.currentTimeMillis() - endedAt - cleanUpDelay;
+		return diff > 0;
 	}
 
 	public void setAllowedSkipsCount(int allowedSkipsCount) {

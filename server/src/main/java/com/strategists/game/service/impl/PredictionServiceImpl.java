@@ -104,12 +104,21 @@ public class PredictionServiceImpl implements PredictionService {
 		val orderedPlayers = playerService.getPlayersByGameOrderByBankruptcy(game);
 
 		// Checking if game data CSV should be exported
-		if (!shouldExportCSV(game, orderedPlayers)) {
-			log.warn("Skipped exporting CSV and training model for game: {}", game.getCode());
+		try {
+			validateGameIntegrity(game, orderedPlayers);
+		} catch (Exception ex) {
+			log.warn("Skipped CSV export for game: {} | Reason: {}", game.getCode(), ex.getMessage());
 			return;
 		}
-		exportCSVFile(game, orderedPlayers, exportDataDirectory, "export-" + System.currentTimeMillis());
 
+		val csv = exportCSVFile(game, orderedPlayers, exportDataDirectory, "export-" + System.currentTimeMillis());
+		if (Objects.isNull(csv)) {
+			log.error("No CSV exported! Skipping training the model!");
+			return;
+		}
+
+		// Training the model
+		log.info("Exported game data: {}", csv.getAbsolutePath());
 		trainPredictionModel();
 	}
 
@@ -366,29 +375,29 @@ public class PredictionServiceImpl implements PredictionService {
 		log.info("Predict File Directory: {}", predictFileDirectory.getAbsolutePath());
 	}
 
-	private boolean shouldExportCSV(Game game, List<Player> players) {
+	private void validateGameIntegrity(Game game, List<Player> players) {
 
-		/**
-		 * Case 1 - If there is only one player in the game, it is not an ideal
-		 * representation and therefore should be filtered out.
-		 */
 		val case1 = players.size() > 1;
+		Assert.isTrue(case1, "More than 1 player required!");
 
-		/**
-		 * Case 2 - If player skipping is not allowed, we can proceed with exporting the
-		 * game as we assume that all players played the game fairly, and none of the
-		 * players left the game during a session.
-		 */
 		val case2 = Objects.isNull(game.getAllowedSkipsCount());
-
-		/**
-		 * Case 3 - It is not worth exporting the game's CSV if any player stopped
-		 * playing, and was bankrupted due to inactivity. Such a game's session doesn't
-		 * reflect an ideal game, and therefore is filtered out.
-		 */
 		val case3 = players.stream().allMatch(player -> player.getRemainingSkipsCount() > 0);
+		Assert.isTrue(case2 || case3, "All players must have more than 0 remaining skips!");
 
-		return case1 && (case2 || case3);
+		val activePlayers = players.stream().filter(player -> !player.isBankrupt()).toList();
+		val bankruptPlayers = players.stream().filter(Player::isBankrupt).toList();
+
+		val case4 = activePlayers.size() == 1;
+		val case5 = bankruptPlayers.size() == players.size() - 1;
+		val case6 = activePlayers.size() + bankruptPlayers.size() == players.size();
+		Assert.isTrue(case4, "Only 1 active player should remain!");
+		Assert.isTrue(case5, "Apart from 1 active player, all other players should be bankrupt!");
+		Assert.isTrue(case6, "Active & bankrupt players count should add up to total players count!");
+
+		int order = 1;
+		for (Player player : players) {
+			Assert.isTrue(player.getBankruptcyOrder() == order++, "Inconsistent bankruptcy order!");
+		}
 	}
 
 }

@@ -11,6 +11,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -56,6 +59,7 @@ public class Trend implements Serializable {
 	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "game_code", referencedColumnName = "code", nullable = false)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Game game;
 
 	public static Trend fromPlayer(Player player) {

@@ -11,6 +11,7 @@ import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -73,6 +74,12 @@ public class GameServiceImpl implements GameService {
 	@Value("${strategists.configuration.skip-player.timeout:#{null}}")
 	private Integer skipPlayerTimeout;
 
+	@Value("${strategists.configuration.clean-up.enabled:#{false}}")
+	private boolean cleanUpEnabled;
+
+	@Value("${strategists.configuration.clean-up.delay:#{null}}")
+	private Integer cleanUpDelay;
+
 	/**
 	 * ---------- DEPENDENCIES BELOW ----------
 	 */
@@ -102,18 +109,26 @@ public class GameServiceImpl implements GameService {
 		val gameMap = GameMap.from(gameMapFiles.get(defaultGameMap));
 		Assert.notNull(gameMap, defaultGameMap + " game map doesn't exist!");
 
-		// Setting up game's instance with required configurations
+		// Creating game instance
 		Game game = new Game();
+		game.setState(State.LOBBY);
+
+		// Setting up game's instance with required configurations
 		game.setPlayerBaseCash(gameMap.getPlayerBaseCash());
 		game.setMinPlayersCount(minPlayersCount);
 		game.setMaxPlayersCount(maxPlayersCount);
 		game.setDiceSize(diceSize);
 		game.setRentFactor(rentFactor);
 
-		// Setting optional configurations
+		// Setting skip-player optional configurations
 		if (skipPlayerEnabled) {
 			game.setAllowedSkipsCount(allowedSkipsCount);
 			game.setSkipPlayerTimeout(skipPlayerTimeout);
+		}
+
+		// Setting clean-up optional configurations
+		if (cleanUpEnabled) {
+			game.setCleanUpDelay(cleanUpDelay);
 		}
 
 		// Setting up share-able code for game
@@ -139,6 +154,7 @@ public class GameServiceImpl implements GameService {
 
 	@Override
 	public void startGame(Game game) {
+
 		// Changing game's state
 		game.setState(State.ACTIVE);
 		game = gameRepository.save(game);
@@ -196,8 +212,10 @@ public class GameServiceImpl implements GameService {
 	@Override
 	@UpdateMapping(UpdateType.RESET)
 	public void resetGame(Game game) {
+
 		// Changing game's state
 		game.setState(State.LOBBY);
+		game.setEndedAt(null);
 		game = gameRepository.save(game);
 
 		// Resetting players
@@ -207,10 +225,33 @@ public class GameServiceImpl implements GameService {
 		landService.resetLands(game);
 	}
 
+	@Override
+	@UpdateMapping(UpdateType.CLEAN_UP)
+	public void deleteGame(Game game) {
+		log.info("Cleaning up data for game: {}", game.getCode());
+
+		// Removing player/land children to avoid foreign key constraint violations
+		playerService.resetPlayers(game);
+		landService.resetLands(game);
+
+		// Deleting game record to cascade it to players and lands
+		try {
+			gameRepository.delete(game);
+		} catch (EmptyResultDataAccessException ex) {
+			// suppress exception
+		}
+	}
+
 	private Optional<Player> getWinnerPlayer(Game game) {
 		val activePlayers = playerService.getActivePlayersByGame(game);
 		if (activePlayers.size() > 1) {
 			return Optional.empty();
+		}
+
+		// Setting end at time for the game if not set before
+		if (Objects.isNull(game.getEndedAt())) {
+			game.setEndedAt(System.currentTimeMillis());
+			game = gameRepository.save(game);
 		}
 
 		val winner = activePlayers.get(0);

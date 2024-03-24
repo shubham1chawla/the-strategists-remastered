@@ -1,11 +1,8 @@
 package com.strategists.game.service.impl;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -16,7 +13,6 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
@@ -24,7 +20,6 @@ import com.strategists.game.entity.Player.State;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
 import com.strategists.game.entity.Trend;
-import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.PlayerRepository;
 import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.service.LandService;
@@ -52,9 +47,6 @@ public class PlayerServiceImpl implements PlayerService {
 	private LandService landService;
 
 	@Autowired
-	private ActivityRepository activityRepository;
-
-	@Autowired
 	private TrendRepository trendRepository;
 
 	@Override
@@ -69,28 +61,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Override
 	public List<Player> getPlayersByGameOrderByBankruptcy(Game game) {
-		// Mapping players with their user name
-		val players = getPlayersByGame(game).stream().map(player -> {
-
-			// Refreshing player entities
-			em.refresh(player);
-			return player;
-
-		}).collect(Collectors.toMap(Player::getUsername, Function.identity()));
-
-		// Adding players in order of bankruptcy
-		val orderedPlayers = new ArrayList<Player>(players.size());
-		for (Activity activity : activityRepository.findByGameAndTypeOrderById(game, UpdateType.BANKRUPTCY)) {
-			orderedPlayers.add(players.get(activity.getVal1()));
-		}
-
-		// Adding winner to the ordered players
-		for (Player player : players.values()) {
-			if (!player.isBankrupt()) {
-				orderedPlayers.add(player);
-			}
-		}
-		return orderedPlayers;
+		return playerRepository.findByGameOrderByBankruptcyOrder(game);
 	}
 
 	@Override
@@ -130,6 +101,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 		// Creating player's instance
 		val player = new Player(game, email);
+		player.setState(State.ACTIVE);
 		player.setHost(host);
 
 		// Generating valid username for the player
@@ -170,9 +142,10 @@ public class PlayerServiceImpl implements PlayerService {
 
 		log.info("Randomly assigning turn to a player for game: {}", game.getCode());
 		val players = getPlayersByGame(game);
+		players.forEach(player -> player.setBankruptcyOrder(players.size()));
 		val player = players.get(RANDOM.nextInt(players.size()));
 		player.setTurn(true);
-		playerRepository.save(player);
+		playerRepository.saveAll(players);
 
 		log.info("Assigned turn to {} for game: {}", player.getUsername(), game.getCode());
 		return player;
@@ -221,7 +194,7 @@ public class PlayerServiceImpl implements PlayerService {
 			val player = players.get(i);
 
 			// Checking if next player is not bankrupt and not current player
-			if (player.isBankrupt() || Objects.equals(currentPlayer.getId(), player.getId())) {
+			if (player.isBankrupt() || Objects.equals(currentPlayer, player)) {
 				continue;
 			}
 
@@ -232,7 +205,7 @@ public class PlayerServiceImpl implements PlayerService {
 			log.info("Assigned turn to {} for game: {}", player.getUsername(), game.getCode());
 			return player;
 
-		} while (!Objects.equals(currentPlayer.getId(), players.get(i).getId()));
+		} while (!Objects.equals(currentPlayer, players.get(i)));
 
 		log.warn("No suitable next player found for game: {}", game.getCode());
 		return null;
@@ -301,7 +274,10 @@ public class PlayerServiceImpl implements PlayerService {
 	@Override
 	@UpdateMapping(UpdateType.BANKRUPTCY)
 	public void bankruptPlayer(Player player) {
+		val order = playerRepository.countByGameAndState(player.getGame(), State.BANKRUPT) + 1;
+
 		player.setState(State.BANKRUPT);
+		player.setBankruptcyOrder((int) order);
 		playerRepository.saveAndFlush(player);
 
 		log.info("{} state updated to {} in game: {}", player.getUsername(), player.getState(), player.getGameCode());

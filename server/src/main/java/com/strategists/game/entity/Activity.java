@@ -13,6 +13,9 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.strategists.game.service.PredictionService.Prediction;
 import com.strategists.game.update.UpdateType;
@@ -55,6 +58,7 @@ public class Activity implements Serializable {
 	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "game_code", referencedColumnName = "code", nullable = false)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Game game;
 
 	public Activity(Game game, UpdateType type, String... values) {
