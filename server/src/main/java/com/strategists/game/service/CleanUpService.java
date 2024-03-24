@@ -1,6 +1,6 @@
 package com.strategists.game.service;
 
-public interface SkipPlayerService extends GenericSchedulerService {
+public interface CleanUpService extends GenericSchedulerService {
 
 	// No additional APIs exposed
 

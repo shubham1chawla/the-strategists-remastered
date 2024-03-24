@@ -40,12 +40,14 @@ strategists:
     clean-up:
       enabled: true
       delay: 300000
+      thread-pool-size: 2
     sse-ping:
       enabled: false 
     skip-player:
       enabled: true
       allowed-count: 3
       timeout: 60000
+      thread-pool-size: 4
   security:
     allowed-emails:
     google-recaptcha:

@@ -17,6 +17,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 
 import org.apache.commons.csv.CSVFormat;
@@ -64,6 +66,9 @@ public class PredictionServiceImpl implements PredictionService {
 	@Value("${strategists.prediction.python-script}")
 	private String pythonScript;
 
+	@PersistenceContext
+	private EntityManager em;
+
 	@Autowired
 	private PlayerService playerService;
 
@@ -99,6 +104,10 @@ public class PredictionServiceImpl implements PredictionService {
 	@Override
 	@Transactional
 	public void trainPredictionModel(Game game) {
+
+		// Ensuring that inconsistency is not observed while generating the CSV file
+		em.flush();
+		em.getEntityManagerFactory().getCache().evictAll();
 
 		// Exporting game data if requested
 		val orderedPlayers = playerService.getPlayersByGameOrderByBankruptcy(game);
