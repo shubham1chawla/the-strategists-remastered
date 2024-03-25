@@ -111,6 +111,7 @@ public class PredictionServiceImpl implements PredictionService {
 
 		// Exporting game data if requested
 		val orderedPlayers = playerService.getPlayersByGameOrderByBankruptcy(game);
+		orderedPlayers.forEach(em::refresh);
 
 		// Checking if game data CSV should be exported
 		try {
@@ -171,7 +172,7 @@ public class PredictionServiceImpl implements PredictionService {
 		val prediction = result == 1 ? Prediction.WINNER : Prediction.BANKRUPT;
 
 		log.info("{} predicted to be {} for game: {}", player.getUsername(), prediction, player.getGameCode());
-		return result == 1 ? Prediction.WINNER : Prediction.BANKRUPT;
+		return prediction;
 	}
 
 	private File exportCSVFile(Game game, List<Player> players, File directory, String filename) {

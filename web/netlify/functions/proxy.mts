@@ -7,7 +7,6 @@ export default async (request: Request, _: Context) => {
       status: 500,
     });
   }
-  const url = new URL(`${base}${new URL(request.url).pathname}`);
   const { method, headers, body } = request;
 
   /**
@@ -24,7 +23,8 @@ export default async (request: Request, _: Context) => {
    * Also to allow typescript to not cause issues,
    * I had to cast the RequestInit object as 'any'.
    */
-  return fetch(url, {
+  const url = new URL(request.url);
+  return fetch(new URL(`${base}${url.pathname}${url.search}`), {
     method,
     body,
     headers,
