@@ -59,11 +59,6 @@ public class CleanUpServiceImpl extends AbstractSchedulerService implements Clea
 
 	@Override
 	protected void execute(Game game) {
-
-		// Checking if game's instance is stale
-		Assert.isTrue(game.isStale(), "Attempting to delete non-stale game: " + game.getCode());
-
-		// Deleting game's instance
 		gameService.deleteGame(game);
 	}
 

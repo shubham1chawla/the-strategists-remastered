@@ -28,6 +28,9 @@ public class StartUpdateHandler extends AbstractUpdateHandler<StartUpdatePayload
 
 		// Scheduling player skip task
 		scheduleSkipPlayerTask(player.getGame());
+
+		// Removing previously scheduled task
+		unscheduleCleanUpTask(player.getGame());
 	}
 
 }

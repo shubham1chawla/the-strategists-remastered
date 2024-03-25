@@ -24,6 +24,9 @@ public class CreateUpdateHandler extends AbstractUpdateHandler<CreateUpdatePaylo
 
 		// Sending activity
 		sendUpdate(player.getGame(), new CreateUpdatePayload(saveActivity(Activity.ofCreate(player))));
+
+		// Scheduling clean-up task
+		scheduleCleanUpTask(player.getGame());
 	}
 
 }
