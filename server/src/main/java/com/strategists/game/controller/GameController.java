@@ -84,13 +84,6 @@ public class GameController {
 			// Finding player and associated game information
 			val player = playerService.getPlayerByEmail(credential.getEmail());
 
-			// Checking if game is not stale
-			val game = player.getGame();
-			if (game.isStale()) {
-				gameService.deleteGame(game);
-				return ResponseEntity.notFound().build();
-			}
-
 			return ResponseEntity.ok(EnterGameResponse.fromPlayer(player));
 
 		} catch (Exception ex) {

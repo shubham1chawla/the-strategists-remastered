@@ -33,7 +33,9 @@ public class ResetUpdateHandler extends AbstractUpdateHandler<ResetUpdatePayload
 
 		// Removing previously scheduled task
 		unscheduleSkipPlayerTask(game);
-		unscheduleCleanUpTask(game);
+
+		// Scheduling clean-up task
+		scheduleCleanUpTask(game);
 	}
 
 }
