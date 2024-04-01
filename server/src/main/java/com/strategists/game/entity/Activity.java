@@ -17,7 +17,6 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.strategists.game.service.PredictionService.Prediction;
 import com.strategists.game.update.UpdateType;
 
 import lombok.Data;
@@ -100,8 +99,9 @@ public class Activity implements Serializable {
 		return new Activity(game, UpdateType.MOVE, player.getUsername(), Integer.toString(move), land.getName());
 	}
 
-	public static Activity ofPrediction(Player player, Prediction prediction) {
-		return new Activity(player.getGame(), UpdateType.PREDICTION, player.getUsername(), prediction.name());
+	public static Activity ofPrediction(Prediction prediction) {
+		val player = prediction.getPlayer();
+		return new Activity(player.getGame(), UpdateType.PREDICTION, player.getUsername(), prediction.getType().name());
 	}
 
 	public static Activity ofRent(Rent rent) {

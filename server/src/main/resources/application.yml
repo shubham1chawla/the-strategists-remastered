@@ -24,9 +24,13 @@ spring:
 strategists:
   prediction:
     enabled: true
-    export-data-directory: ../prediction/data/
-    model-out-directory: ../prediction/out/
-    predict-file-directory: ../prediction/temp/
+    data-directory: ../prediction/data/
+    metadata-directory: ../prediction/metadata/
+    classifier-directory: ../prediction/out/
+    classifier-pickle-file-name: classifier.pkl
+    test-directory: ../prediction/test/
+    train-subcommand: train
+    predict-subcommand: predict
     python-executable: ../prediction/.venv/bin/python
     python-script: ../prediction/main.py
   game:

@@ -7,6 +7,7 @@ import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
+import com.strategists.game.entity.Prediction;
 import com.strategists.game.entity.Trend;
 
 import lombok.Builder;
@@ -26,5 +27,7 @@ public class GameResponse {
 	private List<Activity> activities;
 
 	private List<Trend> trends;
+
+	private List<Prediction> predictions;
 
 }

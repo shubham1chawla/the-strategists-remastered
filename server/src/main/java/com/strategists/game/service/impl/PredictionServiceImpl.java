@@ -8,7 +8,9 @@ import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,11 +31,23 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.DoubleNode;
+import com.fasterxml.jackson.databind.node.IntNode;
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
+import com.strategists.game.entity.Prediction;
+import com.strategists.game.entity.Prediction.Type;
 import com.strategists.game.entity.Rent;
+import com.strategists.game.repository.PredictionRepository;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 import com.strategists.game.service.PredictionService;
@@ -51,14 +65,26 @@ import lombok.extern.log4j.Log4j2;
 @ConditionalOnProperty(name = "strategists.prediction.enabled", havingValue = "true")
 public class PredictionServiceImpl implements PredictionService {
 
-	@Value("${strategists.prediction.export-data-directory}")
-	private File exportDataDirectory;
+	@Value("${strategists.prediction.data-directory}")
+	private File dataDirectory;
 
-	@Value("${strategists.prediction.model-out-directory}")
-	private File modelOutDirectory;
+	@Value("${strategists.prediction.metadata-directory}")
+	private File metadataDirectory;
 
-	@Value("${strategists.prediction.predict-file-directory}")
-	private File predictFileDirectory;
+	@Value("${strategists.prediction.classifier-directory}")
+	private File classifierDirectory;
+
+	@Value("${strategists.prediction.classifier-pickle-file-name}")
+	private String classifierPickleFileName;
+
+	@Value("${strategists.prediction.test-directory}")
+	private File testDirectory;
+
+	@Value("${strategists.prediction.train-subcommand}")
+	private String trainSubcommand;
+
+	@Value("${strategists.prediction.predict-subcommand}")
+	private String predictSubcommand;
 
 	@Value("${strategists.prediction.python-executable}")
 	private String pythonExecutable;
@@ -70,15 +96,34 @@ public class PredictionServiceImpl implements PredictionService {
 	private EntityManager em;
 
 	@Autowired
+	private PredictionRepository predictionRepository;
+
+	@Autowired
 	private PlayerService playerService;
 
 	@Autowired
 	private LandService landService;
 
+	private ObjectMapper predictionObjectMapper;
+
 	@PostConstruct
 	public void setup() {
 		validateDirectories();
-		trainPredictionModel();
+
+		// Setting up prediction object mapper
+		val module = new SimpleModule();
+		module.addDeserializer(Prediction.class, new PredictionDeserializer());
+
+		predictionObjectMapper = new ObjectMapper();
+		predictionObjectMapper.registerModule(module);
+
+		// Training the model if classifier is not present
+		val classifierPickleFile = getClassifierPickleFile();
+		if (!classifierPickleFile.exists()) {
+			trainPredictionModel();
+		} else {
+			log.info("Found classifier: {}", classifierPickleFile.getAbsolutePath());
+		}
 	}
 
 	@Override
@@ -89,13 +134,16 @@ public class PredictionServiceImpl implements PredictionService {
 		val output = executePredictionScript(new String[] {
 
 				// Script execution command
-				pythonExecutable, pythonScript, "train",
+				pythonExecutable, pythonScript, trainSubcommand,
 
-				// Prediction file
-				"-D", exportDataDirectory.getAbsolutePath(),
+				// Game data export directory
+				"-D", dataDirectory.getAbsolutePath(),
 
-				// Model out directory
-				"-O", modelOutDirectory.getAbsolutePath()
+				// Metadata export directory
+				"-M", metadataDirectory.getAbsolutePath(),
+
+				// Classifier pickle file path
+				"-P", getClassifierPickleFile().getAbsolutePath()
 
 		});
 		log.info("Prediction Model's training output:\n{}", String.join("\n", output));
@@ -121,7 +169,8 @@ public class PredictionServiceImpl implements PredictionService {
 			return;
 		}
 
-		val csv = exportCSVFile(game, orderedPlayers, exportDataDirectory, "export-" + System.currentTimeMillis());
+		val filename = String.format("%s-%s", game.getCode(), System.currentTimeMillis());
+		val csv = exportCSVFile(game, orderedPlayers, dataDirectory, filename);
 		if (Objects.isNull(csv)) {
 			log.error("No CSV exported! Skipping training the model!");
 			return;
@@ -135,44 +184,48 @@ public class PredictionServiceImpl implements PredictionService {
 	@Override
 	@Transactional
 	@UpdateMapping(UpdateType.PREDICTION)
-	public Prediction executePredictionModel(Player player) {
+	public List<Prediction> executePredictionModel(Game game) {
 
 		// Fetching new reference
-		player = playerService.getPlayerById(player.getId());
-		log.info("Testing prediction model on {} for game: {}", player.getUsername(), player.getGameCode());
+		val players = playerService.getActivePlayersByGame(game);
+		log.info("Testing prediction model for game: {}", game.getCode());
 
 		// Exporting player data
-		val csv = exportCSVFile(player.getGame(), List.of(player), predictFileDirectory, player.getGamePlayerKey());
+		val csv = exportCSVFile(game, players, testDirectory, game.getCode());
 		if (Objects.isNull(csv)) {
-			return Prediction.UNKNOWN;
+			log.error("No CSV exported! Skipping executing the model!");
+			return List.of();
 		}
 
 		// Executing prediction script
 		val output = executePredictionScript(new String[] {
 
 				// Script execution command
-				pythonExecutable, pythonScript, "predict",
+				pythonExecutable, pythonScript, predictSubcommand,
 
 				// Prediction file
-				"-P", csv.getAbsolutePath(),
+				"-P", getClassifierPickleFile().getAbsolutePath(),
 
 				// Model out directory
-				"-M", modelOutDirectory.getAbsolutePath()
+				"-T", csv.getAbsolutePath()
 
 		});
 
 		// Deleting prediction file
 		csv.delete();
 
-		// Extracting prediction results
-		if (output == null || output.size() != 3) {
-			return Prediction.UNKNOWN;
-		}
-		val result = Integer.valueOf(output.get(2).split(" ")[1]);
-		val prediction = result == 1 ? Prediction.WINNER : Prediction.BANKRUPT;
+		// Loading predictions
+		return predictionRepository.saveAll(loadPredictions(game, output));
+	}
 
-		log.info("{} predicted to be {} for game: {}", player.getUsername(), prediction, player.getGameCode());
-		return prediction;
+	@Override
+	public List<Prediction> getPredictionsByGame(Game game) {
+		return predictionRepository.findByGameOrderById(game);
+	}
+
+	@Override
+	public void clearPredictions(Game game) {
+		predictionRepository.deleteByGame(game);
 	}
 
 	private File exportCSVFile(Game game, List<Player> players, File directory, String filename) {
@@ -247,14 +300,90 @@ public class PredictionServiceImpl implements PredictionService {
 		return headers;
 	}
 
+	private void validateDirectories() {
+		for (File directory : List.of(dataDirectory, metadataDirectory, classifierDirectory, testDirectory)) {
+			if (!directory.exists()) {
+				Assert.state(directory.mkdirs(), "Unable to create directory: " + directory);
+			}
+		}
+		log.info("Data Directory: {}", dataDirectory.getAbsolutePath());
+		log.info("Metadata Directory: {}", metadataDirectory.getAbsolutePath());
+		log.info("Classifier Directory: {}", classifierDirectory.getAbsolutePath());
+		log.info("Test Directory: {}", testDirectory.getAbsolutePath());
+	}
+
+	private File getClassifierPickleFile() {
+		return Paths.get(classifierDirectory.getAbsolutePath(), classifierPickleFileName).toFile();
+	}
+
+	private List<Prediction> loadPredictions(Game game, List<String> output) {
+
+		// Getting prediction file's reference
+		val predictionFileName = String.format("%s.json", game.getCode());
+		val predictionFile = Paths.get(testDirectory.getAbsolutePath(), predictionFileName).toFile();
+
+		try {
+
+			// Checking output and ensuring prediction file exists
+			Assert.notEmpty(output, "No output from prediction script!");
+			Assert.isTrue(output.stream().anyMatch(line -> line.contains(predictionFileName)),
+					"Prediction file name not in output!");
+			Assert.isTrue(predictionFile.exists(), "Prediction file doesn't exist!");
+
+			// Returning predictions
+			val predictions = predictionObjectMapper.readValue(predictionFile, Prediction[].class);
+			return Arrays.asList(predictions);
+
+		} catch (Exception ex) {
+
+			log.error("Unable to load predictions! Message: {}", ex.getMessage());
+			log.debug(ex);
+			return List.of();
+
+		} finally {
+
+			// Deleting the prediction file
+			if (predictionFile.exists()) {
+				predictionFile.delete();
+			}
+
+		}
+	}
+
+	private void validateGameIntegrity(Game game, List<Player> players) {
+
+		val case1 = players.size() > 1;
+		Assert.isTrue(case1, "More than 1 player required!");
+
+		val case2 = Objects.isNull(game.getAllowedSkipsCount());
+		val case3 = players.stream().allMatch(player -> player.getRemainingSkipsCount() > 0);
+		Assert.isTrue(case2 || case3, "All players must have more than 0 remaining skips!");
+
+		val activePlayers = players.stream().filter(player -> !player.isBankrupt()).toList();
+		val bankruptPlayers = players.stream().filter(Player::isBankrupt).toList();
+
+		val case4 = activePlayers.size() == 1;
+		val case5 = bankruptPlayers.size() == players.size() - 1;
+		val case6 = activePlayers.size() + bankruptPlayers.size() == players.size();
+		Assert.isTrue(case4, "Only 1 active player should remain!");
+		Assert.isTrue(case5, "Apart from 1 active player, all other players should be bankrupt!");
+		Assert.isTrue(case6, "Active & bankrupt players count should add up to total players count!");
+
+		int order = 1;
+		for (Player player : players) {
+			Assert.isTrue(player.getBankruptcyOrder() == order++, "Inconsistent bankruptcy order!");
+		}
+	}
+
 	@NoArgsConstructor(access = AccessLevel.PRIVATE)
 	private class CSVColumn {
 		// Game-related columns
 		private static final String GAME_EXPORT_TIMESTAMP = "game.export.timestamp";
+		private static final String GAME_CODE = "game.code";
 		private static final String GAME_BANKRUPTCY_ORDER = "game.bankruptcy-order";
 
 		// Player-related columns
-		private static final String PLAYER_USERNAME = "player.username";
+		private static final String PLAYER_ID = "player.id";
 		private static final String PLAYER_BASE_CASH = "player.base-cash";
 		private static final String PLAYER_STATE = "player.state";
 
@@ -328,10 +457,12 @@ public class PredictionServiceImpl implements PredictionService {
 			switch (header) {
 			case CSVColumn.GAME_EXPORT_TIMESTAMP:
 				return timestamp;
+			case CSVColumn.GAME_CODE:
+				return player.getGameCode();
 			case CSVColumn.GAME_BANKRUPTCY_ORDER:
 				return order;
-			case CSVColumn.PLAYER_USERNAME:
-				return player.getUsername();
+			case CSVColumn.PLAYER_ID:
+				return player.getId();
 			case CSVColumn.PLAYER_BASE_CASH:
 				return player.getBaseCash();
 			case CSVColumn.PLAYER_STATE:
@@ -374,40 +505,42 @@ public class PredictionServiceImpl implements PredictionService {
 
 	}
 
-	private void validateDirectories() {
-		for (File directory : List.of(exportDataDirectory, modelOutDirectory, predictFileDirectory)) {
-			if (!directory.exists()) {
-				Assert.state(directory.mkdirs(), "Unable to create directory: " + directory);
+	private class PredictionDeserializer extends StdDeserializer<Prediction> {
+
+		private static final long serialVersionUID = -8567774160048687462L;
+
+		private static final String PLAYER_ID_FIELD = "player_id";
+		private static final String PROBA_FIELD = "proba";
+		private static final String PREDICT_FIELD = "predict";
+
+		private PredictionDeserializer() {
+			super(Prediction.class);
+		}
+
+		@Override
+		public Prediction deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
+			val node = p.getCodec().readTree(p);
+			Assert.isTrue(node.isObject(), "JSON request is not object!");
+
+			// Validating JSON structure
+			Assert.notNull(node.get(PLAYER_ID_FIELD), "Player ID field not present in JSON!");
+			Assert.notNull(node.get(PROBA_FIELD), "Proba field not present in JSON!");
+			Assert.notNull(node.get(PREDICT_FIELD), "Predict field not present in JSON!");
+
+			// Extracting values from JSON
+			val playerId = ((IntNode) node.get(PLAYER_ID_FIELD)).asLong();
+			val proba = new ArrayList<Double>(2);
+			for (JsonNode probaValue : ((ArrayNode) node.get(PROBA_FIELD))) {
+				proba.add(((DoubleNode) probaValue).asDouble());
 			}
+			val predictionValue = ((IntNode) node.get(PREDICT_FIELD)).asInt();
+
+			// Creating Prediction instance
+			val player = playerService.getPlayerById(playerId);
+			val type = predictionValue == 1 ? Type.WINNER : Type.BANKRUPT;
+			return new Prediction(player, proba.get(0), proba.get(1), type);
 		}
-		log.info("Export Data Directory: {}", exportDataDirectory.getAbsolutePath());
-		log.info("Model Out Directory: {}", modelOutDirectory.getAbsolutePath());
-		log.info("Predict File Directory: {}", predictFileDirectory.getAbsolutePath());
-	}
 
-	private void validateGameIntegrity(Game game, List<Player> players) {
-
-		val case1 = players.size() > 1;
-		Assert.isTrue(case1, "More than 1 player required!");
-
-		val case2 = Objects.isNull(game.getAllowedSkipsCount());
-		val case3 = players.stream().allMatch(player -> player.getRemainingSkipsCount() > 0);
-		Assert.isTrue(case2 || case3, "All players must have more than 0 remaining skips!");
-
-		val activePlayers = players.stream().filter(player -> !player.isBankrupt()).toList();
-		val bankruptPlayers = players.stream().filter(Player::isBankrupt).toList();
-
-		val case4 = activePlayers.size() == 1;
-		val case5 = bankruptPlayers.size() == players.size() - 1;
-		val case6 = activePlayers.size() + bankruptPlayers.size() == players.size();
-		Assert.isTrue(case4, "Only 1 active player should remain!");
-		Assert.isTrue(case5, "Apart from 1 active player, all other players should be bankrupt!");
-		Assert.isTrue(case6, "Active & bankrupt players count should add up to total players count!");
-
-		int order = 1;
-		for (Player player : players) {
-			Assert.isTrue(player.getBankruptcyOrder() == order++, "Inconsistent bankruptcy order!");
-		}
 	}
 
 }

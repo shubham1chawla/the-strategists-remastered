@@ -1,5 +1,6 @@
 package com.strategists.game.controller;
 
+import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +26,7 @@ import com.strategists.game.response.GameResponse;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
+import com.strategists.game.service.PredictionService;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -52,6 +54,9 @@ public class GameController {
 	@Autowired
 	private TrendRepository trendRepository;
 
+	@Autowired(required = false)
+	private PredictionService predictionService;
+
 	@GetMapping("/{code}")
 	public ResponseEntity<GameResponse> getGameResponse(@PathVariable String code) {
 		try {
@@ -60,13 +65,18 @@ public class GameController {
 			val game = gameService.getGameByCode(code);
 
 			// Creating response for the game
-			val response = GameResponse.builder().game(game).players(playerService.getPlayersByGame(game))
+			val builder = GameResponse.builder().game(game).players(playerService.getPlayersByGame(game))
 					.lands(landService.getLandsByGame(game))
 					.activities(activityRepository.findByGameOrderByIdDesc(game))
-					.trends(trendRepository.findByGameOrderByIdAsc(game)).build();
+					.trends(trendRepository.findByGameOrderByIdAsc(game));
+
+			// Adding predictions, if enabled
+			if (Objects.nonNull(predictionService)) {
+				builder.predictions(predictionService.getPredictionsByGame(game));
+			}
 
 			// Responding with 200
-			return ResponseEntity.ok(response);
+			return ResponseEntity.ok(builder.build());
 
 		} catch (Exception ex) {
 			log.warn(ex.getMessage());

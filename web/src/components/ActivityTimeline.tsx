@@ -29,7 +29,10 @@ import { parseActivity } from '../utils';
 
 export const ActivityTimeline = () => {
   const { filteredActivites, subscribedTypes } = useActivities();
-  const [api, contextHolder] = notification.useNotification({ maxCount: 3 });
+  const [api, contextHolder] = notification.useNotification({
+    stack: false,
+    maxCount: 4,
+  });
   const dispatch = useDispatch();
 
   const formatUpdateType = (type: UpdateType): string => {
