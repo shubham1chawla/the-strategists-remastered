@@ -3,6 +3,7 @@ import { ActivityState, activityReducer } from './activity';
 import { LobbyState, lobbyReducer } from './lobby';
 import { TrendState, trendReducer } from './trends';
 import { LoginState, loginReducer } from './login';
+import { PredictionState, predictionReducer } from './predictions';
 import logger from 'redux-logger';
 
 export interface State {
@@ -10,6 +11,7 @@ export interface State {
   lobby: LobbyState;
   trend: TrendState;
   login: LoginState;
+  prediction: PredictionState;
 }
 
 export const store = configureStore({
@@ -18,6 +20,7 @@ export const store = configureStore({
     lobby: lobbyReducer,
     trend: trendReducer,
     login: loginReducer,
+    prediction: predictionReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
   middleware: (defaultMiddlewares) => {

@@ -6,6 +6,8 @@ import {
   Land,
   LobbyActions,
   Player,
+  Prediction,
+  PredictionActions,
   Trend,
   TrendActions,
 } from '../redux';
@@ -19,6 +21,7 @@ interface GameResponse {
   lands: Land[];
   activities: Activity[];
   trends: Trend[];
+  predictions: Prediction[] | null;
 }
 
 export const syncGameStates = (
@@ -36,6 +39,7 @@ export const syncGameStates = (
         lands,
         activities,
         trends,
+        predictions,
       } = data;
       [
         LobbyActions.setState(state),
@@ -47,6 +51,7 @@ export const syncGameStates = (
         LobbyActions.setLands(lands),
         ActivityActions.setActivities(activities),
         TrendActions.setTrends(trends),
+        PredictionActions.setPredictions(predictions || []),
       ].forEach(dispatch);
     })
     .catch(console.error);
