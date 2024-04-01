@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Game;
-import com.strategists.game.entity.Player;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.service.CleanUpService;
@@ -46,6 +45,9 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
 	protected void reset(Game game) {
 		activityRepository.deleteByGame(game);
 		trendRepository.deleteByGame(game);
+		if (Objects.nonNull(predictionService)) {
+			predictionService.clearPredictions(game);
+		}
 	}
 
 	protected void trainPredictionModelAsync(Game game) {
@@ -60,11 +62,11 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
 		}
 	}
 
-	protected void executePredictionModelAsync(Player player) {
+	protected void executePredictionModelAsync(Game game) {
 		if (Objects.nonNull(predictionService)) {
 			CompletableFuture.runAsync(() -> {
 				try {
-					predictionService.executePredictionModel(player);
+					predictionService.executePredictionModel(game);
 				} catch (Exception ex) {
 					log.error("Failed to execute prediction model!", ex);
 				}

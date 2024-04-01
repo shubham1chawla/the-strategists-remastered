@@ -40,7 +40,10 @@ export const Login = () => {
   const [workflow, setWorkflow] = useState<Workflow>('NOT_VERIFIED');
   const [credential, setCredential] = useState<string | null>(null);
   const [joinDisabled, setJoinDisabled] = useState(true);
-  const [api, contextHolder] = notification.useNotification();
+  const [api, contextHolder] = notification.useNotification({
+    stack: false,
+    maxCount: 4,
+  });
   const [form] = Form.useForm<{ code: string }>();
   const dispatch = useDispatch();
   const navigate = useNavigate();

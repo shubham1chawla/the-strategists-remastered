@@ -27,7 +27,10 @@ interface UpdatePayload {
 export const Update = () => {
   const { gameCode, playerId } = useLogin();
   const { subscribedTypes } = useActivities();
-  const [api, contextHolder] = notification.useNotification();
+  const [api, contextHolder] = notification.useNotification({
+    stack: false,
+    maxCount: 4,
+  });
   const dispatch = useDispatch();
 
   /**

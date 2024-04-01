@@ -29,6 +29,9 @@ public class WinUpdateHandler extends AbstractUpdateHandler<WinUpdatePayload> {
 		// If no winner is declared, avoid sending update
 		if (Objects.isNull(player)) {
 
+			// Executing prediction model
+			executePredictionModelAsync(game);
+
 			// Scheduling player skip task
 			scheduleSkipPlayerTask(game);
 
