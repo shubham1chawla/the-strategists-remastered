@@ -7,6 +7,7 @@ import {
   ActivityActions,
   LobbyActions,
   LoginActions,
+  PredictionActions,
   TrendActions,
   UpdateType,
   useActivities,
@@ -105,17 +106,15 @@ export const Update = () => {
           dispatch(LobbyActions.patchPlayers([payload]));
           break;
         case 'PING':
-        case 'PREDICTION':
           // Do nothing
+          break;
+        case 'PREDICTION':
+          dispatch(PredictionActions.addPredictions(payload));
           break;
         case 'RENT':
           dispatch(LobbyActions.patchPlayers(payload));
           break;
         case 'RESET':
-          /**
-           * Unknown issue here. Some clients refresh game's state but some don't (rarely).
-           * Adding the setTimeout seems to work here but root cause is still unknown.
-           */
           setTimeout(() => syncGameStates(gameCode, dispatch));
           break;
         case 'SKIP':
