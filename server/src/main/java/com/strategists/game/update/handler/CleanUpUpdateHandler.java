@@ -23,6 +23,9 @@ public class CleanUpUpdateHandler extends AbstractUpdateHandler<CleanUpUpdatePay
 
 		// Sending update
 		sendUpdate(game, new CleanUpUpdatePayload());
+
+		// Closing update SSE Emitters for the game
+		closeEmitters(game);
 	}
 
 }
