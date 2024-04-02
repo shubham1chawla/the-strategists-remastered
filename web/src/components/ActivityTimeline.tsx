@@ -68,33 +68,37 @@ export const ActivityTimeline = () => {
           expandIcon={(props) => (
             <SettingOutlined rotate={props.isActive ? 90 : 0} />
           )}
-        >
-          <Collapse.Panel
-            key="1"
-            header={
-              <Space>
-                <BarsOutlined />
-                <span>Activity Timeline</span>
-              </Space>
-            }
-          >
-            <Space>
-              <InfoCircleOutlined />
-              <span>Personalize your Timeline & Notifications.</span>
-            </Space>
-            <Select
-              className="strategists-activity__filters"
-              mode="multiple"
-              maxTagCount={3}
-              value={subscribedTypes}
-              onChange={(types) => setSubscribedTypes(types)}
-              options={getSubscribableTypes().map((type) => ({
-                label: formatUpdateType(type),
-                value: type,
-              }))}
-            />
-          </Collapse.Panel>
-        </Collapse>
+          items={[
+            {
+              key: '1',
+              label: (
+                <Space>
+                  <BarsOutlined />
+                  <span>Activity Timeline</span>
+                </Space>
+              ),
+              children: (
+                <>
+                  <Space>
+                    <InfoCircleOutlined />
+                    <span>Personalize your Timeline & Notifications.</span>
+                  </Space>
+                  <Select
+                    className="strategists-activity__filters"
+                    mode="multiple"
+                    maxTagCount={3}
+                    value={subscribedTypes}
+                    onChange={(types) => setSubscribedTypes(types)}
+                    options={getSubscribableTypes().map((type) => ({
+                      label: formatUpdateType(type),
+                      value: type,
+                    }))}
+                  />
+                </>
+              ),
+            },
+          ]}
+        />
         <Timeline
           className="strategists-activity__timeline"
           items={filteredActivites.map((activity) => {
