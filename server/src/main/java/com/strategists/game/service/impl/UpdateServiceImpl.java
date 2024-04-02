@@ -37,6 +37,16 @@ public class UpdateServiceImpl implements UpdateService {
 	}
 
 	@Override
+	public void closeEmitters(Game game) {
+		emitters.entrySet().forEach(entry -> {
+			if (!filterByGame(game, entry.getKey())) {
+				return;
+			}
+			entry.getValue().complete();
+		});
+	}
+
+	@Override
 	public void sendUpdate(Game game, UpdatePayload<?> payload) {
 		sendUpdate(emitterKey -> filterByGame(game, emitterKey), payload);
 	}

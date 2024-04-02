@@ -102,4 +102,8 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
 		updateService.sendUpdate(game, update);
 	}
 
+	protected void closeEmitters(Game game) {
+		updateService.closeEmitters(game);
+	}
+
 }

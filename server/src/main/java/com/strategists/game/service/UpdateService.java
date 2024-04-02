@@ -10,6 +10,8 @@ public interface UpdateService {
 
 	SseEmitter registerEmitter(Player player);
 
+	void closeEmitters(Game game);
+
 	void sendUpdate(Game game, UpdatePayload<?> payload);
 
 	void sendPing();
