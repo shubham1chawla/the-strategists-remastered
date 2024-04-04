@@ -27,3 +27,7 @@ Follow the steps mentioned below to understand how to setup the React applicatio
 ### Troubleshooting
 
 - To check the files in the Docker container, enter its shell using the `docker exec -it <CONTAINER_ID or CONTAINER_NAME> sh` command.
+
+## References
+
+- Refer to [this article](https://observablehq.com/@antv/g2-spec) to explore Antd G2 visualization specs and examples.

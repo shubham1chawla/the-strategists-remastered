@@ -36,6 +36,9 @@ public class Activity implements Serializable {
 	private Long id;
 
 	@Column(nullable = false)
+	private Integer turn;
+
+	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private UpdateType type;
 
@@ -62,6 +65,7 @@ public class Activity implements Serializable {
 
 	public Activity(Game game, UpdateType type, String... values) {
 		this.game = game;
+		this.turn = game.getTurn();
 		this.type = type;
 		this.val1 = values.length > 0 ? values[0] : null;
 		this.val2 = values.length > 1 ? values[1] : null;

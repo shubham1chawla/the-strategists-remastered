@@ -36,6 +36,9 @@ public class Trend implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(nullable = false)
+	private Integer turn;
+
 	@JsonInclude(Include.NON_NULL)
 	@Column(nullable = true)
 	private Long playerId;
@@ -65,6 +68,7 @@ public class Trend implements Serializable {
 	public static Trend fromPlayer(Player player) {
 		val trend = new Trend();
 		trend.setGame(player.getGame());
+		trend.setTurn(player.getGame().getTurn());
 		trend.setPlayerId(player.getId());
 		trend.setCash(player.getCash());
 		trend.setNetWorth(player.getNetWorth());
@@ -74,6 +78,7 @@ public class Trend implements Serializable {
 	public static Trend fromLand(Land land) {
 		val trend = new Trend();
 		trend.setGame(land.getGame());
+		trend.setTurn(land.getGame().getTurn());
 		trend.setLandId(land.getId());
 		trend.setMarketValue(land.getMarketValue());
 		return trend;

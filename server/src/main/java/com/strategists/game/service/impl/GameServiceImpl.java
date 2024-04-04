@@ -111,6 +111,7 @@ public class GameServiceImpl implements GameService {
 
 		// Creating game instance
 		Game game = new Game();
+		game.setTurn(0);
 		game.setState(State.LOBBY);
 
 		// Setting up game's instance with required configurations
@@ -155,7 +156,8 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public void startGame(Game game) {
 
-		// Changing game's state
+		// Changing game's state and other information
+		game.setTurn(1);
 		game.setState(State.ACTIVE);
 		game = gameRepository.save(game);
 
@@ -175,6 +177,10 @@ public class GameServiceImpl implements GameService {
 		if (winner.isPresent()) {
 			return winner.get();
 		}
+
+		// Updating game's turn
+		game.setTurn(game.getTurn() + 1);
+		game = gameRepository.save(game);
 
 		// Assigning turn to next player
 		val player = playerService.nextPlayer(playerService.getCurrentPlayer(game));
@@ -213,7 +219,8 @@ public class GameServiceImpl implements GameService {
 	@UpdateMapping(UpdateType.RESET)
 	public void resetGame(Game game) {
 
-		// Changing game's state
+		// Changing game's state and other information
+		game.setTurn(0);
 		game.setState(State.LOBBY);
 		game.setEndedAt(null);
 		game = gameRepository.save(game);

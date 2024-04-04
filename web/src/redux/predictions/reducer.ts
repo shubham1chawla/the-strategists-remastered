@@ -5,6 +5,7 @@ export interface Prediction {
   winnerProbability: number;
   bankruptProbability: number;
   type: 'WINNER' | 'BANKRUPT';
+  turn: number;
 }
 
 export type PredictionState = Prediction[];

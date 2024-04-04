@@ -4,11 +4,13 @@ export interface PlayerTrend {
   playerId: number;
   cash: number;
   netWorth: number;
+  turn: number;
 }
 
 export interface LandTrend {
   landId: number;
   marketValue: number;
+  turn: number;
 }
 
 export type Trend = Partial<PlayerTrend> & Partial<LandTrend>;
