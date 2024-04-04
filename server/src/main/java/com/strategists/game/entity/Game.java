@@ -39,6 +39,9 @@ public class Game implements Serializable {
 	private String code;
 
 	@Column(nullable = false, unique = false)
+	private Integer turn;
+
+	@Column(nullable = false, unique = false)
 	private Integer minPlayersCount;
 
 	@Column(nullable = false, unique = false)

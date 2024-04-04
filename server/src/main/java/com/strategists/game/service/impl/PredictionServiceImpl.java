@@ -356,8 +356,10 @@ public class PredictionServiceImpl implements PredictionService {
 		Assert.isTrue(case1, "More than 1 player required!");
 
 		val case2 = Objects.isNull(game.getAllowedSkipsCount());
-		val case3 = players.stream().allMatch(player -> player.getRemainingSkipsCount() > 0);
-		Assert.isTrue(case2 || case3, "All players must have more than 0 remaining skips!");
+		if (!case2) {
+			val case3 = players.stream().allMatch(player -> player.getRemainingSkipsCount() > 0);
+			Assert.isTrue(case3, "All players must have more than 0 remaining skips!");
+		}
 
 		val activePlayers = players.stream().filter(player -> !player.isBankrupt()).toList();
 		val bankruptPlayers = players.stream().filter(Player::isBankrupt).toList();

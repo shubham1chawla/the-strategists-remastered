@@ -32,7 +32,9 @@ import {
   Player,
   PlayerLand,
   PlayerTrend,
+  Prediction,
   useLobby,
+  usePredictions,
   useTrends,
 } from '../redux';
 import { CssVariables } from '../App';
@@ -288,7 +290,7 @@ export interface TrendsProps {
 }
 
 export const Trends = (props: TrendsProps) => {
-  const trends = useTrends();
+  const { playerTrends, landTrends } = useTrends();
   const { perspective, id } = props;
 
   useEffect(() => {
@@ -324,31 +326,29 @@ export const Trends = (props: TrendsProps) => {
 
     switch (perspective) {
       case 'player':
-        const playerTrends = trends.filter(({ playerId }) => playerId === id);
-        drawPlayerTrends(chart, playerTrends as PlayerTrend[]);
+        drawPlayerTrends(
+          chart,
+          playerTrends.filter(({ playerId }) => playerId === id)
+        );
         break;
       case 'land':
-        const landTrends = trends.filter(({ landId }) => landId === id);
-        drawLandTrends(chart, landTrends as LandTrend[]);
+        drawLandTrends(
+          chart,
+          landTrends.filter(({ landId }) => landId === id)
+        );
         break;
     }
     chart.render();
-  }, [id, perspective, trends]);
+  }, [id, perspective, playerTrends, landTrends]);
 
   return <div id="trends-container"></div>;
 };
 
 const drawPlayerTrends = (chart: Chart, trends: PlayerTrend[]) => {
-  // Creating player's net worth trends
-  const netWorths = trends.map(({ netWorth }, i) => ({
-    turn: i + 1,
-    netWorth,
-  }));
-
   // Adding area marks
   chart
     .area()
-    .data(netWorths)
+    .data(trends)
     .encode('x', 'turn')
     .encode('y', 'netWorth')
     .scale('y', { domainMin: 0 })
@@ -356,21 +356,12 @@ const drawPlayerTrends = (chart: Chart, trends: PlayerTrend[]) => {
       'fill',
       `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${CssVariables['--accent-color']} 100%)`
     )
-    .tooltip({
-      title: '',
-      items: [
-        {
-          name: 'Turn',
-          field: 'turn',
-          color: 'transparent',
-        },
-      ],
-    });
+    .tooltip(false);
 
   // Adding line marks
   chart
     .line()
-    .data(netWorths)
+    .data(trends)
     .encode('x', 'turn')
     .encode('y', 'netWorth')
     .scale('y', { domainMin: 0 })
@@ -387,16 +378,10 @@ const drawPlayerTrends = (chart: Chart, trends: PlayerTrend[]) => {
       ],
     });
 
-  // Creating player's cash trends
-  const cashs = trends.map(({ cash }, i) => ({
-    turn: i + 1,
-    cash,
-  }));
-
   // Adding cash line marks
   chart
     .line()
-    .data(cashs)
+    .data(trends)
     .encode('x', 'turn')
     .encode('y', 'cash')
     .scale('y', { domainMin: 0 })
@@ -415,16 +400,10 @@ const drawPlayerTrends = (chart: Chart, trends: PlayerTrend[]) => {
 };
 
 const drawLandTrends = (chart: Chart, trends: LandTrend[]) => {
-  // Creating player's net worth trends
-  const marketValues = trends.map(({ marketValue }, i) => ({
-    turn: i + 1,
-    marketValue,
-  }));
-
   // Adding area marks
   chart
     .area()
-    .data(marketValues)
+    .data(trends)
     .encode('x', 'turn')
     .encode('y', 'marketValue')
     .scale('y', { domainMin: 0 })
@@ -446,7 +425,7 @@ const drawLandTrends = (chart: Chart, trends: LandTrend[]) => {
   // Adding line marks
   chart
     .line()
-    .data(marketValues)
+    .data(trends)
     .encode('x', 'turn')
     .encode('y', 'marketValue')
     .scale('y', { domainMin: 0 })
@@ -462,6 +441,134 @@ const drawLandTrends = (chart: Chart, trends: LandTrend[]) => {
         },
       ],
     });
+};
+
+/**
+ * -----  PREDICTION BELOW  -----
+ */
+
+export interface VisualPredictionProps {
+  player: Player;
+}
+
+export const VisualPrediction = (props: VisualPredictionProps) => {
+  const predictions = usePredictions();
+  const { playerTrends } = useTrends();
+  const { players } = useLobby();
+  const { player } = props;
+
+  useEffect(() => {
+    // Creating chart's instance
+    const chart = new Chart({
+      container: 'predictions-container',
+      height: 300,
+    });
+
+    // Configuring chart's options
+    chart.options({
+      autoFit: true,
+      axis: {
+        x: {
+          grid: false,
+          title: false,
+          tickFilter: (value: number) => Number.isInteger(value),
+        },
+        y: {
+          grid: true,
+          title: false,
+          tickFilter: (value: number) => false,
+        },
+      },
+      scale: {
+        color: {
+          range: [CssVariables['--accent-color'], CssVariables['--text-color']],
+        },
+      },
+      legend: {
+        color: {
+          position: 'bottom',
+          layout: {
+            justifyContent: 'center',
+            alignItems: 'center',
+            flexDirection: 'column',
+          },
+          labelFormatter: (label: string) =>
+            label === 'Others'
+              ? "Others' winning probability"
+              : `${label}'s winning probability`,
+        },
+      },
+      theme: getChartTheme(),
+    });
+
+    // Drawing predictions visualization
+    const items = getVisualPredictionItems(
+      player,
+      players,
+      predictions,
+      playerTrends
+    );
+    drawPredictions(chart, player, items);
+
+    // Rendering chart
+    chart.render();
+  }, [player, players, predictions, playerTrends]);
+
+  return <div id="predictions-container"></div>;
+};
+
+const drawPredictions = (
+  chart: Chart,
+  player: Player,
+  items: VisualPredictionItem[]
+) => {
+  // Adding data to the chart's instance
+  chart
+    .data(items)
+    .transform([{ type: 'stackY' }, { type: 'normalizeY' }])
+    .encode('x', 'turn')
+    .encode('y', 'share')
+    .encode('color', 'name');
+
+  // Styling & tooltip interactions for area
+  chart
+    .area()
+    .tooltip({
+      title: '',
+      items: [
+        {
+          field: 'share',
+          name: 'Share',
+          valueFormatter: '.0%',
+        },
+      ],
+    })
+    .style('fillOpacity', (items: VisualPredictionItem[]) =>
+      items[0].name === player.username ? 1 : 0.3
+    )
+    .style('fill', (items: VisualPredictionItem[]) =>
+      items[0].name === player.username
+        ? `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${CssVariables['--accent-color']} 100%)`
+        : `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${CssVariables['--text-color']} 100%)`
+    );
+
+  // Styling & tooltip interactions for line
+  chart
+    .line()
+    .tooltip(false)
+    .style('stroke', (items: VisualPredictionItem[]) =>
+      items[0].name === player.username
+        ? CssVariables['--accent-color']
+        : CssVariables['--text-color']
+    );
+
+  // Updating tooltip position
+  chart.interaction('tooltip', {
+    position: 'left', // Matching the positioning of map's tooltip
+  });
+
+  // Disabling legend filtering
+  chart.interaction('legendFilter', false);
 };
 
 /**
@@ -585,4 +692,150 @@ export const getChartTheme = () => {
       viewFill: 'transparent',
     },
   };
+};
+
+interface VisualPredictionItem {
+  name: string;
+  turn: number;
+  share: number;
+  key?: string;
+  method: 'PREDICTION' | 'NETWORTH';
+}
+
+const getVisualPredictionItems = (
+  player: Player,
+  players: Player[],
+  predictions: Prediction[],
+  playerTrends: PlayerTrend[]
+): VisualPredictionItem[] => {
+  // Utility method to collect by turn and player ID
+  const collectByTurnAndPlayerId = <
+    T extends { playerId: number; turn: number }
+  >(
+    list: T[]
+  ): Map<number, Map<number, T>> => {
+    return list.reduce((turnMap, element) => {
+      const playerMap = turnMap.get(element.turn) || new Map<number, T>();
+      playerMap.set(element.playerId, element);
+      turnMap.set(element.turn, playerMap);
+      return turnMap;
+    }, new Map<number, Map<number, T>>());
+  };
+
+  // Utility method to add dummy player record if missing
+  const addMissingPlayers = <T extends { playerId: number; turn: number }>(
+    map: Map<number, Map<number, T>>,
+    dummy: T
+  ): void => {
+    map.forEach((playerMap, turn) => {
+      players.forEach((p) => {
+        if (playerMap.has(p.id)) return;
+        playerMap.set(p.id, {
+          ...dummy,
+          playerId: p.id,
+          turn,
+        });
+      });
+    });
+  };
+
+  // Extracting turn-wise player trends
+  const turnWisePlayerTrends = collectByTurnAndPlayerId(playerTrends);
+  addMissingPlayers(turnWisePlayerTrends, {
+    cash: 0,
+    netWorth: 0,
+    playerId: -1,
+    turn: -1,
+  });
+
+  // Extracting turn-wise predictions
+  const turnWisePredictions = collectByTurnAndPlayerId(predictions);
+  addMissingPlayers(turnWisePredictions, {
+    winnerProbability: 0,
+    bankruptProbability: 1,
+    type: 'BANKRUPT',
+    playerId: -1,
+    turn: -1,
+  });
+
+  // Calculating maximum turns for the current game
+  const maxTurns = Array.from(turnWisePlayerTrends.keys()).reduce(
+    (max, turn) => Math.max(turn, max),
+    0
+  );
+
+  // Utility method to find the visualization method
+  const getVisualizationMethod = (
+    playerPredictionMap?: Map<number, Prediction>
+  ): 'NETWORTH' | 'PREDICTION' => {
+    if (!playerPredictionMap) return 'NETWORTH';
+    const playerPredictions = Array.from(playerPredictionMap.values());
+    playerPredictions.sort(
+      (p1, p2) => p2.winnerProbability - p1.winnerProbability
+    );
+    return playerPredictions.length > 1 &&
+      playerPredictions[0].type === 'WINNER' &&
+      Math.abs(
+        playerPredictions[0].winnerProbability -
+          playerPredictions[1].winnerProbability
+      ) >= 0.01
+      ? 'PREDICTION'
+      : 'NETWORTH';
+  };
+
+  // Preparing visual prediction items
+  const items: VisualPredictionItem[] = [];
+  for (let turn = 1; turn <= maxTurns; turn++) {
+    // Determining whether to use NETWORTH or PREDICTION method for visualization
+    const playerPredictionMap = turnWisePredictions.get(turn);
+    const playerTrendMap = turnWisePlayerTrends.get(turn);
+    const method = getVisualizationMethod(playerPredictionMap);
+
+    // Calculating total share size in the current turn
+    const totalShareSize =
+      method === 'PREDICTION'
+        ? Array.from(playerPredictionMap?.values() || []).reduce(
+            (share, { winnerProbability }) => share + winnerProbability,
+            0
+          )
+        : Array.from(playerTrendMap?.values() || []).reduce(
+            (share, { netWorth }) => share + netWorth,
+            0
+          );
+
+    // Figuring visual prediction item for other players
+    const otherItem: VisualPredictionItem = {
+      name: 'Others',
+      turn,
+      key: `Others-${turn}`,
+      share: 0,
+      method,
+    };
+    players
+      .filter((p) => p.id !== player.id)
+      .forEach((p) => {
+        otherItem.share +=
+          method === 'PREDICTION'
+            ? playerPredictionMap?.get(p.id)?.winnerProbability || 0
+            : playerTrendMap?.get(p.id)?.netWorth || 0;
+      });
+    otherItem.share /= totalShareSize;
+
+    // Figuring visual prediction item for requested player
+    const playerItem: VisualPredictionItem = {
+      name: player.username,
+      turn,
+      key: `${player.username}-${turn}`,
+      share: 0,
+      method,
+    };
+    playerItem.share =
+      method === 'PREDICTION'
+        ? playerPredictionMap?.get(player.id)?.winnerProbability || 0
+        : playerTrendMap?.get(player.id)?.netWorth || 0;
+    playerItem.share /= totalShareSize;
+
+    items.push(playerItem, otherItem);
+  }
+  return items;
 };

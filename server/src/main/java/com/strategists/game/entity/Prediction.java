@@ -41,6 +41,9 @@ public class Prediction implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@Column(nullable = false)
+	private Integer turn;
+
 	@Column(nullable = false, precision = MathUtil.PRECISION)
 	private Double winnerProbability;
 
@@ -65,6 +68,7 @@ public class Prediction implements Serializable {
 
 	public Prediction(Player player, double bankruptProbability, double winnerProbability, Type type) {
 		this.game = player.getGame();
+		this.turn = player.getGame().getTurn();
 		this.player = player;
 		this.bankruptProbability = MathUtil.round(bankruptProbability);
 		this.winnerProbability = MathUtil.round(winnerProbability);

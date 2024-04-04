@@ -39,6 +39,7 @@ import {
   Logo,
   PlayerStats,
   Portfolio,
+  VisualPrediction,
   TabularPortfolio,
   Trends,
   VisualPortfolio,
@@ -92,10 +93,16 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
       ownership,
     });
     setOwnership(0);
-    onCancel();
+    onModalCancel();
 
     // Ending player's turn after investing in any land
     axios.put(`/api/games/${gameCode}/turn`);
+  };
+
+  // Ensuring that if model closes, we are resetting states
+  const onModalCancel = () => {
+    setOwnership(0);
+    onCancel();
   };
 
   return (
@@ -103,7 +110,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
       className="strategists-actions__modal"
       title="Investment Strategy"
       open={!!open}
-      onCancel={onCancel}
+      onCancel={onModalCancel}
       footer={
         <Row justify="space-between" wrap={false}>
           <Space>
@@ -171,7 +178,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
           defaultValue={ownership}
           min={0}
           max={strategy.maxOfferableOwnership}
-          onAfterChange={(value) => setOwnership(value)}
+          onChangeComplete={(value) => setOwnership(value)}
           tooltip={{
             formatter: (value) => `${value}%`,
           }}
@@ -190,26 +197,27 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
         bordered={false}
         ghost={true}
         expandIconPosition="end"
-      >
-        <Collapse.Panel
-          key="1"
-          header={
-            land.totalOwnership > 0 ? (
-              <Space>
-                <SlidersOutlined />
-                <span>Click to check {land.name}'s investments</span>
-              </Space>
-            ) : (
-              <Space>
-                <CheckCircleOutlined />
-                <span>No investments in {land.name}!</span>
-              </Space>
-            )
-          }
-        >
-          <TabularPortfolio perspective="land" playerLands={land.players} />
-        </Collapse.Panel>
-      </Collapse>
+        items={[
+          {
+            key: '1',
+            label:
+              land.totalOwnership > 0 ? (
+                <Space>
+                  <SlidersOutlined />
+                  <span>Click to check {land.name}'s investments</span>
+                </Space>
+              ) : (
+                <Space>
+                  <CheckCircleOutlined />
+                  <span>No investments in {land.name}!</span>
+                </Space>
+              ),
+            children: (
+              <TabularPortfolio perspective="land" playerLands={land.players} />
+            ),
+          },
+        ]}
+      />
     </Modal>
   );
 };
@@ -232,6 +240,30 @@ export const PortfolioModal = (props: Partial<PortfolioModalProps>) => {
   const playerLands = land ? land.players : player ? player.lands : [];
   const id = land ? land.id : player ? player.id : -1;
 
+  const tabItems = [
+    {
+      key: '1',
+      label: 'Trends',
+      children: <Trends perspective={perspective} id={id} />,
+    },
+    {
+      key: '2',
+      label: 'Portfolio',
+      children: (
+        <Portfolio perspective={perspective} playerLands={playerLands} />
+      ),
+    },
+  ];
+
+  // Adding predictions tab
+  if (perspective === 'player' && !!player) {
+    tabItems.push({
+      key: '3',
+      label: 'Predictions',
+      children: <VisualPrediction player={player} />,
+    });
+  }
+
   return (
     <Modal
       title={land ? `Investments' Analysis` : 'Portfolio Analysis'}
@@ -244,25 +276,7 @@ export const PortfolioModal = (props: Partial<PortfolioModalProps>) => {
       ) : player ? (
         <PlayerStats player={player} />
       ) : null}
-      <Tabs
-        centered
-        defaultActiveKey="1"
-        size="large"
-        items={[
-          {
-            key: '1',
-            label: 'Trends',
-            children: <Trends perspective={perspective} id={id} />,
-          },
-          {
-            key: '2',
-            label: 'Portfolio',
-            children: (
-              <Portfolio perspective={perspective} playerLands={playerLands} />
-            ),
-          },
-        ]}
-      />
+      <Tabs centered defaultActiveKey="1" size="large" items={tabItems} />
     </Modal>
   );
 };
@@ -411,6 +425,11 @@ export const WinModal = () => {
                   playerLands={winnerPlayer.lands}
                 />
               ),
+            },
+            {
+              key: '3',
+              label: 'Predictions',
+              children: <VisualPrediction player={winnerPlayer} />,
             },
           ]}
         />

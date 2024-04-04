@@ -24,37 +24,30 @@ interface GameResponse {
   predictions: Prediction[] | null;
 }
 
-export const syncGameStates = (
+export const syncGameStates = async (
   gameCode: string,
   dispatch: Dispatch<AnyAction>
-): void => {
-  axios
-    .get<GameResponse>(`/api/games/${gameCode}`)
-    .then(({ data }) => {
-      const {
-        state,
-        minPlayersCount,
-        maxPlayersCount,
-        players,
-        lands,
-        activities,
-        trends,
-        predictions,
-      } = data;
-      [
-        LobbyActions.setState(state),
-        LobbyActions.setPlayersCountConstraints(
-          minPlayersCount,
-          maxPlayersCount
-        ),
-        LobbyActions.setPlayers(players),
-        LobbyActions.setLands(lands),
-        ActivityActions.setActivities(activities),
-        TrendActions.setTrends(trends),
-        PredictionActions.setPredictions(predictions || []),
-      ].forEach(dispatch);
-    })
-    .catch(console.error);
+): Promise<void> => {
+  const { data } = await axios.get<GameResponse>(`/api/games/${gameCode}`);
+  const {
+    state,
+    minPlayersCount,
+    maxPlayersCount,
+    players,
+    lands,
+    activities,
+    trends,
+    predictions,
+  } = data;
+  [
+    LobbyActions.setState(state),
+    LobbyActions.setPlayersCountConstraints(minPlayersCount, maxPlayersCount),
+    LobbyActions.setPlayers(players),
+    LobbyActions.setLands(lands),
+    ActivityActions.setActivities(activities),
+    TrendActions.setTrends(trends),
+    PredictionActions.setPredictions(predictions || []),
+  ].forEach(dispatch);
 };
 
 export const parseActivity = (activity: Activity): string => {

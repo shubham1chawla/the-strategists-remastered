@@ -47,7 +47,10 @@ export const Dashboard = () => {
     }
 
     // Syncing game's state
-    syncGameStates(gameCode, dispatch);
+    syncGameStates(gameCode, dispatch).catch((error) => {
+      console.error(error);
+      dispatch(LoginActions.logout());
+    });
 
     // Dashboard component's unmount event
     window.addEventListener('beforeunload', alertUser);
