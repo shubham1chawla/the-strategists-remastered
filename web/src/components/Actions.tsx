@@ -6,7 +6,7 @@ import {
   StockOutlined,
   StopOutlined,
 } from '@ant-design/icons';
-import { Button, Dropdown, Space } from 'antd';
+import { Button, Dropdown, Space, notification } from 'antd';
 import { useState } from 'react';
 import { Player, useLobby, useLogin } from '../redux';
 import { InvestmentStrategy } from '../utils';
@@ -110,8 +110,27 @@ interface ActionButtonsProps {
 
 const ActionButtons = (props: ActionButtonsProps) => {
   const { gameCode, title, onInvestClick, isInvestmentDisabled } = props;
+  const [skipping, setSkipping] = useState(false);
+  const [api, contextHolder] = notification.useNotification();
+
+  const onSkip = async () => {
+    try {
+      setSkipping(true);
+      await axios.put(`/api/games/${gameCode}/turn`);
+    } catch (error) {
+      console.error(error);
+      api.error({
+        message: 'Something went wrong!',
+        description: 'Please refresh the page and try again.',
+      });
+    } finally {
+      setSkipping(false);
+    }
+  };
+
   return (
     <>
+      {contextHolder}
       <Space.Compact size="large">
         <Button
           type="primary"
@@ -123,7 +142,9 @@ const ActionButtons = (props: ActionButtonsProps) => {
         </Button>
         <Button
           icon={<StepForwardOutlined />}
-          onClick={() => axios.put(`/api/games/${gameCode}/turn`)}
+          disabled={skipping}
+          onClick={onSkip}
+          loading={skipping}
         >
           Skip
         </Button>
