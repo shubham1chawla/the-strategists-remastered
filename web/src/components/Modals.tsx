@@ -92,7 +92,6 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
       landId: land.id,
       ownership,
     });
-    setOwnership(0);
     onModalCancel();
 
     // Ending player's turn after investing in any land
@@ -127,7 +126,7 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
             )}
           </Space>
           <Space>
-            <Button onClick={onCancel}>Cancel</Button>
+            <Button onClick={onModalCancel}>Cancel</Button>
             <Button
               type="primary"
               disabled={!strategy.feasible}

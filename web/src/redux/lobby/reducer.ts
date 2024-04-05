@@ -16,6 +16,7 @@ export interface Player {
   host: boolean;
   netWorth: number;
   cash: number;
+  bankruptcyOrder: number;
   lands: PlayerLand[];
 
   // Optional fields based on configuration

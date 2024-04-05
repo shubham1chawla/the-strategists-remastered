@@ -1,40 +1,67 @@
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { State } from '../store';
 
 export const useLobby = () => {
   const lobby = useSelector((state: State) => state.lobby);
-
-  // Sorting players in decreasing order of net-worth and remaining skips
-  // Making a copy of players before sorting to avoid direct state mutation.
-  // Reference to the issue -
-  // https://stackoverflow.com/questions/41051302/react-and-redux-uncaught-error-a-state-mutation-was-detected-between-dispatche
-  const sortedPlayers = [...lobby.players].sort((p1, p2) => {
-    if (
-      Number.isInteger(p1.remainingSkipsCount) &&
-      Number.isInteger(p2.remainingSkipsCount) &&
-      p1.netWorth === p2.netWorth
-    ) {
-      return (p2.remainingSkipsCount || 0) - (p1.remainingSkipsCount || 0);
-    }
-    return p2.netWorth - p1.netWorth;
-  });
+  const { players, state } = lobby;
 
   // Determining turn player
-  const turnPlayer =
-    lobby.state === 'ACTIVE' ? lobby.players.find((p) => !!p.turn) : undefined;
+  const turnPlayer = useMemo(
+    () => (state === 'ACTIVE' ? players.find((p) => !!p.turn) : undefined),
+    [state, players]
+  );
 
   // Determining active players
-  const activePlayers = lobby.players.filter((p) => p.state === 'ACTIVE');
+  const activePlayers = useMemo(
+    () => players.filter((p) => p.state === 'ACTIVE'),
+    [players]
+  );
+
+  // Determining bankrupt players
+  const bankruptPlayers = useMemo(
+    () => players.filter((p) => p.state === 'BANKRUPT'),
+    [players]
+  );
 
   // Determining winner player
-  const winnerPlayer =
-    lobby.state === 'ACTIVE' && activePlayers.length === 1
-      ? activePlayers[0]
-      : undefined;
+  const winnerPlayer = useMemo(
+    () =>
+      state === 'ACTIVE' && activePlayers.length === 1
+        ? activePlayers[0]
+        : undefined,
+    [state, activePlayers]
+  );
+
+  /**
+   * Sorting players for lobby -
+   * 1. Active players by net-worth and remaining skips
+   * 2. Bankrupt players by bankruptcy order
+   */
+  const sortedPlayers = useMemo(
+    () => [
+      ...activePlayers.sort((p1, p2) => {
+        if (
+          !!p1.remainingSkipsCount &&
+          !!p2.remainingSkipsCount &&
+          p1.netWorth === p2.netWorth
+        ) {
+          return p2.remainingSkipsCount - p1.remainingSkipsCount;
+        }
+        return p2.netWorth - p1.netWorth;
+      }),
+      ...bankruptPlayers.sort(
+        (p1, p2) => p2.bankruptcyOrder - p1.bankruptcyOrder
+      ),
+    ],
+    [activePlayers, bankruptPlayers]
+  );
 
   return {
     ...lobby,
     sortedPlayers,
+    activePlayers,
+    bankruptPlayers,
     turnPlayer,
     winnerPlayer,
   };
