@@ -26,10 +26,12 @@ public abstract class AbstractSchedulerService implements GenericSchedulerServic
 	private Map<String, ScheduledFuture<?>> futures;
 
 	protected void initialize(String schedulerName, int threadPoolSize) {
+		Assert.hasText(schedulerName, "Thread-pool name can't be empty!");
+		Assert.isTrue(threadPoolSize > 0, "Thread-pool size can't be less than 1!");
 
 		// Setting up scheduler
 		scheduler = new ThreadPoolTaskScheduler();
-		scheduler.setPoolSize(threadPoolSize);
+		scheduler.setPoolSize(Math.min(threadPoolSize, Runtime.getRuntime().availableProcessors()));
 		scheduler.setThreadNamePrefix(schedulerName);
 		scheduler.initialize();
 
