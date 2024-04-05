@@ -774,11 +774,7 @@ const getVisualPredictionItems = (
       (p1, p2) => p2.winnerProbability - p1.winnerProbability
     );
     return playerPredictions.length > 1 &&
-      playerPredictions[0].type === 'WINNER' &&
-      Math.abs(
-        playerPredictions[0].winnerProbability -
-          playerPredictions[1].winnerProbability
-      ) >= 0.01
+      playerPredictions[0].type === 'WINNER'
       ? 'PREDICTION'
       : 'NETWORTH';
   };
