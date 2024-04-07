@@ -3,6 +3,7 @@ export * from './ActivityTimeline';
 export * from './Bankruptcy';
 export * from './Confetti';
 export * from './Dashboard';
+export * from './Empty';
 export * from './Lobby';
 export * from './Login';
 export * from './Logo';

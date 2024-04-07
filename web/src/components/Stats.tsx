@@ -26,6 +26,7 @@ import {
   UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
+import { Empty } from '.';
 import {
   Land,
   LandTrend,
@@ -187,6 +188,10 @@ export interface PortfolioProps {
 
 export const Portfolio = (props: PortfolioProps) => {
   const [view, setView] = useState<'Visual' | 'Tabular'>('Visual');
+  const { playerLands } = props;
+  if (!playerLands.length) {
+    return <Empty message="No investments available!" />;
+  }
   return (
     <>
       {view === 'Visual' ? (
@@ -294,6 +299,12 @@ export const Trends = (props: TrendsProps) => {
   const { perspective, id } = props;
 
   useEffect(() => {
+    if (
+      (perspective === 'land' && !landTrends.length) ||
+      (perspective === 'player' && !playerTrends.length)
+    )
+      return;
+
     // Creating chart's instance
     const chart = new Chart({
       container: 'trends-container',
@@ -341,6 +352,12 @@ export const Trends = (props: TrendsProps) => {
     chart.render();
   }, [id, perspective, playerTrends, landTrends]);
 
+  if (
+    (perspective === 'land' && !landTrends.length) ||
+    (perspective === 'player' && !playerTrends.length)
+  ) {
+    return <Empty message="No trends available!" />;
+  }
   return <div id="trends-container"></div>;
 };
 
@@ -458,6 +475,8 @@ export const VisualPrediction = (props: VisualPredictionProps) => {
   const { player } = props;
 
   useEffect(() => {
+    if (!predictions.length) return;
+
     // Creating chart's instance
     const chart = new Chart({
       container: 'predictions-container',
@@ -514,6 +533,9 @@ export const VisualPrediction = (props: VisualPredictionProps) => {
     chart.render();
   }, [player, players, predictions, playerTrends]);
 
+  if (!predictions.length) {
+    return <Empty message="No predictions available!" />;
+  }
   return <div id="predictions-container"></div>;
 };
 
