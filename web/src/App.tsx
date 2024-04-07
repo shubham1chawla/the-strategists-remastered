@@ -1,8 +1,7 @@
 import { Provider } from 'react-redux';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import { ConfigProvider, Space } from 'antd';
-import { CoffeeOutlined } from '@ant-design/icons';
-import { Dashboard, Login, NotFound } from './components';
+import { ConfigProvider } from 'antd';
+import { Dashboard, Empty, Login, NotFound } from './components';
 import { store } from './redux';
 import './App.scss';
 
@@ -27,11 +26,7 @@ export const App = () => {
 
   return (
     <ConfigProvider
-      renderEmpty={() => (
-        <Space>
-          <CoffeeOutlined /> Nothing to show here!
-        </Space>
-      )}
+      renderEmpty={() => <Empty />}
       theme={{
         components: {
           Collapse: {
