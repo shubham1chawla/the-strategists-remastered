@@ -83,6 +83,17 @@ h1.strategists-logo {
   );
 }
 
+.strategists-viz {
+  .ant-collapse-header {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+  }
+
+  .ant-collapse-content-box {
+    padding: 0 !important;
+  }
+}
+
 // ----- LOGIN COMPONENT'S CSS DEFINED BELOW ----- //
 
 .strategists-login {
