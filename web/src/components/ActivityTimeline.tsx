@@ -61,7 +61,6 @@ export const ActivityTimeline = () => {
       {contextHolder}
       <div className="strategists-activity">
         <Collapse
-          size="large"
           bordered={false}
           expandIconPosition="end"
           accordion={true}

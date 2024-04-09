@@ -39,11 +39,10 @@ import {
   LandStats,
   Logo,
   PlayerStats,
-  Portfolio,
-  VisualPrediction,
   TabularPortfolio,
-  Trends,
   VisualPortfolio,
+  VisualPrediction,
+  VisualTrend,
 } from '.';
 import { Land, LoginActions, Player, useLobby, useLogin } from '../redux';
 import { InvestmentStrategy } from '../utils';
@@ -222,7 +221,6 @@ export const PlayerInvestModal = (props: Partial<PlayerInvestModalProps>) => {
           </Row>
         </Card>
         <Collapse
-          size="large"
           bordered={false}
           ghost={true}
           expandIconPosition="end"
@@ -277,13 +275,19 @@ export const PortfolioModal = (props: Partial<PortfolioModalProps>) => {
     {
       key: '1',
       label: 'Trends',
-      children: <Trends perspective={perspective} id={id} />,
+      children: (
+        <VisualTrend perspective={perspective} id={id} showHelp={true} />
+      ),
     },
     {
       key: '2',
       label: 'Portfolio',
       children: (
-        <Portfolio perspective={perspective} playerLands={playerLands} />
+        <VisualPortfolio
+          perspective={perspective}
+          playerLands={playerLands}
+          showHelp={true}
+        />
       ),
     },
   ];
@@ -293,7 +297,7 @@ export const PortfolioModal = (props: Partial<PortfolioModalProps>) => {
     tabItems.push({
       key: '3',
       label: 'Predictions',
-      children: <VisualPrediction player={player} />,
+      children: <VisualPrediction player={player} showHelp={true} />,
     });
   }
 
@@ -447,7 +451,9 @@ export const WinModal = () => {
             {
               key: '1',
               label: 'Trends',
-              children: <Trends perspective="player" id={winnerPlayer.id} />,
+              children: (
+                <VisualTrend perspective="player" id={winnerPlayer.id} />
+              ),
             },
             {
               key: '2',

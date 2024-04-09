@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import {
   Card,
   Col,
+  Collapse,
   Divider,
   Row,
-  Select,
   Space,
   Statistic,
   Table,
@@ -19,9 +19,9 @@ import {
   HeartFilled,
   HeartOutlined,
   HomeOutlined,
-  InfoCircleOutlined,
   PercentageOutlined,
   PieChartOutlined,
+  QuestionCircleOutlined,
   StockOutlined,
   UserOutlined,
   WalletOutlined,
@@ -184,35 +184,8 @@ export const LandStats = (props: LandStatsProps) => {
 export interface PortfolioProps {
   perspective: 'player' | 'land';
   playerLands: PlayerLand[];
+  showHelp?: boolean;
 }
-
-export const Portfolio = (props: PortfolioProps) => {
-  const [view, setView] = useState<'Visual' | 'Tabular'>('Visual');
-  const { playerLands } = props;
-  if (!playerLands.length) {
-    return <Empty message="No investments available!" />;
-  }
-  return (
-    <>
-      {view === 'Visual' ? (
-        <VisualPortfolio {...props} />
-      ) : (
-        <TabularPortfolio {...props} />
-      )}
-      <br />
-      <Row align="middle" justify="space-between">
-        <Space>
-          <InfoCircleOutlined /> Change portfolio view
-        </Space>
-        <Select
-          value={view}
-          onChange={setView}
-          options={['Visual', 'Tabular'].map((value) => ({ value }))}
-        />
-      </Row>
-    </>
-  );
-};
 
 export const TabularPortfolio = (props: PortfolioProps) => {
   const { players, lands } = useLobby();
@@ -227,6 +200,7 @@ export const TabularPortfolio = (props: PortfolioProps) => {
 
 export const VisualPortfolio = (props: PortfolioProps) => {
   const { players, lands } = useLobby();
+  const { playerLands, perspective, showHelp } = props;
 
   useEffect(() => {
     const items = getPortfolioItems(props, players, lands);
@@ -282,21 +256,38 @@ export const VisualPortfolio = (props: PortfolioProps) => {
     chart.render();
   }, [players, lands, props]);
 
-  return <div id="portfolio-container"></div>;
+  if (!playerLands.length) {
+    return <Empty message="No investments available!" />;
+  }
+  return (
+    <div className="strategists-viz">
+      <div id="portfolio-container"></div>
+      {showHelp && (
+        <VisualizationHelp
+          message={
+            perspective === 'player'
+              ? "The visualization highlights the player's investments across various properties. A larger circle represents a significant investment amount."
+              : "The visualization highlights the property's investors. A larger circle represents a significant investment amount by the investor."
+          }
+        />
+      )}
+    </div>
+  );
 };
 
 /**
  * -----  TRENDS BELOW  -----
  */
 
-export interface TrendsProps {
+export interface VisualTrendProps {
   perspective: 'player' | 'land';
   id: number;
+  showHelp?: boolean;
 }
 
-export const Trends = (props: TrendsProps) => {
+export const VisualTrend = (props: VisualTrendProps) => {
   const { playerTrends, landTrends } = useTrends();
-  const { perspective, id } = props;
+  const { perspective, id, showHelp } = props;
 
   useEffect(() => {
     if (
@@ -358,7 +349,20 @@ export const Trends = (props: TrendsProps) => {
   ) {
     return <Empty message="No trends available!" />;
   }
-  return <div id="trends-container"></div>;
+  return (
+    <div className="strategists-viz">
+      <div id="trends-container"></div>
+      {showHelp && (
+        <VisualizationHelp
+          message={
+            perspective === 'player'
+              ? "The visualization highlights the change in player's cash and net worth per turn."
+              : "The visualization highlights the change in the land's market value per turn."
+          }
+        />
+      )}
+    </div>
+  );
 };
 
 const drawPlayerTrends = (chart: Chart, trends: PlayerTrend[]) => {
@@ -466,13 +470,14 @@ const drawLandTrends = (chart: Chart, trends: LandTrend[]) => {
 
 export interface VisualPredictionProps {
   player: Player;
+  showHelp?: boolean;
 }
 
 export const VisualPrediction = (props: VisualPredictionProps) => {
   const predictions = usePredictions();
   const { playerTrends } = useTrends();
   const { players } = useLobby();
-  const { player } = props;
+  const { player, showHelp } = props;
 
   useEffect(() => {
     if (!predictions.length) return;
@@ -495,12 +500,13 @@ export const VisualPrediction = (props: VisualPredictionProps) => {
         y: {
           grid: true,
           title: false,
-          tickFilter: (value: number) => false,
+          tickCount: 3,
+          labelFormatter: '.0%',
         },
       },
       scale: {
         color: {
-          range: [CssVariables['--accent-color'], CssVariables['--text-color']],
+          range: [CssVariables['--text-color'], CssVariables['--accent-color']],
         },
       },
       legend: {
@@ -512,9 +518,9 @@ export const VisualPrediction = (props: VisualPredictionProps) => {
             flexDirection: 'column',
           },
           labelFormatter: (label: string) =>
-            label === 'Others'
-              ? "Others' winning probability"
-              : `${label}'s winning probability`,
+            label === 'Opponents'
+              ? "Opponents' winning probability"
+              : `${player.username}'s winning probability`,
         },
       },
       theme: getChartTheme(),
@@ -536,7 +542,16 @@ export const VisualPrediction = (props: VisualPredictionProps) => {
   if (!predictions.length) {
     return <Empty message="No predictions available!" />;
   }
-  return <div id="predictions-container"></div>;
+  return (
+    <div className="strategists-viz">
+      <div id="predictions-container"></div>
+      {showHelp && (
+        <VisualizationHelp
+          message={`The visualization highlights the change in winning probabilities of ${player.username} compared to opponents per turn. A larger area represents a stark contrast in the chance of winning for any side.`}
+        />
+      )}
+    </div>
+  );
 };
 
 const drawPredictions = (
@@ -545,44 +560,42 @@ const drawPredictions = (
   items: VisualPredictionItem[]
 ) => {
   // Adding data to the chart's instance
-  chart
-    .data(items)
-    .transform([{ type: 'stackY' }, { type: 'normalizeY' }])
-    .encode('x', 'turn')
-    .encode('y', 'share')
-    .encode('color', 'name');
+  chart.data(items);
 
-  // Styling & tooltip interactions for area
+  // Drawing area mark for difference
   chart
     .area()
+    .data({
+      transform: [
+        {
+          type: 'fold',
+          fields: ['Opponents', player.username],
+          key: 'side',
+          value: 'share',
+        },
+      ],
+    })
+    .transform([{ type: 'diffY' }])
+    .encode('x', 'turn')
+    .encode('y', 'share')
+    .encode('color', 'side')
     .tooltip({
       title: '',
       items: [
         {
-          field: 'share',
-          name: 'Share',
+          channel: 'y',
           valueFormatter: '.0%',
         },
       ],
-    })
-    .style('fillOpacity', (items: VisualPredictionItem[]) =>
-      items[0].name === player.username ? 1 : 0.3
-    )
-    .style('fill', (items: VisualPredictionItem[]) =>
-      items[0].name === player.username
-        ? `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${CssVariables['--accent-color']} 100%)`
-        : `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${CssVariables['--text-color']} 100%)`
-    );
+    });
 
-  // Styling & tooltip interactions for line
+  // Drawing player's line for reference
   chart
     .line()
-    .tooltip(false)
-    .style('stroke', (items: VisualPredictionItem[]) =>
-      items[0].name === player.username
-        ? CssVariables['--accent-color']
-        : CssVariables['--text-color']
-    );
+    .encode('x', 'turn')
+    .encode('y', player.username)
+    .style('stroke', CssVariables['--accent-color'])
+    .tooltip(false);
 
   // Updating tooltip position
   chart.interaction('tooltip', {
@@ -596,6 +609,33 @@ const drawPredictions = (
 /**
  * -----  UTILITIES DEFINED BELOW  -----
  */
+
+interface VisualizationHelpProps {
+  message: string;
+}
+
+const VisualizationHelp = (props: VisualizationHelpProps) => {
+  const { message } = props;
+  return (
+    <Collapse
+      bordered={false}
+      ghost={true}
+      expandIconPosition="end"
+      items={[
+        {
+          key: '1',
+          label: (
+            <Space>
+              <QuestionCircleOutlined />
+              <span>How should you interpret this visualization?</span>
+            </Space>
+          ),
+          children: message,
+        },
+      ]}
+    />
+  );
+};
 
 interface PortfolioItem extends PlayerLand {
   name: string;
@@ -717,9 +757,8 @@ export const getChartTheme = () => {
 };
 
 interface VisualPredictionItem {
-  name: string;
+  [key: string]: any;
   turn: number;
-  share: number;
   key?: string;
   method: 'PREDICTION' | 'NETWORTH';
 }
@@ -821,39 +860,26 @@ const getVisualPredictionItems = (
             0
           );
 
-    // Figuring visual prediction item for other players
-    const otherItem: VisualPredictionItem = {
-      name: 'Others',
+    // Figuring visual prediction item
+    const item: VisualPredictionItem = {
       turn,
-      key: `Others-${turn}`,
-      share: 0,
+      key: `item-${turn}`,
       method,
     };
-    players
-      .filter((p) => p.id !== player.id)
-      .forEach((p) => {
-        otherItem.share +=
-          method === 'PREDICTION'
-            ? playerPredictionMap?.get(p.id)?.winnerProbability || 0
-            : playerTrendMap?.get(p.id)?.netWorth || 0;
-      });
-    otherItem.share /= totalShareSize;
-
-    // Figuring visual prediction item for requested player
-    const playerItem: VisualPredictionItem = {
-      name: player.username,
-      turn,
-      key: `${player.username}-${turn}`,
-      share: 0,
-      method,
-    };
-    playerItem.share =
-      method === 'PREDICTION'
-        ? playerPredictionMap?.get(player.id)?.winnerProbability || 0
-        : playerTrendMap?.get(player.id)?.netWorth || 0;
-    playerItem.share /= totalShareSize;
-
-    items.push(playerItem, otherItem);
+    item[player.username] = 0;
+    item['Opponents'] = 0;
+    players.forEach((p) => {
+      const value =
+        method === 'PREDICTION'
+          ? playerPredictionMap?.get(p.id)?.winnerProbability || 0
+          : playerTrendMap?.get(p.id)?.netWorth || 0;
+      if (player.id === p.id) {
+        item[player.username] += value / totalShareSize;
+      } else {
+        item['Opponents'] += value / totalShareSize;
+      }
+    });
+    items.push(item);
   }
   return items;
 };
