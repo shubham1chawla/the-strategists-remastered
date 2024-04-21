@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "google-utils"
+version = "0.1.0"
+description = "The Strategists Google API Utilities and Wrappers"
+authors = ["Shubham Chawla <shubham_chawla@live.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+google-auth = "^2.29.0"
+google-api-python-client = "^2.126.0"
+google-auth-httplib2 = "^0.2.0"
+google-auth-oauthlib = "^1.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
