@@ -14,15 +14,15 @@ from src.wrappers import GoogleSheetsService, GoogleDriveService
 
 @unique
 class PermissionStatus(str, Enum):
-    ENABLED: Final[str] = 'Enabled'
-    DISABLED: Final[str] = 'Disabled'
+    ENABLED: Final[str] = 'ENABLED'
+    DISABLED: Final[str] = 'DISABLED'
 
 
 @final
 @dataclass
-class Permission:
+class PermissionGroup:
     email: str
-    create: PermissionStatus
+    gameCreationPermissionStatus: PermissionStatus
 
 
 @final
@@ -53,7 +53,7 @@ class PermissionUtils:
         self.export_file_path = os.path.join(self.export_dir, 'permissions.json')
 
 
-    def get_permissions(self) -> list[Permission]:
+    def get_permission_groups(self) -> list[PermissionGroup]:
 
         # Finding results from Google Sheets
         response = self.service.get(
@@ -63,22 +63,22 @@ class PermissionUtils:
 
         # Checking if any permissions found
         if 'values' not in response or len(response['values']) == 0:
-            raise ValueError('No permissions found!')
+            raise ValueError('No permission groups found!')
 
         # Converting response to permissions
-        return [Permission(value[0], PermissionStatus(value[1])) for value in response['values']]
+        return [PermissionGroup(value[0], PermissionStatus(value[1])) for value in response['values']]
 
 
-    def export_permissions(self) -> None:
+    def export_permission_groups(self) -> None:
 
         # Fetching permissions
-        permissions = self.get_permissions()
-        log.info(f'Found {len(permissions)} permissions')
+        permissions = self.get_permission_groups()
+        log.info(f'Found {len(permissions)} permission groups')
         
         # Exporting permissions
         with open(self.export_file_path, 'w') as file:
             file.write(json.dumps([permission.__dict__ for permission in permissions], indent=4))
-        log.info(f'Exported permissions to {self.export_file_path}')
+        log.info(f'Exported permission groups to {self.export_file_path}')
 
 
 @unique

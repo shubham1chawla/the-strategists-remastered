@@ -15,7 +15,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.command == 'permissions':
-        PermissionUtils(**args.__dict__).export_permissions()
+        PermissionUtils(**args.__dict__).export_permission_groups()
     elif args.command == 'predictions' and args.subcommand == 'download':
         PredictionUtils(**args.__dict__).download_csv_files()
     elif args.command == 'predictions' and args.subcommand == 'upload':

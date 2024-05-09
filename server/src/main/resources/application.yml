@@ -52,8 +52,20 @@ strategists:
       allowed-count: 3
       timeout: 60000
       thread-pool-size: 4
-  security:
-    allowed-emails:
-    google-recaptcha:
+  google:
+    recaptcha:
       api-url: https://www.google.com/recaptcha/api/siteverify
-      secret-key:   
+      secret-key:
+    utils:
+      credentials-json-file:
+      python:
+        executable: ../google-utils/.venv/bin/python
+        script: ../google-utils/main.py
+      permissions:
+        command: permissions
+        export:
+          directory: ../google-utils/
+          file-name: permissions.json
+        spreadsheet:
+          id: 
+          range: 

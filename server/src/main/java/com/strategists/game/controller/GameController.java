@@ -1,10 +1,8 @@
 package com.strategists.game.controller;
 
 import java.util.Objects;
-import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
@@ -18,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.strategists.game.entity.PermissionGroup.PermissionStatus;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.request.GoogleOAuthCredential;
@@ -25,6 +24,7 @@ import com.strategists.game.response.EnterGameResponse;
 import com.strategists.game.response.GameResponse;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.LandService;
+import com.strategists.game.service.PermissionsService;
 import com.strategists.game.service.PlayerService;
 import com.strategists.game.service.PredictionService;
 
@@ -36,8 +36,8 @@ import lombok.extern.log4j.Log4j2;
 @RequestMapping("/api/games")
 public class GameController {
 
-	@Value("${strategists.security.allowed-emails}")
-	private Set<String> allowedEmails;
+	@Autowired
+	private PermissionsService permissionsService;
 
 	@Autowired
 	private GameService gameService;
@@ -105,12 +105,15 @@ public class GameController {
 	public ResponseEntity<EnterGameResponse> createGame(@RequestBody GoogleOAuthCredential credential) {
 
 		// Checking if requesting user can create the game
-		if (allowedEmails.contains(credential.getEmail())) {
-			val player = gameService.createGame(credential);
-			return ResponseEntity.ok(EnterGameResponse.fromPlayer(player));
+		val opt = permissionsService.getPermissionGroupByEmail(credential.getEmail());
+		val status = opt.isPresent() ? opt.get().getGameCreationPermissionStatus() : PermissionStatus.DISABLED;
+		if (PermissionStatus.DISABLED.equals(status)) {
+			return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 		}
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
 
+		// Creating game for the requesting player
+		val player = gameService.createGame(credential);
+		return ResponseEntity.ok(EnterGameResponse.fromPlayer(player));
 	}
 
 	@PutMapping("/{code}/start")
