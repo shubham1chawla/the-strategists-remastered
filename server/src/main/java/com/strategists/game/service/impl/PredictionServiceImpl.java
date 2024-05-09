@@ -1,13 +1,10 @@
 package com.strategists.game.service.impl;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -54,6 +51,7 @@ import com.strategists.game.service.PredictionService;
 import com.strategists.game.update.UpdateMapping;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.util.MathUtil;
+import com.strategists.game.util.ScriptUtil;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -131,7 +129,7 @@ public class PredictionServiceImpl implements PredictionService {
 		log.info("Training prediction model...");
 
 		// Training the prediction model
-		val output = executePredictionScript(new String[] {
+		val output = ScriptUtil.execute(
 
 				// Script execution command
 				pythonExecutable, pythonScript, trainSubcommand,
@@ -145,7 +143,7 @@ public class PredictionServiceImpl implements PredictionService {
 				// Classifier pickle file path
 				"-P", getClassifierPickleFile().getAbsolutePath()
 
-		});
+		);
 		log.info("Prediction Model's training output:\n{}", String.join("\n", output));
 	}
 
@@ -198,7 +196,7 @@ public class PredictionServiceImpl implements PredictionService {
 		}
 
 		// Executing prediction script
-		val output = executePredictionScript(new String[] {
+		val output = ScriptUtil.execute(
 
 				// Script execution command
 				pythonExecutable, pythonScript, predictSubcommand,
@@ -209,7 +207,7 @@ public class PredictionServiceImpl implements PredictionService {
 				// Model out directory
 				"-T", csv.getAbsolutePath()
 
-		});
+		);
 
 		// Deleting prediction file
 		csv.delete();
@@ -249,33 +247,6 @@ public class PredictionServiceImpl implements PredictionService {
 			log.warn("Unable to export CSV file! Message: {}", ex.getMessage(), ex);
 			return null;
 		}
-	}
-
-	private List<String> executePredictionScript(String[] commands) {
-		List<String> output = null;
-		val builder = new ProcessBuilder(commands);
-		builder.redirectErrorStream(true);
-		try {
-
-			val process = builder.start();
-			val code = process.waitFor();
-
-			// Checking if process executed successfully
-			if (code != 0) {
-				log.warn("Prediction script exited with code: {}", code);
-				return output;
-			}
-
-			// Extracting results from prediction
-			val stream = new InputStreamReader(process.getInputStream(), StandardCharsets.UTF_8);
-			try (val reader = new BufferedReader(stream)) {
-				output = reader.lines().toList();
-			}
-
-		} catch (Exception ex) {
-			log.warn("Unable to execute prediction script! Message: {}", ex.getMessage(), ex);
-		}
-		return output;
 	}
 
 	private List<String> getCSVHeaders(Game game) {
