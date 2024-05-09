@@ -1,4 +1,4 @@
-package com.strategists.game.util;
+package com.strategists.game.request;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -11,7 +11,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.fasterxml.jackson.databind.node.TextNode;
-import com.strategists.game.request.GoogleOAuthCredential;
 
 import lombok.val;
 
