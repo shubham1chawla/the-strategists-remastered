@@ -22,17 +22,6 @@ spring:
     console:
       enabled: true
 strategists:
-  prediction:
-    enabled: true
-    data-directory: ../prediction/data/
-    metadata-directory: ../prediction/metadata/
-    classifier-directory: ../prediction/out/
-    classifier-pickle-file-name: classifier.pkl
-    test-directory: ../prediction/test/
-    train-subcommand: train
-    predict-subcommand: predict
-    python-executable: ../prediction/.venv/bin/python
-    python-script: ../prediction/main.py
   game:
     default-map: india
     dice-size: 6
@@ -52,6 +41,23 @@ strategists:
       allowed-count: 3
       timeout: 60000
       thread-pool-size: 4
+  prediction:
+    enabled: true
+    python:
+      executable: ../prediction/.venv/bin/python
+      script: ../prediction/main.py
+    export:
+      directory: ../prediction/out/
+      file-name: classifier.pkl
+    train:
+      command: train
+      directory:
+        data: ../prediction/data/
+        metadata: ../prediction/metadata/
+    predict:
+      command: predict
+      directory:
+        test: ../prediction/test/
   google:
     recaptcha:
       api-url: https://www.google.com/recaptcha/api/siteverify
