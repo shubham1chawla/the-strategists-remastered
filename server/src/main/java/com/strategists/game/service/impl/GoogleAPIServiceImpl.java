@@ -75,25 +75,25 @@ public class GoogleAPIServiceImpl implements AuthenticationService, PermissionsS
 		val output = ScriptUtil.execute(
 
 				// Path to executable
-				googleUtils.getPythonExecutablePath(),
+				googleUtils.python().executable().getPath(),
 
 				// Path to google-utils script
-				googleUtils.getPythonScriptPath(),
+				googleUtils.python().script().getPath(),
 
 				// Permissions command
-				googleUtils.getPermissionsCommand(),
+				googleUtils.permissions().command(),
 
 				// Adding Credentials JSON argument
-				"--credentials-json", googleUtils.getCredentialsJsonFilePath(),
+				"--credentials-json", googleUtils.credentialsJsonFile().getPath(),
 
 				// Adding Google's Spreadsheet ID argument
-				"--spreadsheet-id", googleUtils.getPermissionsSpreadsheetId(),
+				"--spreadsheet-id", googleUtils.permissions().spreadsheet().id(),
 
 				// Adding Google's Spreadsheet Range argument
-				"--spreadsheet-range", googleUtils.getPermissionsSpreadsheetRange(),
+				"--spreadsheet-range", googleUtils.permissions().spreadsheet().range(),
 
 				// Adding export directory argument
-				"--export-dir", googleUtils.getPermissionsExportDirectoryPath()
+				"--export-dir", googleUtils.permissions().export().directory().getPath()
 
 		);
 		log.info("Permissions Script Output:{}{}", System.lineSeparator(), String.join(System.lineSeparator(), output));
@@ -106,6 +106,8 @@ public class GoogleAPIServiceImpl implements AuthenticationService, PermissionsS
 		try {
 			val permissionsGroups = new ObjectMapper().readValue(permissionGroupsFile, PermissionGroup[].class);
 			permissionGroupRepository.saveAll(Arrays.asList(permissionsGroups));
+
+			log.info("Saved {} permission groups", permissionsGroups.length);
 		} finally {
 			permissionGroupsFile.delete();
 		}

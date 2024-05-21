@@ -21,32 +21,4 @@ public record GoogleUtilsConfigurationProperties(File credentialsJsonFile,
 				&& credentialsJsonFile.getPath().endsWith(".json");
 	}
 
-	public String getPythonExecutablePath() {
-		return python.executable().getPath();
-	}
-
-	public String getPythonScriptPath() {
-		return python.script().getPath();
-	}
-
-	public String getPermissionsCommand() {
-		return permissions.command();
-	}
-
-	public String getCredentialsJsonFilePath() {
-		return credentialsJsonFile.getPath();
-	}
-
-	public String getPermissionsSpreadsheetId() {
-		return permissions.spreadsheet().id();
-	}
-
-	public String getPermissionsSpreadsheetRange() {
-		return permissions.spreadsheet().range();
-	}
-
-	public String getPermissionsExportDirectoryPath() {
-		return permissions.export().directory().getPath();
-	}
-
 }

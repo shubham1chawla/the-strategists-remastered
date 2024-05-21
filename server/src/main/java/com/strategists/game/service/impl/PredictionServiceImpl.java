@@ -23,7 +23,6 @@ import javax.transaction.Transactional;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -37,6 +36,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.DoubleNode;
 import com.fasterxml.jackson.databind.node.IntNode;
+import com.strategists.game.configuration.properties.PredictionConfigurationProperties;
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
@@ -63,35 +63,11 @@ import lombok.extern.log4j.Log4j2;
 @ConditionalOnProperty(name = "strategists.prediction.enabled", havingValue = "true")
 public class PredictionServiceImpl implements PredictionService {
 
-	@Value("${strategists.prediction.data-directory}")
-	private File dataDirectory;
-
-	@Value("${strategists.prediction.metadata-directory}")
-	private File metadataDirectory;
-
-	@Value("${strategists.prediction.classifier-directory}")
-	private File classifierDirectory;
-
-	@Value("${strategists.prediction.classifier-pickle-file-name}")
-	private String classifierPickleFileName;
-
-	@Value("${strategists.prediction.test-directory}")
-	private File testDirectory;
-
-	@Value("${strategists.prediction.train-subcommand}")
-	private String trainSubcommand;
-
-	@Value("${strategists.prediction.predict-subcommand}")
-	private String predictSubcommand;
-
-	@Value("${strategists.prediction.python-executable}")
-	private String pythonExecutable;
-
-	@Value("${strategists.prediction.python-script}")
-	private String pythonScript;
-
 	@PersistenceContext
 	private EntityManager em;
+
+	@Autowired
+	private PredictionConfigurationProperties properties;
 
 	@Autowired
 	private PredictionRepository predictionRepository;
@@ -131,17 +107,23 @@ public class PredictionServiceImpl implements PredictionService {
 		// Training the prediction model
 		val output = ScriptUtil.execute(
 
-				// Script execution command
-				pythonExecutable, pythonScript, trainSubcommand,
+				// Path to executable
+				properties.python().executable().getPath(),
+
+				// Path to prediction script
+				properties.python().script().getPath(),
+
+				// Train command
+				properties.train().command(),
 
 				// Game data export directory
-				"-D", dataDirectory.getAbsolutePath(),
+				"-D", properties.train().directory().data().getPath(),
 
 				// Metadata export directory
-				"-M", metadataDirectory.getAbsolutePath(),
+				"-M", properties.train().directory().metadata().getPath(),
 
 				// Classifier pickle file path
-				"-P", getClassifierPickleFile().getAbsolutePath()
+				"-P", getClassifierPickleFile().getPath()
 
 		);
 		log.info("Prediction Model's training output:\n{}", String.join("\n", output));
@@ -168,7 +150,7 @@ public class PredictionServiceImpl implements PredictionService {
 		}
 
 		val filename = String.format("%s-%s", game.getCode(), System.currentTimeMillis());
-		val csv = exportCSVFile(game, orderedPlayers, dataDirectory, filename);
+		val csv = exportCSVFile(game, orderedPlayers, properties.train().directory().data(), filename);
 		if (Objects.isNull(csv)) {
 			log.error("No CSV exported! Skipping training the model!");
 			return;
@@ -189,7 +171,7 @@ public class PredictionServiceImpl implements PredictionService {
 		log.info("Testing prediction model for game: {}", game.getCode());
 
 		// Exporting player data
-		val csv = exportCSVFile(game, players, testDirectory, game.getCode());
+		val csv = exportCSVFile(game, players, properties.predict().directory().test(), game.getCode());
 		if (Objects.isNull(csv)) {
 			log.error("No CSV exported! Skipping executing the model!");
 			return List.of();
@@ -198,14 +180,20 @@ public class PredictionServiceImpl implements PredictionService {
 		// Executing prediction script
 		val output = ScriptUtil.execute(
 
-				// Script execution command
-				pythonExecutable, pythonScript, predictSubcommand,
+				// Path to executable
+				properties.python().executable().getPath(),
+
+				// Path to prediction script
+				properties.python().script().getPath(),
+
+				// Predict command
+				properties.predict().command(),
 
 				// Prediction file
-				"-P", getClassifierPickleFile().getAbsolutePath(),
+				"-P", getClassifierPickleFile().getPath(),
 
 				// Model out directory
-				"-T", csv.getAbsolutePath()
+				"-T", csv.getPath()
 
 		);
 
@@ -272,26 +260,24 @@ public class PredictionServiceImpl implements PredictionService {
 	}
 
 	private void validateDirectories() {
-		for (File directory : List.of(dataDirectory, metadataDirectory, classifierDirectory, testDirectory)) {
+		for (File directory : properties.getAllDirectories()) {
 			if (!directory.exists()) {
 				Assert.state(directory.mkdirs(), "Unable to create directory: " + directory);
+				log.info("Created directory: {}", directory);
 			}
 		}
-		log.info("Data Directory: {}", dataDirectory.getAbsolutePath());
-		log.info("Metadata Directory: {}", metadataDirectory.getAbsolutePath());
-		log.info("Classifier Directory: {}", classifierDirectory.getAbsolutePath());
-		log.info("Test Directory: {}", testDirectory.getAbsolutePath());
+		log.info("Validated prediction-related directories");
 	}
 
 	private File getClassifierPickleFile() {
-		return Paths.get(classifierDirectory.getAbsolutePath(), classifierPickleFileName).toFile();
+		return Paths.get(properties.export().directory().getPath(), properties.export().fileName()).toFile();
 	}
 
 	private List<Prediction> loadPredictions(Game game, List<String> output) {
 
 		// Getting prediction file's reference
 		val predictionFileName = String.format("%s.json", game.getCode());
-		val predictionFile = Paths.get(testDirectory.getAbsolutePath(), predictionFileName).toFile();
+		val predictionFile = Paths.get(properties.predict().directory().test().getPath(), predictionFileName).toFile();
 
 		try {
 

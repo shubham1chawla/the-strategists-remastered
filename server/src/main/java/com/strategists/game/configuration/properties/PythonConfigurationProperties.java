@@ -9,18 +9,14 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 public record PythonConfigurationProperties(File executable, File script) {
 
-	@AssertTrue(message = "Python executable must exists and must be executable!")
+	@AssertTrue(message = "Python binary must exist and be executable!")
 	boolean isExecutableValid() {
-		return isValid(executable);
+		return executable.exists() && executable.isFile() && executable.canExecute();
 	}
 
-	@AssertTrue(message = "Python script must be executable and ends with '.py' extension!")
+	@AssertTrue(message = "Python script must exist and end with '.py' extension!")
 	boolean isScriptValid() {
-		return isValid(script) && script.getPath().endsWith(".py");
-	}
-
-	private boolean isValid(File file) {
-		return file.exists() && file.isFile() && file.canExecute();
+		return script.exists() && script.isFile() && script.getPath().endsWith(".py");
 	}
 
 }
