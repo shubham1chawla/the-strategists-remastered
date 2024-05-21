@@ -75,3 +75,11 @@ strategists:
         spreadsheet:
           id: 
           range: 
+      predictions:
+        command: predictions
+        download:
+          sub-command: download
+          drive-folder-id: 
+        upload: 
+          sub-command: upload
+          drive-folder-id: 

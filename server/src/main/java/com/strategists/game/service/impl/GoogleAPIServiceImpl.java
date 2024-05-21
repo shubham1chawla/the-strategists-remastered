@@ -1,6 +1,8 @@
 package com.strategists.game.service.impl;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -18,10 +20,12 @@ import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.strategists.game.configuration.properties.GoogleConfigurationProperties;
 import com.strategists.game.entity.PermissionGroup;
+import com.strategists.game.exception.FailedProcessException;
 import com.strategists.game.repository.PermissionGroupRepository;
 import com.strategists.game.request.GoogleRecaptchaVerificationRequest;
 import com.strategists.game.response.GoogleRecaptchaVerificationResponse;
 import com.strategists.game.service.AuthenticationService;
+import com.strategists.game.service.DataSyncService;
 import com.strategists.game.service.PermissionsService;
 import com.strategists.game.util.ScriptUtil;
 
@@ -30,7 +34,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
-public class GoogleAPIServiceImpl implements AuthenticationService, PermissionsService {
+public class GoogleAPIServiceImpl implements AuthenticationService, PermissionsService, DataSyncService {
 
 	@Autowired
 	private GoogleConfigurationProperties properties;
@@ -39,7 +43,7 @@ public class GoogleAPIServiceImpl implements AuthenticationService, PermissionsS
 	private PermissionGroupRepository permissionGroupRepository;
 
 	@PostConstruct
-	public void setup() throws IOException {
+	public void setup() {
 
 		// Loading permission groups from Google Sheets
 		loadPermissionGroups();
@@ -63,11 +67,7 @@ public class GoogleAPIServiceImpl implements AuthenticationService, PermissionsS
 	}
 
 	@Override
-	public Optional<PermissionGroup> getPermissionGroupByEmail(String email) {
-		return permissionGroupRepository.findById(email);
-	}
-
-	private void loadPermissionGroups() throws IOException {
+	public void loadPermissionGroups() {
 
 		val googleUtils = properties.utils();
 
@@ -96,7 +96,7 @@ public class GoogleAPIServiceImpl implements AuthenticationService, PermissionsS
 				"--export-dir", googleUtils.permissions().export().directory().getPath()
 
 		);
-		log.info("Permissions Script Output:{}{}", System.lineSeparator(), String.join(System.lineSeparator(), output));
+		log.info("Script Output:{}{}", System.lineSeparator(), String.join(System.lineSeparator(), output));
 
 		// Validating whether permissions file exists
 		val permissionGroupsFile = properties.utils().permissions().getExportFile();
@@ -108,9 +108,78 @@ public class GoogleAPIServiceImpl implements AuthenticationService, PermissionsS
 			permissionGroupRepository.saveAll(Arrays.asList(permissionsGroups));
 
 			log.info("Saved {} permission groups", permissionsGroups.length);
+		} catch (IOException ex) {
+			log.error("Unable to load permission groups! Message: {}", ex.getMessage());
+			log.debug(ex);
+			throw new FailedProcessException(ex);
 		} finally {
-			permissionGroupsFile.delete();
+			if (permissionGroupsFile.exists()) {
+				permissionGroupsFile.delete();
+			}
 		}
+
+	}
+
+	@Override
+	public Optional<PermissionGroup> getPermissionGroupByEmail(String email) {
+		return permissionGroupRepository.findById(email);
+	}
+
+	@Override
+	public void downloadCSVFiles(File directory) {
+		syncCSVFiles(directory, false);
+	}
+
+	@Override
+	public void uploadCSVFiles(File directory) {
+		syncCSVFiles(directory, true);
+	}
+
+	private void syncCSVFiles(File directory, boolean upload) {
+
+		// Validating directory
+		Assert.isTrue(directory.exists(), "Data directory must exists!");
+		Assert.isTrue(directory.isDirectory(), "Data directory must not be a file!");
+
+		val googleUtils = properties.utils();
+
+		// Creating script's commands
+		val commands = new ArrayList<String>();
+
+		// Path to executable
+		commands.add(googleUtils.python().executable().getPath());
+
+		// Path to google-utils script
+		commands.add(googleUtils.python().script().getPath());
+
+		// Predictions command
+		commands.add(googleUtils.predictions().command());
+
+		// Adding sub-command
+		commands.add((upload ? googleUtils.predictions().upload() : googleUtils.predictions().download()).subCommand());
+
+		// Adding Credentials JSON argument
+		commands.add("--credentials-json");
+		commands.add(googleUtils.credentialsJsonFile().getPath());
+
+		// Adding download folder ID argument
+		commands.add("--download-folder-id");
+		commands.add(googleUtils.predictions().download().driveFolderId());
+
+		// Adding upload folder ID argument
+		if (upload) {
+			commands.add("--upload-folder-id");
+			commands.add(googleUtils.predictions().upload().driveFolderId());
+		}
+
+		// Adding data directory argument
+		commands.add("--game-data-dir");
+		commands.add(directory.getPath());
+		log.debug("Google Drive Sync Commands: {}", commands);
+
+		// Executing download script
+		val output = ScriptUtil.execute(commands.toArray(String[]::new));
+		log.info("Script Output:{}{}", System.lineSeparator(), String.join(System.lineSeparator(), output));
 
 	}
 
