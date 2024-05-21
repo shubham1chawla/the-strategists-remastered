@@ -6,6 +6,8 @@ import com.strategists.game.entity.PermissionGroup;
 
 public interface PermissionsService {
 
+	void loadPermissionGroups();
+
 	Optional<PermissionGroup> getPermissionGroupByEmail(String email);
 
 }

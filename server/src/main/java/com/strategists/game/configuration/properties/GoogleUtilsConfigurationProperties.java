@@ -13,7 +13,8 @@ import org.springframework.validation.annotation.Validated;
 @ConfigurationProperties(prefix = "strategists.google.utils")
 public record GoogleUtilsConfigurationProperties(File credentialsJsonFile,
 		@DefaultValue @Valid PythonConfigurationProperties python,
-		@DefaultValue @Valid GoogleUtilsPermissionsConfigurationProperties permissions) {
+		@DefaultValue @Valid GoogleUtilsPermissionsConfigurationProperties permissions,
+		@DefaultValue @Valid GoogleUtilsPredictionsConfigurationProperties predictions) {
 
 	@AssertTrue(message = "Credentials JSON must exists and must ends with '.json' extension!")
 	boolean isCredentialsJsonFileValid() {

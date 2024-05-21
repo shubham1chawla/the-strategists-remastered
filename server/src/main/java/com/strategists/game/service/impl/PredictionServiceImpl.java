@@ -45,6 +45,7 @@ import com.strategists.game.entity.Prediction;
 import com.strategists.game.entity.Prediction.Type;
 import com.strategists.game.entity.Rent;
 import com.strategists.game.repository.PredictionRepository;
+import com.strategists.game.service.DataSyncService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 import com.strategists.game.service.PredictionService;
@@ -73,6 +74,9 @@ public class PredictionServiceImpl implements PredictionService {
 	private PredictionRepository predictionRepository;
 
 	@Autowired
+	private DataSyncService dataSyncService;
+
+	@Autowired
 	private PlayerService playerService;
 
 	@Autowired
@@ -91,13 +95,11 @@ public class PredictionServiceImpl implements PredictionService {
 		predictionObjectMapper = new ObjectMapper();
 		predictionObjectMapper.registerModule(module);
 
-		// Training the model if classifier is not present
-		val classifierPickleFile = getClassifierPickleFile();
-		if (!classifierPickleFile.exists()) {
-			trainPredictionModel();
-		} else {
-			log.info("Found classifier: {}", classifierPickleFile.getAbsolutePath());
-		}
+		// Downloading CSV files
+		dataSyncService.downloadCSVFiles(properties.train().directory().data());
+
+		// Training the model
+		trainPredictionModel();
 	}
 
 	@Override
@@ -159,6 +161,9 @@ public class PredictionServiceImpl implements PredictionService {
 		// Training the model
 		log.info("Exported game data: {}", csv.getAbsolutePath());
 		trainPredictionModel();
+
+		// Uploading CSV files
+		dataSyncService.uploadCSVFiles(properties.train().directory().data());
 	}
 
 	@Override
