@@ -39,7 +39,7 @@ strategists:
     skip-player:
       enabled: true
       allowed-count: 3
-      timeout: 60000
+      timeout: 90000
       thread-pool-size: 4
   prediction:
     enabled: true
