@@ -203,6 +203,8 @@ export const VisualPortfolio = (props: PortfolioProps) => {
   const { playerLands, perspective, showHelp } = props;
 
   useEffect(() => {
+    if (!playerLands.length) return;
+
     const items = getPortfolioItems(props, players, lands);
 
     // Creating chart's instance
