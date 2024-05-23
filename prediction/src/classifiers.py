@@ -1,6 +1,6 @@
 # Standard Python imports
 from enum import Enum
-from typing import Final, final
+from typing import Final, Union, final
 from abc import ABC
 
 # Machine-learning imports
@@ -10,10 +10,10 @@ import numpy as np
 from sklearn.base import BaseEstimator
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, GradientBoostingClassifier
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 
 # Project imports
-from src.configuration import PredictorConfiguration
+from .configuration import PredictorConfiguration
 
 
 @final
@@ -26,25 +26,26 @@ class PredictorClassifierType(Enum):
 
 class PredictorClassifier(ABC):
 
-    __gs__: GridSearchCV
+    __cv__: Union[GridSearchCV, RandomizedSearchCV]
 
-    def __init__(self, type: PredictorClassifierType) -> None:
+    def __init__(self, type: PredictorClassifierType, configuration: PredictorConfiguration, **kwargs) -> None:
         self.type = type
-        self.__gs__ = None
+        self.__cv__ = configuration.search_method.cls(**kwargs,
+                                                        cv=configuration.CROSS_VALIDATOR, 
+                                                        scoring=configuration.SCORING, 
+                                                        n_jobs=configuration.GS_N_JOBS, 
+                                                        refit=True)
 
 
     def fit(self, X: pd.DataFrame, y: pd.Series, sample_weight: np.ndarray) -> None:
-        assert self.__gs__ != None, 'GridSearchCV instance is not set!'
-        self.__gs__.fit(X, y, sample_weight=sample_weight)
+        self.__cv__.fit(X, y, sample_weight=sample_weight)
 
 
     def predict(self, X: pd.DataFrame) -> np.ndarray:
-        assert self.__gs__ != None, 'GridSearchCV instance is not set!'
         return self.best_estimator_.predict(X)
     
 
     def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
-        assert self.__gs__ != None, 'GridSearchCV instance is not set!'
         return self.best_estimator_.predict_proba(X)
     
 
@@ -59,20 +60,17 @@ class PredictorClassifier(ABC):
 
     @property
     def best_estimator_(self) -> BaseEstimator:
-        assert self.__gs__ != None, 'GridSearchCV instance is not set!'
-        return self.__gs__.best_estimator_
+        return self.__cv__.best_estimator_
 
 
     @property
     def best_score_(self) -> float:
-        assert self.__gs__ != None, 'GridSearchCV instance is not set!'
-        return self.__gs__.best_score_
+        return self.__cv__.best_score_
     
 
     @property
     def best_params_(self) -> float:
-        assert self.__gs__ != None, 'GridSearchCV instance is not set!'
-        return self.__gs__.best_params_
+        return self.__cv__.best_params_
 
 
 @final
@@ -80,18 +78,14 @@ class DecisionTreePredictorClassifier(PredictorClassifier):
 
 
     def __init__(self, configuration: PredictorConfiguration) -> None:
-        super().__init__(PredictorClassifierType.DECISION_TREE)
-        estimator = DecisionTreeClassifier(criterion='gini', random_state=configuration.RANDOM_STATE)
-        param_grid = {
-            'min_samples_leaf': [1] + list(range(5, 51, 5)),
-            'max_features': [10, 20] + list(range(50, 501, 50))
+        kwargs = { 
+            'estimator': DecisionTreeClassifier(criterion='gini', random_state=configuration.RANDOM_STATE),
+            configuration.search_method.param_key: { 
+                'min_samples_leaf': [1] + list(range(5, 51, 5)), 
+                'max_features': [10, 20] + list(range(50, 501, 50)) 
+            }
         }
-        self.__gs__ = GridSearchCV(estimator=estimator, 
-                                   param_grid=param_grid, 
-                                   cv=configuration.CROSS_VALIDATOR, 
-                                   scoring=configuration.SCORING, 
-                                   n_jobs=configuration.GS_N_JOBS, 
-                                   refit=True)
+        super().__init__(PredictorClassifierType.DECISION_TREE, configuration, **kwargs)
     
 
 @final
@@ -99,18 +93,14 @@ class RandomForestPredictorClassifier(PredictorClassifier):
 
 
     def __init__(self, configuration: PredictorConfiguration) -> None:
-        super().__init__(PredictorClassifierType.RANDOM_FOREST)
-        estimator = RandomForestClassifier(criterion='gini', warm_start=True, random_state=configuration.RANDOM_STATE)
-        param_grid = {
-            'n_estimators': [10, 50] + list(range(100, 251, 50)),
-            'min_samples_leaf': [1] + list(range(5, 51, 5)),
+        kwargs = { 
+            'estimator': RandomForestClassifier(criterion='gini', warm_start=True, random_state=configuration.RANDOM_STATE),
+            configuration.search_method.param_key: { 
+                'n_estimators': [10, 50] + list(range(100, 251, 50)), 
+                'min_samples_leaf': [1] + list(range(5, 51, 5)) 
+            }
         }
-        self.__gs__ = GridSearchCV(estimator=estimator, 
-                                   param_grid=param_grid, 
-                                   cv=configuration.CROSS_VALIDATOR, 
-                                   scoring=configuration.SCORING, 
-                                   n_jobs=configuration.GS_N_JOBS, 
-                                   refit=True)
+        super().__init__(PredictorClassifierType.RANDOM_FOREST, configuration, **kwargs)
         
 
 @final
@@ -118,22 +108,18 @@ class AdaBoostPredictorClassifier(PredictorClassifier):
 
 
     def __init__(self, configuration: PredictorConfiguration) -> None:
-        super().__init__(PredictorClassifierType.ADA_BOOST)
-        estimator = AdaBoostClassifier(algorithm='SAMME', random_state=configuration.RANDOM_STATE)
-        param_grid = {
-            'estimator': [
-                DecisionTreeClassifier(max_depth=1, random_state=configuration.RANDOM_STATE), 
-                DecisionTreeClassifier(max_depth=2, random_state=configuration.RANDOM_STATE),
-            ],
-            'n_estimators': [100, 200, 300],
-            'learning_rate': [0.1, 0.5, 1.0, 2.0]
+        kwargs = {
+            'estimator': AdaBoostClassifier(algorithm='SAMME', random_state=configuration.RANDOM_STATE),
+            configuration.search_method.param_key: {
+                'estimator': [ 
+                    DecisionTreeClassifier(max_depth=1, random_state=configuration.RANDOM_STATE), 
+                    DecisionTreeClassifier(max_depth=2, random_state=configuration.RANDOM_STATE), 
+                ],
+                'n_estimators': [100, 200, 300], 
+                'learning_rate': [0.1, 0.5, 1.0, 2.0]
+            }
         }
-        self.__gs__ = GridSearchCV(estimator=estimator, 
-                                   param_grid=param_grid, 
-                                   cv=configuration.CROSS_VALIDATOR, 
-                                   scoring=configuration.SCORING, 
-                                   n_jobs=configuration.GS_N_JOBS, 
-                                   refit=True)
+        super().__init__(PredictorClassifierType.ADA_BOOST, configuration, **kwargs)
         
 
 @final
@@ -141,18 +127,14 @@ class GradientBoostingPredictorClassifier(PredictorClassifier):
 
 
     def __init__(self, configuration: PredictorConfiguration) -> None:
-        super().__init__(PredictorClassifierType.GRADIENT_BOOSTING)
-        estimator = GradientBoostingClassifier(warm_start=True, random_state=configuration.RANDOM_STATE)
-        param_grid = {
-            'n_estimators': [100, 200, 300],
-            'learning_rate': [0.1, 0.5, 1.0, 2.0],
+        kwargs = {
+            'estimator': GradientBoostingClassifier(warm_start=True, random_state=configuration.RANDOM_STATE),
+            configuration.search_method.param_key: {
+                'n_estimators': [100, 200, 300], 
+                'learning_rate': [0.1, 0.5, 1.0, 2.0]
+            }
         }
-        self.__gs__ = GridSearchCV(estimator=estimator, 
-                                   param_grid=param_grid, 
-                                   cv=configuration.CROSS_VALIDATOR, 
-                                   scoring=configuration.SCORING, 
-                                   n_jobs=configuration.GS_N_JOBS, 
-                                   refit=True)
+        super().__init__(PredictorClassifierType.GRADIENT_BOOSTING, configuration, **kwargs)
 
 
 def get_predictor_classifiers(configuration: PredictorConfiguration) -> list[PredictorClassifier]:

@@ -1,4 +1,5 @@
 # Standard Python imports
+import time
 import json
 import logging as log
 from os import listdir, path
@@ -15,9 +16,9 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 from sklearn.utils.class_weight import compute_sample_weight
 
 # Project imports
-from src.configuration import PredictorConfiguration
-from src.classifiers import PredictorClassifierType, PredictorClassifier
-from src.classifiers import get_predictor_classifiers
+from .configuration import PredictorConfiguration
+from .classifiers import PredictorClassifierType, PredictorClassifier
+from .classifiers import get_predictor_classifiers
 
 
 @final
@@ -94,6 +95,7 @@ class Predictor:
     
 
     def export_model(self) -> None:
+        start_time = time.time()
 
         # Importing all the CSV files as dataframe
         df, csv_files_count, rows_count = self.import_data()
@@ -161,9 +163,10 @@ class Predictor:
         metadata.export()
 
         # Exporting model's pickle file
-        pickle_file_path = self.__configuration__.pickle_file_path
+        pickle_file_path, search_method = self.__configuration__.pickle_file_path, self.__configuration__.search_method
         best_classifier.export(pickle_file_path)
-        log.info(f'Classifier exported: {pickle_file_path}')
+        end_time = time.time() - start_time
+        log.info(f'Export Path: {pickle_file_path} | Export Time: {end_time:.02f} seconds | Search Method: {search_method}')
 
 
     def plot_roc_curve(self, y_test, y_pred_probs, roc_auc) -> None:

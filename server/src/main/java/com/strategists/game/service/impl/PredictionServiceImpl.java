@@ -119,13 +119,13 @@ public class PredictionServiceImpl implements PredictionService {
 				properties.train().command(),
 
 				// Game data export directory
-				"-D", properties.train().directory().data().getPath(),
+				"--data-dir", properties.train().directory().data().getPath(),
 
 				// Metadata export directory
-				"-M", properties.train().directory().metadata().getPath(),
+				"--meta-dir", properties.train().directory().metadata().getPath(),
 
 				// Classifier pickle file path
-				"-P", getClassifierPickleFile().getPath()
+				"--pickle-path", getClassifierPickleFile().getPath()
 
 		);
 		log.info("Prediction Model's training output:\n{}", String.join("\n", output));
@@ -195,10 +195,10 @@ public class PredictionServiceImpl implements PredictionService {
 				properties.predict().command(),
 
 				// Prediction file
-				"-P", getClassifierPickleFile().getPath(),
+				"--pickle-path", getClassifierPickleFile().getPath(),
 
 				// Model out directory
-				"-T", csv.getPath()
+				"--test-csv", csv.getPath()
 
 		);
 
