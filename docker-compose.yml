@@ -25,10 +25,13 @@ services:
     build: 
       context: .
       dockerfile: server/Dockerfile
-    environment:
-      - PROFILE=docker
+    env_file:
+      - secrets/server.env.list
     networks:
       - strategists-network
+    volumes:
+      - ./secrets:/app/secrets:ro
+      - ./prediction/data:/app/prediction/data
 
 networks:
   strategists-network:

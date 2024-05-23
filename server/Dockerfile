@@ -37,7 +37,15 @@ COPY prediction /app/prediction
 WORKDIR /app/prediction
 RUN python3 -m pip install --upgrade pip && \
     pip3 install poetry && \
-    poetry config virtualenvs.in-project true && \
+    poetry install
+
+# copying google-utils model
+COPY google-utils /app/google-utils
+
+# installing poetry
+WORKDIR /app/google-utils
+RUN python3 -m pip install --upgrade pip && \
+    pip3 install poetry && \
     poetry install
 
 ######## Execution Stage ########
@@ -46,5 +54,4 @@ RUN python3 -m pip install --upgrade pip && \
 WORKDIR /app/server
 CMD java -cp .:classes:lib/* \
          -Djava.security.egd=file:/dev/./urandom \
-         -Dspring.profiles.active=$PROFILE \
          com.strategists.game.StrategistsService
