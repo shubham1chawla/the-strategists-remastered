@@ -20,7 +20,7 @@ spring:
         format_sql: true
   h2:
     console:
-      enabled: true
+      enabled: ${ENABLE_H2_CONSOLE:false}
 strategists:
   game:
     default-map: india
@@ -30,19 +30,19 @@ strategists:
     min-players-count: 2
     max-players-count: 6
   configuration:
-    clean-up:
-      enabled: true
-      delay: 300000
-      thread-pool-size: 2
     sse-ping:
-      enabled: false 
+      enabled: ${ENABLE_SSE_PING:true}
+    clean-up:
+      enabled: ${ENABLE_CLEAN_UP:true}
+      delay: 300000
+      thread-pool-size: 2 
     skip-player:
-      enabled: true
+      enabled: ${ENABLE_SKIP_PLAYER:true} 
       allowed-count: 3
       timeout: 90000
       thread-pool-size: 4
   prediction:
-    enabled: true
+    enabled: ${ENABLE_PREDICTIONS:true}
     python:
       executable: ../prediction/.venv/bin/python
       script: ../prediction/main.py
@@ -61,9 +61,9 @@ strategists:
   google:
     recaptcha:
       api-url: https://www.google.com/recaptcha/api/siteverify
-      secret-key:
+      secret-key: ${GOOGLE_RECAPTCHA_SECRET_KEY:}
     utils:
-      credentials-json-file:
+      credentials-json-file: ${GOOGLE_CREDENTIALS_JSON:}
       python:
         executable: ../google-utils/.venv/bin/python
         script: ../google-utils/main.py
@@ -73,13 +73,13 @@ strategists:
           directory: ../google-utils/
           file-name: permissions.json
         spreadsheet:
-          id: 
-          range: 
+          id: ${GOOGLE_SPREADSHEET_ID:}
+          range: ${GOOGLE_SPREADSHEET_RANGE:}
       predictions:
         command: predictions
         download:
           sub-command: download
-          drive-folder-id: 
+          drive-folder-id: ${GOOGLE_DRIVE_DOWNLOAD_FOLDER_ID:}
         upload: 
           sub-command: upload
-          drive-folder-id: 
+          drive-folder-id: ${GOOGLE_DRIVE_UPLOAD_FOLDER_ID:}
