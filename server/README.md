@@ -1,42 +1,77 @@
-# The Strategists - Back-end Service
+# The Strategists - Backend Service
 
-This directory is a Spring Boot application that serves as a back-end service for The Strategists.
+This directory is a Spring Boot application that serves as a backend service for The Strategists.
 
 ## Setup
 
-Follow the steps mentioned below to understand how to setup the Spring Boot application, and create Docker images. You may also refer to the troubleshooting steps if you face any issues.
+Follow the steps below to understand how to set up the Spring Boot application and create Docker images.
 
-### General
-- Please refer to the `application.yml` file to view all the Spring and application-related configurations.
-- You will need to provide admins' email addresses (comma separated for multiple emails) to run the application. Either create your own spring profile with the `strategists.admin.emails` key, or pass it as a VM argument as `-Dstrategists.admin.emails=<EMAIL1>,<EMAIL2>`. **DO NOT** hard-code email addresses in the default `application.yml` file.
-- You will need to provide Google Recaptcha secret key to run the application. Either create your own spring profile with the `strategists.configuration.google-recaptcha-secret-key` key, or pass it as a VM argument as `-Dstrategists.configuration.google-recaptcha-secret-key=<SECRET_KEY>`. **DO NOT** hard-code it in the default `application.yml` file.
-- If you want to log auto-generated SQLs, change the `spring.jpa.show-sql` to `true` in the `application.yml` or pass it as a VM argument as `-Dspring.jpa.show-sql=true`. If you are changing the default `application.yml` file, **DO NOT** commit it to the repository.
-- H2 is enabled by default, if you want to disable it, change the `spring.h2.console.enabled` to `false` in the `application.yml` or pass it as a VM argument as `-Dspring.h2.console.enabled=false`. If you are changing the default `application.yml` file, **DO NOT** commit it to the repository.
+### Step 1 - Importing Maven Project
 
-### Docker
-- Before creating a Docker image, make sure you have created a dedicated `application-docker.yml` file in the resources directory along with `application.yml`.
-- Overwrite any default configuration in the dedicated `yml` file. **DO NOT** update the default `application.yml` file.
-- Make sure to add the `strategists.admin.emails` key in the Docker's dedicated `yml` file. The application won't start otherwise as admins' email addresses is not provided in the default `application.yml` file.
-- Make sure to add the `strategists.configuration.google-recaptcha-secret-key` key in the Docker's dedicated `yml` file. The application won't start otherwise as Google Recaptcha secret key is not provided in the default `application.yml` file.
-- Once you have created a dedicated `yml` file, you can build a Docker image from the **parent directory (outside server)** using the `docker buildx build -f server/Dockerfile -t <REPOSITORY_NAME>/strategists-service:<TAG_NAME> .` command.
-- To run the image, use the `docker run -e PROFILE=docker -p 8090:8090 <REPOSITORY_NAME>/strategists-service:<TAG_NAME>` command. This command assumes that your dedicated file is named `application-docker.yml`.
+- Use any IDE, such as [Eclipse](https://www.eclipse.org/) or [IntelliJ](https://www.jetbrains.com/idea/), to import this `server` folder containing the `pom.xml` file as a maven project.
 
-### AWS
+### Step 2 - Setting up Environment Variables
 
-- Update the VM using the `sudo yum update -y` command.
-- Install Docker using the `sudo yum -y install docker` command.
-- Start the Docker service using the `sudo service docker start` command.
-- Allow default `ec2-user` to run Docker commands without sudo using the following commands.
-    
-    ```
-    sudo usermod -a -G docker ec2-user
-    sudo chmod 666 /var/run/docker.sock
-    ```
-- Pull the service's Docker image using `docker pull <REPOSITORY_NAME>/strategists-service:<TAG_NAME>` command. **Note:** You can build the image on the instance too.
-- If you are pulling the image, make sure the platform where the image is built using and where you are running matches. To enfore platform while building, pass the `--platform=linux/amd64` flag.
-- Run the service using the `docker run --env PROFILE=docker -p 80:8090 <REPOSITORY_NAME>/strategists-service:<TAG_NAME>` command.
+In addition to all the configurations mentioned in the `application.yml` file, please refer to the following variables required to run the server. Please refer to the `google-utils/README.md` file for Google-related configurations.
 
-### Troubleshooting
+> [!NOTE]
+> If you are using an IDE like Eclipse, you can pass these environment variables to the application as `-D<VARIABLE_NAME>=<VALUE>` by adding them to the VM arguments of the run configuration.
+
+Variable | Description | Type | Default Value
+--- | --- | --- | ---
+ENABLE_H2_CONSOLE | If set, the server will expose the H2 database console URL by the server. | `boolean` | `false`
+ENABLE_SSE_PING | If set, the server will send a periodic ping to keep the SSE channel open. | `boolean` | `true`
+ENABLE_CLEAN_UP | If set, the server will delete games after some time of inactivity. | `boolean` | `true`
+ENABLE_SKIP_PLAYER | If set, the server will skip players' turns after some time of inactivity. | `boolean` | `true`
+ENABLE_PREDICTIONS | If set, the server will train and execute the prediction model. | `boolean` | `true`
+GOOGLE_RECAPTCHA_SECRET_KEY | Google Recaptcha Secret Key (Version 2) that will verify users after they check the 'I am not a robot' box. It would be best if you either created your own or used the testing one mentioned on [this website](https://developers.google.com/recaptcha/docs/faq#id-like-to-run-automated-tests-with-recaptcha.-what-should-i-do). | `String` | none
+GOOGLE_CREDENTIALS_JSON | Path to the Google Service Account's Credentials as a JSON file. Learn how to create service accounts from [this webpage](https://cloud.google.com/iam/docs/service-accounts-create). | `String` | none
+GOOGLE_SPREADSHEET_ID | Google Spreadsheet ID, which manages user permission groups. | `String` | none
+GOOGLE_SPREADSHEET_RANGE | Range you want the server to query to fetch the permission groups. | `String` | none
+GOOGLE_DRIVE_DOWNLOAD_FOLDER_ID | Google Drive folder ID where all the game data is present. | `String` | none
+GOOGLE_DRIVE_UPLOAD_FOLDER_ID | Google Drive folder ID where the server should upload new game data. | `String` | none
+
+### Step 3 - Running Server
+
+- After configuring the VM arguments, you can run the `StrategistsService.java` file from your IDE to start the backend server.
+
+## Docker
+
+Read the following steps to build and run the backend service's Docker image.
+
+### Step 1 - How to build a Docker Image?
+
+> [!IMPORTANT]
+> Ensure you execute this build command from the root directory, not inside the `server` directory!
+
+You can use the following command to build a Docker image for the backend service.
+
+    docker buildx build -f server/Dockerfile -t strategists-service .
+
+> [!TIP]
+> You can also use the `docker-compose build` command from the root directory to build the server's Docker image.
+
+### Step 2 - Setting up environment variables file
+
+- Create a folder named `secrets` in the root directory. This directory is in the `.gitignore` file and shouldn't be pushed to GitHub.
+- Copy/Move the service account's `credentials.json` file in this directory.
+- Create a `service.env.list` file inside the `secrets` directory containing all the required environment variables.
+
+### Step 3 - How to run this Docker image?
+
+You can run a container from this Docker image using the following command.
+
+    docker run \
+    --env-file secrets/server.env.list \
+    -v ./secrets:/app/secrets:ro \
+    -v ./prediction/data:/app/prediction/data \
+    -p 8090:8090 \
+    strategists-service
+
+> [!TIP]
+> You can also use the `docker-compose up` command from the root directory to run the server's Docker image. Please make the necessary changes to expose the server's port so that APIs can be accessed.
+
+### Step 4 - How do you enter an interactive shell attached to a running Docker container?
 - To check the files in the Docker container, enter its shell using the `docker exec -it <CONTAINER_ID or CONTAINER_NAME> sh` command.
 
 ## References
