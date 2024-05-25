@@ -256,7 +256,7 @@ export const VisualPortfolio = (props: PortfolioProps) => {
 
     // Rendering the chart
     chart.render();
-  }, [players, lands, props]);
+  }, [players, lands, props, playerLands]);
 
   if (!playerLands.length) {
     return <Empty message="No investments available!" />;
