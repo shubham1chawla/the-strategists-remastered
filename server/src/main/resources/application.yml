@@ -47,17 +47,17 @@ strategists:
       executable: ../prediction/.venv/bin/python
       script: ../prediction/main.py
     export:
-      directory: ../prediction/out/
+      directory: ../shared/model/
       file-name: classifier.pkl
     train:
       command: train
       directory:
-        data: ../prediction/data/
-        metadata: ../prediction/metadata/
+        data: ../shared/data/
+        metadata: ../shared/metadata/
     predict:
       command: predict
       directory:
-        test: ../prediction/test/
+        test: ../shared/test/
   google:
     recaptcha:
       api-url: https://www.google.com/recaptcha/api/siteverify
@@ -68,9 +68,10 @@ strategists:
         executable: ../google-utils/.venv/bin/python
         script: ../google-utils/main.py
       permissions:
+        bypass-google-sheets-query-for-testing: false
         command: permissions
         export:
-          directory: ../google-utils/
+          directory: ../shared/secrets/
           file-name: permissions.json
         spreadsheet:
           id: ${GOOGLE_SPREADSHEET_ID:}

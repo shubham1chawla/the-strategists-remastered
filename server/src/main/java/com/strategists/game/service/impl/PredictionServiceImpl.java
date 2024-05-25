@@ -271,7 +271,7 @@ public class PredictionServiceImpl implements PredictionService {
 				log.info("Created directory: {}", directory);
 			}
 		}
-		log.info("Validated prediction-related directories");
+		log.info("Checked prediction-related directories!");
 	}
 
 	private File getClassifierPickleFile() {
