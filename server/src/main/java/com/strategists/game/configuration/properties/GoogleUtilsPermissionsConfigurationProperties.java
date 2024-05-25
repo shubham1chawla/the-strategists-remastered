@@ -12,8 +12,8 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties(prefix = "strategists.google.utils.permissions")
-public record GoogleUtilsPermissionsConfigurationProperties(@NotBlank String command,
-		@DefaultValue @Valid SimpleFileExportConfigurationProperties export,
+public record GoogleUtilsPermissionsConfigurationProperties(boolean bypassGoogleSheetsQueryForTesting,
+		@NotBlank String command, @DefaultValue @Valid SimpleFileExportConfigurationProperties export,
 		@DefaultValue @Valid Spreadsheet spreadsheet) {
 
 	public record Spreadsheet(@NotBlank String id, @NotBlank String range) {

@@ -2,6 +2,7 @@ package com.strategists.game.service.impl;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
@@ -71,6 +72,26 @@ public class GoogleAPIServiceImpl implements AuthenticationService, PermissionsS
 
 		val googleUtils = properties.utils();
 
+		// Checking if user bypassed google sheets query for testing
+		if (googleUtils.permissions().bypassGoogleSheetsQueryForTesting()) {
+			log.warn("Bypassing querying permission groups! ONLY DO THIS FOR TESTING!");
+
+			// Loading from permissions file in export directory
+			val permissionGroupsFile = googleUtils.permissions().getExportFile();
+
+			// Checking if testing permission file exists
+			Assert.isTrue(permissionGroupsFile.exists(),
+					"You've set 'bypass-google-sheets-query-for-testing', but there is no '"
+							+ googleUtils.permissions().export().fileName() + "' in the '"
+							+ googleUtils.permissions().export().directory().getPath()
+							+ "' directory! Fix this issue by placing a testing permissions file to load!");
+
+			loadPermissionGroups(permissionGroupsFile);
+			return;
+		}
+
+		log.info("Querying permission groups...");
+
 		// Executing permissions script
 		val output = ScriptUtil.execute(
 
@@ -98,23 +119,41 @@ public class GoogleAPIServiceImpl implements AuthenticationService, PermissionsS
 		);
 		log.info("Script Output:{}{}", System.lineSeparator(), String.join(System.lineSeparator(), output));
 
+		// Loading from permissions file in export directory
+		val permissionGroupsFile = googleUtils.permissions().getExportFile();
+		loadPermissionGroups(permissionGroupsFile);
+
+	}
+
+	private void loadPermissionGroups(File permissionGroupsFile) {
+
 		// Validating whether permissions file exists
-		val permissionGroupsFile = properties.utils().permissions().getExportFile();
 		Assert.isTrue(permissionGroupsFile.exists(), "Permission Groups JSON not generated!");
 
 		// Reading permissions JSON and saving permission groups
 		try {
-			val permissionsGroups = new ObjectMapper().readValue(permissionGroupsFile, PermissionGroup[].class);
-			permissionGroupRepository.saveAll(Arrays.asList(permissionsGroups));
+			val permissionGroups = new ObjectMapper().readValue(permissionGroupsFile, PermissionGroup[].class);
+			permissionGroupRepository.saveAll(Arrays.asList(permissionGroups));
 
-			log.info("Saved {} permission groups", permissionsGroups.length);
+			log.info("Saved {} permission groups", permissionGroups.length);
 		} catch (IOException ex) {
 			log.error("Unable to load permission groups! Message: {}", ex.getMessage());
 			log.debug(ex);
 			throw new FailedProcessException(ex);
 		} finally {
-			if (permissionGroupsFile.exists()) {
-				permissionGroupsFile.delete();
+
+			// Deleting permissions file only if bypass is disabled
+			val bypass = properties.utils().permissions().bypassGoogleSheetsQueryForTesting();
+			if (!bypass && permissionGroupsFile.exists()) {
+				try {
+					Files.delete(permissionGroupsFile.toPath());
+					log.info("Removed: {}", permissionGroupsFile.getPath());
+				} catch (IOException ex) {
+					log.warn("Unable to remove: {} | Message: {}", ex.getMessage());
+					log.debug(ex);
+				}
+			} else if (bypass) {
+				log.info("Skipped removing: {}", permissionGroupsFile.getPath());
 			}
 		}
 

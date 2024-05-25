@@ -18,6 +18,8 @@
 .env.test.local
 .env.production.local
 
+.netlify
+
 package-lock.json
 
 npm-debug.log*

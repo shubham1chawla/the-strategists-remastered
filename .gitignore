@@ -1,6 +1,2 @@
 .DS_Store
-*.pem
-*.pdf
-.netlify
 .vscode
-secrets
