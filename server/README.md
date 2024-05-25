@@ -53,18 +53,20 @@ You can use the following command to build a Docker image for the backend servic
 
 ### Step 2 - Setting up environment variables file
 
-- Create a folder named `secrets` in the root directory. This directory is in the `.gitignore` file and shouldn't be pushed to GitHub.
-- Copy/Move the service account's `credentials.json` file in this directory.
-- Create a `service.env.list` file inside the `secrets` directory containing all the required environment variables.
+- Copy/Move the service account's `credentials.json` file in the `shared/secrets` directory.
+- Create a `service.env.list` file inside the `shared/secrets` directory containing all the required environment variables.
+
+> [!TIP]
+> You can bypass Google Utils functionalities for **TESTING ONLY** by following the steps mentioned here.
+> - Either edit the `application.yml` file or pass VM argument `-Dstrategists.google.utils.permissions.bypass-google-sheets-query-for-testing=true` to bypass querying Google Spreadsheets for fetching the permission groups. You must manually create a testing `permissions.json` file in the `shared/secrets` directory.
 
 ### Step 3 - How to run this Docker image?
 
 You can run a container from this Docker image using the following command.
 
     docker run \
-    --env-file secrets/server.env.list \
-    -v ./secrets:/app/secrets:ro \
-    -v ./prediction/data:/app/prediction/data \
+    --env-file shared/secrets/server.env.list \
+    -v ./shared:/app/shared \
     -p 8090:8090 \
     strategists-service
 
