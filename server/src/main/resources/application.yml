@@ -77,6 +77,7 @@ strategists:
           id: ${GOOGLE_SPREADSHEET_ID:}
           range: ${GOOGLE_SPREADSHEET_RANGE:}
       predictions:
+        bypass-google-drive-sync-for-testing: false
         command: predictions
         download:
           sub-command: download
