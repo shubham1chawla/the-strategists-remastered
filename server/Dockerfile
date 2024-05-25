@@ -37,6 +37,7 @@ COPY prediction /app/prediction
 WORKDIR /app/prediction
 RUN python3 -m pip install --upgrade pip && \
     pip3 install poetry && \
+    poetry config virtualenvs.in-project true && \
     poetry install
 
 # copying google-utils model
@@ -46,6 +47,7 @@ COPY google-utils /app/google-utils
 WORKDIR /app/google-utils
 RUN python3 -m pip install --upgrade pip && \
     pip3 install poetry && \
+    poetry config virtualenvs.in-project true && \
     poetry install
 
 ######## Execution Stage ########

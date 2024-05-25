@@ -234,10 +234,20 @@ $RECYCLE.BIN/
 
 # End of https://www.toptal.com/developers/gitignore/api/python,macos,windows
 
+shared/*
+
+prediction/.venv
 prediction/data
 prediction/metadata
 prediction/test
 prediction/out
+prediction/*.csv
+prediction/**/*.csv
 
+google-utils/.venv
 google-utils/*.sh
 google-utils/sh
+google-utils/*.json
+google-utils/**/*.json
+google-utils/*.csv
+google-utils/**/*.csv
