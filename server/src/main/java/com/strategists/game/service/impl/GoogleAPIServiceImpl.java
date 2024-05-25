@@ -166,21 +166,29 @@ public class GoogleAPIServiceImpl implements AuthenticationService, PermissionsS
 
 	@Override
 	public void downloadCSVFiles(File directory) {
+		log.info("Downloading CSV files from Google Drive...");
 		syncCSVFiles(directory, false);
 	}
 
 	@Override
 	public void uploadCSVFiles(File directory) {
+		log.info("Uploading CSV files to Google Drive...");
 		syncCSVFiles(directory, true);
 	}
 
 	private void syncCSVFiles(File directory, boolean upload) {
 
+		val googleUtils = properties.utils();
+
+		// Checking if user bypassed google drive sync for testing
+		if (googleUtils.predictions().bypassGoogleDriveSyncForTesting()) {
+			log.warn("Bypassing syncing CSV files! ONLY DO THIS FOR TESTING!");
+			return;
+		}
+
 		// Validating directory
 		Assert.isTrue(directory.exists(), "Data directory must exists!");
 		Assert.isTrue(directory.isDirectory(), "Data directory must not be a file!");
-
-		val googleUtils = properties.utils();
 
 		// Creating script's commands
 		val commands = new ArrayList<String>();
