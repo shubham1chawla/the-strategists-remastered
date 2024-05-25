@@ -59,6 +59,7 @@ You can use the following command to build a Docker image for the backend servic
 > [!TIP]
 > You can bypass Google Utils functionalities for **TESTING ONLY** by following the steps mentioned here.
 > - Either edit the `application.yml` file or pass VM argument `-Dstrategists.google.utils.permissions.bypass-google-sheets-query-for-testing=true` to bypass querying Google Spreadsheets for fetching the permission groups. You must manually create a testing `permissions.json` file in the `shared/secrets` directory.
+> - Either edit the `application.yml` file or pass VM argument `-Dstrategists.google.utils.predictions.bypass-google-drive-sync-for-testing=true` to bypass downloading and uploading of CSV files to Google Drive. You must manually maintain game data in the `shared/data` directory.
 
 ### Step 3 - How to run this Docker image?
 
