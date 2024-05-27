@@ -123,7 +123,9 @@ export class InvestmentStrategy {
 
   get feasible() {
     return (
-      !!this.land.marketValue && this.ownership <= this.maxOfferableOwnership
+      !!this.land.marketValue &&
+      this.ownership > 0 &&
+      this.ownership <= this.maxOfferableOwnership
     );
   }
 }
