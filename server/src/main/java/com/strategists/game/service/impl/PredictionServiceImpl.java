@@ -158,12 +158,12 @@ public class PredictionServiceImpl implements PredictionService {
 			return;
 		}
 
-		// Training the model
+		// Uploading Exported CSV files
 		log.info("Exported game data: {}", csv.getAbsolutePath());
-		trainPredictionModel();
-
-		// Uploading CSV files
 		dataSyncService.uploadCSVFiles(properties.train().directory().data());
+
+		// Training the model
+		trainPredictionModel();
 	}
 
 	@Override
