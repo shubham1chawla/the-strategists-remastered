@@ -83,7 +83,7 @@ The game includes a confetti animation once a player wins. The prediction model 
 
 ## Setup
 
-If you just want to run the application on your local machine using Docker, use the `docker-compose up` command. Please make sure all the configurations are set before running this command. Refer to individual projects' README to read more.
+If you want to run the application on your local machine using Docker, use the `docker-compose up` command. Please make sure all the configurations are set before running this command. Refer to individual projects' README to read more.
 
 ## Blogs & Videos
 
@@ -91,3 +91,5 @@ If you just want to run the application on your local machine using Docker, use 
 - [Leveraging Spring Aspect-Oriented Programming (AOP) for Event-Driven Updates](https://medium.com/@shuchawl/leveraging-spring-aspect-oriented-programming-aop-for-event-driven-updates-a53240de6dc2)
 - [From localhost to the cloud — my struggles with hosting The Strategists for free!](https://medium.com/@shuchawl/from-localhost-to-the-cloud-my-struggles-with-hosting-the-strategists-for-free-66b7b5664c9a)
 - [The Strategists | 1st Gameplay Demo | Monopoly-inspired Online Multiplayer Game](https://www.youtube.com/watch?v=hvkbyQzbgW0)
+- [How did I use Google Sheets as my app’s free database?](https://medium.com/@shuchawl/how-did-i-use-google-sheets-as-my-apps-free-database-c38faa5be6b3)
+- [How did I use Google Drive as a free cloud storage solution to automate syncing my Machine Learning data?](https://medium.com/@shuchawl/how-did-i-use-google-drive-as-a-free-cloud-storage-solution-to-automate-syncing-my-machine-learning-e1f288ebeab9)
