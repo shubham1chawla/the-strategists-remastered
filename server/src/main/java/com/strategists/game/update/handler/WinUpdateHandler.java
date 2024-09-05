@@ -32,6 +32,9 @@ public class WinUpdateHandler extends AbstractUpdateHandler<WinUpdatePayload> {
 			// Executing prediction model
 			executePredictionModelAsync(game);
 
+			// Generating advice for players
+			generateAdvicesAsync(game);
+
 			// Scheduling player skip task
 			scheduleSkipPlayerTask(game);
 
