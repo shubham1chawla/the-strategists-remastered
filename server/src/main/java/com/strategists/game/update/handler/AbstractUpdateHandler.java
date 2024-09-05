@@ -9,6 +9,7 @@ import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Game;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.TrendRepository;
+import com.strategists.game.service.AdviceService;
 import com.strategists.game.service.CleanUpService;
 import com.strategists.game.service.PredictionService;
 import com.strategists.game.service.SkipPlayerService;
@@ -33,6 +34,9 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
 	private PredictionService predictionService;
 
 	@Autowired(required = false)
+	private AdviceService adviceService;
+
+	@Autowired(required = false)
 	private SkipPlayerService skipPlayerService;
 
 	@Autowired(required = false)
@@ -47,6 +51,9 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
 		trendRepository.deleteByGame(game);
 		if (Objects.nonNull(predictionService)) {
 			predictionService.clearPredictions(game);
+		}
+		if (Objects.nonNull(adviceService)) {
+			adviceService.clearAdvices(game);
 		}
 	}
 
@@ -69,6 +76,18 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
 					predictionService.executePredictionModel(game);
 				} catch (Exception ex) {
 					log.error("Failed to execute prediction model!", ex);
+				}
+			});
+		}
+	}
+
+	protected void generateAdvicesAsync(Game game) {
+		if (Objects.nonNull(adviceService)) {
+			CompletableFuture.runAsync(() -> {
+				try {
+					adviceService.generateAdvices(game);
+				} catch (Exception ex) {
+					log.error("Failed to generate advices!", ex);
 				}
 			});
 		}

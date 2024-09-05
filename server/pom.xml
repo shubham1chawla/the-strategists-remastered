@@ -68,6 +68,13 @@
 		    <artifactId>commons-validator</artifactId>
 		    <version>1.8.0</version>
 		</dependency>
+		
+		<!-- Dependency for Advice chains -->
+		<dependency>
+		    <groupId>commons-chain</groupId>
+		    <artifactId>commons-chain</artifactId>
+		    <version>1.2</version>
+		</dependency>
 
 		<!-- Test dependencies below -->
 		<dependency>
