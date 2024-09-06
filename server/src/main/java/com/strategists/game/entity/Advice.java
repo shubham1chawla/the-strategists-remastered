@@ -50,6 +50,10 @@ public class Advice implements Serializable {
 
 	@JsonIgnore
 	@Column(nullable = false)
+	private int priority;
+
+	@JsonIgnore
+	@Column(nullable = false)
 	private int newCount;
 
 	@JsonIgnore
@@ -87,10 +91,11 @@ public class Advice implements Serializable {
 	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Game game;
 
-	public Advice(Player player, AdviceType type, String... values) {
+	public Advice(AdviceType type, int priority, Player player, String... values) {
+		this.type = type;
+		this.priority = priority;
 		this.player = player;
 		this.game = player.getGame();
-		this.type = type;
 		this.viewed = false;
 		this.state = State.NEW;
 		this.newCount = 1;
@@ -111,8 +116,12 @@ public class Advice implements Serializable {
 		return player.getId();
 	}
 
-	public static Advice ofFrequentlyInvest(Player player, int turnsElapsed) {
-		return new Advice(player, AdviceType.FREQUENTLY_INVEST, String.valueOf(turnsElapsed));
+	public static Advice ofFrequentlyInvest(int priority, Player player, int turnsElapsed) {
+		return new Advice(AdviceType.FREQUENTLY_INVEST, priority, player, String.valueOf(turnsElapsed));
+	}
+
+	public static Advice ofAvoidTimeout(int priority, Player player) {
+		return new Advice(AdviceType.AVOID_TIMEOUT, priority, player);
 	}
 
 }

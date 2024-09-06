@@ -25,14 +25,11 @@ import com.strategists.game.update.UpdateType;
 import lombok.val;
 
 @Component
-@ConditionalOnExpression("${strategists.advice.enabled} && ${strategists.advice.frequently-invest.enabled}")
-public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
+@ConditionalOnExpression("${strategists.configuration.skip-player.enabled} && ${strategists.advice.enabled} && ${strategists.advice.avoid-timeout.enabled}")
+public class AvoidTimeoutAdviceHandler extends AbstractAdviceHandler {
 
-	@Value("${strategists.advice.frequently-invest.priority}")
+	@Value("${strategists.advice.avoid-timeout.priority}")
 	private int priority;
-
-	@Value("${strategists.advice.frequently-invest.turn-look-back}")
-	private int turnLookBack = 3;
 
 	@Autowired
 	private ActivityRepository activityRepository;
@@ -47,18 +44,18 @@ public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
 	protected void generate(AdviceContext context) {
 		val game = context.getGame();
 		val players = playerService.getPlayersByGame(game);
-		val getLastInvestTurnByPlayer = getLastInvestTurnByPlayerFunction(game, players);
+		val getLastSkippedTurnByPlayer = getLastSkippedTurnByPlayerFunction(game, players);
 
 		// Generating or updating advice
 		for (Player player : players) {
-			val opt = generate(game, players.size(), player, getLastInvestTurnByPlayer.applyAsInt(player));
+			val opt = generate(game, players.size(), player, getLastSkippedTurnByPlayer.applyAsInt(player));
 			if (opt.isPresent()) {
 				context.addAdvice(opt.get());
 			}
 		}
 	}
 
-	private Optional<Advice> generate(Game game, int playersCount, Player player, int lastInvestTurn) {
+	private Optional<Advice> generate(Game game, int playersCount, Player player, int lastSkippedTurn) {
 
 		// Ignoring bankrupt players
 		if (player.isBankrupt()) {
@@ -66,10 +63,13 @@ public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
 		}
 
 		// Checking if advice is needed
-		val isAdviceNeeded = (game.getTurn() - lastInvestTurn) > (playersCount * turnLookBack);
+		boolean isAdviceNeeded = false;
+		if (lastSkippedTurn > 0) {
+			isAdviceNeeded = (game.getTurn() - lastSkippedTurn) <= playersCount;
+		}
 
 		// Checking if we have already generated advice for this player
-		val opt = adviceRepository.findByPlayerAndType(player, AdviceType.FREQUENTLY_INVEST);
+		val opt = adviceRepository.findByPlayerAndType(player, AdviceType.AVOID_TIMEOUT);
 
 		// Case 1 - No previous advice found and no new advice needed
 		if (opt.isEmpty() && !isAdviceNeeded) {
@@ -78,7 +78,7 @@ public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
 
 		// Case 2 - No previous advice found and new advice needed
 		if (opt.isEmpty() && isAdviceNeeded) {
-			return Optional.of(Advice.ofFrequentlyInvest(priority, player, turnLookBack));
+			return Optional.of(Advice.ofAvoidTimeout(priority, player));
 		}
 
 		// Case 3 - Previous advice's state not NEW and advice needed
@@ -100,21 +100,21 @@ public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
 		return Optional.empty();
 	}
 
-	private ToIntFunction<Player> getLastInvestTurnByPlayerFunction(Game game, List<Player> players) {
+	private ToIntFunction<Player> getLastSkippedTurnByPlayerFunction(Game game, List<Player> players) {
 		val usernames = players.stream().collect(Collectors.toMap(Player::getUsername, Function.identity()));
 		val activities = activityRepository.findByGameOrderByIdDesc(game);
-		val playerInvestTurnMap = new HashMap<Player, Integer>();
+		val playerSkippedTurnMap = new HashMap<Player, Integer>();
 		int i = 0;
-		while (i < activities.size() && playerInvestTurnMap.size() < players.size()) {
+		while (i < activities.size() && playerSkippedTurnMap.size() < players.size()) {
 			val activity = activities.get(i);
-			if (UpdateType.INVEST.equals(activity.getType())) {
+			if (UpdateType.SKIP.equals(activity.getType())) {
 				val player = usernames.get(activity.getVal1());
-				playerInvestTurnMap.computeIfAbsent(player, key -> activity.getTurn());
+				playerSkippedTurnMap.computeIfAbsent(player, key -> activity.getTurn());
 			}
 			i++;
 		}
 
-		return p -> playerInvestTurnMap.getOrDefault(p, 0);
+		return p -> playerSkippedTurnMap.getOrDefault(p, 0);
 	}
 
 }
