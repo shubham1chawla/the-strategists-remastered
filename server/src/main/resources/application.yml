@@ -64,6 +64,9 @@ strategists:
       enabled: ${ENABLE_FREQUENTLY_INVEST_ADVICE:true}
       priority: 1
       turn-look-back: 3
+    avoid-timeout:
+      enabled: ${ENABLE_AVOID_TIMEOUT_ADVICE:true}
+      priority: 1
   google:
     recaptcha:
       api-url: https://www.google.com/recaptcha/api/siteverify
