@@ -1,11 +1,8 @@
 package com.strategists.game.advice.handler;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.ToIntFunction;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -17,9 +14,7 @@ import com.strategists.game.advice.AdviceType;
 import com.strategists.game.entity.Advice;
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Player;
-import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.AdviceRepository;
-import com.strategists.game.service.PlayerService;
 import com.strategists.game.update.UpdateType;
 
 import lombok.val;
@@ -32,19 +27,13 @@ public class AvoidTimeoutAdviceHandler extends AbstractAdviceHandler {
 	private int priority;
 
 	@Autowired
-	private ActivityRepository activityRepository;
-
-	@Autowired
-	private PlayerService playerService;
-
-	@Autowired
 	private AdviceRepository adviceRepository;
 
 	@Override
 	protected void generate(AdviceContext context) {
 		val game = context.getGame();
-		val players = playerService.getPlayersByGame(game);
-		val getLastSkippedTurnByPlayer = getLastSkippedTurnByPlayerFunction(game, players);
+		val players = context.getPlayers();
+		val getLastSkippedTurnByPlayer = getLastSkippedTurnByPlayerFunction(context);
 
 		// Generating or updating advice
 		for (Player player : players) {
@@ -100,15 +89,17 @@ public class AvoidTimeoutAdviceHandler extends AbstractAdviceHandler {
 		return Optional.empty();
 	}
 
-	private ToIntFunction<Player> getLastSkippedTurnByPlayerFunction(Game game, List<Player> players) {
-		val usernames = players.stream().collect(Collectors.toMap(Player::getUsername, Function.identity()));
-		val activities = activityRepository.findByGameOrderByIdDesc(game);
+	private ToIntFunction<Player> getLastSkippedTurnByPlayerFunction(AdviceContext context) {
+		val players = context.getPlayers();
+		val activities = context.getActivities();
+
 		val playerSkippedTurnMap = new HashMap<Player, Integer>();
+
 		int i = 0;
 		while (i < activities.size() && playerSkippedTurnMap.size() < players.size()) {
 			val activity = activities.get(i);
 			if (UpdateType.SKIP.equals(activity.getType())) {
-				val player = usernames.get(activity.getVal1());
+				val player = context.getPlayerByUsername(activity.getVal1());
 				playerSkippedTurnMap.computeIfAbsent(player, key -> activity.getTurn());
 			}
 			i++;

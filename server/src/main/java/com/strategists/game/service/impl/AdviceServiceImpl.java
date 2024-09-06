@@ -12,8 +12,10 @@ import com.strategists.game.advice.AdviceContext;
 import com.strategists.game.advice.handler.AbstractAdviceHandler;
 import com.strategists.game.entity.Advice;
 import com.strategists.game.entity.Game;
+import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.AdviceRepository;
 import com.strategists.game.service.AdviceService;
+import com.strategists.game.service.PlayerService;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -22,6 +24,12 @@ import lombok.extern.log4j.Log4j2;
 @Service
 @ConditionalOnProperty(name = "strategists.advice.enabled", havingValue = "true")
 public class AdviceServiceImpl implements AdviceService {
+
+	@Autowired
+	private PlayerService playerService;
+
+	@Autowired
+	private ActivityRepository activityRepository;
 
 	@Autowired
 	private AdviceRepository adviceRepository;
@@ -45,8 +53,12 @@ public class AdviceServiceImpl implements AdviceService {
 			chain.addCommand(handler);
 		}
 
+		// Adding information to advice context
+		val players = playerService.getPlayersByGame(game);
+		val activities = activityRepository.findByGameOrderByIdDesc(game);
+		val context = new AdviceContext(game, players, activities);
+
 		// Executing advice chain
-		val context = new AdviceContext(game);
 		try {
 			chain.execute(context);
 		} catch (Exception ex) {
