@@ -48,6 +48,14 @@ public class Advice implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private State state;
 
+	@JsonIgnore
+	@Column(nullable = false)
+	private int newCount;
+
+	@JsonIgnore
+	@Column(nullable = false)
+	private int followedCount;
+
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private AdviceType type;
@@ -85,6 +93,8 @@ public class Advice implements Serializable {
 		this.type = type;
 		this.viewed = false;
 		this.state = State.NEW;
+		this.newCount = 1;
+		this.followedCount = 0;
 		this.val1 = values.length > 0 ? values[0] : null;
 		this.val2 = values.length > 1 ? values[1] : null;
 		this.val3 = values.length > 2 ? values[2] : null;
