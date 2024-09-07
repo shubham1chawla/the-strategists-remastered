@@ -124,4 +124,8 @@ public class Advice implements Serializable {
 		return new Advice(AdviceType.AVOID_TIMEOUT, priority, player);
 	}
 
+	public static Advice ofSignificantInvestments(int priority, Player player, double minAverageOwnership) {
+		return new Advice(AdviceType.SIGNIFICANT_INVESTMENTS, priority, player, String.valueOf(minAverageOwnership));
+	}
+
 }

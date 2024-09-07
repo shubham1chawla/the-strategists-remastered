@@ -2,6 +2,8 @@ package com.strategists.game.service.impl;
 
 import java.util.List;
 
+import javax.transaction.Transactional;
+
 import org.apache.commons.chain.impl.ChainBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -22,6 +24,7 @@ import lombok.extern.log4j.Log4j2;
 
 @Log4j2
 @Service
+@Transactional
 @ConditionalOnProperty(name = "strategists.advice.enabled", havingValue = "true")
 public class AdviceServiceImpl implements AdviceService {
 
