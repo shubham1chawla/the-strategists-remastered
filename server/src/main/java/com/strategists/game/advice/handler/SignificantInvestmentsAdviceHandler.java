@@ -1,64 +1,62 @@
 package com.strategists.game.advice.handler;
 
-import java.util.HashMap;
 import java.util.Optional;
-import java.util.function.ToIntFunction;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
 import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
 
 import com.strategists.game.advice.AdviceContext;
 import com.strategists.game.advice.AdviceType;
 import com.strategists.game.entity.Advice;
-import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Player;
 import com.strategists.game.repository.AdviceRepository;
-import com.strategists.game.update.UpdateType;
+import com.strategists.game.util.MathUtil;
 
 import lombok.val;
 
 @Component
-@ConditionalOnExpression("${strategists.advice.enabled} && ${strategists.advice.frequently-invest.enabled}")
-public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
+@ConditionalOnExpression("${strategists.advice.enabled} && ${strategists.advice.significant-investments.enabled}")
+public class SignificantInvestmentsAdviceHandler extends AbstractAdviceHandler {
 
-	@Value("${strategists.advice.frequently-invest.priority}")
+	@Value("${strategists.advice.significant-investments.priority}")
 	private int priority;
 
-	@Value("${strategists.advice.frequently-invest.turn-look-back}")
-	private int turnLookBack;
+	@Value("${strategists.advice.significant-investments.min-average-ownership}")
+	private double minAverageOwnership;
 
 	@Autowired
 	private AdviceRepository adviceRepository;
 
 	@Override
 	protected void generate(AdviceContext context) {
-		val game = context.getGame();
-		val players = context.getPlayers();
-		val getLastInvestTurnByPlayer = getLastInvestTurnByPlayerFunction(context);
-
-		// Generating or updating advice
-		for (Player player : players) {
-			val opt = generate(game, players.size(), player, getLastInvestTurnByPlayer.applyAsInt(player));
+		for (Player player : context.getPlayers()) {
+			val opt = generate(player);
 			if (opt.isPresent()) {
 				context.addAdvice(opt.get());
 			}
 		}
 	}
 
-	private Optional<Advice> generate(Game game, int playersCount, Player player, int lastInvestTurn) {
+	private Optional<Advice> generate(Player player) {
 
-		// Ignoring bankrupt players
-		if (player.isBankrupt()) {
+		// Checking if player made any investments
+		if (player.isBankrupt() || CollectionUtils.isEmpty(player.getPlayerLands())) {
 			return Optional.empty();
 		}
 
+		// Calculating average ownership
+		val investmentsCount = player.getPlayerLands().size();
+		val totalOwnership = MathUtil.sum(player.getPlayerLands(), pl -> pl.getOwnership());
+		val averageOwnership = totalOwnership / investmentsCount;
+
 		// Checking if advice is needed
-		val isAdviceNeeded = (game.getTurn() - lastInvestTurn) > (playersCount * turnLookBack);
+		val isAdviceNeeded = averageOwnership < minAverageOwnership;
 
 		// Checking if we have already generated advice for this player
-		val opt = adviceRepository.findByPlayerAndType(player, AdviceType.FREQUENTLY_INVEST);
+		val opt = adviceRepository.findByPlayerAndType(player, AdviceType.SIGNIFICANT_INVESTMENTS);
 
 		// Case 1 - No previous advice found and no new advice needed
 		if (opt.isEmpty() && !isAdviceNeeded) {
@@ -67,7 +65,7 @@ public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
 
 		// Case 2 - No previous advice found and new advice needed
 		if (opt.isEmpty() && isAdviceNeeded) {
-			return Optional.of(Advice.ofFrequentlyInvest(priority, player, turnLookBack));
+			return Optional.of(Advice.ofSignificantInvestments(priority, player, minAverageOwnership));
 		}
 
 		// Case 3 - Previous advice's state not NEW and advice needed
@@ -87,25 +85,6 @@ public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
 
 		// Case 5 - Advice NEW and needed or Advice FOLLOWED and not needed
 		return Optional.empty();
-	}
-
-	private ToIntFunction<Player> getLastInvestTurnByPlayerFunction(AdviceContext context) {
-		val players = context.getPlayers();
-		val activities = context.getActivities();
-
-		val playerInvestTurnMap = new HashMap<Player, Integer>();
-
-		int i = 0;
-		while (i < activities.size() && playerInvestTurnMap.size() < players.size()) {
-			val activity = activities.get(i);
-			if (UpdateType.INVEST.equals(activity.getType())) {
-				val player = context.getPlayerByUsername(activity.getVal1());
-				playerInvestTurnMap.computeIfAbsent(player, key -> activity.getTurn());
-			}
-			i++;
-		}
-
-		return p -> playerInvestTurnMap.getOrDefault(p, 0);
 	}
 
 }
