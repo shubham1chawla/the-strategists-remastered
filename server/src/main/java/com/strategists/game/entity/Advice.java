@@ -128,4 +128,8 @@ public class Advice implements Serializable {
 		return new Advice(AdviceType.SIGNIFICANT_INVESTMENTS, priority, player, String.valueOf(minAverageOwnership));
 	}
 
+	public static Advice ofConcentrateInvestments(int priority, Player player, int minInvestmentsCount) {
+		return new Advice(AdviceType.CONCENTRATE_INVESTMENTS, priority, player, String.valueOf(minInvestmentsCount));
+	}
+
 }
