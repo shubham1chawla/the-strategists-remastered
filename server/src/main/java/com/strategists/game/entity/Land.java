@@ -28,12 +28,14 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.strategists.game.util.MathUtil;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import lombok.val;
 
 @Data
 @Entity
 @Table(name = "lands")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Land implements Serializable {
 
 	private static final long serialVersionUID = -5330429528909555218L;
@@ -41,6 +43,7 @@ public class Land implements Serializable {
 	private static final double DAMPENER = 0.01;
 
 	@Id
+	@EqualsAndHashCode.Include
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 

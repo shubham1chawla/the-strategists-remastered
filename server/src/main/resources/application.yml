@@ -71,6 +71,10 @@ strategists:
       enabled: ${ENABLE_SIGNIFICANT_INVESTMENTS_ADVICE:true}
       priority: 1
       min-average-ownership: 50
+    concentrate-investments:
+      enabled: ${ENABLE_CONCENTRATE_INVESTMENTS_ADVICE:true}
+      priority: 1
+      min-investments-count: 3
   google:
     recaptcha:
       api-url: https://www.google.com/recaptcha/api/siteverify
