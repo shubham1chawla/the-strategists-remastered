@@ -33,9 +33,8 @@ public class SignificantInvestmentsAdviceHandler extends AbstractAdviceHandler {
 	@Override
 	protected void generate(AdviceContext context) {
 		for (Player player : context.getPlayers()) {
-			val opt = generate(player);
-			if (opt.isPresent()) {
-				context.addAdvice(opt.get());
+			if (!player.isBankrupt()) {
+				generate(player).ifPresent(context::addAdvice);
 			}
 		}
 	}
@@ -43,7 +42,7 @@ public class SignificantInvestmentsAdviceHandler extends AbstractAdviceHandler {
 	private Optional<Advice> generate(Player player) {
 
 		// Checking if player made any investments
-		if (player.isBankrupt() || CollectionUtils.isEmpty(player.getPlayerLands())) {
+		if (CollectionUtils.isEmpty(player.getPlayerLands())) {
 			return Optional.empty();
 		}
 

@@ -35,21 +35,15 @@ public class AvoidTimeoutAdviceHandler extends AbstractAdviceHandler {
 		val players = context.getPlayers();
 		val getLastSkippedTurnByPlayer = getLastSkippedTurnByPlayerFunction(context);
 
-		// Generating or updating advice
 		for (Player player : players) {
-			val opt = generate(game, players.size(), player, getLastSkippedTurnByPlayer.applyAsInt(player));
-			if (opt.isPresent()) {
-				context.addAdvice(opt.get());
+			if (!player.isBankrupt()) {
+				val lastSkippedTurn = getLastSkippedTurnByPlayer.applyAsInt(player);
+				generate(game, players.size(), player, lastSkippedTurn).ifPresent(context::addAdvice);
 			}
 		}
 	}
 
 	private Optional<Advice> generate(Game game, int playersCount, Player player, int lastSkippedTurn) {
-
-		// Ignoring bankrupt players
-		if (player.isBankrupt()) {
-			return Optional.empty();
-		}
 
 		// Checking if advice is needed
 		boolean isAdviceNeeded = false;

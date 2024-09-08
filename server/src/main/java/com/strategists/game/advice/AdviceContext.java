@@ -12,6 +12,7 @@ import org.apache.commons.chain.impl.ContextBase;
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Advice;
 import com.strategists.game.entity.Game;
+import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 
 import lombok.AccessLevel;
@@ -29,15 +30,17 @@ public class AdviceContext extends ContextBase implements Context {
 	private Game game;
 
 	private List<Player> players;
+	private List<Land> lands;
 	private List<Activity> activities;
 	private List<Advice> advices;
 
 	@Getter(AccessLevel.PRIVATE)
 	private Map<String, Player> playerUsernameMap;
 
-	public AdviceContext(Game game, List<Player> players, List<Activity> activities) {
+	public AdviceContext(Game game, List<Player> players, List<Land> lands, List<Activity> activities) {
 		this.game = game;
 		this.players = players;
+		this.lands = lands;
 		this.activities = activities;
 		this.advices = new ArrayList<>();
 

@@ -1,6 +1,8 @@
 package com.strategists.game.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,9 @@ import org.springframework.util.Assert;
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.GameMap;
 import com.strategists.game.entity.Land;
+import com.strategists.game.entity.Player;
+import com.strategists.game.entity.PlayerLand;
+import com.strategists.game.entity.Rent;
 import com.strategists.game.entity.Trend;
 import com.strategists.game.repository.LandRepository;
 import com.strategists.game.repository.TrendRepository;
@@ -52,6 +57,28 @@ public class LandServiceImpl implements LandService {
 	@Override
 	public Land getLandByIndex(Game game, int index) {
 		return getLandsByGame(game).get(index);
+	}
+
+	@Override
+	public List<Rent> getPlayerRentsByLand(Player sourcePlayer, Land land) {
+		Assert.isTrue(Objects.equals(sourcePlayer.getGame(), land.getGame()), "Player's and Land's game must match!");
+		val game = sourcePlayer.getGame();
+
+		val rents = new ArrayList<Rent>();
+		for (PlayerLand pl : land.getPlayerLands()) {
+			val targetPlayer = pl.getPlayer();
+
+			// Avoiding self rent payment or bankrupt players
+			if (Objects.equals(targetPlayer, sourcePlayer) || targetPlayer.isBankrupt()) {
+				continue;
+			}
+
+			// Calculating rent for the target player
+			val rentAmount = game.getRentFactor() * (pl.getOwnership() / 100) * land.getMarketValue();
+			rents.add(new Rent(sourcePlayer, targetPlayer, land, rentAmount));
+		}
+
+		return rents;
 	}
 
 	@Override

@@ -38,21 +38,15 @@ public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
 		val players = context.getPlayers();
 		val getLastInvestTurnByPlayer = getLastInvestTurnByPlayerFunction(context);
 
-		// Generating or updating advice
 		for (Player player : players) {
-			val opt = generate(game, players.size(), player, getLastInvestTurnByPlayer.applyAsInt(player));
-			if (opt.isPresent()) {
-				context.addAdvice(opt.get());
+			if (!player.isBankrupt()) {
+				val lastInvestTurn = getLastInvestTurnByPlayer.applyAsInt(player);
+				generate(game, players.size(), player, lastInvestTurn).ifPresent(context::addAdvice);
 			}
 		}
 	}
 
 	private Optional<Advice> generate(Game game, int playersCount, Player player, int lastInvestTurn) {
-
-		// Ignoring bankrupt players
-		if (player.isBankrupt()) {
-			return Optional.empty();
-		}
 
 		// Checking if advice is needed
 		val isAdviceNeeded = (game.getTurn() - lastInvestTurn) > (playersCount * turnLookBack);
