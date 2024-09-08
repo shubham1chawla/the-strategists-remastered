@@ -73,12 +73,6 @@ public class Advice implements Serializable {
 	@Column(nullable = true)
 	private String val3;
 
-	@Column(nullable = true)
-	private String val4;
-
-	@Column(nullable = true)
-	private String val5;
-
 	@JsonIgnore
 	@ManyToOne
 	@JoinColumn(name = "player_id", referencedColumnName = "id", nullable = false)
@@ -103,10 +97,8 @@ public class Advice implements Serializable {
 		this.val1 = values.length > 0 ? values[0] : null;
 		this.val2 = values.length > 1 ? values[1] : null;
 		this.val3 = values.length > 2 ? values[2] : null;
-		this.val4 = values.length > 3 ? values[3] : null;
-		this.val5 = values.length > 4 ? values[4] : null;
-		if (values.length > 5) {
-			throw new IllegalArgumentException("More than 5 values are not supported!");
+		if (values.length > 3) {
+			throw new IllegalArgumentException("More than 3 values are not supported!");
 		}
 	}
 
@@ -130,6 +122,11 @@ public class Advice implements Serializable {
 
 	public static Advice ofConcentrateInvestments(int priority, Player player, int minInvestmentsCount) {
 		return new Advice(AdviceType.CONCENTRATE_INVESTMENTS, priority, player, String.valueOf(minInvestmentsCount));
+	}
+
+	public static Advice ofPotentialBankruptcy(int priority, Player player, double maxRentAmount, Land maxRentLand) {
+		return new Advice(AdviceType.POTENTIAL_BANKRUPTCY, priority, player, String.valueOf(maxRentAmount),
+				maxRentLand.getName());
 	}
 
 }

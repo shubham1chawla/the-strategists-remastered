@@ -1,7 +1,6 @@
 package com.strategists.game.service.impl;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -19,7 +18,6 @@ import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Game.State;
 import com.strategists.game.entity.GameMap;
 import com.strategists.game.entity.Player;
-import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.entity.Rent;
 import com.strategists.game.repository.GameRepository;
 import com.strategists.game.request.GoogleOAuthCredential;
@@ -188,18 +186,12 @@ public class GameServiceImpl implements GameService {
 		// Moving the current player to a new position
 		val land = playerService.movePlayer(player, RANDOM.nextInt(game.getDiceSize()) + 1);
 
+		// Calculating rents on the moved land
+		val rents = landService.getPlayerRentsByLand(player, land);
+
 		// Paying rent to players on current land
-		for (PlayerLand pl : new ArrayList<>(land.getPlayerLands())) {
-			val targetPlayer = pl.getPlayer();
-
-			// Avoiding self rent payment and bankrupt players
-			if (Objects.equals(targetPlayer, player) || targetPlayer.isBankrupt()) {
-				continue;
-			}
-
-			// Paying rent to target player
-			val rentAmount = game.getRentFactor() * (pl.getOwnership() / 100) * land.getMarketValue();
-			playerService.payRent(new Rent(player, targetPlayer, land, rentAmount));
+		for (Rent rent : rents) {
+			playerService.payRent(rent);
 		}
 
 		// Updating trends

@@ -75,6 +75,9 @@ strategists:
       enabled: ${ENABLE_CONCENTRATE_INVESTMENTS_ADVICE:true}
       priority: 1
       min-investments-count: 3
+    potential-bankruptcy:
+      enabled: ${ENABLE_POTENTIAL_BANKRUPTCY_ADVICE:true}
+      priority: 1
   google:
     recaptcha:
       api-url: https://www.google.com/recaptcha/api/siteverify

@@ -17,6 +17,7 @@ import com.strategists.game.entity.Game;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.AdviceRepository;
 import com.strategists.game.service.AdviceService;
+import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 
 import lombok.val;
@@ -30,6 +31,9 @@ public class AdviceServiceImpl implements AdviceService {
 
 	@Autowired
 	private PlayerService playerService;
+
+	@Autowired
+	private LandService landService;
 
 	@Autowired
 	private ActivityRepository activityRepository;
@@ -58,8 +62,9 @@ public class AdviceServiceImpl implements AdviceService {
 
 		// Adding information to advice context
 		val players = playerService.getPlayersByGame(game);
+		val lands = landService.getLandsByGame(game);
 		val activities = activityRepository.findByGameOrderByIdDesc(game);
-		val context = new AdviceContext(game, players, activities);
+		val context = new AdviceContext(game, players, lands, activities);
 
 		// Executing advice chain
 		try {
