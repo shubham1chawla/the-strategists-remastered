@@ -85,6 +85,7 @@ public class PotentialBankruptcyAdviceHandler extends AbstractAdviceHandler {
 			advice.setNewCount(advice.getNewCount() + 1);
 			advice.setVal1(String.valueOf(maxRentAmount));
 			advice.setVal2(maxRentLand.getName());
+			advice.setViewed(false);
 			return Optional.of(advice);
 		}
 
@@ -92,6 +93,7 @@ public class PotentialBankruptcyAdviceHandler extends AbstractAdviceHandler {
 		if (!Advice.State.FOLLOWED.equals(advice.getState()) && !isAdviceNeeded) {
 			advice.setState(Advice.State.FOLLOWED);
 			advice.setFollowedCount(advice.getFollowedCount() + 1);
+			advice.setViewed(false);
 			return Optional.of(advice);
 		}
 

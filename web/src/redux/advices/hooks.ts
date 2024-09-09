@@ -1,10 +1,13 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { State } from '../store';
+import axios from 'axios';
+import { useLogin } from '../login';
 
 export const useAdvices = () => {
-  const { advice: advices, login } = useSelector((state: State) => state);
-  const { playerId } = login;
+  const advices = useSelector((state: State) => state.advice);
+  const { playerId, gameCode } = useLogin();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   // Filtering advices based on logged in player
   const playerAdvices = useMemo(() => {
@@ -20,8 +23,25 @@ export const useAdvices = () => {
     return filteredAdvices;
   }, [advices, playerId]);
 
+  // Updating unread count
+  useEffect(() => {
+    const count = playerAdvices.filter((advice) => !advice.viewed).length;
+    setUnreadCount(count);
+  }, [playerAdvices]);
+
   return {
     advices,
     playerAdvices,
+    unreadCount,
+    markAdvicesRead: async (): Promise<void> => {
+      if (unreadCount < 1 || !gameCode || !playerId) {
+        return;
+      }
+      try {
+        await axios.patch(`/api/games/${gameCode}/players/${playerId}/advices`);
+      } catch (error) {
+        console.error('Unable to mark advices viewed!', error);
+      }
+    },
   };
 };

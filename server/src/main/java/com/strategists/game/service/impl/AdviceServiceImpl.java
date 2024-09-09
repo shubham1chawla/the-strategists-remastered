@@ -14,6 +14,7 @@ import com.strategists.game.advice.AdviceContext;
 import com.strategists.game.advice.handler.AbstractAdviceHandler;
 import com.strategists.game.entity.Advice;
 import com.strategists.game.entity.Game;
+import com.strategists.game.entity.Player;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.AdviceRepository;
 import com.strategists.game.service.AdviceService;
@@ -84,6 +85,20 @@ public class AdviceServiceImpl implements AdviceService {
 	@Override
 	public List<Advice> getAdvicesByGame(Game game) {
 		return adviceRepository.findByGameOrderByPriority(game);
+	}
+
+	@Override
+	@UpdateMapping(UpdateType.ADVICE)
+	public List<Advice> markPlayerAdvicesViewed(Player player) {
+		log.info("Marking {}'s advices as viewed for game: {}", player.getUsername(), player.getGameCode());
+		val advices = adviceRepository.findByPlayerAndViewed(player, false);
+		if (CollectionUtils.isEmpty(advices)) {
+			return List.of();
+		}
+		return adviceRepository.saveAll(advices.stream().map(advice -> {
+			advice.setViewed(true);
+			return advice;
+		}).toList());
 	}
 
 	@Override

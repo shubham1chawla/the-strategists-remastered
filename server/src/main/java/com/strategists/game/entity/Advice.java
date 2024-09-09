@@ -40,7 +40,6 @@ public class Advice implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@JsonIgnore
 	@Column(nullable = false)
 	private Boolean viewed;
 

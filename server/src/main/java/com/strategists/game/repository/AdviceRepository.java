@@ -16,6 +16,8 @@ public interface AdviceRepository extends JpaRepository<Advice, Long> {
 
 	Optional<Advice> findByPlayerAndType(Player player, AdviceType type);
 
+	List<Advice> findByPlayerAndViewed(Player player, boolean viewed);
+
 	long deleteByGame(Game game);
 
 }

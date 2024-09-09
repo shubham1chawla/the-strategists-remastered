@@ -3,10 +3,12 @@ package com.strategists.game.update.handler;
 import java.util.List;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import com.strategists.game.entity.Advice;
 import com.strategists.game.entity.Game;
+import com.strategists.game.entity.Player;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.AdviceUpdatePayload;
 
@@ -23,7 +25,13 @@ public class AdviceUpdateHandler extends AbstractUpdateHandler<AdviceUpdatePaylo
 	@Override
 	public void handle(Object returnValue, Object[] args) {
 		// Game from the argument and advice returned
-		val game = (Game) args[0];
+		Game game = null;
+		if (args[0].getClass().isAssignableFrom(Game.class)) {
+			game = (Game) args[0];
+		} else if (args[0].getClass().isAssignableFrom(Player.class)) {
+			game = ((Player) args[0]).getGame();
+		}
+		Assert.notNull(game, "Unable to extract game from arguments!");
 
 		@SuppressWarnings("unchecked")
 		val advices = (List<Advice>) returnValue;

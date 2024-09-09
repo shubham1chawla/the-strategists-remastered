@@ -13,6 +13,7 @@ export interface Advice {
   state: 'NEW' | 'FOLLOWED';
   priority: number;
   type: AdviceType;
+  viewed: boolean;
   val1: string | null;
   val2: string | null;
   val3: string | null;
