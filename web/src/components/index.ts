@@ -1,5 +1,6 @@
 export * from './Actions';
 export * from './ActivityTimeline';
+export * from './Advices';
 export * from './Bankruptcy';
 export * from './Confetti';
 export * from './Dashboard';

@@ -53,6 +53,7 @@ export const App = () => {
           colorBgContainer: 'transparent',
           colorErrorBg: 'transparent',
           colorWarningBg: 'transparent',
+          colorSuccessBg: 'transparent',
           colorText: CssVariables['--text-color'],
           colorTextPlaceholder: CssVariables['--text-color'],
           colorTextBase: CssVariables['--text-color'],

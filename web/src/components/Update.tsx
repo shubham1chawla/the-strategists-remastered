@@ -5,6 +5,7 @@ import { DisconnectOutlined } from '@ant-design/icons';
 import {
   Activity,
   ActivityActions,
+  AdviceActions,
   LobbyActions,
   LoginActions,
   PredictionActions,
@@ -74,6 +75,9 @@ export const Update = () => {
         message.data
       );
       switch (type) {
+        case 'ADVICE':
+          dispatch(AdviceActions.addOrPatchAdvices(payload));
+          break;
         case 'BANKRUPTCY': {
           const { lands, players } = payload;
           dispatch(LobbyActions.patchLands(lands));

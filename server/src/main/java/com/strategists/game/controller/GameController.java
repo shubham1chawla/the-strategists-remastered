@@ -22,6 +22,7 @@ import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.request.GoogleOAuthCredential;
 import com.strategists.game.response.EnterGameResponse;
 import com.strategists.game.response.GameResponse;
+import com.strategists.game.service.AdviceService;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PermissionsService;
@@ -57,6 +58,9 @@ public class GameController {
 	@Autowired(required = false)
 	private PredictionService predictionService;
 
+	@Autowired(required = false)
+	private AdviceService adviceService;
+
 	@GetMapping("/{code}")
 	public ResponseEntity<GameResponse> getGameResponse(@PathVariable String code) {
 		try {
@@ -73,6 +77,11 @@ public class GameController {
 			// Adding predictions, if enabled
 			if (Objects.nonNull(predictionService)) {
 				builder.predictions(predictionService.getPredictionsByGame(game));
+			}
+
+			// Adding advice, if enabled
+			if (Objects.nonNull(adviceService)) {
+				builder.advices(adviceService.getAdvicesByGame(game));
 			}
 
 			// Responding with 200

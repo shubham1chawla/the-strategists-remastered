@@ -18,6 +18,7 @@ import {
   ResetModal,
   WinModal,
   Update,
+  Advices,
 } from '.';
 import { LoginActions, Player, useLobby, useLogin } from '../redux';
 import { syncGameStates } from '../utils';
@@ -102,13 +103,15 @@ interface PlayerPanelProps {
   maxPlayersCount: number;
 }
 
+type PlayerPanelTabKey = 'LOBBY' | 'TIMELINE' | 'ADVICE';
+
 const PlayerPanel = (props: PlayerPanelProps) => {
   const { player, state } = props;
-  const [activeKey, setActiveKey] = useState(state);
+  const [activeKey, setActiveKey] = useState<PlayerPanelTabKey>('LOBBY');
 
   // Switching tabs when game's state changes
   useEffect(() => {
-    setActiveKey(state);
+    setActiveKey(state === 'ACTIVE' ? 'TIMELINE' : 'LOBBY');
   }, [state]);
 
   return (
@@ -119,18 +122,23 @@ const PlayerPanel = (props: PlayerPanelProps) => {
         centered
         defaultActiveKey="LOBBY"
         activeKey={activeKey}
-        onChange={(key) => setActiveKey(key as 'LOBBY' | 'ACTIVE')}
+        onChange={(key) => setActiveKey(key as PlayerPanelTabKey)}
         size="large"
         items={[
           {
             key: 'LOBBY',
-            label: `Lobby`,
+            label: 'Lobby',
             children: <Lobby />,
           },
           {
-            key: 'ACTIVE',
-            label: `Timeline`,
+            key: 'TIMELINE',
+            label: 'Timeline',
             children: <ActivityTimeline />,
+          },
+          {
+            key: 'ADVICE',
+            label: 'Advices',
+            children: <Advices />,
           },
         ]}
       />
