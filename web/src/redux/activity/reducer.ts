@@ -1,6 +1,7 @@
 import { ActivityActions } from '.';
 
 export type UpdateType =
+  | 'ADVICE'
   | 'BANKRUPTCY'
   | 'BONUS'
   | 'CHEAT'

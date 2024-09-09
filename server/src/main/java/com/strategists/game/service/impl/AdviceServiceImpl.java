@@ -19,6 +19,8 @@ import com.strategists.game.repository.AdviceRepository;
 import com.strategists.game.service.AdviceService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
+import com.strategists.game.update.UpdateMapping;
+import com.strategists.game.update.UpdateType;
 
 import lombok.val;
 import lombok.extern.log4j.Log4j2;
@@ -45,6 +47,7 @@ public class AdviceServiceImpl implements AdviceService {
 	private List<AbstractAdviceHandler> handlers;
 
 	@Override
+	@UpdateMapping(UpdateType.ADVICE)
 	public List<Advice> generateAdvices(Game game) {
 		log.info("Generating advices for game: {}", game.getCode());
 
@@ -80,7 +83,7 @@ public class AdviceServiceImpl implements AdviceService {
 
 	@Override
 	public List<Advice> getAdvicesByGame(Game game) {
-		return adviceRepository.findByGameOrderByIdDesc(game);
+		return adviceRepository.findByGameOrderByPriority(game);
 	}
 
 	@Override

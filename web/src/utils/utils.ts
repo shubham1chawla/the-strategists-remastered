@@ -3,6 +3,8 @@ import { AnyAction } from 'redux';
 import {
   Activity,
   ActivityActions,
+  Advice,
+  AdviceActions,
   Land,
   LobbyActions,
   Player,
@@ -22,6 +24,7 @@ interface GameResponse {
   activities: Activity[];
   trends: Trend[];
   predictions: Prediction[] | null;
+  advices: Advice[] | null;
 }
 
 export const syncGameStates = async (
@@ -38,6 +41,7 @@ export const syncGameStates = async (
     activities,
     trends,
     predictions,
+    advices,
   } = data;
   [
     LobbyActions.setState(state),
@@ -47,6 +51,7 @@ export const syncGameStates = async (
     ActivityActions.setActivities(activities),
     TrendActions.setTrends(trends),
     PredictionActions.setPredictions(predictions || []),
+    AdviceActions.setAdvices(advices || []),
   ].forEach(dispatch);
 };
 

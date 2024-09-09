@@ -12,7 +12,7 @@ import com.strategists.game.entity.Player;
 
 public interface AdviceRepository extends JpaRepository<Advice, Long> {
 
-	List<Advice> findByGameOrderByIdDesc(Game game);
+	List<Advice> findByGameOrderByPriority(Game game);
 
 	Optional<Advice> findByPlayerAndType(Player player, AdviceType type);
 

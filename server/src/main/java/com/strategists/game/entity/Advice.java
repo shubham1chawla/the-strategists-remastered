@@ -36,11 +36,11 @@ public class Advice implements Serializable {
 		NEW, FOLLOWED;
 	}
 
-	@JsonIgnore
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	@JsonIgnore
 	@Column(nullable = false)
 	private Boolean viewed;
 
@@ -48,7 +48,6 @@ public class Advice implements Serializable {
 	@Enumerated(EnumType.STRING)
 	private State state;
 
-	@JsonIgnore
 	@Column(nullable = false)
 	private int priority;
 

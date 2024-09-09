@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.strategists.game.entity.Activity;
+import com.strategists.game.entity.Advice;
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
@@ -29,5 +30,7 @@ public class GameResponse {
 	private List<Trend> trends;
 
 	private List<Prediction> predictions;
+
+	private List<Advice> advices;
 
 }
