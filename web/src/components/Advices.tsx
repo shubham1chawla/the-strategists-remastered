@@ -1,6 +1,7 @@
-import { Alert, Card, Space } from 'antd';
+import { Alert, Card, Row, Space, Tag } from 'antd';
 import {
   CheckCircleOutlined,
+  CheckOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import { Advice, useAdvices } from '../redux';
@@ -31,7 +32,16 @@ export const Advices = () => {
         <Alert
           key={advice.id}
           type={advice.state === 'NEW' ? 'error' : 'success'}
-          message={getAdviceTitle(advice)}
+          message={
+            <Row justify="space-between">
+              {getAdviceTitle(advice)}
+              {advice.viewed && (
+                <Tag icon={<CheckOutlined />} bordered={false}>
+                  Read
+                </Tag>
+              )}
+            </Row>
+          }
           description={getAdviceDescription(advice)}
           icon={
             advice.state === 'NEW' ? (
@@ -58,7 +68,7 @@ const getAdviceDescription = (advice: Advice) => {
     case 'AVOID_TIMEOUT':
       return 'The game completed your turn because of inactivity. Please use the "Skip" button!';
     case 'CONCENTRATE_INVESTMENTS':
-      return `You have invested all over the map; try to have ${val1} investments close by!`;
+      return `You have invested all over the map; try to have at least ${val1} investments close by!`;
     case 'FREQUENTLY_INVEST':
       return `You have yet to invest in the last ${val1} turns. Try investing more to get a competitive edge!`;
     case 'POTENTIAL_BANKRUPTCY':

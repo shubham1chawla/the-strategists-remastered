@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { Button, Col, Row, Tabs, Tooltip } from 'antd';
+import { Badge, Button, Col, Row, Space, Tabs, TabsProps, Tooltip } from 'antd';
 import { googleLogout } from '@react-oauth/google';
 import {
   LogoutOutlined,
@@ -20,7 +20,7 @@ import {
   Update,
   Advices,
 } from '.';
-import { LoginActions, Player, useLobby, useLogin } from '../redux';
+import { LoginActions, Player, useAdvices, useLobby, useLogin } from '../redux';
 import { syncGameStates } from '../utils';
 import axios from 'axios';
 
@@ -108,11 +108,49 @@ type PlayerPanelTabKey = 'LOBBY' | 'TIMELINE' | 'ADVICE';
 const PlayerPanel = (props: PlayerPanelProps) => {
   const { player, state } = props;
   const [activeKey, setActiveKey] = useState<PlayerPanelTabKey>('LOBBY');
+  const { playerAdvices, unreadCount, markAdvicesRead } = useAdvices();
 
   // Switching tabs when game's state changes
   useEffect(() => {
     setActiveKey(state === 'ACTIVE' ? 'TIMELINE' : 'LOBBY');
   }, [state]);
+
+  // Creating tabs
+  const items: TabsProps['items'] = [
+    {
+      key: 'LOBBY',
+      label: 'Lobby',
+      children: <Lobby />,
+    },
+    {
+      key: 'TIMELINE',
+      label: 'Timeline',
+      children: <ActivityTimeline />,
+    },
+  ];
+
+  // Adding Advice tab if the feature is enabled
+  if (playerAdvices.length) {
+    items.push({
+      key: 'ADVICE',
+      label: (
+        <Space align="center">
+          <span>Advices</span>
+          <Badge count={unreadCount} offset={[0, -2]} status="default" />
+        </Space>
+      ),
+      children: <Advices />,
+    });
+  }
+
+  const onTabChange = (key: string) => {
+    setActiveKey((prev) => {
+      if (prev === 'ADVICE') {
+        markAdvicesRead();
+      }
+      return key as PlayerPanelTabKey;
+    });
+  };
 
   return (
     <>
@@ -122,25 +160,9 @@ const PlayerPanel = (props: PlayerPanelProps) => {
         centered
         defaultActiveKey="LOBBY"
         activeKey={activeKey}
-        onChange={(key) => setActiveKey(key as PlayerPanelTabKey)}
+        onChange={onTabChange}
         size="large"
-        items={[
-          {
-            key: 'LOBBY',
-            label: 'Lobby',
-            children: <Lobby />,
-          },
-          {
-            key: 'TIMELINE',
-            label: 'Timeline',
-            children: <ActivityTimeline />,
-          },
-          {
-            key: 'ADVICE',
-            label: 'Advices',
-            children: <Advices />,
-          },
-        ]}
+        items={items}
       />
       <Actions />
     </>

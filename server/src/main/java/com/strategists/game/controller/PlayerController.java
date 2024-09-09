@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import com.strategists.game.request.GoogleOAuthCredential;
 import com.strategists.game.request.InvestmentRequest;
 import com.strategists.game.request.KickPlayerRequest;
 import com.strategists.game.response.EnterGameResponse;
+import com.strategists.game.service.AdviceService;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
@@ -37,6 +39,9 @@ public class PlayerController {
 
 	@Autowired
 	private LandService landService;
+
+	@Autowired(required = false)
+	private AdviceService adviceService;
 
 	@PostMapping
 	public ResponseEntity<EnterGameResponse> addPlayer(@PathVariable String code,
@@ -82,6 +87,16 @@ public class PlayerController {
 		Assert.state(Objects.equals(land.getId(), request.getLandId()), "Current player is not at the requested land!");
 
 		playerService.invest(player, land, request.getOwnership());
+	}
+
+	@PatchMapping("/{playerId}/advices")
+	public void markAdvicesViewed(@PathVariable String code, @PathVariable long playerId) {
+		Assert.notNull(adviceService, "Advice Service is not enabled!");
+
+		val player = playerService.getPlayerById(playerId);
+		Assert.state(Objects.equals(code, player.getGameCode()), "Requesting player not in the game!");
+
+		adviceService.markPlayerAdvicesViewed(player);
 	}
 
 }
