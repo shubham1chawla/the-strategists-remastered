@@ -44,6 +44,9 @@ public class WinUpdateHandler extends AbstractUpdateHandler<WinUpdatePayload> {
 		// Exporting data and training the prediction model
 		trainPredictionModelAsync(game);
 
+		// Exporting advice data
+		exportAdvicesAsync(game);
+
 		// Persisting the activity and sending the update
 		val activity = Activity.ofWin(player);
 		sendUpdate(game, new WinUpdatePayload(saveActivity(activity), player));

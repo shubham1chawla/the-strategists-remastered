@@ -4,8 +4,10 @@ import java.io.File;
 
 public interface DataSyncService {
 
-	void downloadCSVFiles(File directory);
+	void downloadGameCSVFiles(File directory);
 
-	void uploadCSVFiles(File directory);
+	void uploadGameCSVFiles(File directory);
+
+	void uploadAdviceCSVFiles(File directory);
 
 }

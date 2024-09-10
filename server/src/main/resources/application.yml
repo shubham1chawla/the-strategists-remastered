@@ -60,6 +60,8 @@ strategists:
         test: ../shared/test/
   advice:
     enabled: ${ENABLE_ADVICES:true}
+    export:
+      directory: ../shared/advices/
     frequently-invest:
       enabled: ${ENABLE_FREQUENTLY_INVEST_ADVICE:true}
       priority: 3
@@ -94,14 +96,18 @@ strategists:
           directory: ../shared/secrets/
           file-name: permissions.json
         spreadsheet:
-          id: ${GOOGLE_SPREADSHEET_ID:}
-          range: ${GOOGLE_SPREADSHEET_RANGE:}
+          id: ${PERMISSIONS_SPREADSHEET_ID:}
+          range: ${PERMISSIONS_SPREADSHEET_RANGE:}
       predictions:
         bypass-google-drive-sync-for-testing: false
         command: predictions
         download:
           sub-command: download
-          drive-folder-id: ${GOOGLE_DRIVE_DOWNLOAD_FOLDER_ID:}
+          drive-folder-id: ${PREDICTIONS_DOWNLOAD_FOLDER_ID:}
         upload: 
           sub-command: upload
-          drive-folder-id: ${GOOGLE_DRIVE_UPLOAD_FOLDER_ID:}
+          drive-folder-id: ${PREDICTIONS_UPLOAD_FOLDER_ID:}
+      advices:
+        bypass-google-drive-sync-for-testing: false
+        command: advices
+        drive-folder-id: ${ADVICES_UPLOAD_FOLDER_ID:}
