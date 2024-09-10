@@ -3,7 +3,7 @@
 import logging as log
 
 from src.cli import get_argument_parser
-from src.utils import PermissionUtils, PredictionUtils
+from src.utils import PermissionUtils, PredictionUtils, AdviceUtils
 
 
 if __name__ == '__main__':
@@ -20,5 +20,7 @@ if __name__ == '__main__':
         PredictionUtils(**args.__dict__).download_csv_files()
     elif args.command == 'predictions' and args.subcommand == 'upload':
         PredictionUtils(**args.__dict__).upload_csv_files()
+    elif args.command == 'advices':
+        AdviceUtils(**args.__dict__).upload_csv_files()
     else:
         raise ValueError(f'Unknown command and subcommand combination!')

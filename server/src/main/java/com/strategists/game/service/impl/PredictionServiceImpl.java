@@ -96,7 +96,7 @@ public class PredictionServiceImpl implements PredictionService {
 		predictionObjectMapper.registerModule(module);
 
 		// Downloading CSV files
-		dataSyncService.downloadCSVFiles(properties.train().directory().data());
+		dataSyncService.downloadGameCSVFiles(properties.train().directory().data());
 
 		// Training the model
 		trainPredictionModel();
@@ -160,7 +160,7 @@ public class PredictionServiceImpl implements PredictionService {
 
 		// Uploading Exported CSV files
 		log.info("Exported game data: {}", csv.getAbsolutePath());
-		dataSyncService.uploadCSVFiles(properties.train().directory().data());
+		dataSyncService.uploadGameCSVFiles(properties.train().directory().data());
 
 		// Training the model
 		trainPredictionModel();
@@ -237,7 +237,7 @@ public class PredictionServiceImpl implements PredictionService {
 			log.debug("Exported: {}", csv.getAbsolutePath());
 			return csv;
 		} catch (IOException ex) {
-			log.warn("Unable to export CSV file! Message: {}", ex.getMessage(), ex);
+			log.warn("Unable to export game's CSV file! Message: {}", ex.getMessage(), ex);
 			return null;
 		}
 	}

@@ -1,4 +1,3 @@
-from typing import Final
 from enum import IntEnum, unique
 from argparse import ArgumentParser
 
@@ -7,14 +6,15 @@ from src.utils import DownloadStrategy
 
 @unique
 class Argument(IntEnum):
-    SERVICE_ACCOUNT_CREDENTIALS_JSON: Final[int] = 0
-    GOOGLE_SPREADSHEET_ID: Final[int] = 1
-    GOOGLE_SPREADSHEET_RANGE: Final[int] = 2
-    PERMISSIONS_EXPORT_DIR: Final[int] = 3
-    GOOGLE_DOWNLOAD_FOLDER_ID: Final[int] = 4
-    GOOGLE_UPLOAD_FOLDER_ID: Final[int] = 5
-    GAME_DATA_DIRECTORY: Final[int] = 6
-    DOWNLOAD_STRATEGY: Final[int] = 7
+    SERVICE_ACCOUNT_CREDENTIALS_JSON = 0
+    GOOGLE_SPREADSHEET_ID = 1
+    GOOGLE_SPREADSHEET_RANGE = 2
+    PERMISSIONS_EXPORT_DIR = 3
+    GOOGLE_DOWNLOAD_FOLDER_ID = 4
+    GOOGLE_UPLOAD_FOLDER_ID = 5
+    GAME_DATA_DIRECTORY = 6
+    DOWNLOAD_STRATEGY = 7
+    ADVICE_DATA_DIRECTORY = 8
 
 
     def add_to(self, parser: ArgumentParser) -> None:
@@ -36,6 +36,8 @@ class Argument(IntEnum):
             default = DownloadStrategy.MISSING
             choices = [strategy.value for strategy in DownloadStrategy]
             parser.add_argument('--strategy', type=DownloadStrategy, help='Download strategy', default=default, choices=choices)
+        elif self == Argument.ADVICE_DATA_DIRECTORY:
+            parser.add_argument('--advice-data-dir', type=str, help='Advice data directory', required=True)
         else:
             raise ValueError(f'Unknown argument: {self}')
 
@@ -77,6 +79,16 @@ def set_predictions_arguments(parser: ArgumentParser) -> None:
         argument.add_to(parser_upload)
 
 
+def set_advices_arguments(parser: ArgumentParser) -> None:
+    arguments = [
+        Argument.SERVICE_ACCOUNT_CREDENTIALS_JSON,
+        Argument.GOOGLE_UPLOAD_FOLDER_ID,
+        Argument.ADVICE_DATA_DIRECTORY,
+    ]
+    for argument in arguments:
+        argument.add_to(parser)
+
+
 def get_argument_parser() -> ArgumentParser:
     parser = ArgumentParser(description='The Strategists CLI Utility.')
     subparsers = parser.add_subparsers(dest='command', required=True)
@@ -88,5 +100,9 @@ def get_argument_parser() -> ArgumentParser:
     # Adding predictions command
     parser_predictions = subparsers.add_parser('predictions', description='The Strategists Google Drive-based predictions utility.')
     set_predictions_arguments(parser_predictions)
+
+    # Adding advice command
+    parser_advices = subparsers.add_parser('advices', description='The Strategists Google Drive-based advices utility.')
+    set_advices_arguments(parser_advices)
 
     return parser

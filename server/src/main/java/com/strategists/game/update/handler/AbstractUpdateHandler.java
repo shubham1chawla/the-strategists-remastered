@@ -93,6 +93,18 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
 		}
 	}
 
+	protected void exportAdvicesAsync(Game game) {
+		if (Objects.nonNull(adviceService)) {
+			CompletableFuture.runAsync(() -> {
+				try {
+					adviceService.exportAdvices(game);
+				} catch (Exception ex) {
+					log.error("Failed to export advices!", ex);
+				}
+			});
+		}
+	}
+
 	protected void scheduleSkipPlayerTask(Game game) {
 		if (Objects.nonNull(skipPlayerService)) {
 			skipPlayerService.schedule(game);

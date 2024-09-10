@@ -3,7 +3,6 @@ package com.strategists.game.service.impl;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -93,30 +92,7 @@ public class GoogleAPIServiceImpl implements AuthenticationService, PermissionsS
 		log.info("Querying permission groups...");
 
 		// Executing permissions script
-		val output = ScriptUtil.execute(
-
-				// Path to executable
-				googleUtils.python().executable().getPath(),
-
-				// Path to google-utils script
-				googleUtils.python().script().getPath(),
-
-				// Permissions command
-				googleUtils.permissions().command(),
-
-				// Adding Credentials JSON argument
-				"--credentials-json", googleUtils.credentialsJsonFile().getPath(),
-
-				// Adding Google's Spreadsheet ID argument
-				"--spreadsheet-id", googleUtils.permissions().spreadsheet().id(),
-
-				// Adding Google's Spreadsheet Range argument
-				"--spreadsheet-range", googleUtils.permissions().spreadsheet().range(),
-
-				// Adding export directory argument
-				"--export-dir", googleUtils.permissions().export().directory().getPath()
-
-		);
+		val output = ScriptUtil.execute(googleUtils.getPermissionsCommands());
 		log.info("Script Output:{}{}", System.lineSeparator(), String.join(System.lineSeparator(), output));
 
 		// Loading from permissions file in export directory
@@ -165,69 +141,41 @@ public class GoogleAPIServiceImpl implements AuthenticationService, PermissionsS
 	}
 
 	@Override
-	public void downloadCSVFiles(File directory) {
-		log.info("Downloading CSV files from Google Drive...");
-		syncCSVFiles(directory, false);
+	public void downloadGameCSVFiles(File directory) {
+		log.info("Downloading Game CSV files from Google Drive to {}", directory.getPath());
+		syncGameCSVFiles(directory, false);
 	}
 
 	@Override
-	public void uploadCSVFiles(File directory) {
-		log.info("Uploading CSV files to Google Drive...");
-		syncCSVFiles(directory, true);
+	public void uploadGameCSVFiles(File directory) {
+		log.info("Uploading Game CSV files to Google Drive from {}", directory.getPath());
+		syncGameCSVFiles(directory, true);
 	}
 
-	private void syncCSVFiles(File directory, boolean upload) {
-
+	private void syncGameCSVFiles(File directory, boolean upload) {
 		val googleUtils = properties.utils();
+		val commands = googleUtils.getPredictionsCommands(directory, upload);
+		val bypass = googleUtils.predictions().bypassGoogleDriveSyncForTesting();
+		executeSyncScript(commands, bypass);
+	}
 
+	@Override
+	public void uploadAdviceCSVFiles(File directory) {
+		log.info("Uploading Advice CSV files to Google Drive from {}", directory.getPath());
+		val googleUtils = properties.utils();
+		val commands = googleUtils.getAdvicesCommands(directory);
+		val bypass = googleUtils.advices().bypassGoogleDriveSyncForTesting();
+		executeSyncScript(commands, bypass);
+	}
+
+	private void executeSyncScript(String[] commands, boolean bypass) {
 		// Checking if user bypassed google drive sync for testing
-		if (googleUtils.predictions().bypassGoogleDriveSyncForTesting()) {
-			log.warn("Bypassing syncing CSV files! ONLY DO THIS FOR TESTING!");
+		if (bypass) {
+			log.warn("Bypassing syncing Game CSV files! ONLY DO THIS FOR TESTING!");
 			return;
 		}
-
-		// Validating directory
-		Assert.isTrue(directory.exists(), "Data directory must exists!");
-		Assert.isTrue(directory.isDirectory(), "Data directory must not be a file!");
-
-		// Creating script's commands
-		val commands = new ArrayList<String>();
-
-		// Path to executable
-		commands.add(googleUtils.python().executable().getPath());
-
-		// Path to google-utils script
-		commands.add(googleUtils.python().script().getPath());
-
-		// Predictions command
-		commands.add(googleUtils.predictions().command());
-
-		// Adding sub-command
-		commands.add((upload ? googleUtils.predictions().upload() : googleUtils.predictions().download()).subCommand());
-
-		// Adding Credentials JSON argument
-		commands.add("--credentials-json");
-		commands.add(googleUtils.credentialsJsonFile().getPath());
-
-		// Adding download folder ID argument
-		commands.add("--download-folder-id");
-		commands.add(googleUtils.predictions().download().driveFolderId());
-
-		// Adding upload folder ID argument
-		if (upload) {
-			commands.add("--upload-folder-id");
-			commands.add(googleUtils.predictions().upload().driveFolderId());
-		}
-
-		// Adding data directory argument
-		commands.add("--game-data-dir");
-		commands.add(directory.getPath());
-		log.debug("Google Drive Sync Commands: {}", commands);
-
-		// Executing download script
-		val output = ScriptUtil.execute(commands.toArray(String[]::new));
+		val output = ScriptUtil.execute(commands);
 		log.info("Script Output:{}{}", System.lineSeparator(), String.join(System.lineSeparator(), output));
-
 	}
 
 }

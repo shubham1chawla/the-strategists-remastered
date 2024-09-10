@@ -11,9 +11,11 @@ public interface AdviceService {
 	List<Advice> generateAdvices(Game game);
 
 	List<Advice> getAdvicesByGame(Game game);
-	
+
 	List<Advice> markPlayerAdvicesViewed(Player player);
 
 	void clearAdvices(Game game);
+
+	void exportAdvices(Game game);
 
 }
