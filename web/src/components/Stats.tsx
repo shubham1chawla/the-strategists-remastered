@@ -26,7 +26,7 @@ import {
   UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
-import { Empty } from '.';
+import { CssVariables } from '../App';
 import {
   Land,
   LandTrend,
@@ -38,7 +38,7 @@ import {
   usePredictions,
   useTrends,
 } from '../redux';
-import { CssVariables } from '../App';
+import { Empty } from '.';
 
 /**
  * -----  PLAYER STATS BELOW  -----
@@ -203,7 +203,7 @@ export const VisualPortfolio = (props: PortfolioProps) => {
   const { playerLands, perspective, showHelp } = props;
 
   useEffect(() => {
-    if (!playerLands.length) return;
+    if (!playerLands || !playerLands.length) return;
 
     const items = getPortfolioItems(props, players, lands);
 

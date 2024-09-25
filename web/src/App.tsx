@@ -16,7 +16,7 @@ export const CssVariables = {
   '--dark-color-rgb': '24, 25, 26',
   '--accent-color': '#eb3b5a',
   '--accent-color-hover': '#f7657b',
-};
+} as const;
 
 export const App = () => {
   // Setting up theme colors
