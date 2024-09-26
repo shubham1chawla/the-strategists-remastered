@@ -42,10 +42,10 @@ const prepareStyles = (playersLength: number): Stylesheet[] => {
     {
       selector: '.land',
       style: {
-        width: 30,
-        height: 30,
+        width: 20,
+        height: 20,
         shape: 'ellipse',
-        'pie-size': '95%',
+        'pie-size': '100%',
         ...playerColors
           .slice(0, Math.min(playerColors.length, playersLength))
           .reduce(
@@ -60,6 +60,13 @@ const prepareStyles = (playersLength: number): Stylesheet[] => {
           ),
       },
     } as Stylesheet,
+    {
+      selector: '.land-invested',
+      style: {
+        width: 30,
+        height: 30,
+      },
+    },
     {
       selector: '.prison',
       style: {
@@ -109,7 +116,7 @@ const prepareLands = (cy: Core, lands: Land[], players: Player[]): void => {
         }),
       {}
     );
-    const investments = sortedPlayers.reduce(
+    const investments: Record<string, number> = sortedPlayers.reduce(
       (obj, player, i) =>
         Object.assign(obj, {
           [`${i}`]:
@@ -119,6 +126,17 @@ const prepareLands = (cy: Core, lands: Land[], players: Player[]): void => {
         }),
       {}
     );
+    const classes = [];
+    if (
+      land.name !== 'Prison' &&
+      Object.values(investments).some((value: number) => value > 0)
+    ) {
+      classes.push('land', 'land-invested');
+    } else if (land.name !== 'Prison') {
+      classes.push('land');
+    } else {
+      classes.push('prison');
+    }
     cy.add({
       data: {
         land,
@@ -128,7 +146,7 @@ const prepareLands = (cy: Core, lands: Land[], players: Player[]): void => {
       } as any,
       position: { x: land.x, y: land.y },
       selectable: false,
-      classes: land.name === 'Prison' ? 'prison' : 'land',
+      classes: classes,
     });
   });
 
