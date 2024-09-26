@@ -26,7 +26,6 @@ import {
   UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
-import { CssVariables } from '../App';
 import {
   Land,
   LandTrend,
@@ -38,6 +37,7 @@ import {
   usePredictions,
   useTrends,
 } from '../redux';
+import { Theme, useTheme } from '../theme';
 import { Empty } from '.';
 
 /**
@@ -199,6 +199,7 @@ export const TabularPortfolio = (props: PortfolioProps) => {
 };
 
 export const VisualPortfolio = (props: PortfolioProps) => {
+  const theme = useTheme();
   const { players, lands } = useLobby();
   const { playerLands, perspective, showHelp } = props;
 
@@ -227,7 +228,7 @@ export const VisualPortfolio = (props: PortfolioProps) => {
           title: false,
         },
       },
-      theme: getChartTheme(),
+      theme: getChartTheme(theme),
     });
 
     // Setting up chart's data
@@ -256,7 +257,7 @@ export const VisualPortfolio = (props: PortfolioProps) => {
 
     // Rendering the chart
     chart.render();
-  }, [players, lands, props, playerLands]);
+  }, [players, lands, props, playerLands, theme]);
 
   if (!playerLands.length) {
     return <Empty message="No investments available!" />;
@@ -288,6 +289,7 @@ export interface VisualTrendProps {
 }
 
 export const VisualTrend = (props: VisualTrendProps) => {
+  const theme = useTheme();
   const { playerTrends, landTrends } = useTrends();
   const { perspective, id, showHelp } = props;
 
@@ -320,7 +322,7 @@ export const VisualTrend = (props: VisualTrendProps) => {
           labelFormatter: (value: number) => `$${value}`,
         },
       },
-      theme: getChartTheme(),
+      theme: getChartTheme(theme),
     });
 
     // Updating tooltip position
@@ -332,18 +334,20 @@ export const VisualTrend = (props: VisualTrendProps) => {
       case 'player':
         drawPlayerTrends(
           chart,
-          playerTrends.filter(({ playerId }) => playerId === id)
+          playerTrends.filter(({ playerId }) => playerId === id),
+          theme
         );
         break;
       case 'land':
         drawLandTrends(
           chart,
-          landTrends.filter(({ landId }) => landId === id)
+          landTrends.filter(({ landId }) => landId === id),
+          theme
         );
         break;
     }
     chart.render();
-  }, [id, perspective, playerTrends, landTrends]);
+  }, [id, perspective, playerTrends, landTrends, theme]);
 
   if (
     (perspective === 'land' && !landTrends.length) ||
@@ -367,7 +371,11 @@ export const VisualTrend = (props: VisualTrendProps) => {
   );
 };
 
-const drawPlayerTrends = (chart: Chart, trends: PlayerTrend[]) => {
+const drawPlayerTrends = (
+  chart: Chart,
+  trends: PlayerTrend[],
+  theme: Theme
+) => {
   // Adding area marks
   chart
     .area()
@@ -377,7 +385,7 @@ const drawPlayerTrends = (chart: Chart, trends: PlayerTrend[]) => {
     .scale('y', { domainMin: 0 })
     .style(
       'fill',
-      `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${CssVariables['--accent-color']} 100%)`
+      `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${theme.accentColor} 100%)`
     )
     .tooltip(false);
 
@@ -388,7 +396,7 @@ const drawPlayerTrends = (chart: Chart, trends: PlayerTrend[]) => {
     .encode('x', 'turn')
     .encode('y', 'netWorth')
     .scale('y', { domainMin: 0 })
-    .style('stroke', CssVariables['--accent-color'])
+    .style('stroke', theme.accentColor)
     .tooltip({
       title: '',
       items: [
@@ -408,7 +416,7 @@ const drawPlayerTrends = (chart: Chart, trends: PlayerTrend[]) => {
     .encode('x', 'turn')
     .encode('y', 'cash')
     .scale('y', { domainMin: 0 })
-    .style('stroke', CssVariables['--text-color'])
+    .style('stroke', theme.textColor)
     .tooltip({
       title: '',
       items: [
@@ -422,7 +430,7 @@ const drawPlayerTrends = (chart: Chart, trends: PlayerTrend[]) => {
     });
 };
 
-const drawLandTrends = (chart: Chart, trends: LandTrend[]) => {
+const drawLandTrends = (chart: Chart, trends: LandTrend[], theme: Theme) => {
   // Adding area marks
   chart
     .area()
@@ -432,7 +440,7 @@ const drawLandTrends = (chart: Chart, trends: LandTrend[]) => {
     .scale('y', { domainMin: 0 })
     .style(
       'fill',
-      `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${CssVariables['--accent-color']} 100%)`
+      `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${theme.accentColor} 100%)`
     )
     .tooltip({
       title: '',
@@ -452,7 +460,7 @@ const drawLandTrends = (chart: Chart, trends: LandTrend[]) => {
     .encode('x', 'turn')
     .encode('y', 'marketValue')
     .scale('y', { domainMin: 0 })
-    .style('stroke', CssVariables['--accent-color'])
+    .style('stroke', theme.accentColor)
     .tooltip({
       title: '',
       items: [
@@ -479,6 +487,7 @@ export const VisualPrediction = (props: VisualPredictionProps) => {
   const predictions = usePredictions();
   const { playerTrends } = useTrends();
   const { players } = useLobby();
+  const theme = useTheme();
   const { player, showHelp } = props;
 
   useEffect(() => {
@@ -508,7 +517,7 @@ export const VisualPrediction = (props: VisualPredictionProps) => {
       },
       scale: {
         color: {
-          range: [CssVariables['--text-color'], CssVariables['--accent-color']],
+          range: [theme.textColor, theme.accentColor],
         },
       },
       legend: {
@@ -525,7 +534,7 @@ export const VisualPrediction = (props: VisualPredictionProps) => {
               : `${player.username}'s winning probability`,
         },
       },
-      theme: getChartTheme(),
+      theme: getChartTheme(theme),
     });
 
     // Drawing predictions visualization
@@ -535,11 +544,11 @@ export const VisualPrediction = (props: VisualPredictionProps) => {
       predictions,
       playerTrends
     );
-    drawPredictions(chart, player, items);
+    drawPredictions(chart, player, items, theme);
 
     // Rendering chart
     chart.render();
-  }, [player, players, predictions, playerTrends]);
+  }, [player, players, predictions, playerTrends, theme]);
 
   if (!predictions.length) {
     return <Empty message="No predictions available!" />;
@@ -559,7 +568,8 @@ export const VisualPrediction = (props: VisualPredictionProps) => {
 const drawPredictions = (
   chart: Chart,
   player: Player,
-  items: VisualPredictionItem[]
+  items: VisualPredictionItem[],
+  theme: Theme
 ) => {
   // Adding data to the chart's instance
   chart.data(items);
@@ -596,7 +606,7 @@ const drawPredictions = (
     .line()
     .encode('x', 'turn')
     .encode('y', player.username)
-    .style('stroke', CssVariables['--accent-color'])
+    .style('stroke', theme.accentColor)
     .tooltip(false);
 
   // Updating tooltip position
@@ -740,18 +750,18 @@ const getPortfolioTooltipItems = (props: PortfolioProps): TooltipItem[] => {
   ];
 };
 
-export const getChartTheme = () => {
+export const getChartTheme = (theme: Theme) => {
   return {
     ...Dark(),
     axisLeft: {
-      labelFill: CssVariables['--text-color'],
+      labelFill: theme.textColor,
       labelOpacity: 1,
     },
     axisBottom: {
-      labelFill: CssVariables['--text-color'],
+      labelFill: theme.textColor,
       labelOpacity: 1,
     },
-    color: CssVariables['--accent-color'],
+    color: theme.accentColor,
     view: {
       viewFill: 'transparent',
     },

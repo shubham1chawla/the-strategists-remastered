@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { confetti } from 'tsparticles-confetti';
-import { CssVariables } from '../App';
 import { IConfettiOptions } from 'tsparticles-confetti/types/IConfettiOptions';
+import { useTheme } from '../theme';
 
 export interface ConfettiProps {
   type: 'single' | 'multiple';
@@ -14,6 +14,7 @@ const defaultProps: ConfettiProps = {
 };
 
 export const Confetti = (props: Partial<ConfettiProps>) => {
+  const { accentColor, textColor } = useTheme();
   const [count, setCount] = useState(0);
   const type = props.type || defaultProps.type;
   const interval = props.interval || defaultProps.interval;
@@ -23,24 +24,28 @@ export const Confetti = (props: Partial<ConfettiProps>) => {
 
   useEffect(() => {
     // rendering confetti
-    confetti('confetti-container', getConfiguration(type, count));
+    confetti(
+      'confetti-container',
+      getConfiguration(type, count, [accentColor, textColor])
+    );
 
     // use effect will re-trigger when count state changes
     if (type === 'multiple' && document.hasFocus()) {
       setTimeout(() => setCount(count + 1), interval);
     }
-  }, [count, type, interval]);
+  }, [count, type, interval, accentColor, textColor]);
 
   return <div id="confetti-container"></div>;
 };
 
 const getConfiguration = (
   type: 'single' | 'multiple' = 'single',
-  count: number
+  count: number,
+  colors: string[]
 ): Partial<IConfettiOptions> => {
   const baseConfig: Partial<IConfettiOptions> = {
     shapes: ['star', 'square', 'circle', 'polygon', 'diamonds'],
-    colors: [CssVariables['--accent-color'], CssVariables['--text-color']],
+    colors,
   };
 
   const config = { ...baseConfig };

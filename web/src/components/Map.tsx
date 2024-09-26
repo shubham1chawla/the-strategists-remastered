@@ -7,34 +7,27 @@ import cytoscape, {
   Stylesheet,
 } from 'cytoscape';
 import popper from 'cytoscape-popper';
-import { CssVariables } from '../App';
-import {
-  Land,
-  Player,
-  playerColors,
-  PlayerLand,
-  useLobby,
-  usePlayerColors,
-} from '../redux';
+import { Land, Player, PlayerLand, useLobby } from '../redux';
+import { Theme, useTheme } from '../theme';
 import { LandStats, PlayerStats, PortfolioModal, PortfolioModalProps } from '.';
 
 /**
  * -----  MAP COMPONENT BELOW  -----
  */
 
-const prepareStyles = (playersLength: number): Stylesheet[] => {
+const prepareStyles = (theme: Theme): Stylesheet[] => {
   return [
     {
       selector: 'node',
       style: {
         width: 20,
         height: 20,
-        color: CssVariables['--text-color'],
+        color: theme.textColor,
         label: 'data(name)',
         'text-margin-y': -10,
         'text-halign': 'center',
         'text-valign': 'top',
-        'text-background-color': CssVariables['--dark-color'],
+        'text-background-color': theme.darkColor,
         'text-background-opacity': 1,
         'text-background-padding': '4px',
       },
@@ -46,18 +39,16 @@ const prepareStyles = (playersLength: number): Stylesheet[] => {
         height: 20,
         shape: 'ellipse',
         'pie-size': '100%',
-        ...playerColors
-          .slice(0, Math.min(playerColors.length, playersLength))
-          .reduce(
-            (pieStyles, color, i) =>
-              Object.assign(pieStyles, {
-                [`pie-${i + 1}-background-color`]: color,
-                [`pie-${
-                  i + 1
-                }-background-size`]: `mapData(investments.${i}, 0, 100, 0, 100)`,
-              }),
-            {}
-          ),
+        ...theme.playerColors.reduce(
+          (pieStyles, color, i) =>
+            Object.assign(pieStyles, {
+              [`pie-${i + 1}-background-color`]: color,
+              [`pie-${
+                i + 1
+              }-background-size`]: `mapData(investments.${i}, 0, 100, 0, 100)`,
+            }),
+          {}
+        ),
       },
     } as Stylesheet,
     {
@@ -71,7 +62,7 @@ const prepareStyles = (playersLength: number): Stylesheet[] => {
       selector: '.prison',
       style: {
         shape: 'pentagon',
-        backgroundColor: CssVariables['--accent-color'],
+        backgroundColor: theme.accentColor,
       },
     },
     {
@@ -192,7 +183,7 @@ const preparePlayers = (
   cy: Core,
   lands: Land[],
   players: Player[],
-  getColor: (player: Player) => string
+  theme: Theme
 ): void => {
   // Finding players per index
   const counts = Array(lands.length).fill(0);
@@ -220,7 +211,7 @@ const preparePlayers = (
         player,
         name: player.username,
         id: player.username,
-        color: getColor(player),
+        color: theme.getPlayerColor(player),
       } as any,
       position: {
         x: land.x + (land.x > middle.x ? 1 : -1) * counts[player.index]-- * 60,
@@ -261,7 +252,7 @@ const preparePlayers = (
       position: node.position(),
       renderedPosition: node.position(),
       style: {
-        backgroundColor: CssVariables['--text-color'],
+        backgroundColor: theme.textColor,
       },
     });
 
@@ -274,7 +265,7 @@ const prepareMap = (
   cy: Core | null,
   lands: Land[],
   players: Player[],
-  getColor: (player: Player) => string
+  theme: Theme
 ): void => {
   if (!cy || !lands.length) return;
 
@@ -285,7 +276,7 @@ const prepareMap = (
   prepareLands(cy, lands, players);
 
   // Adding player nodes and edges
-  preparePlayers(cy, lands, players, getColor);
+  preparePlayers(cy, lands, players, theme);
 
   // Adjusting zoom
   try {
@@ -297,7 +288,7 @@ const prepareMap = (
 
 export const Map = () => {
   const { players, lands } = useLobby();
-  const { getColor } = usePlayerColors();
+  const theme = useTheme();
 
   // Setting up references to DOM elements
   const tooltip = useRef<HTMLDivElement | null>(null);
@@ -324,7 +315,7 @@ export const Map = () => {
         layout: {
           name: 'preset',
         },
-        style: prepareStyles(players.length),
+        style: prepareStyles(theme),
         container: current,
       });
 
@@ -373,7 +364,7 @@ export const Map = () => {
       // Setting up cytoscape instance's state
       setCy(cy);
     },
-    [players.length]
+    [theme]
   );
 
   // Setting up popper js support for tooltips
@@ -381,8 +372,8 @@ export const Map = () => {
 
   // Setting up map elements
   useEffect(
-    () => prepareMap(cy, lands, players, getColor),
-    [cy, players, lands, getColor]
+    () => prepareMap(cy, lands, players, theme),
+    [cy, players, lands, theme]
   );
 
   return (
