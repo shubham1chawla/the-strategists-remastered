@@ -1,8 +1,6 @@
-import { useCallback, useMemo } from 'react';
+import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { scaleOrdinal, schemeSet1 } from 'd3';
 import { State } from '../store';
-import { Player } from './reducer';
 
 export const useLobby = () => {
   const lobby = useSelector((state: State) => state.lobby);
@@ -66,25 +64,5 @@ export const useLobby = () => {
     bankruptPlayers,
     turnPlayer,
     winnerPlayer,
-  };
-};
-
-export const playerColors = schemeSet1;
-
-export const usePlayerColors = () => {
-  const { players } = useSelector((state: State) => state.lobby);
-  const colorsScale = useMemo(
-    () =>
-      scaleOrdinal(playerColors).domain(
-        [...players].sort((a, b) => a.id - b.id).map(({ username }) => username)
-      ),
-    [players]
-  );
-  const getColor = useCallback(
-    (player: Player) => colorsScale(player.username),
-    [colorsScale]
-  );
-  return {
-    getColor,
   };
 };
