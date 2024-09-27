@@ -19,6 +19,7 @@ import {
   WinModal,
   Update,
   Advices,
+  TurnModal,
 } from '.';
 import { LoginActions, Player, useAdvices, useLobby, useLogin } from '../redux';
 import { syncGameStates } from '../utils';
@@ -67,6 +68,7 @@ export const Dashboard = () => {
   return (
     <>
       <Update />
+      <TurnModal />
       <Row className="strategists-dashboard strategists-wallpaper">
         <Col
           className="strategists-dashboard__panel strategists-glossy"

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import {
   Alert,
@@ -24,6 +24,7 @@ import {
   DollarCircleOutlined,
   ExclamationCircleOutlined,
   HeartOutlined,
+  HomeOutlined,
   InfoCircleOutlined,
   LogoutOutlined,
   PercentageOutlined,
@@ -481,5 +482,46 @@ export const WinModal = () => {
         />
       )}
     </>
+  );
+};
+
+/**
+ * -----  TURN MODAL BELOW  -----
+ */
+
+export const TurnModal = () => {
+  const { player } = useLogin();
+  const { lands } = useLobby();
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    setOpen(player?.turn || false);
+  }, [player]);
+
+  if (!player) {
+    return null;
+  }
+  return (
+    <Modal
+      open={!!player && open}
+      footer={null}
+      onCancel={() => setOpen(false)}
+      width={400}
+      closeIcon={false}
+      centered
+    >
+      <Alert
+        type="info"
+        message="It's your turn!"
+        description={
+          <Space>
+            You have landed on
+            <Tag icon={<HomeOutlined />}>{lands[player.index].name}</Tag>
+          </Space>
+        }
+        showIcon
+        banner
+      />
+    </Modal>
   );
 };
