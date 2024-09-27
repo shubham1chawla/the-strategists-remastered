@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Collapse, Select, Space, Timeline, notification } from 'antd';
+import { Collapse, Select, Space, Timeline } from 'antd';
 import { useDispatch } from 'react-redux';
 import {
   AppstoreAddOutlined,
@@ -18,7 +18,7 @@ import {
   UserAddOutlined,
   UserDeleteOutlined,
 } from '@ant-design/icons';
-import { Bankruptcy } from '.';
+import { useNotification } from '../notification';
 import {
   ActivityActions,
   UpdateType,
@@ -26,13 +26,11 @@ import {
   useActivities,
 } from '../redux';
 import { parseActivity } from '../utils';
+import { Bankruptcy } from '.';
 
 export const ActivityTimeline = () => {
   const { filteredActivites, subscribedTypes } = useActivities();
-  const [api, contextHolder] = notification.useNotification({
-    stack: false,
-    maxCount: 4,
-  });
+  const { contextHolder, ...api } = useNotification();
   const dispatch = useDispatch();
 
   const formatUpdateType = (type: UpdateType): string => {
