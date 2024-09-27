@@ -1,11 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Divider } from 'antd';
-import cytoscape, {
-  Core,
-  EventObjectNode,
-  Position,
-  Stylesheet,
-} from 'cytoscape';
+import cytoscape, { Core, EventObjectNode, Stylesheet } from 'cytoscape';
 import popper from 'cytoscape-popper';
 import { Land, Player, PlayerLand, useLobby } from '../redux';
 import { Theme, useTheme } from '../theme';
@@ -168,17 +163,6 @@ const prepareLands = (cy: Core, lands: Land[], players: Player[]): void => {
   });
 };
 
-const calculateMiddle = (lands: Land[]): Position => {
-  const middle = { x: 0, y: 0 };
-  lands.forEach((land) => {
-    middle.x += land.x;
-    middle.y += land.y;
-  });
-  middle.x /= lands.length;
-  middle.y /= lands.length;
-  return middle;
-};
-
 const preparePlayers = (
   cy: Core,
   lands: Land[],
@@ -198,13 +182,10 @@ const preparePlayers = (
 
     // Player's current land
     const land = lands[player.index];
-
-    // Calculating middle of adjusting lands
-    const middle = calculateMiddle([
-      lands[(player.index - 1 + lands.length) % lands.length],
-      land,
-      lands[(player.index + 1) % lands.length],
-    ]);
+    const position = {
+      x: land.playerPosition.endsWith('left') ? -1 : 1,
+      y: land.playerPosition.startsWith('top') ? -1 : 1,
+    };
 
     cy.add({
       data: {
@@ -214,8 +195,8 @@ const preparePlayers = (
         color: theme.getPlayerColor(player),
       } as any,
       position: {
-        x: land.x + (land.x > middle.x ? 1 : -1) * counts[player.index]-- * 60,
-        y: land.y + (land.y > middle.y ? 1 : -1) * 60,
+        x: land.x + position.x * counts[player.index]-- * 60,
+        y: land.y + position.y * 60,
       },
       selectable: false,
       classes: 'player',
