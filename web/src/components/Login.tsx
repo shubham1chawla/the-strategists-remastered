@@ -1,17 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import {
-  Alert,
-  Button,
-  Card,
-  Divider,
-  Form,
-  Input,
-  Row,
-  Space,
-  notification,
-} from 'antd';
+import { Alert, Button, Card, Divider, Form, Input, Row, Space } from 'antd';
 import {
   AppstoreAddOutlined,
   AppstoreOutlined,
@@ -20,8 +10,9 @@ import {
   LoadingOutlined,
 } from '@ant-design/icons';
 import { GoogleCredentialResponse, GoogleLogin } from '@react-oauth/google';
-import { Logo } from '.';
+import { useNotification } from '../notification';
 import { LoginActions, LoginState, useLogin } from '../redux';
+import { Logo } from '.';
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
 
@@ -40,10 +31,7 @@ export const Login = () => {
   const [workflow, setWorkflow] = useState<Workflow>('NOT_VERIFIED');
   const [credential, setCredential] = useState<string | null>(null);
   const [joinDisabled, setJoinDisabled] = useState(true);
-  const [api, contextHolder] = notification.useNotification({
-    stack: false,
-    maxCount: 4,
-  });
+  const { contextHolder, ...api } = useNotification();
   const [form] = Form.useForm<{ code: string }>();
   const dispatch = useDispatch();
   const navigate = useNavigate();

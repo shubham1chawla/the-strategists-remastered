@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { notification } from 'antd';
 import { DisconnectOutlined } from '@ant-design/icons';
+import { useNotification } from '../notification';
 import {
   Activity,
   ActivityActions,
@@ -29,10 +29,7 @@ interface UpdatePayload {
 export const Update = () => {
   const { gameCode, playerId } = useLogin();
   const { subscribedTypes } = useActivities();
-  const [api, contextHolder] = notification.useNotification({
-    stack: false,
-    maxCount: 4,
-  });
+  const { contextHolder, ...api } = useNotification();
   const dispatch = useDispatch();
 
   /**
