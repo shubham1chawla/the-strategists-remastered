@@ -29,6 +29,7 @@ export interface Land {
   name: string;
   x: number;
   y: number;
+  playerPosition: 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';
   marketValue: number;
   totalOwnership: number;
   players: PlayerLand[];

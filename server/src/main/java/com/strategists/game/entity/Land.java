@@ -8,6 +8,8 @@ import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -25,8 +27,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import com.fasterxml.jackson.annotation.JsonValue;
 import com.strategists.game.util.MathUtil;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
@@ -42,6 +46,18 @@ public class Land implements Serializable {
 
 	private static final double DAMPENER = 0.01;
 
+	@AllArgsConstructor
+	public enum PlayerPosition {
+		TOP_LEFT("top-left"), TOP_RIGHT("top-right"), BOTTOM_LEFT("bottom-left"), BOTTOM_RIGHT("bottom-right");
+
+		private String value;
+
+		@JsonValue
+		public String getValue() {
+			return value;
+		}
+	}
+
 	@Id
 	@EqualsAndHashCode.Include
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,6 +71,10 @@ public class Land implements Serializable {
 
 	@Column(nullable = false)
 	private Integer y;
+
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private PlayerPosition playerPosition;
 
 	/**
 	 * Land's sensitivity shouldn't be revealed and therefore marked as ignore. We
