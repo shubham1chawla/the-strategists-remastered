@@ -93,11 +93,11 @@ export const PlayerStats = (props: PlayerStatsProps) => {
             <Statistic
               title={
                 <Space>
-                  <WalletOutlined />
-                  Cash
+                  <StockOutlined />
+                  Net Worth
                 </Space>
               }
-              value={player?.cash}
+              value={player?.netWorth}
               precision={2}
               prefix={<DollarOutlined />}
             />
@@ -108,11 +108,11 @@ export const PlayerStats = (props: PlayerStatsProps) => {
             <Statistic
               title={
                 <Space>
-                  <StockOutlined />
-                  Net Worth
+                  <WalletOutlined />
+                  Cash
                 </Space>
               }
-              value={player?.netWorth}
+              value={player?.cash}
               precision={2}
               prefix={<DollarOutlined />}
             />
