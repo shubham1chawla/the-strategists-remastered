@@ -443,7 +443,7 @@ export const WinModal = () => {
           </Row>
         }
       >
-        <PlayerStats player={winnerPlayer} />
+        <PlayerStats player={winnerPlayer} winner />
         <Tabs
           centered
           defaultActiveKey="1"
@@ -491,12 +491,13 @@ export const WinModal = () => {
 
 export const TurnModal = () => {
   const { player } = useLogin();
-  const { lands } = useLobby();
+  const { lands, winnerPlayer } = useLobby();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
+    if (winnerPlayer) return;
     setOpen(player?.turn || false);
-  }, [player]);
+  }, [player, winnerPlayer]);
 
   if (!player) {
     return null;

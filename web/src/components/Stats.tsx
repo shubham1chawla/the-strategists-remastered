@@ -14,6 +14,7 @@ import { ColumnType } from 'antd/es/table';
 import { Chart, Dark, TooltipItem } from '@antv/g2';
 import {
   AuditOutlined,
+  CrownOutlined,
   DollarCircleOutlined,
   DollarOutlined,
   HeartFilled,
@@ -47,10 +48,11 @@ import { Empty } from '.';
 export interface PlayerStatsProps {
   player: Player;
   showRemainingSkipsCount?: boolean;
+  winner?: boolean;
 }
 
 export const PlayerStats = (props: PlayerStatsProps) => {
-  const { player } = props;
+  const { player, winner } = props;
 
   // Determining whether to show remaining skip counts
   const showRemainingSkipsCount =
@@ -68,22 +70,29 @@ export const PlayerStats = (props: PlayerStatsProps) => {
       <Row>
         <Col span={24}>
           <Divider>
-            <Space>
-              <Tag icon={<UserOutlined />}>{player?.username}</Tag>
-              {player.state === 'BANKRUPT' && (
-                <Tag icon={<AuditOutlined />}>Bankrupt</Tag>
-              )}
-              {showRemainingSkipsCount && (
-                <Tag>
-                  {[...Array(remainingSkipsCount)].map((_, i) => (
-                    <HeartFilled key={i} />
-                  ))}
-                  {[...Array(skipsCount)].map((_, i) => (
-                    <HeartOutlined key={i} />
-                  ))}
-                </Tag>
-              )}
-            </Space>
+            {winner ? (
+              <Space>
+                <CrownOutlined />
+                <span>{player.username} won this round!</span>
+              </Space>
+            ) : (
+              <Space>
+                <Tag icon={<UserOutlined />}>{player?.username}</Tag>
+                {player.state === 'BANKRUPT' && (
+                  <Tag icon={<AuditOutlined />}>Bankrupt</Tag>
+                )}
+                {showRemainingSkipsCount && (
+                  <Tag>
+                    {[...Array(remainingSkipsCount)].map((_, i) => (
+                      <HeartFilled key={i} />
+                    ))}
+                    {[...Array(skipsCount)].map((_, i) => (
+                      <HeartOutlined key={i} />
+                    ))}
+                  </Tag>
+                )}
+              </Space>
+            )}
           </Divider>
         </Col>
       </Row>
