@@ -504,24 +504,20 @@ export const TurnModal = () => {
   return (
     <Modal
       open={!!player && open}
-      footer={null}
+      footer={
+        <Button type="primary" onClick={() => setOpen(false)}>
+          Got it!
+        </Button>
+      }
       onCancel={() => setOpen(false)}
       width={400}
-      closeIcon={false}
+      title="It's your turn!"
       centered
     >
-      <Alert
-        type="info"
-        message="It's your turn!"
-        description={
-          <Space>
-            You have landed on
-            <Tag icon={<HomeOutlined />}>{lands[player.index].name}</Tag>
-          </Space>
-        }
-        showIcon
-        banner
-      />
+      <Space>
+        You have landed on
+        <Tag icon={<HomeOutlined />}>{lands[player.index].name}</Tag>
+      </Space>
     </Modal>
   );
 };
