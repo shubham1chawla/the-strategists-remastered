@@ -13,10 +13,16 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties(prefix = "strategists.prediction")
 @ConditionalOnProperty(name = "strategists.prediction.enabled", havingValue = "true")
-public record PredictionConfigurationProperties(@DefaultValue @Valid PythonConfigurationProperties python,
+public record PredictionConfigurationProperties(@DefaultValue @Valid Strategies strategies,
+		@DefaultValue @Valid PythonConfigurationProperties python,
 		@DefaultValue @Valid SimpleFileExportConfigurationProperties export,
 		@DefaultValue @Valid PredictionTrainConfigurationProperties train,
 		@DefaultValue @Valid PredictionPredictConfigurationProperties predict) {
+
+	public record Strategies(boolean trainOnStartupEnabled, boolean trainOnEndEnabled, boolean dataExportEnabled,
+			boolean dataIntegrityValidationEnabled, boolean modelExecutionEnabled) {
+
+	}
 
 	public List<File> getAllDirectories() {
 		return List.of(
