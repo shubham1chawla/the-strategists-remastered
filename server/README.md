@@ -24,12 +24,24 @@ ENABLE_SSE_PING | If set, the server will send a periodic ping to keep the SSE c
 ENABLE_CLEAN_UP | If set, the server will delete games after some time of inactivity. | `boolean` | `true`
 ENABLE_SKIP_PLAYER | If set, the server will skip players' turns after some time of inactivity. | `boolean` | `true`
 ENABLE_PREDICTIONS | If set, the server will train and execute the prediction model. | `boolean` | `true`
+ENABLE_PREDICTIONS_TRAIN_ON_STARTUP | If set, the server will train the prediction model on server start-up. | `boolean` | `true`
+ENABLE_PREDICTIONS_TRAIN_ON_END | If set, the server will train the prediction model when game ends. | `boolean` | `true`
+ENABLE_PREDICTIONS_DATA_EXPORT | If set, the server will export CSV files for model training and execution. | `boolean` | `true`
+ENABLE_PREDICTIONS_DATA_INTEGRITY_VALIDATION | If set, the server will perform integrity before exporting game's CSV file. | `boolean` | `true`
+ENABLE_PREDICTIONS_MODEL_EXECUTION | If set, the server will execute the model for predictions. | `boolean` | `true`
+ENABLE_ADVICES | If set, the server will generate advices for players | `boolean` | `true`
+ENABLE_FREQUENTLY_INVEST_ADVICE | If set, the server will generate "frequently invest" advice for players | `boolean` | `true`
+ENABLE_AVOID_TIMEOUT_ADVICE | If set, the server will generate "avoid timeout" advice for players | `boolean` | `true`
+ENABLE_SIGNIFICANT_INVESTMENTS_ADVICE | If set, the server will generate "significant investments" advice for players | `boolean` | `true`
+ENABLE_CONCENTRATE_INVESTMENTS_ADVICE | If set, the server will generate "concentrate investments" advice for players | `boolean` | `true`
+ENABLE_POTENTIAL_BANKRUPTCY_ADVICE | If set, the server will generate "potential bankruptcy" advice for players | `boolean` | `true`
 GOOGLE_RECAPTCHA_SECRET_KEY | Google Recaptcha Secret Key (Version 2) that will verify users after they check the 'I am not a robot' box. It would be best if you either created your own or used the testing one mentioned on [this website](https://developers.google.com/recaptcha/docs/faq#id-like-to-run-automated-tests-with-recaptcha.-what-should-i-do). | `String` | none
 GOOGLE_CREDENTIALS_JSON | Path to the Google Service Account's Credentials as a JSON file. Learn how to create service accounts from [this webpage](https://cloud.google.com/iam/docs/service-accounts-create). | `String` | none
-GOOGLE_SPREADSHEET_ID | Google Spreadsheet ID, which manages user permission groups. | `String` | none
-GOOGLE_SPREADSHEET_RANGE | Range you want the server to query to fetch the permission groups. | `String` | none
-GOOGLE_DRIVE_DOWNLOAD_FOLDER_ID | Google Drive folder ID where all the game data is present. | `String` | none
-GOOGLE_DRIVE_UPLOAD_FOLDER_ID | Google Drive folder ID where the server should upload new game data. | `String` | none
+PERMISSIONS_SPREADSHEET_ID | Google Spreadsheet ID, which manages user permission groups. | `String` | none
+PERMISSIONS_SPREADSHEET_RANGE | Range you want the server to query to fetch the permission groups. | `String` | none
+PREDICTIONS_DOWNLOAD_FOLDER_ID | Google Drive folder ID where all the game data is present. | `String` | none
+PREDICTIONS_UPLOAD_FOLDER_ID | Google Drive folder ID where the server should upload new game data. | `String` | none
+ADVICES_UPLOAD_FOLDER_ID | Google Drive folder ID where the server should upload new advice data. | `String` | none
 
 ### Step 3 - Running Server
 

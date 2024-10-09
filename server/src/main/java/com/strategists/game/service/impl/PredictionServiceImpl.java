@@ -86,6 +86,9 @@ public class PredictionServiceImpl implements PredictionService {
 
 	@PostConstruct
 	public void setup() {
+		// Logging strategies
+		log.info("Predictions enabled! Strategies: {}", properties.strategies());
+
 		validateDirectories();
 
 		// Setting up prediction object mapper
@@ -99,7 +102,9 @@ public class PredictionServiceImpl implements PredictionService {
 		dataSyncService.downloadGameCSVFiles(properties.train().directory().data());
 
 		// Training the model
-		trainPredictionModel();
+		if (properties.strategies().trainOnStartupEnabled()) {
+			trainPredictionModel();
+		}
 	}
 
 	@Override
@@ -144,14 +149,22 @@ public class PredictionServiceImpl implements PredictionService {
 		orderedPlayers.forEach(em::refresh);
 
 		// Checking if game data CSV should be exported
+		Exception validationException = null;
 		try {
 			validateGameIntegrity(game, orderedPlayers);
 		} catch (Exception ex) {
-			log.warn("Skipped CSV export for game: {} | Reason: {}", game.getCode(), ex.getMessage());
-			return;
+			if (properties.strategies().dataIntegrityValidationEnabled()) {
+				log.warn("Skipped CSV export for game: {} | Reason: {}", game.getCode(), ex.getMessage());
+				return;
+			} else {
+				log.warn("CSV validation bypassed | Error Message: {}", ex.getMessage());
+				validationException = ex;
+			}
 		}
 
-		val filename = String.format("%s-%s", game.getCode(), System.currentTimeMillis());
+		val timestamp = System.currentTimeMillis();
+		val filename = Objects.isNull(validationException) ? String.format("%s-%s", game.getCode(), timestamp)
+				: String.format("%s-%s-[ISSUE: %s]", game.getCode(), timestamp, validationException.getMessage());
 		val csv = exportCSVFile(game, orderedPlayers, properties.train().directory().data(), filename);
 		if (Objects.isNull(csv)) {
 			log.error("No CSV exported! Skipping training the model!");
@@ -163,13 +176,21 @@ public class PredictionServiceImpl implements PredictionService {
 		dataSyncService.uploadGameCSVFiles(properties.train().directory().data());
 
 		// Training the model
-		trainPredictionModel();
+		if (properties.strategies().trainOnEndEnabled()) {
+			trainPredictionModel();
+		}
 	}
 
 	@Override
 	@Transactional
 	@UpdateMapping(UpdateType.PREDICTION)
 	public List<Prediction> executePredictionModel(Game game) {
+
+		// Checking if model execution is disabled
+		if (!properties.strategies().modelExecutionEnabled()) {
+			log.warn("Model execution bypassed!");
+			return List.of();
+		}
 
 		// Fetching new reference
 		val players = playerService.getActivePlayersByGame(game);
@@ -220,6 +241,13 @@ public class PredictionServiceImpl implements PredictionService {
 	}
 
 	private File exportCSVFile(Game game, List<Player> players, File directory, String filename) {
+
+		// Checking if CSV export disabled
+		if (!properties.strategies().dataExportEnabled()) {
+			log.warn("CSV export bypassed!");
+			return null;
+		}
+
 		// Creating CSV formatter
 		val headers = getCSVHeaders(game);
 		val format = CSVFormat.DEFAULT.builder().setHeader(headers.toArray(String[]::new)).build();

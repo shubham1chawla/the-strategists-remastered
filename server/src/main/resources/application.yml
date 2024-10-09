@@ -43,6 +43,12 @@ strategists:
       thread-pool-size: 4
   prediction:
     enabled: ${ENABLE_PREDICTIONS:true}
+    strategies:
+      train-on-startup-enabled: ${ENABLE_PREDICTIONS_TRAIN_ON_STARTUP:true}
+      train-on-end-enabled: ${ENABLE_PREDICTIONS_TRAIN_ON_END:true}
+      data-export-enabled: ${ENABLE_PREDICTIONS_DATA_EXPORT:true}
+      data-integrity-validation-enabled: ${ENABLE_PREDICTIONS_DATA_INTEGRITY_VALIDATION:true} 
+      model-execution-enabled: ${ENABLE_PREDICTIONS_MODEL_EXECUTION:true}
     python:
       executable: ../prediction/.venv/bin/python
       script: ../prediction/main.py
