@@ -166,7 +166,7 @@ h1.strategists-logo {
 
     .ant-tabs {
       flex-basis: 100%;
-      overflow-y: scroll;
+      overflow-y: auto;
 
       .ant-tabs-content,
       .ant-tabs-tabpane {
@@ -178,7 +178,7 @@ h1.strategists-logo {
     .strategists-activity,
     .strategists-lobby {
       height: 100%;
-      overflow-y: scroll;
+      overflow-y: auto;
       display: flex;
       flex-direction: column;
       flex: 1 auto;
@@ -251,7 +251,7 @@ h1.strategists-logo {
   }
 
   &__timeline {
-    overflow-y: scroll;
+    overflow-y: auto;
     padding: var(--ant-lg-padding);
     padding-bottom: 0;
 
@@ -267,7 +267,7 @@ h1.strategists-logo {
 .strategists-lobby {
   &__players {
     flex-basis: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
   }
 }
 
@@ -276,7 +276,7 @@ h1.strategists-logo {
 .strategists-advice {
   width: 100%;
   height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
 
   &__empty {
     height: 100%;
@@ -288,7 +288,7 @@ h1.strategists-logo {
 
 .strategists-map {
   height: 100%;
-  width: 100%;
+  width: 99%;
 
   &__tooltip {
     position: absolute;
