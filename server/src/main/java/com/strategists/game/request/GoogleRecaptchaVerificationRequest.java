@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class GoogleRecaptchaVerificationRequest {
 
-	private String clientToken;
+    private String clientToken;
 
 }

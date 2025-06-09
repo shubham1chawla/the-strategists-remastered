@@ -4,8 +4,8 @@ import com.strategists.game.entity.Game;
 
 public interface GenericSchedulerService {
 
-	void schedule(Game game);
+    void schedule(Game game);
 
-	void unschedule(Game game);
+    void unschedule(Game game);
 
 }

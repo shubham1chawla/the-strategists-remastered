@@ -1,13 +1,13 @@
 package com.strategists.game.service;
 
-import java.util.Optional;
-
 import com.strategists.game.entity.PermissionGroup;
+
+import java.util.Optional;
 
 public interface PermissionsService {
 
-	void loadPermissionGroups();
+    void loadPermissionGroups();
 
-	Optional<PermissionGroup> getPermissionGroupByEmail(String email);
+    Optional<PermissionGroup> getPermissionGroupByEmail(String email);
 
 }

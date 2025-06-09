@@ -4,8 +4,8 @@ import com.strategists.game.update.UpdateType;
 
 public interface UpdateHandler {
 
-	UpdateType getType();
+    UpdateType getType();
 
-	void handle(Object returnValue, Object[] args);
+    void handle(Object returnValue, Object[] args);
 
 }

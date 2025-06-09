@@ -1,18 +1,5 @@
 package com.strategists.game.service.impl;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Random;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.transaction.Transactional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
@@ -26,9 +13,19 @@ import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 import com.strategists.game.update.UpdateMapping;
 import com.strategists.game.update.UpdateType;
-
-import lombok.val;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
+import lombok.val;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import java.util.List;
+import java.util.Objects;
+import java.util.Random;
 
 @Log4j2
 @Service
@@ -298,7 +295,7 @@ public class PlayerServiceImpl implements PlayerService {
 			player.getReceivedRents().clear();
 			player.getPaidRents().clear();
 
-			// Reseting other information
+			// Resetting other information
 			player.setIndex(0);
 			player.setTurn(false);
 			player.setState(State.ACTIVE);

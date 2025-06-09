@@ -1,61 +1,59 @@
 package com.strategists.game.update.handler;
 
-import java.util.Objects;
-
-import org.springframework.stereotype.Component;
-
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Player;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.WinUpdatePayload;
-
 import lombok.val;
+import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 @Component
 public class WinUpdateHandler extends AbstractUpdateHandler<WinUpdatePayload> {
 
-	@Override
-	public UpdateType getType() {
-		return UpdateType.WIN;
-	}
+    @Override
+    public UpdateType getType() {
+        return UpdateType.WIN;
+    }
 
-	@Override
-	public void handle(Object returnValue, Object[] args) {
-		// Winner player returned by the method and game is passed in argument
-		val player = (Player) returnValue;
-		val game = (Game) args[0];
+    @Override
+    public void handle(Object returnValue, Object[] args) {
+        // Winner player returned by the method and game is passed in argument
+        val player = (Player) returnValue;
+        val game = (Game) args[0];
 
-		// If no winner is declared, avoid sending update
-		if (Objects.isNull(player)) {
+        // If no winner is declared, avoid sending update
+        if (Objects.isNull(player)) {
 
-			// Executing prediction model
-			executePredictionModelAsync(game);
+            // Executing prediction model
+            executePredictionModelAsync(game);
 
-			// Generating advice for players
-			generateAdvicesAsync(game);
+            // Generating advice for players
+            generateAdvicesAsync(game);
 
-			// Scheduling player skip task
-			scheduleSkipPlayerTask(game);
+            // Scheduling player skip task
+            scheduleSkipPlayerTask(game);
 
-			return;
-		}
+            return;
+        }
 
-		// Exporting data and training the prediction model
-		trainPredictionModelAsync(game);
+        // Exporting data and training the prediction model
+        trainPredictionModelAsync(game);
 
-		// Exporting advice data
-		exportAdvicesAsync(game);
+        // Exporting advice data
+        exportAdvicesAsync(game);
 
-		// Persisting the activity and sending the update
-		val activity = Activity.ofWin(player);
-		sendUpdate(game, new WinUpdatePayload(saveActivity(activity), player));
+        // Persisting the activity and sending the update
+        val activity = Activity.ofWin(player);
+        sendUpdate(game, new WinUpdatePayload(saveActivity(activity), player));
 
-		// Removing previously scheduled task
-		unscheduleSkipPlayerTask(game);
+        // Removing previously scheduled task
+        unscheduleSkipPlayerTask(game);
 
-		// Scheduling clean-up task
-		scheduleCleanUpTask(game);
-	}
+        // Scheduling clean-up task
+        scheduleCleanUpTask(game);
+    }
 
 }

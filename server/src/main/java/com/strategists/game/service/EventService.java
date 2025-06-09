@@ -1,13 +1,13 @@
 package com.strategists.game.service;
 
-import java.util.List;
-
 import com.strategists.game.entity.Event;
+
+import java.util.List;
 
 public interface EventService {
 
-	List<Event> getEvents();
+    List<Event> getEvents();
 
-	Event getEventById(long id);
+    Event getEventById(long id);
 
 }

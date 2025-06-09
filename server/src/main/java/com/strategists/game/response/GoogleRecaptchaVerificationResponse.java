@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class GoogleRecaptchaVerificationResponse {
 
-	private boolean success;
+    private boolean success;
 
 }

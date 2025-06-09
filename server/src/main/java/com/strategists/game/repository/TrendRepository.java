@@ -1,16 +1,15 @@
 package com.strategists.game.repository;
 
-import java.util.List;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Trend;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.util.List;
 
 public interface TrendRepository extends JpaRepository<Trend, Long> {
 
-	List<Trend> findByGameOrderByIdAsc(Game game);
+    List<Trend> findByGameOrderByIdAsc(Game game);
 
-	long deleteByGame(Game game);
+    void deleteByGame(Game game);
 
 }

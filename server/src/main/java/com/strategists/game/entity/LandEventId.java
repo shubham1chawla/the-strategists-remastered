@@ -1,34 +1,34 @@
 package com.strategists.game.entity;
 
-import java.io.Serializable;
-
-import javax.persistence.Embeddable;
-import javax.persistence.ManyToOne;
-
-import org.springframework.util.Assert;
-
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.util.Assert;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 @Data
 @Embeddable
 @NoArgsConstructor
 public class LandEventId implements Serializable {
 
-	private static final long serialVersionUID = 271923618412311775L;
+    @Serial
+    private static final long serialVersionUID = 271923618412311775L;
 
-	@ManyToOne
-	private Land land;
+    @ManyToOne
+    private Land land;
 
-	@ManyToOne
-	private Event event;
+    @ManyToOne
+    private Event event;
 
-	public LandEventId(Land land, Event event) {
-		Assert.notNull(land, "Land shouldn't be null!");
-		Assert.notNull(event, "Event shouldn't be null!");
+    public LandEventId(Land land, Event event) {
+        Assert.notNull(land, "Land shouldn't be null!");
+        Assert.notNull(event, "Event shouldn't be null!");
 
-		this.land = land;
-		this.event = event;
-	}
+        this.land = land;
+        this.event = event;
+    }
 
 }

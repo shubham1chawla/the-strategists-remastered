@@ -1,21 +1,21 @@
 package com.strategists.game.service;
 
-import java.util.List;
-
 import com.strategists.game.entity.Advice;
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Player;
 
+import java.util.List;
+
 public interface AdviceService {
 
-	List<Advice> generateAdvices(Game game);
+    List<Advice> generateAdvices(Game game);
 
-	List<Advice> getAdvicesByGame(Game game);
+    List<Advice> getAdvicesByGame(Game game);
 
-	List<Advice> markPlayerAdvicesViewed(Player player);
+    List<Advice> markPlayerAdvicesViewed(Player player);
 
-	void clearAdvices(Game game);
+    void clearAdvices(Game game);
 
-	void exportAdvices(Game game);
+    void exportAdvices(Game game);
 
 }

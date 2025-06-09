@@ -5,8 +5,8 @@ import lombok.Data;
 @Data
 public class HostEventRequest {
 
-	private Long eventId;
-	private Integer life;
-	private Integer level;
+    private Long eventId;
+    private Integer life;
+    private Integer level;
 
 }

@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class KickPlayerRequest {
 
-	private long playerId;
+    private long playerId;
 
 }
