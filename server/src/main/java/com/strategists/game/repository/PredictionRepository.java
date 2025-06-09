@@ -1,18 +1,17 @@
 package com.strategists.game.repository;
 
-import java.util.List;
-
+import com.strategists.game.entity.Game;
+import com.strategists.game.entity.Prediction;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.strategists.game.entity.Game;
-import com.strategists.game.entity.Prediction;
+import java.util.List;
 
 @ConditionalOnProperty(name = "strategists.prediction.enabled", havingValue = "true")
 public interface PredictionRepository extends JpaRepository<Prediction, Long> {
 
-	List<Prediction> findByGameOrderById(Game game);
+    List<Prediction> findByGameOrderById(Game game);
 
-	long deleteByGame(Game game);
+    void deleteByGame(Game game);
 
 }

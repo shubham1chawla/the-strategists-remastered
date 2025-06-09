@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class InvestmentRequest {
 
-	private Long landId;
-	private Double ownership;
+    private Long landId;
+    private Double ownership;
 
 }

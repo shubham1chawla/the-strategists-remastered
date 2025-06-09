@@ -4,6 +4,6 @@ import com.strategists.game.request.GoogleRecaptchaVerificationRequest;
 
 public interface AuthenticationService {
 
-	boolean verify(GoogleRecaptchaVerificationRequest request);
+    boolean verify(GoogleRecaptchaVerificationRequest request);
 
 }

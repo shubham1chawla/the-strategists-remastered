@@ -1,38 +1,38 @@
 package com.strategists.game.entity;
 
-import java.io.Serializable;
-import java.util.Objects;
-
-import javax.persistence.Embeddable;
-import javax.persistence.ManyToOne;
-
-import org.springframework.util.Assert;
-
+import jakarta.persistence.Embeddable;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.util.Assert;
+
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Objects;
 
 @Data
 @Embeddable
 @NoArgsConstructor
 public class PlayerLandId implements Serializable {
 
-	private static final long serialVersionUID = 2411177966930860531L;
+    @Serial
+    private static final long serialVersionUID = 2411177966930860531L;
 
-	@ManyToOne
-	private Player player;
+    @ManyToOne
+    private Player player;
 
-	@ManyToOne
-	private Land land;
+    @ManyToOne
+    private Land land;
 
-	public PlayerLandId(Player player, Land land) {
-		Assert.notNull(player, "Player can't be null!");
-		Assert.notNull(land, "Land can't be null!");
-		Assert.notNull(player.getGame(), "Player must be associated with a game!");
-		Assert.notNull(land.getGame(), "Land must be associated with a game!");
-		Assert.isTrue(Objects.equals(player.getGame(), land.getGame()), "Games must match!");
+    public PlayerLandId(Player player, Land land) {
+        Assert.notNull(player, "Player can't be null!");
+        Assert.notNull(land, "Land can't be null!");
+        Assert.notNull(player.getGame(), "Player must be associated with a game!");
+        Assert.notNull(land.getGame(), "Land must be associated with a game!");
+        Assert.isTrue(Objects.equals(player.getGame(), land.getGame()), "Games must match!");
 
-		this.player = player;
-		this.land = land;
-	}
+        this.player = player;
+        this.land = land;
+    }
 
 }

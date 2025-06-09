@@ -1,27 +1,25 @@
 package com.strategists.game.entity;
 
-import java.io.Serializable;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
-
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.strategists.game.util.MathUtil;
-
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.val;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 @Data
 @Entity
@@ -29,59 +27,60 @@ import lombok.val;
 @Table(name = "trends")
 public class Trend implements Serializable {
 
-	private static final long serialVersionUID = 2688947717625456147L;
+    @Serial
+    private static final long serialVersionUID = 2688947717625456147L;
 
-	@JsonIgnore
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @JsonIgnore
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@Column(nullable = false)
-	private Integer turn;
+    @Column(nullable = false)
+    private Integer turn;
 
-	@JsonInclude(Include.NON_NULL)
-	@Column(nullable = true)
-	private Long playerId;
+    @JsonInclude(Include.NON_NULL)
+    @Column(nullable = true)
+    private Long playerId;
 
-	@JsonInclude(Include.NON_NULL)
-	@Column(nullable = true)
-	private Long landId;
+    @JsonInclude(Include.NON_NULL)
+    @Column(nullable = true)
+    private Long landId;
 
-	@JsonInclude(Include.NON_NULL)
-	@Column(nullable = true, precision = MathUtil.PRECISION)
-	private Double cash;
+    @JsonInclude(Include.NON_NULL)
+    @Column(nullable = true, precision = MathUtil.PRECISION)
+    private Double cash;
 
-	@JsonInclude(Include.NON_NULL)
-	@Column(nullable = true, precision = MathUtil.PRECISION)
-	private Double netWorth;
+    @JsonInclude(Include.NON_NULL)
+    @Column(nullable = true, precision = MathUtil.PRECISION)
+    private Double netWorth;
 
-	@JsonInclude(Include.NON_NULL)
-	@Column(nullable = true, precision = MathUtil.PRECISION)
-	private Double marketValue;
+    @JsonInclude(Include.NON_NULL)
+    @Column(nullable = true, precision = MathUtil.PRECISION)
+    private Double marketValue;
 
-	@JsonIgnore
-	@ManyToOne
-	@JoinColumn(name = "game_code", referencedColumnName = "code", nullable = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
-	private Game game;
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "game_code", referencedColumnName = "code", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private Game game;
 
-	public static Trend fromPlayer(Player player) {
-		val trend = new Trend();
-		trend.setGame(player.getGame());
-		trend.setTurn(player.getGame().getTurn());
-		trend.setPlayerId(player.getId());
-		trend.setCash(player.getCash());
-		trend.setNetWorth(player.getNetWorth());
-		return trend;
-	}
+    public static Trend fromPlayer(Player player) {
+        val trend = new Trend();
+        trend.setGame(player.getGame());
+        trend.setTurn(player.getGame().getTurn());
+        trend.setPlayerId(player.getId());
+        trend.setCash(player.getCash());
+        trend.setNetWorth(player.getNetWorth());
+        return trend;
+    }
 
-	public static Trend fromLand(Land land) {
-		val trend = new Trend();
-		trend.setGame(land.getGame());
-		trend.setTurn(land.getGame().getTurn());
-		trend.setLandId(land.getId());
-		trend.setMarketValue(land.getMarketValue());
-		return trend;
-	}
+    public static Trend fromLand(Land land) {
+        val trend = new Trend();
+        trend.setGame(land.getGame());
+        trend.setTurn(land.getGame().getTurn());
+        trend.setLandId(land.getId());
+        trend.setMarketValue(land.getMarketValue());
+        return trend;
+    }
 
 }

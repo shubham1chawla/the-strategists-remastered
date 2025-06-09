@@ -5,10 +5,10 @@ import com.strategists.game.update.UpdateType;
 
 public interface UpdatePayload<T> {
 
-	UpdateType getType();
+    UpdateType getType();
 
-	Activity getActivity();
+    Activity getActivity();
 
-	T getPayload();
+    T getPayload();
 
 }

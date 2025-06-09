@@ -5,19 +5,19 @@ import com.strategists.game.update.UpdateType;
 
 public class CleanUpUpdatePayload implements UpdatePayload<Object> {
 
-	@Override
-	public UpdateType getType() {
-		return UpdateType.CLEAN_UP;
-	}
+    @Override
+    public UpdateType getType() {
+        return UpdateType.CLEAN_UP;
+    }
 
-	@Override
-	public Activity getActivity() {
-		return null;
-	}
+    @Override
+    public Activity getActivity() {
+        return null;
+    }
 
-	@Override
-	public Object getPayload() {
-		return null;
-	}
+    @Override
+    public Object getPayload() {
+        return null;
+    }
 
 }

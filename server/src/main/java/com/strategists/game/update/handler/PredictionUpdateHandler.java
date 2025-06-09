@@ -1,54 +1,52 @@
 package com.strategists.game.update.handler;
 
-import java.util.List;
-
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
-
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Prediction;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.PredictionUpdatePayload;
-
 import lombok.val;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
+import java.util.List;
 
 @Component
 public class PredictionUpdateHandler extends AbstractUpdateHandler<PredictionUpdatePayload> {
 
-	private static final double WINNER_DIFFERENCE_THRESHOLD = 0.01;
+    private static final double WINNER_DIFFERENCE_THRESHOLD = 0.01;
 
-	@Override
-	public UpdateType getType() {
-		return UpdateType.PREDICTION;
-	}
+    @Override
+    public UpdateType getType() {
+        return UpdateType.PREDICTION;
+    }
 
-	@Override
-	public void handle(Object returnValue, Object[] args) {
-		// Game from the argument and predictions returned
-		val game = (Game) args[0];
+    @Override
+    public void handle(Object returnValue, Object[] args) {
+        // Game from the argument and predictions returned
+        val game = (Game) args[0];
 
-		@SuppressWarnings("unchecked")
-		val predictions = (List<Prediction>) returnValue;
-		if (CollectionUtils.isEmpty(predictions)) {
-			return;
-		}
+        @SuppressWarnings("unchecked")
+        val predictions = (List<Prediction>) returnValue;
+        if (CollectionUtils.isEmpty(predictions)) {
+            return;
+        }
 
-		/**
-		 * Sorting the predictions per players' net-worths and winning probabilities.
-		 * Even if all the predicted probabilities are almost the same, sorting them
-		 * based on net-worth allows us to bet on the best performing player.
-		 */
-		predictions.sort((p1, p2) -> {
-			if (Math.abs(p1.getWinnerProbability() - p2.getWinnerProbability()) < WINNER_DIFFERENCE_THRESHOLD) {
-				return p2.getPlayer().getNetWorth() > p1.getPlayer().getNetWorth() ? 1 : -1;
-			}
-			return p2.getWinnerProbability() > p1.getWinnerProbability() ? 1 : -1;
-		});
-		val bestPrediction = predictions.get(0);
+        /**
+         * Sorting the predictions per players' net-worths and winning probabilities.
+         * Even if all the predicted probabilities are almost the same, sorting them
+         * based on net-worth allows us to bet on the best performing player.
+         */
+        predictions.sort((p1, p2) -> {
+            if (Math.abs(p1.getWinnerProbability() - p2.getWinnerProbability()) < WINNER_DIFFERENCE_THRESHOLD) {
+                return p2.getPlayer().getNetWorth() > p1.getPlayer().getNetWorth() ? 1 : -1;
+            }
+            return p2.getWinnerProbability() > p1.getWinnerProbability() ? 1 : -1;
+        });
+        val bestPrediction = predictions.get(0);
 
-		// Persisting the activity and sending the update
-		sendUpdate(game, new PredictionUpdatePayload(saveActivity(Activity.ofPrediction(bestPrediction)), predictions));
-	}
+        // Persisting the activity and sending the update
+        sendUpdate(game, new PredictionUpdatePayload(saveActivity(Activity.ofPrediction(bestPrediction)), predictions));
+    }
 
 }
