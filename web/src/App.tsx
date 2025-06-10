@@ -1,8 +1,8 @@
 import { Provider } from 'react-redux';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { Dashboard, Login, NotFound } from './components';
-import { store } from './redux';
-import { ThemeProvider } from './theme';
+import { ThemeProvider } from './providers';
+import { store } from './store';
 import './App.scss';
 
 export const App = () => {

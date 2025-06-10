@@ -1,19 +1,23 @@
 import { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { DisconnectOutlined } from '@ant-design/icons';
-import { useNotification } from '../notification';
 import {
+  activityAdded,
   Activity,
-  ActivityActions,
-  AdviceActions,
-  LobbyActions,
-  LoginActions,
-  PredictionActions,
-  TrendActions,
   UpdateType,
-  useActivities,
-  useLogin,
-} from '../redux';
+} from '../features/activities/slice';
+import { advicesAddedOrPatched } from '../features/advices/slice';
+import {
+  gameStateSetted,
+  landsPatched,
+  playerAdded,
+  playerKicked,
+  playersPatched,
+} from '../features/game/slice';
+import { loggedOut } from '../features/login/slice';
+import { predictionsAdded } from '../features/predictions/slice';
+import { trendsAdded } from '../features/trends/slice';
+import { useActivities, useLogin, useNotification } from '../hooks';
 import { parseActivity, syncGameStates } from '../utils';
 
 /**
@@ -73,63 +77,63 @@ export const Update = () => {
       );
       switch (type) {
         case 'ADVICE':
-          dispatch(AdviceActions.addOrPatchAdvices(payload));
+          dispatch(advicesAddedOrPatched(payload));
           break;
         case 'BANKRUPTCY': {
           const { lands, players } = payload;
-          dispatch(LobbyActions.patchLands(lands));
-          dispatch(LobbyActions.patchPlayers(players));
+          dispatch(landsPatched(lands));
+          dispatch(playersPatched(players));
           break;
         }
         case 'CLEAN_UP':
-          dispatch(LoginActions.logout());
+          dispatch(loggedOut());
           break;
         case 'CREATE':
           // Do nothing
           break;
         case 'INVEST': {
           const { land, players } = payload;
-          dispatch(LobbyActions.patchLands([land]));
-          dispatch(LobbyActions.patchPlayers(players));
+          dispatch(landsPatched([land]));
+          dispatch(playersPatched(players));
           break;
         }
         case 'JOIN':
-          dispatch(LobbyActions.addPlayer(payload));
+          dispatch(playerAdded(payload));
           break;
         case 'KICK':
           // Logging out if current player is kicked
           if (payload === playerId) {
-            dispatch(LoginActions.logout());
+            dispatch(loggedOut());
           }
-          dispatch(LobbyActions.kickPlayer(payload));
+          dispatch(playerKicked(payload));
           break;
         case 'MOVE':
-          dispatch(LobbyActions.patchPlayers([payload]));
+          dispatch(playersPatched([payload]));
           break;
         case 'PING':
           // Do nothing
           break;
         case 'PREDICTION':
-          dispatch(PredictionActions.addPredictions(payload));
+          dispatch(predictionsAdded(payload));
           break;
         case 'RENT':
-          dispatch(LobbyActions.patchPlayers(payload));
+          dispatch(playersPatched(payload));
           break;
         case 'RESET':
           setTimeout(() => syncGameStates(gameCode, dispatch));
           break;
         case 'SKIP':
-          dispatch(LobbyActions.patchPlayers([payload]));
+          dispatch(playersPatched([payload]));
           break;
         case 'START':
-          dispatch(LobbyActions.patchPlayers([payload]));
-          dispatch(LobbyActions.setState('ACTIVE'));
+          dispatch(playersPatched([payload]));
+          dispatch(gameStateSetted('ACTIVE'));
           break;
         case 'TREND':
-          dispatch(TrendActions.addTrends(payload));
+          dispatch(trendsAdded(payload));
           break;
         case 'TURN':
-          dispatch(LobbyActions.patchPlayers(payload));
+          dispatch(playersPatched(payload));
           break;
         case 'WIN':
           // Do nothing
@@ -138,7 +142,7 @@ export const Update = () => {
           console.warn(`Unsupported update type: ${type}`);
       }
       if (!activity) return;
-      dispatch(ActivityActions.addActivity(activity));
+      dispatch(activityAdded(activity));
       if (subscribedTypes.includes(type)) {
         api.open({ message: parseActivity(activity) });
       }

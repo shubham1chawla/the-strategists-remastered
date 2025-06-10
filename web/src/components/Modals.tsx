@@ -45,7 +45,9 @@ import {
   VisualPrediction,
   VisualTrend,
 } from '.';
-import { Land, LoginActions, Player, useLobby, useLogin } from '../redux';
+import { Land, Player } from '../features/game/slice';
+import { loggedOut } from '../features/login/slice';
+import { useGame, useLogin } from '../hooks';
 import { InvestmentStrategy } from '../utils';
 import axios from 'axios';
 
@@ -390,7 +392,7 @@ export const ResetModal = (props: ResetModalProps) => {
 
 export const WinModal = () => {
   const { gameCode, player } = useLogin();
-  const { winnerPlayer } = useLobby();
+  const { winnerPlayer } = useGame();
   const [showResetModal, setShowResetModal] = useState(false);
   const dispatch = useDispatch();
 
@@ -434,7 +436,7 @@ export const WinModal = () => {
                 <Button
                   type="primary"
                   icon={<LogoutOutlined />}
-                  onClick={() => dispatch(LoginActions.logout())}
+                  onClick={() => dispatch(loggedOut())}
                 >
                   Logout
                 </Button>
@@ -491,7 +493,7 @@ export const WinModal = () => {
 
 export const TurnModal = () => {
   const { player } = useLogin();
-  const { lands, winnerPlayer } = useLobby();
+  const { lands, winnerPlayer } = useGame();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {

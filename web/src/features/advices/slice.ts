@@ -1,4 +1,4 @@
-import { AdviceActions } from './actions';
+import { createSlice } from '@reduxjs/toolkit';
 
 export type AdviceType =
   | 'FREQUENTLY_INVEST'
@@ -19,14 +19,16 @@ export interface Advice {
   val3: string | null;
 }
 
-export type AdviceState = Advice[];
+export type AdvicesState = Advice[];
 
-export const adviceReducer = (state: AdviceState = [], action: any) => {
-  const { type, payload } = action;
-  switch (type) {
-    case AdviceActions.Types.SET_ADVICES:
-      return [...payload];
-    case AdviceActions.Types.ADD_OR_PATCH_ADVICES: {
+const initialState: AdvicesState = [];
+
+const slice = createSlice({
+  name: 'advices',
+  initialState,
+  reducers: {
+    advicesSetted: (_, { payload }: { payload: Advice[] }) => [...payload],
+    advicesAddedOrPatched: (state, { payload }: { payload: Advice[] }) => {
       const toMap = (advices: Advice[]) =>
         advices.reduce((map, advice) => {
           map.set(advice.id, advice);
@@ -34,15 +36,15 @@ export const adviceReducer = (state: AdviceState = [], action: any) => {
         }, new Map<number, Advice>());
 
       const oldAdvices = toMap(state);
-      const newAdvices = toMap((payload as Advice[]) || []);
+      const newAdvices = toMap(payload || []);
       return [
         ...state.map((advice) => newAdvices.get(advice.id) || advice),
-        ...((payload as Advice[]) || []).filter(
-          (advice) => !oldAdvices.has(advice.id)
-        ),
+        ...(payload || []).filter((advice) => !oldAdvices.has(advice.id)),
       ];
-    }
-    default:
-      return state;
-  }
-};
+    },
+  },
+});
+
+export const { advicesSetted, advicesAddedOrPatched } = slice.actions;
+
+export default slice.reducer;

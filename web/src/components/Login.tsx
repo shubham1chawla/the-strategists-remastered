@@ -10,8 +10,8 @@ import {
   LoadingOutlined,
 } from '@ant-design/icons';
 import { GoogleCredentialResponse, GoogleLogin } from '@react-oauth/google';
-import { useNotification } from '../notification';
-import { LoginActions, LoginState, useLogin } from '../redux';
+import { loggedIn, LoginState } from '../features/login/slice';
+import { useLogin, useNotification } from '../hooks';
 import { Logo } from '.';
 import ReCAPTCHA from 'react-google-recaptcha';
 import axios from 'axios';
@@ -65,7 +65,7 @@ export const Login = () => {
     axios
       .get<LoginState>(`/api/games?credential=${credential}`)
       .then(({ data }) => {
-        dispatch(LoginActions.login(data));
+        dispatch(loggedIn(data));
         navigate('/dashboard');
       })
       .catch(() => setWorkflow('ACTIONS'));
@@ -95,7 +95,7 @@ export const Login = () => {
     axios
       .post<LoginState>(url, { credential })
       .then(({ data }) => {
-        dispatch(LoginActions.login(data));
+        dispatch(loggedIn(data));
         navigate('/dashboard');
       })
       .catch(({ response }) => {

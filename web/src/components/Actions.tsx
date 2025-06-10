@@ -8,14 +8,15 @@ import {
 } from '@ant-design/icons';
 import { Button, Dropdown, Space, notification } from 'antd';
 import { useState } from 'react';
-import { Player, useLobby, useLogin } from '../redux';
+import { Player } from '../features/game/slice';
+import { useGame, useLogin } from '../hooks';
 import { InvestmentStrategy } from '../utils';
 import { PlayerInvestModal } from '.';
 import axios from 'axios';
 
 export const Actions = () => {
   const { gameCode, player } = useLogin();
-  const { turnPlayer, lands } = useLobby();
+  const { turnPlayer, lands } = useGame();
   const [showModal, setShowModal] = useState(false);
 
   // Determining player's current land

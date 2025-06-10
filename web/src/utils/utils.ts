@@ -1,18 +1,17 @@
 import { Dispatch } from 'react';
 import { AnyAction } from 'redux';
+import { activitiesSetted, Activity } from '../features/activities/slice';
+import { Advice, advicesSetted } from '../features/advices/slice';
 import {
-  Activity,
-  ActivityActions,
-  Advice,
-  AdviceActions,
-  Land,
-  LobbyActions,
   Player,
-  Prediction,
-  PredictionActions,
-  Trend,
-  TrendActions,
-} from '../redux';
+  Land,
+  gameStateSetted,
+  playersCountConstraintsSetted,
+  playersSetted,
+  landsSetted,
+} from '../features/game/slice';
+import { Prediction, predictionsSetted } from '../features/predictions/slice';
+import { Trend, trendsSetted } from '../features/trends/slice';
 import axios from 'axios';
 
 interface GameResponse {
@@ -44,14 +43,14 @@ export const syncGameStates = async (
     advices,
   } = data;
   [
-    LobbyActions.setState(state),
-    LobbyActions.setPlayersCountConstraints(minPlayersCount, maxPlayersCount),
-    LobbyActions.setPlayers(players),
-    LobbyActions.setLands(lands),
-    ActivityActions.setActivities(activities),
-    TrendActions.setTrends(trends),
-    PredictionActions.setPredictions(predictions || []),
-    AdviceActions.setAdvices(advices || []),
+    gameStateSetted(state),
+    playersCountConstraintsSetted([minPlayersCount, maxPlayersCount]),
+    playersSetted(players),
+    landsSetted(lands),
+    activitiesSetted(activities),
+    trendsSetted(trends),
+    predictionsSetted(predictions || []),
+    advicesSetted(advices || []),
   ].forEach(dispatch);
 };
 
