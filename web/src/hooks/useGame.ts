@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { State } from '../store';
 
-export const useLobby = () => {
-  const lobby = useSelector((state: State) => state.lobby);
-  const { players, state } = lobby;
+export const useGame = () => {
+  const game = useSelector((state: State) => state.game);
+  const { players, state } = game;
 
   // Determining turn player
   const turnPlayer = useMemo(
@@ -58,7 +58,7 @@ export const useLobby = () => {
   );
 
   return {
-    ...lobby,
+    ...game,
     sortedPlayers,
     activePlayers,
     bankruptPlayers,

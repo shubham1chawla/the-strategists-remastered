@@ -18,13 +18,12 @@ import {
   UserAddOutlined,
   UserDeleteOutlined,
 } from '@ant-design/icons';
-import { useNotification } from '../notification';
+import { useActivities, useNotification } from '../hooks';
 import {
-  ActivityActions,
   UpdateType,
   getSubscribableTypes,
-  useActivities,
-} from '../redux';
+  subscribedTypesSetted,
+} from '../features/activities/slice';
 import { parseActivity } from '../utils';
 import { Bankruptcy } from '.';
 
@@ -51,7 +50,7 @@ export const ActivityTimeline = () => {
         message: `Unsubscribed from all ${formatUpdateType(type)} activities!`,
       });
     }
-    dispatch(ActivityActions.setSubscribedTypes(types));
+    dispatch(subscribedTypesSetted(types));
   };
 
   return (

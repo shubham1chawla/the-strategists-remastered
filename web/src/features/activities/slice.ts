@@ -1,4 +1,4 @@
-import { ActivityActions } from '.';
+import { createSlice } from '@reduxjs/toolkit';
 
 export type UpdateType =
   | 'ADVICE'
@@ -55,41 +55,33 @@ export interface Activity {
   val5: string | null;
 }
 
-export interface ActivityState {
+export interface ActivitiesState {
   subscribedTypes: UpdateType[];
   activities: Activity[];
 }
 
-const initialState: ActivityState = {
+const initialState: ActivitiesState = {
   subscribedTypes: [...getSubscribableTypes()],
   activities: [],
 };
 
-export const activityReducer = (
-  state: ActivityState = initialState,
-  action: any
-): ActivityState => {
-  const { type, payload } = action;
-  switch (type) {
-    case ActivityActions.Types.SET_ACTIVITIES:
-      return {
-        ...state,
-        activities: [...payload],
-      };
+const slice = createSlice({
+  name: 'activities',
+  initialState,
+  reducers: {
+    activitiesSetted: (state, { payload }: { payload: Activity[] }) => {
+      state.activities = [...payload];
+    },
+    activityAdded: (state, { payload }: { payload: Activity }) => {
+      state.activities = [payload, ...state.activities];
+    },
+    subscribedTypesSetted: (state, { payload }: { payload: UpdateType[] }) => {
+      state.subscribedTypes = [...payload];
+    },
+  },
+});
 
-    case ActivityActions.Types.ADD_ACTIVITY:
-      return {
-        ...state,
-        activities: [payload, ...state.activities],
-      };
+export const { activitiesSetted, activityAdded, subscribedTypesSetted } =
+  slice.actions;
 
-    case ActivityActions.Types.SET_SUBSCRIBED_TYPES:
-      return {
-        ...state,
-        subscribedTypes: [...payload],
-      };
-
-    default:
-      return state;
-  }
-};
+export default slice.reducer;

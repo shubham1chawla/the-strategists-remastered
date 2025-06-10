@@ -4,7 +4,8 @@ import {
   CheckOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import { Advice, useAdvices } from '../redux';
+import { Advice } from '../features/advices/slice';
+import { useAdvices } from '../hooks';
 
 /**
  * -----  ADVICES COMPONENT BELOW  -----

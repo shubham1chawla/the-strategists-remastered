@@ -27,18 +27,11 @@ import {
   UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
-import {
-  Land,
-  LandTrend,
-  Player,
-  PlayerLand,
-  PlayerTrend,
-  Prediction,
-  useLobby,
-  usePredictions,
-  useTrends,
-} from '../redux';
-import { Theme, useTheme } from '../theme';
+import { Land, Player, PlayerLand } from '../features/game/slice';
+import { Prediction } from '../features/predictions/slice';
+import { LandTrend, PlayerTrend } from '../features/trends/slice';
+import { useGame, usePredictions, useTrends } from '../hooks';
+import { Theme, useTheme } from '../providers';
 import { Empty } from '.';
 
 /**
@@ -197,7 +190,7 @@ export interface PortfolioProps {
 }
 
 export const TabularPortfolio = (props: PortfolioProps) => {
-  const { players, lands } = useLobby();
+  const { players, lands } = useGame();
   return (
     <Table
       pagination={false}
@@ -209,7 +202,7 @@ export const TabularPortfolio = (props: PortfolioProps) => {
 
 export const VisualPortfolio = (props: PortfolioProps) => {
   const theme = useTheme();
-  const { players, lands } = useLobby();
+  const { players, lands } = useGame();
   const { playerLands, perspective, showHelp } = props;
 
   useEffect(() => {
@@ -495,7 +488,7 @@ export interface VisualPredictionProps {
 export const VisualPrediction = (props: VisualPredictionProps) => {
   const predictions = usePredictions();
   const { playerTrends } = useTrends();
-  const { players } = useLobby();
+  const { players } = useGame();
   const theme = useTheme();
   const { player, showHelp } = props;
 

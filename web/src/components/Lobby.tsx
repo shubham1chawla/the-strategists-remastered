@@ -10,7 +10,8 @@ import {
   UserAddOutlined,
   StarOutlined,
 } from '@ant-design/icons';
-import { Player, useLobby, useLogin } from '../redux';
+import { Player } from '../features/game/slice';
+import { useGame, useLogin } from '../hooks';
 import axios from 'axios';
 
 /**
@@ -32,7 +33,7 @@ export const Lobby = () => {
 
 const LobbyPlayers = () => {
   const { gameCode, player } = useLogin();
-  const { state, sortedPlayers } = useLobby();
+  const { state, sortedPlayers } = useGame();
 
   const kickPlayer = (event: MouseEvent, { id }: Player) => {
     event.stopPropagation();
@@ -108,7 +109,7 @@ const LobbyPlayers = () => {
 
 export const GameCode = () => {
   const { gameCode } = useLogin();
-  const { state } = useLobby();
+  const { state } = useGame();
 
   if (state === 'ACTIVE') return null;
 

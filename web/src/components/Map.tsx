@@ -1,10 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Divider } from 'antd';
+import { Land, Player, PlayerLand } from '../features/game/slice';
+import { useGame } from '../hooks';
+import { Theme, useTheme } from '../providers';
+import { LandStats, PlayerStats, PortfolioModal, PortfolioModalProps } from '.';
 import cytoscape, { Core, EventObjectNode, Stylesheet } from 'cytoscape';
 import popper from 'cytoscape-popper';
-import { Land, Player, PlayerLand, useLobby } from '../redux';
-import { Theme, useTheme } from '../theme';
-import { LandStats, PlayerStats, PortfolioModal, PortfolioModalProps } from '.';
 
 /**
  * -----  MAP COMPONENT BELOW  -----
@@ -268,7 +269,7 @@ const prepareMap = (
 };
 
 export const Map = () => {
-  const { players, lands } = useLobby();
+  const { players, lands } = useGame();
   const theme = useTheme();
 
   // Setting up references to DOM elements

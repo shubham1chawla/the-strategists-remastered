@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { confetti } from 'tsparticles-confetti';
 import { IConfettiOptions } from 'tsparticles-confetti/types/IConfettiOptions';
-import { useTheme } from '../theme';
+import { useTheme } from '../providers';
 
 export interface ConfettiProps {
   type: 'single' | 'multiple';

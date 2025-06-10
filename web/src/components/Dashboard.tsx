@@ -21,7 +21,9 @@ import {
   Advices,
   TurnModal,
 } from '.';
-import { LoginActions, Player, useAdvices, useLobby, useLogin } from '../redux';
+import { Player } from '../features/game/slice';
+import { loggedOut } from '../features/login/slice';
+import { useAdvices, useGame, useLogin } from '../hooks';
 import { syncGameStates } from '../utils';
 import axios from 'axios';
 
@@ -31,7 +33,7 @@ import axios from 'axios';
 
 export const Dashboard = () => {
   const { gameCode, player } = useLogin();
-  const { state, players, minPlayersCount, maxPlayersCount } = useLobby();
+  const { state, players, minPlayersCount, maxPlayersCount } = useGame();
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -51,7 +53,7 @@ export const Dashboard = () => {
     // Syncing game's state
     syncGameStates(gameCode, dispatch).catch((error) => {
       console.error(error);
-      dispatch(LoginActions.logout());
+      dispatch(loggedOut());
     });
 
     // Dashboard component's unmount event
@@ -197,7 +199,7 @@ const Navigation = (props: NavigationProps) => {
 
   const logout = () => {
     googleLogout();
-    dispatch(LoginActions.logout());
+    dispatch(loggedOut());
   };
 
   return (

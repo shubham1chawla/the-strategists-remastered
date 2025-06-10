@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { State } from '../store';
+import { useLogin } from './useLogin';
 import axios from 'axios';
-import { useLogin } from '../login';
 
 export const useAdvices = () => {
-  const advices = useSelector((state: State) => state.advice);
+  const advices = useSelector((state: State) => state.advices);
   const { playerId, gameCode } = useLogin();
   const [unreadCount, setUnreadCount] = useState(0);
 

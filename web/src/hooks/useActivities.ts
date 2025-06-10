@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { State } from '../store';
 
 export const useActivities = () => {
-  const activity = useSelector((state: State) => state.activity);
+  const activity = useSelector((state: State) => state.activities);
   const { activities, subscribedTypes } = activity;
 
   // Extracting filtered activities
