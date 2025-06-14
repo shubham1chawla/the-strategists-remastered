@@ -26,13 +26,10 @@ const store = configureStore({
     trends: trendsReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
-  middleware: (defaultMiddlewares) => {
-    if (process.env.NODE_ENV !== 'production') {
-      // For some reason, logger needs to be typecasted to any to avoid errors.
-      return defaultMiddlewares().concat(logger as any);
-    }
-    return defaultMiddlewares();
-  },
+  middleware: (defaultMiddlewares) =>
+    defaultMiddlewares().concat(
+      process.env.NODE_ENV !== 'production' ? [logger] : []
+    ),
 });
 
 export default store;
