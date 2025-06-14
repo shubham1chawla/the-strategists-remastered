@@ -14,7 +14,20 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "jsx": "react-jsx"
+    "jsx": "react-jsx",
+    "baseUrl": "./src",
+    "paths": {
+      "@activities/*": ["./features/activities/*"],
+      "@advices/*": ["./features/advices/*"],
+      "@game/*": ["./features/game/*"],
+      "@login/*": ["./features/login/*"],
+      "@predictions/*": ["./features/predictions/*"],
+      "@trends/*": ["./features/trends/*"],
+      "@theme/*": ["./features/theme/*"],
+      "@features/*": ["./features/*"],
+      "@shared/*": ["./shared/*"],
+      "@/*": ["./*"]
+    }
   },
   "include": ["src"]
 }

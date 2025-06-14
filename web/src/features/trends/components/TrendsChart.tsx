@@ -1,0 +1,204 @@
+import { useEffect } from 'react';
+import { Chart } from '@antv/g2';
+import ChartInterpretationHelp from '@shared/components/ChartInterpretationHelp';
+import EmptyContainer from '@shared/components/EmptyContainer';
+import useChartTheme from '@shared/hooks/useChartTheme';
+import useTheme from '@shared/hooks/useTheme';
+import { Theme } from '@shared/providers/themeProvider';
+import { LandTrend, PlayerTrend } from '@trends/state';
+import useTrends from '@trends/hooks/useTrends';
+
+interface TrendsChartProps {
+  perspective: 'player' | 'land';
+  id: number;
+  showHelp?: boolean;
+}
+
+const TrendsChart = (props: TrendsChartProps) => {
+  const theme = useTheme();
+  const chartTheme = useChartTheme();
+  const { playerTrends, landTrends } = useTrends();
+  const { perspective, id, showHelp } = props;
+
+  useEffect(() => {
+    if (
+      (perspective === 'land' && !landTrends.length) ||
+      (perspective === 'player' && !playerTrends.length)
+    )
+      return;
+
+    // Creating chart's instance
+    const chart = new Chart({
+      container: 'trends-container',
+      height: 300,
+    });
+
+    // Configuring chart's options
+    chart.options({
+      autoFit: true,
+      axis: {
+        x: {
+          grid: false,
+          title: false,
+          tickFilter: (value: number) => Number.isInteger(value),
+        },
+        y: {
+          grid: true,
+          title: false,
+          tickCount: 3,
+          labelFormatter: (value: number) => `$${value}`,
+        },
+      },
+      theme: chartTheme,
+    });
+
+    // Updating tooltip position
+    chart.interaction('tooltip', {
+      position: 'left', // Matching the positioning of map's tooltip
+    });
+
+    switch (perspective) {
+      case 'player':
+        drawPlayerTrends(
+          chart,
+          playerTrends.filter(({ playerId }) => playerId === id),
+          theme
+        );
+        break;
+      case 'land':
+        drawLandTrends(
+          chart,
+          landTrends.filter(({ landId }) => landId === id),
+          theme
+        );
+        break;
+    }
+    chart.render();
+  }, [id, perspective, playerTrends, landTrends, theme, chartTheme]);
+
+  if (
+    (perspective === 'land' && !landTrends.length) ||
+    (perspective === 'player' && !playerTrends.length)
+  ) {
+    return <EmptyContainer message="No trends available!" />;
+  }
+  return (
+    <div className="strategists-viz">
+      <div id="trends-container"></div>
+      {showHelp && (
+        <ChartInterpretationHelp
+          message={
+            perspective === 'player'
+              ? "The chart highlights the change in player's cash and net worth per turn."
+              : "The chart highlights the change in the land's market value per turn."
+          }
+        />
+      )}
+    </div>
+  );
+};
+
+const drawPlayerTrends = (
+  chart: Chart,
+  trends: PlayerTrend[],
+  theme: Theme
+) => {
+  // Adding area marks
+  chart
+    .area()
+    .data(trends)
+    .encode('x', 'turn')
+    .encode('y', 'netWorth')
+    .scale('y', { domainMin: 0 })
+    .style(
+      'fill',
+      `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${theme.accentColor} 100%)`
+    )
+    .tooltip(false);
+
+  // Adding line marks
+  chart
+    .line()
+    .data(trends)
+    .encode('x', 'turn')
+    .encode('y', 'netWorth')
+    .scale('y', { domainMin: 0 })
+    .style('stroke', theme.accentColor)
+    .tooltip({
+      title: '',
+      items: [
+        {
+          name: 'Net Worth',
+          field: 'netWorth',
+          color: 'transparent',
+          valueFormatter: (value: number) => `$${value}`,
+        },
+      ],
+    });
+
+  // Adding cash line marks
+  chart
+    .line()
+    .data(trends)
+    .encode('x', 'turn')
+    .encode('y', 'cash')
+    .scale('y', { domainMin: 0 })
+    .style('stroke', theme.textColor)
+    .tooltip({
+      title: '',
+      items: [
+        {
+          name: 'Cash',
+          field: 'cash',
+          color: 'transparent',
+          valueFormatter: (value: number) => `$${value}`,
+        },
+      ],
+    });
+};
+
+const drawLandTrends = (chart: Chart, trends: LandTrend[], theme: Theme) => {
+  // Adding area marks
+  chart
+    .area()
+    .data(trends)
+    .encode('x', 'turn')
+    .encode('y', 'marketValue')
+    .scale('y', { domainMin: 0 })
+    .style(
+      'fill',
+      `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${theme.accentColor} 100%)`
+    )
+    .tooltip({
+      title: '',
+      items: [
+        {
+          name: 'Turn',
+          field: 'turn',
+          color: 'transparent',
+        },
+      ],
+    });
+
+  // Adding line marks
+  chart
+    .line()
+    .data(trends)
+    .encode('x', 'turn')
+    .encode('y', 'marketValue')
+    .scale('y', { domainMin: 0 })
+    .style('stroke', theme.accentColor)
+    .tooltip({
+      title: '',
+      items: [
+        {
+          name: 'Market Value',
+          field: 'marketValue',
+          color: 'transparent',
+          valueFormatter: (value: number) => `$${value}`,
+        },
+      ],
+    });
+};
+
+export default TrendsChart;
