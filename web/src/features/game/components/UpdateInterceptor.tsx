@@ -68,7 +68,7 @@ const UpdateInterceptor = () => {
     // Setting up on message strategy for the event source
     updates.onmessage = (message: MessageEvent<any>) => {
       const { type, payload, activity }: UpdatePayload = JSON.parse(
-        message.data
+        message.data,
       );
       switch (type) {
         case 'ADVICE':

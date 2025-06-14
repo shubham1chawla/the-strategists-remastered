@@ -62,14 +62,14 @@ const TrendsChart = (props: TrendsChartProps) => {
         drawPlayerTrends(
           chart,
           playerTrends.filter(({ playerId }) => playerId === id),
-          theme
+          theme,
         );
         break;
       case 'land':
         drawLandTrends(
           chart,
           landTrends.filter(({ landId }) => landId === id),
-          theme
+          theme,
         );
         break;
     }
@@ -101,7 +101,7 @@ const TrendsChart = (props: TrendsChartProps) => {
 const drawPlayerTrends = (
   chart: Chart,
   trends: PlayerTrend[],
-  theme: Theme
+  theme: Theme,
 ) => {
   // Adding area marks
   chart
@@ -112,7 +112,7 @@ const drawPlayerTrends = (
     .scale('y', { domainMin: 0 })
     .style(
       'fill',
-      `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${theme.accentColor} 100%)`
+      `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${theme.accentColor} 100%)`,
     )
     .tooltip(false);
 
@@ -167,7 +167,7 @@ const drawLandTrends = (chart: Chart, trends: LandTrend[], theme: Theme) => {
     .scale('y', { domainMin: 0 })
     .style(
       'fill',
-      `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${theme.accentColor} 100%)`
+      `linear-gradient(-90deg, rgba(0, 0, 0, 0) 0%, ${theme.accentColor} 100%)`,
     )
     .tooltip({
       title: '',

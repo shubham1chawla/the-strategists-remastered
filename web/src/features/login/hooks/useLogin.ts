@@ -10,7 +10,7 @@ const useLogin = () => {
   // Determining logged-in player
   const player = useMemo(
     () => players.find(({ id }) => id === playerId),
-    [players, playerId]
+    [players, playerId],
   );
 
   return { ...login, player };

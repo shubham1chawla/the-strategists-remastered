@@ -19,7 +19,7 @@ createRoot(document.getElementById('root') as HTMLElement).render(
       </h1>
     )}
     <App />
-  </GoogleOAuthProvider>
+  </GoogleOAuthProvider>,
 );
 
 // If you want to start measuring performance in your app, pass a function

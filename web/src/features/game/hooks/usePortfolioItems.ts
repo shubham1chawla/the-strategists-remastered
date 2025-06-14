@@ -9,7 +9,7 @@ interface PortfolioItem extends PlayerLand {
 
 const usePortfolioItems = (
   perspective: 'land' | 'player',
-  playerLands: PlayerLand[]
+  playerLands: PlayerLand[],
 ): PortfolioItem[] => {
   const { players, lands } = useGame();
 
@@ -20,7 +20,7 @@ const usePortfolioItems = (
         map.set(player.id, player);
         return map;
       }, new Map<number, Player>()),
-    [players]
+    [players],
   );
 
   // Converting lands to landMap
@@ -30,7 +30,7 @@ const usePortfolioItems = (
         map.set(land.id, land);
         return map;
       }, new Map<number, Land>()),
-    [lands]
+    [lands],
   );
 
   // Creating portfolio items
@@ -56,7 +56,7 @@ const usePortfolioItems = (
             name: name || 'Unknown',
           };
         }),
-    [perspective, playerLands, playerMap, landMap]
+    [perspective, playerLands, playerMap, landMap],
   );
 
   return portfolioItems;

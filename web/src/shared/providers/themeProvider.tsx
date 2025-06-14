@@ -31,7 +31,7 @@ const DefaultCssVariables = {
  * Making first color same as Strategists default theme color
  */
 const allPlayerColors = schemeSet1.map((color, i) =>
-  i === 0 ? DefaultCssVariables['--accent-color'] : color
+  i === 0 ? DefaultCssVariables['--accent-color'] : color,
 );
 
 export interface Theme {
@@ -52,12 +52,12 @@ const ThemeProvider = ({ children }: PropsWithChildren) => {
 
   const playerColors = useMemo(
     () => allPlayerColors.slice(0, playersLength),
-    [playersLength]
+    [playersLength],
   );
 
   const sortedPlayers = useMemo(
     () => [...players].sort((a, b) => a.id - b.id),
-    [players]
+    [players],
   );
 
   const getPlayerColor = useCallback(
@@ -66,11 +66,11 @@ const ThemeProvider = ({ children }: PropsWithChildren) => {
         return DefaultCssVariables['--accent-color'];
       }
       const scale = scaleOrdinal(playerColors).domain(
-        sortedPlayers.map(({ username }) => username)
+        sortedPlayers.map(({ username }) => username),
       );
       return scale(player.username);
     },
-    [playerColors, sortedPlayers]
+    [playerColors, sortedPlayers],
   );
 
   const accentColor = useMemo(
@@ -78,7 +78,7 @@ const ThemeProvider = ({ children }: PropsWithChildren) => {
       loggedInPlayer
         ? getPlayerColor(loggedInPlayer)
         : DefaultCssVariables['--accent-color'],
-    [loggedInPlayer, getPlayerColor]
+    [loggedInPlayer, getPlayerColor],
   );
 
   const variables = useMemo(
@@ -86,7 +86,7 @@ const ThemeProvider = ({ children }: PropsWithChildren) => {
       ...DefaultCssVariables,
       '--accent-color': accentColor,
     }),
-    [accentColor]
+    [accentColor],
   );
 
   // Setting up documents theme colors

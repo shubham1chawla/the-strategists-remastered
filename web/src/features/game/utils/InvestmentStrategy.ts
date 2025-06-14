@@ -6,7 +6,7 @@ class InvestmentStrategy {
   constructor(
     readonly player: Player,
     readonly land: Land,
-    public ownership: number = 0
+    public ownership: number = 0,
   ) {}
 
   get cost() {
@@ -22,7 +22,7 @@ class InvestmentStrategy {
     const cash = this.player.cash - InvestmentStrategy.RESERVED_CASH;
     return Math.min(
       this.availableOwnership,
-      Math.floor((cash * 100) / this.land.marketValue)
+      Math.floor((cash * 100) / this.land.marketValue),
     );
   }
 

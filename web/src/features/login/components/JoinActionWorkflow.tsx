@@ -68,7 +68,7 @@ const JoinActionWorkflow = () => {
       errorNotifcation,
       dispatch,
       navigate,
-    ]
+    ],
   );
 
   if (loginWorkflow !== 'JOIN_ACTION') return null;

@@ -219,7 +219,7 @@ const prepareSliderMarks = (strategy: InvestmentStrategy): SliderMarks => {
   };
   const marks: SliderMarks = {};
   [0, Math.floor(max / 2), max].forEach(
-    (ownership) => (marks[ownership] = { label: `${ownership}%`, style })
+    (ownership) => (marks[ownership] = { label: `${ownership}%`, style }),
   );
   return marks;
 };

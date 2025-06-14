@@ -12,7 +12,7 @@ const useAdvices = () => {
   // Filtering advices based on logged in player
   const playerAdvices = useMemo(() => {
     const filteredAdvices = advices.filter(
-      (advice) => advice.playerId === playerId
+      (advice) => advice.playerId === playerId,
     );
     filteredAdvices.sort((a1, a2) => {
       if (a1.state !== a2.state) {

@@ -36,11 +36,9 @@ const prepareStyles = (theme: Theme): Stylesheet[] => {
           (pieStyles, color, i) =>
             Object.assign(pieStyles, {
               [`pie-${i + 1}-background-color`]: color,
-              [`pie-${
-                i + 1
-              }-background-size`]: `mapData(investments.${i}, 0, 100, 0, 100)`,
+              [`pie-${i + 1}-background-size`]: `mapData(investments.${i}, 0, 100, 0, 100)`,
             }),
-          {}
+          {},
         ),
       },
     } as Stylesheet,
@@ -98,7 +96,7 @@ const prepareLands = (cy: Core, lands: Land[], players: Player[]): void => {
         Object.assign(obj, {
           [pl.playerId || -1]: pl,
         }),
-      {}
+      {},
     );
     const investments: Record<string, number> = sortedPlayers.reduce(
       (obj, player, i) =>
@@ -108,7 +106,7 @@ const prepareLands = (cy: Core, lands: Land[], players: Player[]): void => {
               ? investors[player.id].ownership
               : 0,
         }),
-      {}
+      {},
     );
     const classes = [];
     if (
@@ -165,7 +163,7 @@ const preparePlayers = (
   cy: Core,
   lands: Land[],
   players: Player[],
-  theme: Theme
+  theme: Theme,
 ): void => {
   // Finding players per index
   const counts = Array(lands.length).fill(0);
@@ -220,7 +218,7 @@ const preparePlayers = (
       return new Promise((resolve) =>
         setTimeout(() => {
           resolve(callback);
-        }, 1000)
+        }, 1000),
       );
     }
 
@@ -244,7 +242,7 @@ const prepareMap = (
   cy: Core | null,
   lands: Land[],
   players: Player[],
-  theme: Theme
+  theme: Theme,
 ): void => {
   if (!cy || !lands.length) return;
 
@@ -278,7 +276,7 @@ const MapPanel = () => {
   const [hoveredLand, setHoveredLand] = useState<Land | null>(null);
   const [hoveredPlayer, setHoveredPlayer] = useState<Player | null>(null);
   const [modalProps, setModalProps] = useState<PortfolioModalProps | null>(
-    null
+    null,
   );
 
   // Setting up cytoscape
@@ -341,7 +339,7 @@ const MapPanel = () => {
       // Setting up cytoscape instance's state
       setCy(cy);
     },
-    [theme]
+    [theme],
   );
 
   // Setting up popper js support for tooltips
@@ -350,7 +348,7 @@ const MapPanel = () => {
   // Setting up map elements
   useEffect(
     () => prepareMap(cy, lands, players, theme),
-    [cy, players, lands, theme]
+    [cy, players, lands, theme],
   );
 
   return (

@@ -1,5 +1,5 @@
 import { Dispatch } from 'react';
-import { AnyAction } from 'redux';
+import { UnknownAction } from 'redux';
 import { activitiesSetted, Activity } from '@activities/state';
 import { Advice, advicesSetted } from '@advices/state';
 import {
@@ -28,7 +28,7 @@ interface GameResponse {
 
 const syncGameStates = async (
   gameCode: string,
-  dispatch: Dispatch<AnyAction>
+  dispatch: Dispatch<UnknownAction>,
 ): Promise<void> => {
   const { data } = await axios.get<GameResponse>(`/api/games/${gameCode}`);
   const {

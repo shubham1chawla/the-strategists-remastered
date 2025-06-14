@@ -38,8 +38,8 @@ const PlayerActionsPanel = () => {
     title = !land.marketValue
       ? `Cannot invest in ${land?.name}`
       : land.totalOwnership >= 100
-      ? 'No shares available!'
-      : `Not enough cash to invest!`;
+        ? 'No shares available!'
+        : `Not enough cash to invest!`;
   } else {
     title = `Invest in ${land?.name}`;
   }
