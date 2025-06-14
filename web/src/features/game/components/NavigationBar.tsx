@@ -58,10 +58,10 @@ const NavigationBar = (props: NavigationBarProps) => {
             players.length < minPlayersCount
               ? `At least ${minPlayersCount} players required to start The Strategists!`
               : players.length > maxPlayersCount
-              ? `At most ${maxPlayersCount} players required to start The Strategists!`
-              : state === 'ACTIVE'
-              ? 'Reset this session of The Strategists!'
-              : 'Start this session of The Strategists!'
+                ? `At most ${maxPlayersCount} players required to start The Strategists!`
+                : state === 'ACTIVE'
+                  ? 'Reset this session of The Strategists!'
+                  : 'Start this session of The Strategists!'
           }
         >
           <Button

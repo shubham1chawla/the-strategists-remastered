@@ -21,7 +21,7 @@ const useChartTheme = () => {
         viewFill: 'transparent',
       },
     }),
-    [theme]
+    [theme],
   );
 
   return chartTheme;

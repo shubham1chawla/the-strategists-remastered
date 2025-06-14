@@ -14,10 +14,10 @@ const RecaptchaWorkflow = () => {
         .post('/api/recaptcha', { clientToken })
         .then(() => setLoginWorkflow('VERIFIED'))
         .catch(({ response: { status } }) =>
-          setLoginWorkflow(status === 403 ? 'NOT_VERIFIED' : 'UNREACHABLE')
+          setLoginWorkflow(status === 403 ? 'NOT_VERIFIED' : 'UNREACHABLE'),
         );
     },
-    [setLoginWorkflow]
+    [setLoginWorkflow],
   );
 
   /**

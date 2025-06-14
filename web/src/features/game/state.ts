@@ -61,7 +61,7 @@ const slice = createSlice({
     },
     playersCountConstraintsSetted: (
       state,
-      { payload }: { payload: [number, number] }
+      { payload }: { payload: [number, number] },
     ) => {
       state.minPlayersCount = payload[0];
       state.maxPlayersCount = payload[1];
@@ -81,7 +81,7 @@ const slice = createSlice({
         patches.set(p.id, p);
       }
       state.players = state.players.map(
-        (player) => patches.get(player.id) || player
+        (player) => patches.get(player.id) || player,
       );
     },
     landsSetted: (state, { payload }: { payload: Land[] }) => {

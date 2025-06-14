@@ -9,13 +9,13 @@ const useTrends = () => {
   // Extracting player trends
   const playerTrends = useMemo(
     () => trends.filter(({ playerId }) => !!playerId) as PlayerTrend[],
-    [trends]
+    [trends],
   );
 
   // Extracting land trends
   const landTrends = useMemo(
     () => trends.filter(({ landId }) => !!landId) as LandTrend[],
-    [trends]
+    [trends],
   );
 
   return { trends, playerTrends, landTrends };

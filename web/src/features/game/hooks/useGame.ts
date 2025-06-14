@@ -9,19 +9,19 @@ const useGame = () => {
   // Determining turn player
   const turnPlayer = useMemo(
     () => (state === 'ACTIVE' ? players.find((p) => !!p.turn) : undefined),
-    [state, players]
+    [state, players],
   );
 
   // Determining active players
   const activePlayers = useMemo(
     () => players.filter((p) => p.state === 'ACTIVE'),
-    [players]
+    [players],
   );
 
   // Determining bankrupt players
   const bankruptPlayers = useMemo(
     () => players.filter((p) => p.state === 'BANKRUPT'),
-    [players]
+    [players],
   );
 
   // Determining winner player
@@ -30,7 +30,7 @@ const useGame = () => {
       state === 'ACTIVE' && activePlayers.length === 1
         ? activePlayers[0]
         : undefined,
-    [state, activePlayers]
+    [state, activePlayers],
   );
 
   /**
@@ -51,10 +51,10 @@ const useGame = () => {
         return p2.netWorth - p1.netWorth;
       }),
       ...bankruptPlayers.sort(
-        (p1, p2) => p2.bankruptcyOrder - p1.bankruptcyOrder
+        (p1, p2) => p2.bankruptcyOrder - p1.bankruptcyOrder,
       ),
     ],
-    [activePlayers, bankruptPlayers]
+    [activePlayers, bankruptPlayers],
   );
 
   return {

@@ -27,7 +27,7 @@ const GoogleLoginWorkflow = () => {
       setGoogleLoginCredential(credential);
       setLoginWorkflow('RESUME');
     },
-    [handleGoogleLoginError, setLoginWorkflow, setGoogleLoginCredential]
+    [handleGoogleLoginError, setLoginWorkflow, setGoogleLoginCredential],
   );
 
   if (loginWorkflow !== 'VERIFIED') return null;

@@ -26,7 +26,7 @@ const ConfettiBackdrop = (props: Partial<ConfettiBackdropProps>) => {
     // rendering confetti
     confetti(
       'confetti-container',
-      getConfiguration(type, count, [accentColor, textColor])
+      getConfiguration(type, count, [accentColor, textColor]),
     );
 
     // use effect will re-trigger when count state changes
@@ -41,7 +41,7 @@ const ConfettiBackdrop = (props: Partial<ConfettiBackdropProps>) => {
 const getConfiguration = (
   type: 'single' | 'multiple' = 'single',
   count: number,
-  colors: string[]
+  colors: string[],
 ): Partial<IConfettiOptions> => {
   const baseConfig: Partial<IConfettiOptions> = {
     shapes: ['star', 'square', 'circle', 'polygon', 'diamonds'],

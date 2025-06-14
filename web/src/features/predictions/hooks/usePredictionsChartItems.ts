@@ -26,14 +26,14 @@ const usePredictionsChartItems = (player: Player) => {
         turnMap.set(element.turn, playerMap);
         return turnMap;
       }, new Map<number, Map<number, T>>()),
-    []
+    [],
   );
 
   // Utility method to add dummy player record if missing
   const addMissingPlayers = useCallback(
     <T extends { playerId: number; turn: number }>(
       map: Map<number, Map<number, T>>,
-      dummy: T
+      dummy: T,
     ): void => {
       map.forEach((playerMap, turn) => {
         players.forEach((p) => {
@@ -46,7 +46,7 @@ const usePredictionsChartItems = (player: Player) => {
         });
       });
     },
-    [players]
+    [players],
   );
 
   // Extracting turn-wise player trends
@@ -79,27 +79,27 @@ const usePredictionsChartItems = (player: Player) => {
     () =>
       Array.from(turnWisePlayerTrends.keys()).reduce(
         (max, turn) => Math.max(turn, max),
-        0
+        0,
       ),
-    [turnWisePlayerTrends]
+    [turnWisePlayerTrends],
   );
 
   // Utility method to find the visualization method
   const getVisualizationMethod = useCallback(
     (
-      playerPredictionMap?: Map<number, Prediction>
+      playerPredictionMap?: Map<number, Prediction>,
     ): 'NETWORTH' | 'PREDICTION' => {
       if (!playerPredictionMap) return 'NETWORTH';
       const playerPredictions = Array.from(playerPredictionMap.values());
       playerPredictions.sort(
-        (p1, p2) => p2.winnerProbability - p1.winnerProbability
+        (p1, p2) => p2.winnerProbability - p1.winnerProbability,
       );
       return playerPredictions.length > 1 &&
         playerPredictions[0].type === 'WINNER'
         ? 'PREDICTION'
         : 'NETWORTH';
     },
-    []
+    [],
   );
 
   // Preparing visual prediction items
@@ -116,11 +116,11 @@ const usePredictionsChartItems = (player: Player) => {
         method === 'PREDICTION'
           ? Array.from(playerPredictionMap?.values() || []).reduce(
               (share, { winnerProbability }) => share + winnerProbability,
-              0
+              0,
             )
           : Array.from(playerTrendMap?.values() || []).reduce(
               (share, { netWorth }) => share + netWorth,
-              0
+              0,
             );
 
       // Figuring visual prediction item

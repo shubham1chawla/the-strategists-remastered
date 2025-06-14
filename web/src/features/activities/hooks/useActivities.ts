@@ -9,7 +9,7 @@ const useActivities = () => {
   // Extracting filtered activities
   const filteredActivites = useMemo(
     () => activities.filter(({ type }) => subscribedTypes.includes(type)),
-    [activities, subscribedTypes]
+    [activities, subscribedTypes],
   );
 
   return {

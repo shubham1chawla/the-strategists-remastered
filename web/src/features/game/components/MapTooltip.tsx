@@ -34,8 +34,8 @@ const MapTooltip = (props: MapTooltipProps) => {
               player
                 ? `Click to check ${player.username}'s portfolio.`
                 : land
-                ? `Click to check ${land.name}'s investments`
-                : null
+                  ? `Click to check ${land.name}'s investments`
+                  : null
             }
             banner
           />
