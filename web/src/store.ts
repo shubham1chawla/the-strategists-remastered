@@ -1,14 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import activitiesReducer, {
-  ActivitiesState,
-} from './features/activities/slice';
-import advicesReducer, { AdvicesState } from './features/advices/slice';
-import gameReducer, { GameState } from './features/game/slice';
-import loginReducer, { LoginState } from './features/login/slice';
-import predictionsReducer, {
-  PredictionsState,
-} from './features/predictions/slice';
-import trendsReducer, { TrendsState } from './features/trends/slice';
+import activitiesReducer, { ActivitiesState } from '@activities/state';
+import advicesReducer, { AdvicesState } from '@advices/state';
+import gameReducer, { GameState } from '@game/state';
+import loginReducer, { LoginState } from '@login/state';
+import predictionsReducer, { PredictionsState } from '@predictions/state';
+import trendsReducer, { TrendsState } from '@trends/state';
 import logger from 'redux-logger';
 
 export interface State {
@@ -20,7 +16,7 @@ export interface State {
   trends: TrendsState;
 }
 
-export const store = configureStore({
+const store = configureStore({
   reducer: {
     activities: activitiesReducer,
     advices: advicesReducer,
@@ -38,3 +34,5 @@ export const store = configureStore({
     return defaultMiddlewares();
   },
 });
+
+export default store;

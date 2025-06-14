@@ -6,6 +6,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.0.1",
     "@antv/g2": "^5.1.8",
+    "@craco/craco": "^7.1.0",
     "@netlify/edge-functions": "^2.3.1",
     "@netlify/functions": "^2.5.1",
     "@react-oauth/google": "^0.12.1",
@@ -23,15 +24,16 @@
     "react-router-dom": "^6.7.0",
     "react-scripts": "5.0.1",
     "redux": "^4.2.0",
+    "tsconfig-paths-webpack-plugin": "^4.2.0",
     "tsparticles-confetti": "^2.12.0"
   },
   "scripts": {
     "prepare": "cd .. && husky install",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
