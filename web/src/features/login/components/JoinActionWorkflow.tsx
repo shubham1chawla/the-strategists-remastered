@@ -5,15 +5,13 @@ import { Button, Card, Form, Input, Space } from 'antd';
 import { AppstoreOutlined, ArrowLeftOutlined } from '@ant-design/icons';
 import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
 import { loggedIn, LoginState } from '@login/state';
+import useNotifications from '@shared/hooks/useNotifications';
 import axios from 'axios';
 
 const JoinActionWorkflow = () => {
-  const {
-    loginWorkflow,
-    googleLoginCredential,
-    setLoginWorkflow,
-    errorNotifcation,
-  } = useLoginWorkflow();
+  const { loginWorkflow, googleLoginCredential, setLoginWorkflow } =
+    useLoginWorkflow();
+  const { errorNotification } = useNotifications();
   const [form] = Form.useForm<{ code: string }>();
   const [joinButtonDisabled, setJoinButtonDisabled] = useState(true);
   const dispatch = useDispatch();
@@ -48,12 +46,12 @@ const JoinActionWorkflow = () => {
         .catch(({ response }) => {
           switch (response.status) {
             case 404:
-              errorNotifcation({
+              errorNotification({
                 message: 'No game found for the entered code!',
               });
               break;
             default:
-              errorNotifcation({
+              errorNotification({
                 message: 'Unable to join the game!',
                 description:
                   'Please contact the developers if this problem persists.',
@@ -65,7 +63,7 @@ const JoinActionWorkflow = () => {
     [
       googleLoginCredential,
       setLoginWorkflow,
-      errorNotifcation,
+      errorNotification,
       dispatch,
       navigate,
     ],

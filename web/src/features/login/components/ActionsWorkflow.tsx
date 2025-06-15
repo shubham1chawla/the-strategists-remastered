@@ -5,15 +5,13 @@ import { Card, Space } from 'antd';
 import { AppstoreAddOutlined, AppstoreOutlined } from '@ant-design/icons';
 import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
 import { loggedIn, LoginState } from '@login/state';
+import useNotifications from '@shared/hooks/useNotifications';
 import axios from 'axios';
 
 const ActionsWorklfow = () => {
-  const {
-    loginWorkflow,
-    googleLoginCredential,
-    setLoginWorkflow,
-    errorNotifcation,
-  } = useLoginWorkflow();
+  const { loginWorkflow, googleLoginCredential, setLoginWorkflow } =
+    useLoginWorkflow();
+  const { errorNotification } = useNotifications();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -28,13 +26,13 @@ const ActionsWorklfow = () => {
       .catch(({ response }) => {
         switch (response.status) {
           case 403:
-            errorNotifcation({
+            errorNotification({
               message: 'You are not authorized to create a game!',
               description: 'Please contact the developers to grant access.',
             });
             break;
           default:
-            errorNotifcation({
+            errorNotification({
               message: 'Unable to create the game!',
               description:
                 'Please contact the developers if this problem persists.',
@@ -45,7 +43,7 @@ const ActionsWorklfow = () => {
   }, [
     googleLoginCredential,
     setLoginWorkflow,
-    errorNotifcation,
+    errorNotification,
     dispatch,
     navigate,
   ]);
