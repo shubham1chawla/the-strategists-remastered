@@ -25,7 +25,7 @@ const LandStats = (props: LandStatsProps) => {
       </Row>
       <Row>
         <Col span={12}>
-          <Card bordered={false}>
+          <Card variant="borderless">
             <Statistic
               title={
                 <Space>
@@ -40,7 +40,7 @@ const LandStats = (props: LandStatsProps) => {
           </Card>
         </Col>
         <Col span={12}>
-          <Card bordered={false}>
+          <Card variant="borderless">
             <Statistic
               title={
                 <Space>
