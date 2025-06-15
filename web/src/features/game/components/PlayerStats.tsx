@@ -64,7 +64,7 @@ const PlayerStats = (props: PlayerStatsProps) => {
       </Row>
       <Row>
         <Col span={12}>
-          <Card bordered={false}>
+          <Card variant="borderless">
             <Statistic
               title={
                 <Space>
@@ -79,7 +79,7 @@ const PlayerStats = (props: PlayerStatsProps) => {
           </Card>
         </Col>
         <Col span={12}>
-          <Card bordered={false}>
+          <Card variant="borderless">
             <Statistic
               title={
                 <Space>

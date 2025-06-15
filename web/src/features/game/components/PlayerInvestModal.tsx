@@ -133,7 +133,7 @@ const PlayerInvestModal = ({
       <LandStats land={land} />
       <Row>
         <Col span={12}>
-          <Card bordered={false}>
+          <Card variant="borderless">
             <Statistic
               title={
                 <Space>
@@ -148,7 +148,7 @@ const PlayerInvestModal = ({
           </Card>
         </Col>
         <Col span={12}>
-          <Card bordered={false}>
+          <Card variant="borderless">
             <Statistic
               title={
                 <Space>

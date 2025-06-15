@@ -72,7 +72,7 @@ const JoinActionWorkflow = () => {
   if (loginWorkflow !== 'JOIN_ACTION') return null;
   return (
     <div className="strategists-login__workflows__join">
-      <Card bordered={false} size="small">
+      <Card variant="borderless" size="small">
         <Card.Meta
           title={
             <Space>
