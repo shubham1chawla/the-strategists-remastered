@@ -1,23 +1,39 @@
-import { useEffect, useMemo } from 'react';
+import { PropsWithChildren, useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { Dispatch, UnknownAction } from 'redux';
 import { DisconnectOutlined } from '@ant-design/icons';
 import useActivities from '@activities/hooks/useActivities';
-import { activityAdded, Activity, UpdateType } from '@activities/state';
+import {
+  activityAdded,
+  Activity,
+  UpdateType,
+  activitiesSetted,
+} from '@activities/state';
 import parseActivity from '@activities/utils/parseActivity';
-import { advicesAddedOrPatched } from '@advices/state';
+import { Advice, advicesAddedOrPatched, advicesSetted } from '@advices/state';
 import {
   gameStateSetted,
+  Land,
   landsPatched,
+  landsSetted,
+  Player,
   playerAdded,
   playerKicked,
+  playersCountConstraintsSetted,
   playersPatched,
+  playersSetted,
 } from '@game/state';
-import syncGameStates from '@game/utils/syncGameStates';
 import useLogin from '@login/hooks/useLogin';
 import { loggedOut } from '@login/state';
-import { predictionsAdded } from '@predictions/state';
+import {
+  Prediction,
+  predictionsAdded,
+  predictionsSetted,
+} from '@predictions/state';
 import useNotifications from '@shared/hooks/useNotifications';
-import { trendsAdded } from '@trends/state';
+import { Trend, trendsAdded, trendsSetted } from '@trends/state';
+import axios from 'axios';
 
 interface UpdatePayload {
   type: UpdateType;
@@ -25,11 +41,83 @@ interface UpdatePayload {
   payload: any;
 }
 
-const UpdateInterceptor = () => {
+interface GameResponse {
+  state: 'LOBBY' | 'ACTIVE';
+  minPlayersCount: number;
+  maxPlayersCount: number;
+  players: Player[];
+  lands: Land[];
+  activities: Activity[];
+  trends: Trend[];
+  predictions: Prediction[] | null;
+  advices: Advice[] | null;
+}
+
+const syncGameStates = async (
+  gameCode: string,
+  dispatch: Dispatch<UnknownAction>,
+): Promise<void> => {
+  const { data } = await axios.get<GameResponse>(`/api/games/${gameCode}`);
+  const {
+    state,
+    minPlayersCount,
+    maxPlayersCount,
+    players,
+    lands,
+    activities,
+    trends,
+    predictions,
+    advices,
+  } = data;
+  [
+    gameStateSetted(state),
+    playersCountConstraintsSetted([minPlayersCount, maxPlayersCount]),
+    playersSetted(players),
+    landsSetted(lands),
+    activitiesSetted(activities),
+    trendsSetted(trends),
+    predictionsSetted(predictions || []),
+    advicesSetted(advices || []),
+  ].forEach(dispatch);
+};
+
+const alertUser = (event: BeforeUnloadEvent) => {
+  event.preventDefault();
+  return 'You are about to exit The Strategists! Do you want to continue?';
+};
+
+const GameWrapper = ({ children }: PropsWithChildren) => {
   const { gameCode, playerId } = useLogin();
   const { subscribedTypes } = useActivities();
   const { openNotification, errorNotification } = useNotifications();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // Checking if player is logged-in
+  useEffect(() => {
+    if (!gameCode) {
+      navigate('/login');
+      return;
+    }
+
+    // Syncing game's state
+    syncGameStates(gameCode, dispatch).catch((error) => {
+      console.error(error);
+      errorNotification({
+        message: 'Something went wrong!',
+        description:
+          'Please try logging in again. If the problem persists, please contact the developers.',
+      });
+      dispatch(loggedOut());
+    });
+
+    // Dashboard component's unmount event
+    window.addEventListener('beforeunload', alertUser);
+    return () => {
+      // Removing listener if user logouts
+      window.removeEventListener('beforeunload', alertUser);
+    };
+  }, [dispatch, navigate, gameCode, errorNotification]);
 
   /**
    * This useMemo ensures that we'll change the event source's instance
@@ -167,7 +255,7 @@ const UpdateInterceptor = () => {
     };
   }, [updates]);
 
-  return <></>;
+  return <>{children}</>;
 };
 
-export default UpdateInterceptor;
+export default GameWrapper;
