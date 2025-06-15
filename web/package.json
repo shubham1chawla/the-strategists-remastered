@@ -29,7 +29,7 @@
     "tsparticles-confetti": "^2.12.0"
   },
   "scripts": {
-    "prepare": "cd .. && husky install",
+    "prepare": "cd .. && husky || true",
     "format:check": "prettier --check .",
     "format:fix": "prettier --write .",
     "start": "craco start",
@@ -71,7 +71,7 @@
     "@types/react-dom": "^18.0.10",
     "@types/react-google-recaptcha": "^2.1.9",
     "@types/redux-logger": "^3.0.13",
-    "husky": "^8.0.3",
+    "husky": "^9.1.7",
     "prettier": "^3.5.3",
     "redux-logger": "^3.0.6",
     "sass": "^1.62.0",
