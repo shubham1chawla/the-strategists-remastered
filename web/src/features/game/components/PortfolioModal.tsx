@@ -7,27 +7,30 @@ import PlayerStats from './PlayerStats';
 import PortfolioChart from './PortfolioChart';
 
 export interface PortfolioModalProps {
-  player: Player;
-  land: Land;
   open: boolean;
   onCancel: () => void;
+  perspective: 'land' | 'player';
+  node: Land | Player;
 }
 
-const PortfolioModal = (props: Partial<PortfolioModalProps>) => {
-  const { open, onCancel, player, land } = props;
-  if (!open || !onCancel || (!!land && !!player) || (!land && !player)) {
+const PortfolioModal = ({
+  open,
+  onCancel,
+  perspective,
+  node,
+}: Partial<PortfolioModalProps>) => {
+  if (!open || !perspective || !node) {
     return null;
   }
-  const perspective = land ? 'land' : 'player';
-  const playerLands = land ? land.players : player ? player.lands : [];
-  const id = land ? land.id : player ? player.id : -1;
 
+  const playerLands =
+    perspective === 'land' ? (node as Land).players : (node as Player).lands;
   const tabItems = [
     {
       key: '1',
       label: 'Trends',
       children: (
-        <TrendsChart perspective={perspective} id={id} showHelp={true} />
+        <TrendsChart perspective={perspective} id={node.id} showHelp={true} />
       ),
     },
     {
@@ -44,26 +47,28 @@ const PortfolioModal = (props: Partial<PortfolioModalProps>) => {
   ];
 
   // Adding predictions tab
-  if (perspective === 'player' && !!player) {
+  if (perspective === 'player') {
     tabItems.push({
       key: '3',
       label: 'Predictions',
-      children: <PredictionsChart player={player} showHelp={true} />,
+      children: <PredictionsChart player={node as Player} showHelp={true} />,
     });
   }
 
   return (
     <Modal
-      title={land ? `Investments' Analysis` : 'Portfolio Analysis'}
+      title={
+        perspective === 'land' ? `Investments' Analysis` : 'Portfolio Analysis'
+      }
       open={open}
       onCancel={onCancel}
       footer={null}
     >
-      {land ? (
-        <LandStats land={land} />
-      ) : player ? (
-        <PlayerStats player={player} />
-      ) : null}
+      {perspective === 'land' ? (
+        <LandStats land={node as Land} />
+      ) : (
+        <PlayerStats player={node as Player} />
+      )}
       <Tabs centered defaultActiveKey="1" size="large" items={tabItems} />
     </Modal>
   );

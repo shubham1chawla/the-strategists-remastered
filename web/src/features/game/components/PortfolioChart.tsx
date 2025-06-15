@@ -10,12 +10,17 @@ interface PortfolioChartProps extends PortfolioTableProps {
   showHelp?: boolean;
 }
 
-const PortfolioChart = (props: PortfolioChartProps) => {
-  const { playerLands, perspective, showHelp } = props;
+const PortfolioChart = ({
+  playerLands,
+  perspective,
+  showHelp,
+}: PortfolioChartProps) => {
   const chartTheme = useChartTheme();
   const portfolioItems = usePortfolioItems(perspective, playerLands);
 
   useEffect(() => {
+    if (!portfolioItems.length) return;
+
     // Creating chart's instance
     const chart = new Chart({
       container: 'portfolio-container',
@@ -83,9 +88,9 @@ const PortfolioChart = (props: PortfolioChartProps) => {
 
     // Rendering the chart
     chart.render();
-  }, [portfolioItems, perspective, playerLands, chartTheme]);
+  }, [portfolioItems, perspective, chartTheme]);
 
-  if (!playerLands.length) {
+  if (!portfolioItems.length) {
     return <EmptyContainer message="No investments available!" />;
   }
   return (

@@ -3,7 +3,6 @@ import { Chart } from '@antv/g2';
 import ChartInterpretationHelp from '@shared/components/ChartInterpretationHelp';
 import EmptyContainer from '@shared/components/EmptyContainer';
 import { Player } from '@game/state';
-import usePredictions from '@predictions/hooks/usePredictions';
 import usePredictionsChartItems from '@predictions/hooks/usePredictionsChartItems';
 import useChartTheme from '@shared/hooks/useChartTheme';
 import useTheme from '@shared/hooks/useTheme';
@@ -14,13 +13,12 @@ interface PredictionsChartProps {
 }
 
 const PredictionsChart = ({ player, showHelp }: PredictionsChartProps) => {
-  const predictions = usePredictions();
   const theme = useTheme();
   const chartTheme = useChartTheme();
   const predictionsChartItems = usePredictionsChartItems(player);
 
   useEffect(() => {
-    if (!predictions.length) return;
+    if (!predictionsChartItems.length) return;
 
     // Creating chart's instance
     const chart = new Chart({
@@ -114,9 +112,9 @@ const PredictionsChart = ({ player, showHelp }: PredictionsChartProps) => {
 
     // Rendering chart
     chart.render();
-  }, [player, predictions, theme, chartTheme, predictionsChartItems]);
+  }, [player, theme, chartTheme, predictionsChartItems]);
 
-  if (!predictions.length) {
+  if (!predictionsChartItems.length) {
     return <EmptyContainer message="No predictions available!" />;
   }
   return (

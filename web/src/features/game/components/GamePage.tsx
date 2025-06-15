@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Col, Row } from 'antd';
 import useGame from '@game/hooks/useGame';
+import CytoscapeProvider from '@game/providers/cytoscapeProvider';
 import syncGameStates from '@game/utils/syncGameStates';
 import useLogin from '@login/hooks/useLogin';
 import { loggedOut } from '@login/state';
@@ -67,7 +68,9 @@ const GamePage = () => {
           />
         </Col>
         <Col flex="70%">
-          <MapPanel />
+          <CytoscapeProvider>
+            <MapPanel />
+          </CytoscapeProvider>
         </Col>
       </Row>
       <WinModal />

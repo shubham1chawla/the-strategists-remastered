@@ -20,7 +20,7 @@ const usePredictionsChartItems = (player: Player) => {
   // Utility method to collect by turn and player ID
   const collectByTurnAndPlayerId = useCallback(
     <T extends { playerId: number; turn: number }>(list: T[]) =>
-      (list || []).reduce((turnMap, element) => {
+      list.reduce((turnMap, element) => {
         const playerMap = turnMap.get(element.turn) || new Map<number, T>();
         playerMap.set(element.playerId, element);
         turnMap.set(element.turn, playerMap);
