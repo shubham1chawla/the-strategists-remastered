@@ -3,32 +3,30 @@ import { Badge, Space, Tabs, TabsProps } from 'antd';
 import Activities from '@activities/components/Activities';
 import Advices from '@advices/components/Advices';
 import useAdvices from '@advices/hooks/useAdvices';
-import { Player } from '@game/state';
 import PlayerActionsPanel from './PlayerActionsPanel';
 import Lobby from './Lobby';
 import NavigationBar from './NavigationBar';
 import PlayerStats from './PlayerStats';
-
-export interface PlayerPanelProps {
-  gameCode: string;
-  player: Player;
-  state: 'LOBBY' | 'ACTIVE';
-  players: Player[];
-  minPlayersCount: number;
-  maxPlayersCount: number;
-}
+import useGame from '@game/hooks/useGame';
+import useLogin from '@login/hooks/useLogin';
 
 type PlayerPanelTabKey = 'LOBBY' | 'ACTIVITIES' | 'ADVICE';
 
-const PlayerPanel = (props: PlayerPanelProps) => {
-  const { player, state } = props;
-  const [activeKey, setActiveKey] = useState<PlayerPanelTabKey>('LOBBY');
+const PlayerPanel = () => {
+  const { player } = useLogin();
+  const { state } = useGame();
   const { playerAdvices, unreadCount, markAdvicesRead } = useAdvices();
+  const [activeKey, setActiveKey] = useState<PlayerPanelTabKey>('LOBBY');
 
   // Switching tabs when game's state changes
   useEffect(() => {
     setActiveKey(state === 'ACTIVE' ? 'ACTIVITIES' : 'LOBBY');
   }, [state]);
+
+  // Validation
+  if (!player) {
+    return null;
+  }
 
   // Creating tabs
   const items: TabsProps['items'] = [
@@ -69,7 +67,7 @@ const PlayerPanel = (props: PlayerPanelProps) => {
 
   return (
     <>
-      <NavigationBar {...props} />
+      <NavigationBar />
       <PlayerStats player={player} showRemainingSkipsCount />
       <Tabs
         centered

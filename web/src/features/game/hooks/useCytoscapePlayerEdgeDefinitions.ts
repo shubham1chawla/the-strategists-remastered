@@ -1,26 +1,28 @@
 import { useMemo } from 'react';
-import useGame from './useGame';
 import { EdgeDefinition } from 'cytoscape';
+import useGame from './useGame';
 
 const useCytoscapePlayerEdgeDefinitions = () => {
   const { players, lands } = useGame();
 
   // Creating player to land edges
-  const playerEdges = useMemo(
-    () =>
-      players.map(
-        (player): EdgeDefinition => ({
-          data: {
-            id: `${player.username}->${lands[player.index].id}`,
-            source: player.username,
-            target: `${lands[player.index].id}`,
-          },
-          selectable: false,
-          classes: 'player-edge',
-        }),
-      ),
-    [lands, players],
-  );
+  const playerEdges = useMemo(() => {
+    const edges: EdgeDefinition[] = [];
+    for (const player of players) {
+      // Not rendering bankrupted player's edge
+      if (player.state === 'BANKRUPT') continue;
+      edges.push({
+        data: {
+          id: `${player.username}->${lands[player.index].id}`,
+          source: player.username,
+          target: `${lands[player.index].id}`,
+        },
+        selectable: false,
+        classes: 'player-edge',
+      });
+    }
+    return edges;
+  }, [lands, players]);
 
   return playerEdges;
 };

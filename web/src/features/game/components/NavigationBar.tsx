@@ -7,21 +7,23 @@ import {
   PlayCircleFilled,
   StopFilled,
 } from '@ant-design/icons';
+import useGame from '@game/hooks/useGame';
+import useLogin from '@login/hooks/useLogin';
 import { loggedOut } from '@login/state';
 import StrategistsLogo from '@shared/components/StrategistsLogo';
-import { PlayerPanelProps } from './PlayerPanel';
 import ResetModal from './ResetModal';
 import axios from 'axios';
 
-interface NavigationBarProps extends PlayerPanelProps {
-  // No additional fields needed
-}
-
-const NavigationBar = (props: NavigationBarProps) => {
-  const { gameCode, player, state, players, minPlayersCount, maxPlayersCount } =
-    props;
+const NavigationBar = () => {
+  const { gameCode, player } = useLogin();
+  const { state, players, minPlayersCount, maxPlayersCount } = useGame();
   const [showResetModal, setShowResetModal] = useState(false);
   const dispatch = useDispatch();
+
+  // Validations
+  if (!gameCode) {
+    return null;
+  }
 
   const start = () => {
     if (state === 'ACTIVE') return;
