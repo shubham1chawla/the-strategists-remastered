@@ -1,4 +1,4 @@
 echo "🕒 Running prettier..."
 cd web
-npx prettier --check .
+npm run format:check
 echo "✔️ Completed!"
