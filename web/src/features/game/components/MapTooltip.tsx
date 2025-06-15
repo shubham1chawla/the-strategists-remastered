@@ -1,46 +1,37 @@
-import { MutableRefObject } from 'react';
 import { Alert, Divider } from 'antd';
+import useCytoscape from '@game/hooks/useCytoscape';
 import { Land, Player } from '@game/state';
 import PlayerStats from './PlayerStats';
 import LandStats from './LandStats';
 
-interface MapTooltipProps {
-  player: Player | null;
-  land: Land | null;
-  tooltipRef: MutableRefObject<HTMLDivElement | null>;
-  hidden: boolean;
-}
-
-const MapTooltip = (props: MapTooltipProps) => {
-  const { player, land, tooltipRef, hidden } = props;
+const MapTooltip = () => {
+  const { tooltipRef, hoveredNode, isTooltipHidden } = useCytoscape();
   return (
     <div
       ref={tooltipRef}
       role="tooltip"
       className={`strategists-map__tooltip ${
-        hidden ? 'strategists-map__tooltip-hidden' : ''
+        isTooltipHidden ? 'strategists-map__tooltip-hidden' : ''
       }`}
     >
-      <>
-        {player ? (
-          <PlayerStats player={player} />
-        ) : land ? (
-          <LandStats land={land} />
-        ) : null}
-        <Divider>
-          <Alert
-            type="info"
-            message={
-              player
-                ? `Click to check ${player.username}'s portfolio.`
-                : land
-                  ? `Click to check ${land.name}'s investments`
-                  : null
-            }
-            banner
-          />
-        </Divider>
-      </>
+      {hoveredNode?.type === 'player' ? (
+        <PlayerStats player={hoveredNode.value as Player} />
+      ) : hoveredNode?.type === 'land' ? (
+        <LandStats land={hoveredNode.value as Land} />
+      ) : null}
+      <Divider>
+        <Alert
+          type="info"
+          message={
+            hoveredNode?.type === 'player'
+              ? `Click to check ${(hoveredNode.value as Player).username}'s portfolio.`
+              : hoveredNode?.type === 'land'
+                ? `Click to check ${(hoveredNode.value as Land).name}'s investments`
+                : null
+          }
+          banner
+        />
+      </Divider>
     </div>
   );
 };

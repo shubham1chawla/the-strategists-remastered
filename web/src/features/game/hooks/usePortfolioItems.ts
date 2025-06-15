@@ -36,7 +36,7 @@ const usePortfolioItems = (
   // Creating portfolio items
   const portfolioItems = useMemo(
     () =>
-      (playerLands || [])
+      playerLands
         .filter((pl) => {
           if (perspective === 'player') return true;
           return (

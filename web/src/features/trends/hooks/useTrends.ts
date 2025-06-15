@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { State } from '@/store';
-import { LandTrend, PlayerTrend, Trend } from '@trends/state';
+import { LandTrend, PlayerTrend } from '@trends/state';
 
 const useTrends = () => {
-  const trends: Trend[] = useSelector((state: State) => state.trends);
+  const trends = useSelector((state: State) => state.trends);
 
   // Extracting player trends
   const playerTrends = useMemo(
