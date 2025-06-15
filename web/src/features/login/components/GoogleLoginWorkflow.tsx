@@ -1,22 +1,20 @@
 import { useCallback } from 'react';
 import { GoogleCredentialResponse, GoogleLogin } from '@react-oauth/google';
 import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
+import useNotifications from '@shared/hooks/useNotifications';
 
 const GoogleLoginWorkflow = () => {
-  const {
-    loginWorkflow,
-    setLoginWorkflow,
-    setGoogleLoginCredential,
-    errorNotifcation,
-  } = useLoginWorkflow();
+  const { loginWorkflow, setLoginWorkflow, setGoogleLoginCredential } =
+    useLoginWorkflow();
+  const { errorNotification } = useNotifications();
 
   const handleGoogleLoginError = useCallback(() => {
-    errorNotifcation({
+    errorNotification({
       message:
         'Google authentication failed. Please contact the developers to address your issue!',
     });
     setLoginWorkflow('VERIFIED');
-  }, [setLoginWorkflow, errorNotifcation]);
+  }, [setLoginWorkflow, errorNotification]);
 
   const handleGoogleLoginSuccess = useCallback(
     ({ credential }: GoogleCredentialResponse) => {

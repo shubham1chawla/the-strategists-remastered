@@ -28,7 +28,7 @@ interface UpdatePayload {
 const UpdateInterceptor = () => {
   const { gameCode, playerId } = useLogin();
   const { subscribedTypes } = useActivities();
-  const { contextHolder, ...api } = useNotifications();
+  const { openNotification, errorNotification } = useNotifications();
   const dispatch = useDispatch();
 
   /**
@@ -55,7 +55,7 @@ const UpdateInterceptor = () => {
       updates.close();
 
       // Showing notification to the user, urging them to refresh the page.
-      api.error({
+      errorNotification({
         icon: <DisconnectOutlined />,
         message: 'Disconnected!',
         description:
@@ -139,10 +139,18 @@ const UpdateInterceptor = () => {
       if (!activity) return;
       dispatch(activityAdded(activity));
       if (subscribedTypes.includes(type)) {
-        api.open({ message: parseActivity(activity) });
+        openNotification({ message: parseActivity(activity) });
       }
     };
-  }, [api, dispatch, subscribedTypes, updates, gameCode, playerId]);
+  }, [
+    openNotification,
+    errorNotification,
+    dispatch,
+    subscribedTypes,
+    updates,
+    gameCode,
+    playerId,
+  ]);
 
   /**
    * This useEffect will close the event source for the
@@ -159,7 +167,7 @@ const UpdateInterceptor = () => {
     };
   }, [updates]);
 
-  return <>{contextHolder}</>;
+  return <></>;
 };
 
 export default UpdateInterceptor;

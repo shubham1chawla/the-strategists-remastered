@@ -18,7 +18,7 @@ import axios from 'axios';
 const PlayerActionsPanel = () => {
   const { gameCode, player } = useLogin();
   const { turnPlayer, lands } = useGame();
-  const { contextHolder, ...api } = useNotifications();
+  const { errorNotification } = useNotifications();
   const [showModal, setShowModal] = useState(false);
   const [skipping, setSkipping] = useState(false);
 
@@ -50,7 +50,7 @@ const PlayerActionsPanel = () => {
       await axios.put(`/api/games/${gameCode}/turn`);
     } catch (error) {
       console.error(error);
-      api.error({
+      errorNotification({
         message: 'Something went wrong!',
         description: 'Please refresh the page and try again.',
       });
@@ -61,13 +61,8 @@ const PlayerActionsPanel = () => {
 
   return (
     <>
-      {contextHolder}
       <PlayerInvestModal
         open={showModal}
-        gameCode={gameCode}
-        player={player}
-        land={land}
-        title={title}
         onCancel={() => setShowModal(false)}
       />
       <div className="strategists-actions">

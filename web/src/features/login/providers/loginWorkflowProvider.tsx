@@ -1,10 +1,8 @@
 import { createContext, PropsWithChildren, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { ArgsProps } from 'antd/es/notification';
 import useLogin from '@login/hooks/useLogin';
 import { loggedIn, LoginState } from '@login/state';
-import useNotifications from '@shared/hooks/useNotifications';
 import axios from 'axios';
 
 type LoginWorkflow =
@@ -22,14 +20,12 @@ interface LoginWorkflowProviderValue {
   setLoginWorkflow: (loginWorkflow: LoginWorkflow) => void;
   googleLoginCredential: string | null;
   setGoogleLoginCredential: (googleLoginCredential: string | null) => void;
-  errorNotifcation: (args: ArgsProps) => void;
 }
 
 export const LoginWorkflowContext =
   createContext<LoginWorkflowProviderValue | null>(null);
 
 const LoginWorkflowProvider = ({ children }: PropsWithChildren) => {
-  const { contextHolder, ...api } = useNotifications();
   const [loginWorkflow, setLoginWorkflow] =
     useState<LoginWorkflow>('NOT_VERIFIED');
   const [googleLoginCredential, setGoogleLoginCredential] = useState<
@@ -44,7 +40,6 @@ const LoginWorkflowProvider = ({ children }: PropsWithChildren) => {
     setLoginWorkflow,
     googleLoginCredential,
     setGoogleLoginCredential,
-    errorNotifcation: api.error,
   };
 
   // Redirecting to dashboard if user logged-in
@@ -74,12 +69,9 @@ const LoginWorkflowProvider = ({ children }: PropsWithChildren) => {
   ]);
 
   return (
-    <>
-      {contextHolder}
-      <LoginWorkflowContext.Provider value={value}>
-        {children}
-      </LoginWorkflowContext.Provider>
-    </>
+    <LoginWorkflowContext.Provider value={value}>
+      {children}
+    </LoginWorkflowContext.Provider>
   );
 };
 
