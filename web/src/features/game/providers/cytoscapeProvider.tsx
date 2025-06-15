@@ -8,7 +8,7 @@ import {
   useState,
 } from 'react';
 import cytoscape, { Core, EventObjectNode } from 'cytoscape';
-import cytoscapePopper from 'cytoscape-popper';
+import cytoscapePopper, { PopperFactory } from 'cytoscape-popper';
 import {
   autoPlacement,
   computePosition,
@@ -32,7 +32,6 @@ interface ActionableNode {
 }
 
 interface CytoscapeProviderValue {
-  cy: Core | null;
   cytoscapeContainerRef: (current: HTMLDivElement | null) => void;
   tooltipRef: MutableRefObject<HTMLDivElement | null>;
   clickedNode: ActionableNode | null;
@@ -120,38 +119,43 @@ const CytoscapeProvider = ({ children }: PropsWithChildren) => {
   );
 
   // Setting up popper js support for tooltips
-  useEffect(
-    () =>
-      cytoscape.use(
-        cytoscapePopper((ref, content, opts) => {
-          const popperOptions = {
-            // This allows the tooltip to show inside of the screen is going out of it!
-            // Ref - https://floating-ui.com/docs/migration#configure-middleware
-            middleware: [
-              flip(),
-              shift({ limiter: limitShift() }),
-              offset(12),
-              autoPlacement(),
-            ],
-            strategy: 'absolute' as Strategy,
-            ...opts,
-          };
+  useEffect(() => {
+    // Checking if popper factory is already registered
+    if (!cy || !!cy.popperFactory) {
+      return;
+    }
 
-          function update() {
-            computePosition(ref, content, popperOptions).then(({ x, y }) => {
-              // Adding positions to the tooltip element
-              Object.assign(content.style, {
-                left: `${x}px`,
-                top: `${y}px`,
-              });
-            });
-          }
-          update();
-          return { update };
-        }),
-      ),
-    [],
-  );
+    // Creating popper factory to move tooltip
+    const popperFactory: PopperFactory = (ref, content, opts) => {
+      const popperOptions = {
+        // This allows the tooltip to show inside of the screen is going out of it!
+        // Ref - https://floating-ui.com/docs/migration#configure-middleware
+        middleware: [
+          flip(),
+          shift({ limiter: limitShift() }),
+          offset(12),
+          autoPlacement(),
+        ],
+        strategy: 'absolute' as Strategy,
+        ...opts,
+      };
+
+      function update() {
+        computePosition(ref, content, popperOptions).then(({ x, y }) => {
+          // Adding positions to the tooltip element
+          Object.assign(content.style, {
+            left: `${x}px`,
+            top: `${y}px`,
+          });
+        });
+      }
+      update();
+      return { update };
+    };
+
+    // Registering popper factory
+    cytoscape.use(cytoscapePopper(popperFactory));
+  }, [cy]);
 
   // Updating nodes & edges
   useEffect(() => {
@@ -213,7 +217,6 @@ const CytoscapeProvider = ({ children }: PropsWithChildren) => {
 
   // Creating provider's value
   const value: CytoscapeProviderValue = {
-    cy,
     cytoscapeContainerRef,
     tooltipRef,
     clickedNode,
