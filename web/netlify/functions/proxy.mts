@@ -1,7 +1,7 @@
 import type { Context } from '@netlify/functions';
 
 export default async (request: Request, _: Context) => {
-  const base = process.env.REACT_APP_API_BASE_URL || '';
+  const base = process.env.VITE_API_BASE_URL || '';
   if (!base) {
     return new Response('Base API URL is not configured!', {
       status: 500,

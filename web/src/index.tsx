@@ -9,8 +9,8 @@ createRoot(document.getElementById('root') as HTMLElement).render(
    *
    * https://stackoverflow.com/questions/60618844/react-hooks-useeffect-is-called-twice-even-if-an-empty-array-is-used-as-an-ar
    */
-  <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID || ''}>
-    {!process.env.REACT_APP_GOOGLE_CLIENT_ID && (
+  <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}>
+    {!import.meta.env.VITE_GOOGLE_CLIENT_ID && (
       <h1 style={{ color: 'red', position: 'absolute' }}>
         <b>
           DEV NOTE: You have not configured Google's Client ID in the
