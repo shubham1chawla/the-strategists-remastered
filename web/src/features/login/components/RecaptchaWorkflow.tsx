@@ -29,7 +29,7 @@ const RecaptchaWorkflow = () => {
       style={{
         display: loginWorkflow === 'NOT_VERIFIED' ? 'block' : 'none',
       }}
-      sitekey={process.env.REACT_APP_GOOGLE_RECAPTCHA_SITE_KEY || ''}
+      sitekey={import.meta.env.VITE_GOOGLE_RECAPTCHA_SITE_KEY || ''}
       theme="dark"
       onChange={onRecaptchaChange}
       onExpired={() => setLoginWorkflow('NOT_VERIFIED')}
