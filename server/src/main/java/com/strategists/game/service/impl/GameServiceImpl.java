@@ -226,10 +226,6 @@ public class GameServiceImpl implements GameService {
     public void deleteGame(Game game) {
         log.info("Cleaning up data for game: {}", game.getCode());
 
-        // Removing player/land children to avoid foreign key constraint violations
-        playerService.resetPlayers(game);
-        landService.resetLands(game);
-
         // Deleting game record to cascade it to players and lands
         try {
             gameRepository.delete(game);

@@ -44,6 +44,7 @@ public class Rent implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "land_id", referencedColumnName = "id", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Land land;
 
     @Column(nullable = false, precision = MathUtil.PRECISION)

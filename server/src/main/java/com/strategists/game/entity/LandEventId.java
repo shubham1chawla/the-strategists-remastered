@@ -4,6 +4,8 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.util.Assert;
 
 import java.io.Serial;
@@ -18,9 +20,11 @@ public class LandEventId implements Serializable {
     private static final long serialVersionUID = 271923618412311775L;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Land land;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Event event;
 
     public LandEventId(Land land, Event event) {
