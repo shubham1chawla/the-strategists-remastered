@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
+import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
 import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
-import axios from 'axios';
 
-const RecaptchaWorkflow = () => {
+function RecaptchaWorkflow() {
   const { loginWorkflow, setLoginWorkflow } = useLoginWorkflow();
 
   const onRecaptchaChange = useCallback(
@@ -35,6 +35,6 @@ const RecaptchaWorkflow = () => {
       onExpired={() => setLoginWorkflow('NOT_VERIFIED')}
     />
   );
-};
+}
 
 export default RecaptchaWorkflow;

@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { googleLogout } from '@react-oauth/google';
 import { Button, Tooltip } from 'antd';
 import {
   LogoutOutlined,
   PlayCircleFilled,
   StopFilled,
 } from '@ant-design/icons';
+import axios from 'axios';
+import { googleLogout } from '@react-oauth/google';
+import StrategistsLogo from '@shared/components/StrategistsLogo';
 import useGame from '@game/hooks/useGame';
 import useLogin from '@login/hooks/useLogin';
 import { loggedOut } from '@login/state';
-import StrategistsLogo from '@shared/components/StrategistsLogo';
 import ResetModal from './ResetModal';
-import axios from 'axios';
 
-const NavigationBar = () => {
+function NavigationBar() {
   const { gameCode, player } = useLogin();
   const { state, players, minPlayersCount, maxPlayersCount } = useGame();
   const [showResetModal, setShowResetModal] = useState(false);
@@ -87,6 +87,6 @@ const NavigationBar = () => {
       />
     </nav>
   );
-};
+}
 
 export default NavigationBar;

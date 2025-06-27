@@ -1,20 +1,20 @@
 import { useEffect } from 'react';
 import { Chart } from '@antv/g2';
-import usePortfolioItems from '@game/hooks/usePortfolioItems';
 import ChartInterpretationHelp from '@shared/components/ChartInterpretationHelp';
 import EmptyContainer from '@shared/components/EmptyContainer';
 import useChartTheme from '@shared/hooks/useChartTheme';
+import usePortfolioItems from '@game/hooks/usePortfolioItems';
 import { PortfolioTableProps } from './PortfolioTable';
 
 interface PortfolioChartProps extends PortfolioTableProps {
   showHelp?: boolean;
 }
 
-const PortfolioChart = ({
+function PortfolioChart({
   playerLands,
   perspective,
   showHelp,
-}: PortfolioChartProps) => {
+}: PortfolioChartProps) {
   const chartTheme = useChartTheme();
   const portfolioItems = usePortfolioItems(perspective, playerLands);
 
@@ -95,7 +95,7 @@ const PortfolioChart = ({
   }
   return (
     <div className="strategists-viz">
-      <div id="portfolio-container"></div>
+      <div id="portfolio-container" />
       {showHelp && (
         <ChartInterpretationHelp
           message={
@@ -107,6 +107,6 @@ const PortfolioChart = ({
       )}
     </div>
   );
-};
+}
 
 export default PortfolioChart;

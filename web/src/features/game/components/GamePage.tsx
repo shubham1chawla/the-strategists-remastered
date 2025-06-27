@@ -1,12 +1,12 @@
 import { Col, Row } from 'antd';
 import CytoscapeProvider from '@game/providers/cytoscapeProvider';
+import GameWrapper from './GameWrapper';
 import MapPanel from './MapPanel';
 import PlayerPanel from './PlayerPanel';
 import TurnModal from './TurnModal';
-import GameWrapper from './GameWrapper';
 import WinModal from './WinModal';
 
-const GamePage = () => {
+function GamePage() {
   return (
     <GameWrapper>
       <TurnModal />
@@ -26,6 +26,6 @@ const GamePage = () => {
       <WinModal />
     </GameWrapper>
   );
-};
+}
 
 export default GamePage;

@@ -105,7 +105,7 @@ const usePredictionsChartItems = (player: Player) => {
   // Preparing visual prediction items
   const predictionsChartItems = useMemo(() => {
     const items: PredictionsChartItem[] = [];
-    for (let turn = 1; turn <= maxTurns; turn++) {
+    for (let turn = 1; turn <= maxTurns; turn += 1) {
       // Determining whether to use NETWORTH or PREDICTION method for visualization
       const playerPredictionMap = turnWisePredictions.get(turn);
       const playerTrendMap = turnWisePlayerTrends.get(turn);
@@ -130,7 +130,7 @@ const usePredictionsChartItems = (player: Player) => {
         method,
       };
       item[player.username] = 0;
-      item['Opponents'] = 0;
+      item.Opponents = 0;
       players.forEach((p) => {
         const value =
           method === 'PREDICTION'
@@ -139,7 +139,7 @@ const usePredictionsChartItems = (player: Player) => {
         if (player.id === p.id) {
           item[player.username] += value / totalShareSize;
         } else {
-          item['Opponents'] += value / totalShareSize;
+          item.Opponents += value / totalShareSize;
         }
       });
       items.push(item);

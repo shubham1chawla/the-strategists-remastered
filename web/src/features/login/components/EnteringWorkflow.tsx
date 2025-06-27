@@ -2,7 +2,7 @@ import { Space } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
 
-const EnteringWorkflow = () => {
+function EnteringWorkflow() {
   const { loginWorkflow } = useLoginWorkflow();
   if (loginWorkflow !== 'ENTERING') return null;
   return (
@@ -11,6 +11,6 @@ const EnteringWorkflow = () => {
       Entering...
     </Space>
   );
-};
+}
 
 export default EnteringWorkflow;

@@ -5,98 +5,8 @@ import EmptyContainer from '@shared/components/EmptyContainer';
 import useChartTheme from '@shared/hooks/useChartTheme';
 import useTheme from '@shared/hooks/useTheme';
 import { Theme } from '@shared/providers/themeProvider';
-import { LandTrend, PlayerTrend } from '@trends/state';
 import useTrends from '@trends/hooks/useTrends';
-
-interface TrendsChartProps {
-  perspective: 'player' | 'land';
-  id: number;
-  showHelp?: boolean;
-}
-
-const TrendsChart = (props: TrendsChartProps) => {
-  const theme = useTheme();
-  const chartTheme = useChartTheme();
-  const { playerTrends, landTrends } = useTrends();
-  const { perspective, id, showHelp } = props;
-
-  useEffect(() => {
-    if (
-      (perspective === 'land' && !landTrends.length) ||
-      (perspective === 'player' && !playerTrends.length)
-    )
-      return;
-
-    // Creating chart's instance
-    const chart = new Chart({
-      container: 'trends-container',
-      height: 300,
-    });
-
-    // Configuring chart's options
-    chart.options({
-      autoFit: true,
-      axis: {
-        x: {
-          grid: false,
-          title: false,
-          tickFilter: (value: number) => Number.isInteger(value),
-        },
-        y: {
-          grid: true,
-          title: false,
-          tickCount: 3,
-          labelFormatter: (value: number) => `$${value}`,
-        },
-      },
-      theme: chartTheme,
-    });
-
-    // Updating tooltip position
-    chart.interaction('tooltip', {
-      position: 'left', // Matching the positioning of map's tooltip
-    });
-
-    switch (perspective) {
-      case 'player':
-        drawPlayerTrends(
-          chart,
-          playerTrends.filter(({ playerId }) => playerId === id),
-          theme,
-        );
-        break;
-      case 'land':
-        drawLandTrends(
-          chart,
-          landTrends.filter(({ landId }) => landId === id),
-          theme,
-        );
-        break;
-    }
-    chart.render();
-  }, [id, perspective, playerTrends, landTrends, theme, chartTheme]);
-
-  if (
-    (perspective === 'land' && !landTrends.length) ||
-    (perspective === 'player' && !playerTrends.length)
-  ) {
-    return <EmptyContainer message="No trends available!" />;
-  }
-  return (
-    <div className="strategists-viz">
-      <div id="trends-container"></div>
-      {showHelp && (
-        <ChartInterpretationHelp
-          message={
-            perspective === 'player'
-              ? "The chart highlights the change in player's cash and net worth per turn."
-              : "The chart highlights the change in the land's market value per turn."
-          }
-        />
-      )}
-    </div>
-  );
-};
+import { LandTrend, PlayerTrend } from '@trends/state';
 
 const drawPlayerTrends = (
   chart: Chart,
@@ -200,5 +110,97 @@ const drawLandTrends = (chart: Chart, trends: LandTrend[], theme: Theme) => {
       ],
     });
 };
+
+interface TrendsChartProps {
+  perspective: 'player' | 'land';
+  id: number;
+  showHelp?: boolean;
+}
+
+function TrendsChart(props: TrendsChartProps) {
+  const theme = useTheme();
+  const chartTheme = useChartTheme();
+  const { playerTrends, landTrends } = useTrends();
+  const { perspective, id, showHelp } = props;
+
+  useEffect(() => {
+    if (
+      (perspective === 'land' && !landTrends.length) ||
+      (perspective === 'player' && !playerTrends.length)
+    )
+      return;
+
+    // Creating chart's instance
+    const chart = new Chart({
+      container: 'trends-container',
+      height: 300,
+    });
+
+    // Configuring chart's options
+    chart.options({
+      autoFit: true,
+      axis: {
+        x: {
+          grid: false,
+          title: false,
+          tickFilter: (value: number) => Number.isInteger(value),
+        },
+        y: {
+          grid: true,
+          title: false,
+          tickCount: 3,
+          labelFormatter: (value: number) => `$${value}`,
+        },
+      },
+      theme: chartTheme,
+    });
+
+    // Updating tooltip position
+    chart.interaction('tooltip', {
+      position: 'left', // Matching the positioning of map's tooltip
+    });
+
+    switch (perspective) {
+      case 'player':
+        drawPlayerTrends(
+          chart,
+          playerTrends.filter(({ playerId }) => playerId === id),
+          theme,
+        );
+        break;
+      case 'land':
+        drawLandTrends(
+          chart,
+          landTrends.filter(({ landId }) => landId === id),
+          theme,
+        );
+        break;
+      default:
+        throw new Error(`Unrecognized perspective: ${perspective}!`);
+    }
+    chart.render();
+  }, [id, perspective, playerTrends, landTrends, theme, chartTheme]);
+
+  if (
+    (perspective === 'land' && !landTrends.length) ||
+    (perspective === 'player' && !playerTrends.length)
+  ) {
+    return <EmptyContainer message="No trends available!" />;
+  }
+  return (
+    <div className="strategists-viz">
+      <div id="trends-container" />
+      {showHelp && (
+        <ChartInterpretationHelp
+          message={
+            perspective === 'player'
+              ? "The chart highlights the change in player's cash and net worth per turn."
+              : "The chart highlights the change in the land's market value per turn."
+          }
+        />
+      )}
+    </div>
+  );
+}
 
 export default TrendsChart;

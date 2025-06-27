@@ -1,21 +1,22 @@
-import { Collapse, Select, Space, Timeline } from 'antd';
+import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { Collapse, Select, Space, Timeline } from 'antd';
 import {
   BarsOutlined,
   InfoCircleOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
+import useNotifications from '@shared/hooks/useNotifications';
 import useActivities from '@activities/hooks/useActivities';
 import {
   UpdateType,
   getSubscribableTypes,
   subscribedTypesSetted,
 } from '@activities/state';
-import useNotifications from '@shared/hooks/useNotifications';
-import ActivityIcon from './ActivityIcon';
 import parseActivity from '@activities/utils/parseActivity';
+import ActivityIcon from './ActivityIcon';
 
-const Activities = () => {
+function Activities() {
   const { filteredActivites, subscribedTypes } = useActivities();
   const { infoNotification } = useNotifications();
   const dispatch = useDispatch();
@@ -24,32 +25,35 @@ const Activities = () => {
     return type.charAt(0) + type.slice(1).toLowerCase();
   };
 
-  const setSubscribedTypes = (types: UpdateType[]) => {
-    if (types.length > subscribedTypes.length) {
+  const setSubscribedTypes = (updateTypes: UpdateType[]) => {
+    if (updateTypes.length > subscribedTypes.length) {
       const set = new Set<UpdateType>(subscribedTypes);
-      const type = types.filter((type) => !set.has(type))[0];
+      const updateType = updateTypes.filter((type) => !set.has(type))[0];
       infoNotification({
-        message: `Subscribed to all ${formatUpdateType(type)} activities!`,
+        message: `Subscribed to all ${formatUpdateType(updateType)} activities!`,
       });
     } else {
-      const set = new Set<UpdateType>(types);
-      const type = subscribedTypes.filter((type) => !set.has(type))[0];
+      const set = new Set<UpdateType>(updateTypes);
+      const updateType = subscribedTypes.filter((type) => !set.has(type))[0];
       infoNotification({
-        message: `Unsubscribed from all ${formatUpdateType(type)} activities!`,
+        message: `Unsubscribed from all ${formatUpdateType(updateType)} activities!`,
       });
     }
-    dispatch(subscribedTypesSetted(types));
+    dispatch(subscribedTypesSetted(updateTypes));
   };
+
+  const SettingsIcon = useCallback(
+    (props: any) => <SettingOutlined rotate={props.isActive ? 90 : 0} />,
+    [],
+  );
 
   return (
     <div className="strategists-activity">
       <Collapse
         bordered={false}
         expandIconPosition="end"
-        accordion={true}
-        expandIcon={(props) => (
-          <SettingOutlined rotate={props.isActive ? 90 : 0} />
-        )}
+        accordion
+        expandIcon={SettingsIcon}
         items={[
           {
             key: '1',
@@ -92,6 +96,6 @@ const Activities = () => {
       />
     </div>
   );
-};
+}
 
 export default Activities;

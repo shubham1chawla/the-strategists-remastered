@@ -12,7 +12,7 @@ const useCytoscapeLandEdgeDefinitions = () => {
     if (!lands.length) return edges;
 
     // Adding n-1 edges
-    for (let i = 1; i < lands.length; i++) {
+    for (let i = 1; i < lands.length; i += 1) {
       const prev = lands[i - 1];
       const curr = lands[i];
       edges.push({

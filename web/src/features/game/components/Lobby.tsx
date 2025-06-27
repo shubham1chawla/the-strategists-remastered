@@ -10,12 +10,12 @@ import {
   UserAddOutlined,
   StarOutlined,
 } from '@ant-design/icons';
+import axios from 'axios';
 import useGame from '@game/hooks/useGame';
 import { Player } from '@game/state';
 import useLogin from '@login/hooks/useLogin';
-import axios from 'axios';
 
-const Lobby = () => {
+function Lobby() {
   const { gameCode, player } = useLogin();
   const { state, sortedPlayers } = useGame();
 
@@ -60,14 +60,14 @@ const Lobby = () => {
               </Space>
               <Space>
                 {state === 'ACTIVE' && p.state !== 'BANKRUPT' && (
-                  <Tooltip title={<>{p.username}'s rank</>}>
+                  <Tooltip title={<>{p.username}&apos;s rank</>}>
                     <Tag icon={<CrownOutlined />}>#{index + 1}</Tag>
                   </Tooltip>
                 )}
-                <Tooltip title={<>{p.username}'s cash</>}>
+                <Tooltip title={<>{p.username}&apos;s cash</>}>
                   <Tag icon={<WalletOutlined />}>{p.cash}</Tag>
                 </Tooltip>
-                <Tooltip title={<>{p.username}'s net worth</>}>
+                <Tooltip title={<>{p.username}&apos;s net worth</>}>
                   <Tag icon={<StockOutlined />}>{p.netWorth}</Tag>
                 </Tooltip>
                 {!!p.remainingSkipsCount &&
@@ -104,6 +104,6 @@ const Lobby = () => {
       ) : null}
     </div>
   );
-};
+}
 
 export default Lobby;

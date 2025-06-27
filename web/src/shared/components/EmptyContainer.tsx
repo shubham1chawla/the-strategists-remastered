@@ -5,8 +5,7 @@ interface EmptyContainerProps {
   message?: string;
 }
 
-const EmptyContainer = (props: EmptyContainerProps) => {
-  const { message } = props;
+function EmptyContainer({ message }: EmptyContainerProps) {
   return (
     <Row justify="center" align="middle">
       <Space>
@@ -15,6 +14,6 @@ const EmptyContainer = (props: EmptyContainerProps) => {
       </Space>
     </Row>
   );
-};
+}
 
 export default EmptyContainer;

@@ -1,9 +1,15 @@
-import { createContext, PropsWithChildren, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import {
+  createContext,
+  PropsWithChildren,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import axios from 'axios';
 import useLogin from '@login/hooks/useLogin';
 import { loggedIn, LoginState } from '@login/state';
-import axios from 'axios';
 
 type LoginWorkflow =
   | 'NOT_VERIFIED'
@@ -25,7 +31,7 @@ interface LoginWorkflowProviderValue {
 export const LoginWorkflowContext =
   createContext<LoginWorkflowProviderValue | null>(null);
 
-const LoginWorkflowProvider = ({ children }: PropsWithChildren) => {
+function LoginWorkflowProvider({ children }: PropsWithChildren) {
   const [loginWorkflow, setLoginWorkflow] =
     useState<LoginWorkflow>('NOT_VERIFIED');
   const [googleLoginCredential, setGoogleLoginCredential] = useState<
@@ -35,12 +41,15 @@ const LoginWorkflowProvider = ({ children }: PropsWithChildren) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const value: LoginWorkflowProviderValue = {
-    loginWorkflow,
-    setLoginWorkflow,
-    googleLoginCredential,
-    setGoogleLoginCredential,
-  };
+  const value: LoginWorkflowProviderValue = useMemo(
+    () => ({
+      loginWorkflow,
+      setLoginWorkflow,
+      googleLoginCredential,
+      setGoogleLoginCredential,
+    }),
+    [googleLoginCredential, loginWorkflow],
+  );
 
   // Redirecting to dashboard if user logged-in
   useEffect(() => {
@@ -73,6 +82,6 @@ const LoginWorkflowProvider = ({ children }: PropsWithChildren) => {
       {children}
     </LoginWorkflowContext.Provider>
   );
-};
+}
 
 export default LoginWorkflowProvider;

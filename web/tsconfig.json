@@ -24,10 +24,9 @@
       "@predictions/*": ["./features/predictions/*"],
       "@trends/*": ["./features/trends/*"],
       "@theme/*": ["./features/theme/*"],
-      "@features/*": ["./features/*"],
       "@shared/*": ["./shared/*"],
       "@/*": ["./*"]
     }
   },
-  "include": ["src", "vite-env.d.ts"]
+  "include": ["src", "vite-env.d.ts", ".eslintrc.cjs"]
 }

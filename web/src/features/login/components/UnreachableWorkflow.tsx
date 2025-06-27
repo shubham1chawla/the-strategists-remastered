@@ -1,7 +1,7 @@
 import { Alert } from 'antd';
 import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
 
-const UnreachableWorkflow = () => {
+function UnreachableWorkflow() {
   const { loginWorkflow } = useLoginWorkflow();
   if (loginWorkflow !== 'UNREACHABLE') return null;
   return (
@@ -13,6 +13,6 @@ const UnreachableWorkflow = () => {
       banner
     />
   );
-};
+}
 
 export default UnreachableWorkflow;

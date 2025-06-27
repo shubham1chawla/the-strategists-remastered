@@ -8,14 +8,14 @@ import {
   StockOutlined,
   StopOutlined,
 } from '@ant-design/icons';
+import axios from 'axios';
+import useNotifications from '@shared/hooks/useNotifications';
 import useGame from '@game/hooks/useGame';
 import InvestmentStrategy from '@game/utils/InvestmentStrategy';
 import useLogin from '@login/hooks/useLogin';
-import useNotifications from '@shared/hooks/useNotifications';
 import PlayerInvestModal from './PlayerInvestModal';
-import axios from 'axios';
 
-const PlayerActionsPanel = () => {
+function PlayerActionsPanel() {
   const { gameCode, player } = useLogin();
   const { turnPlayer, lands } = useGame();
   const { errorNotification } = useNotifications();
@@ -49,7 +49,6 @@ const PlayerActionsPanel = () => {
       setSkipping(true);
       await axios.put(`/api/games/${gameCode}/turn`);
     } catch (error) {
-      console.error(error);
       errorNotification({
         message: 'Something went wrong!',
         description: 'Please refresh the page and try again.',
@@ -117,6 +116,6 @@ const PlayerActionsPanel = () => {
       </div>
     </>
   );
-};
+}
 
 export default PlayerActionsPanel;

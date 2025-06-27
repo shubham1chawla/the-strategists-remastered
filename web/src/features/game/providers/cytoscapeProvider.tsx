@@ -4,6 +4,7 @@ import {
   PropsWithChildren,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -18,13 +19,13 @@ import {
   shift,
   Strategy,
 } from '@floating-ui/dom';
-import useCytoscapeLandNodeDefinitions from '@game/hooks/useCytoscapeLandNodeDefinitions';
+import useTheme from '@shared/hooks/useTheme';
 import useCytoscapeLandEdgeDefinitions from '@game/hooks/useCytoscapeLandEdgeDefinitions';
-import useCytoscapePlayerNodeDefinitions from '@game/hooks/useCytoscapePlayerNodeDefinitions';
+import useCytoscapeLandNodeDefinitions from '@game/hooks/useCytoscapeLandNodeDefinitions';
 import useCytoscapePlayerEdgeDefinitions from '@game/hooks/useCytoscapePlayerEdgeDefinitions';
+import useCytoscapePlayerNodeDefinitions from '@game/hooks/useCytoscapePlayerNodeDefinitions';
 import useCytoscapeStyles from '@game/hooks/useCytoscapeStyles';
 import { Land, Player } from '@game/state';
-import useTheme from '@shared/hooks/useTheme';
 
 interface ActionableNode {
   type: 'land' | 'player';
@@ -44,7 +45,7 @@ export const CytoscapeContext = createContext<CytoscapeProviderValue | null>(
   null,
 );
 
-const CytoscapeProvider = ({ children }: PropsWithChildren) => {
+function CytoscapeProvider({ children }: PropsWithChildren) {
   const { textColor } = useTheme();
   const cytoscapeStyles = useCytoscapeStyles();
   const landNodes = useCytoscapeLandNodeDefinitions();
@@ -65,7 +66,7 @@ const CytoscapeProvider = ({ children }: PropsWithChildren) => {
       if (!current) return;
 
       // Creating cytoscape instance
-      const cy = cytoscape({
+      const newCy = cytoscape({
         autolock: true,
         maxZoom: 1.5,
         minZoom: 0.75,
@@ -77,7 +78,7 @@ const CytoscapeProvider = ({ children }: PropsWithChildren) => {
       });
 
       // Adding onclick hook for cytoscape
-      cy.on('click', 'node', (event: EventObjectNode) => {
+      newCy.on('click', 'node', (event: EventObjectNode) => {
         const { player, land } = event.target.data();
 
         // Setting clicked node
@@ -91,7 +92,7 @@ const CytoscapeProvider = ({ children }: PropsWithChildren) => {
       });
 
       // Adding mousemove hook for tooltip
-      cy.on('mousemove', 'node', ({ target }: EventObjectNode) => {
+      newCy.on('mousemove', 'node', ({ target }: EventObjectNode) => {
         const { land, player } = target.data();
 
         // Setting hovered node
@@ -110,10 +111,10 @@ const CytoscapeProvider = ({ children }: PropsWithChildren) => {
       });
 
       // Adding mouseout hook to remove tooltip
-      cy.on('mouseout', 'node', () => setTooltipHidden(true));
+      newCy.on('mouseout', 'node', () => setTooltipHidden(true));
 
       // Setting up cytoscape instance's state
-      setCy(cy);
+      setCy(newCy);
     },
     [cytoscapeStyles],
   );
@@ -187,11 +188,11 @@ const CytoscapeProvider = ({ children }: PropsWithChildren) => {
       // Adding animation to the turn player
       const node = cy.filter((ele) => ele.data('player.turn'));
       if (!node || !node.position()) {
-        return new Promise((resolve) =>
+        return new Promise((resolve) => {
           setTimeout(() => {
             resolve(callback);
-          }, 1000),
-        );
+          }, 1000);
+        });
       }
 
       // Preparing blink animation for current player
@@ -216,20 +217,23 @@ const CytoscapeProvider = ({ children }: PropsWithChildren) => {
   }, [cy, textColor]);
 
   // Creating provider's value
-  const value: CytoscapeProviderValue = {
-    cytoscapeContainerRef,
-    tooltipRef,
-    clickedNode,
-    hoveredNode,
-    clearClickedNode: () => setClickedNode(null),
-    isTooltipHidden,
-  };
+  const value: CytoscapeProviderValue = useMemo(
+    () => ({
+      cytoscapeContainerRef,
+      tooltipRef,
+      clickedNode,
+      hoveredNode,
+      clearClickedNode: () => setClickedNode(null),
+      isTooltipHidden,
+    }),
+    [clickedNode, cytoscapeContainerRef, hoveredNode, isTooltipHidden],
+  );
 
   return (
     <CytoscapeContext.Provider value={value}>
       {children}
     </CytoscapeContext.Provider>
   );
-};
+}
 
 export default CytoscapeProvider;

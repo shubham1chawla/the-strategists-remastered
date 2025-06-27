@@ -13,12 +13,12 @@ export interface PortfolioModalProps {
   node: Land | Player;
 }
 
-const PortfolioModal = ({
+function PortfolioModal({
   open,
   onCancel,
   perspective,
   node,
-}: Partial<PortfolioModalProps>) => {
+}: Partial<PortfolioModalProps>) {
   if (!open || !perspective || !node) {
     return null;
   }
@@ -29,9 +29,7 @@ const PortfolioModal = ({
     {
       key: '1',
       label: 'Trends',
-      children: (
-        <TrendsChart perspective={perspective} id={node.id} showHelp={true} />
-      ),
+      children: <TrendsChart perspective={perspective} id={node.id} showHelp />,
     },
     {
       key: '2',
@@ -40,7 +38,7 @@ const PortfolioModal = ({
         <PortfolioChart
           perspective={perspective}
           playerLands={playerLands}
-          showHelp={true}
+          showHelp
         />
       ),
     },
@@ -51,7 +49,7 @@ const PortfolioModal = ({
     tabItems.push({
       key: '3',
       label: 'Predictions',
-      children: <PredictionsChart player={node as Player} showHelp={true} />,
+      children: <PredictionsChart player={node as Player} showHelp />,
     });
   }
 
@@ -72,6 +70,6 @@ const PortfolioModal = ({
       <Tabs centered defaultActiveKey="1" size="large" items={tabItems} />
     </Modal>
   );
-};
+}
 
 export default PortfolioModal;

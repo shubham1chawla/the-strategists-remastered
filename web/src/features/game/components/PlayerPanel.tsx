@@ -1,21 +1,23 @@
 import { useEffect, useState } from 'react';
 import { Badge, Space, Tabs, TabsProps } from 'antd';
+import useNotifications from '@shared/hooks/useNotifications';
 import Activities from '@activities/components/Activities';
 import Advices from '@advices/components/Advices';
 import useAdvices from '@advices/hooks/useAdvices';
-import PlayerActionsPanel from './PlayerActionsPanel';
-import Lobby from './Lobby';
-import NavigationBar from './NavigationBar';
-import PlayerStats from './PlayerStats';
 import useGame from '@game/hooks/useGame';
 import useLogin from '@login/hooks/useLogin';
+import Lobby from './Lobby';
+import NavigationBar from './NavigationBar';
+import PlayerActionsPanel from './PlayerActionsPanel';
+import PlayerStats from './PlayerStats';
 
 type PlayerPanelTabKey = 'LOBBY' | 'ACTIVITIES' | 'ADVICE';
 
-const PlayerPanel = () => {
+function PlayerPanel() {
   const { player } = useLogin();
   const { state } = useGame();
   const { playerAdvices, unreadCount, markAdvicesRead } = useAdvices();
+  const { errorNotification } = useNotifications();
   const [activeKey, setActiveKey] = useState<PlayerPanelTabKey>('LOBBY');
 
   // Switching tabs when game's state changes
@@ -59,7 +61,13 @@ const PlayerPanel = () => {
   const onTabChange = (key: string) => {
     setActiveKey((prev) => {
       if (prev === 'ADVICE') {
-        markAdvicesRead();
+        markAdvicesRead().catch(() => {
+          errorNotification({
+            message: 'Something went wrong!',
+            description:
+              'Unable to mark your advices as read! If this problem persists, please contact the developers.',
+          });
+        });
       }
       return key as PlayerPanelTabKey;
     });
@@ -80,6 +88,6 @@ const PlayerPanel = () => {
       <PlayerActionsPanel />
     </>
   );
-};
+}
 
 export default PlayerPanel;

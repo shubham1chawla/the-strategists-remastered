@@ -2,17 +2,17 @@ import { useEffect } from 'react';
 import { Chart } from '@antv/g2';
 import ChartInterpretationHelp from '@shared/components/ChartInterpretationHelp';
 import EmptyContainer from '@shared/components/EmptyContainer';
-import { Player } from '@game/state';
-import usePredictionsChartItems from '@predictions/hooks/usePredictionsChartItems';
 import useChartTheme from '@shared/hooks/useChartTheme';
 import useTheme from '@shared/hooks/useTheme';
+import { Player } from '@game/state';
+import usePredictionsChartItems from '@predictions/hooks/usePredictionsChartItems';
 
 interface PredictionsChartProps {
   player: Player;
   showHelp?: boolean;
 }
 
-const PredictionsChart = ({ player, showHelp }: PredictionsChartProps) => {
+function PredictionsChart({ player, showHelp }: PredictionsChartProps) {
   const theme = useTheme();
   const chartTheme = useChartTheme();
   const predictionsChartItems = usePredictionsChartItems(player);
@@ -119,7 +119,7 @@ const PredictionsChart = ({ player, showHelp }: PredictionsChartProps) => {
   }
   return (
     <div className="strategists-viz">
-      <div id="predictions-container"></div>
+      <div id="predictions-container" />
       {showHelp && (
         <ChartInterpretationHelp
           message={`The chart highlights the change in winning probabilities of ${player.username} compared to opponents per turn. A larger area represents a stark contrast in the chance of winning for any side.`}
@@ -127,6 +127,6 @@ const PredictionsChart = ({ player, showHelp }: PredictionsChartProps) => {
       )}
     </div>
   );
-};
+}
 
 export default PredictionsChart;

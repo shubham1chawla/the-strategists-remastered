@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import useLogin from '@login/hooks/useLogin';
-import { State } from '@/store';
 import axios from 'axios';
+import { State } from '@/store';
+import useLogin from '@login/hooks/useLogin';
 
 const useAdvices = () => {
   const advices = useSelector((state: State) => state.advices);
@@ -33,16 +33,10 @@ const useAdvices = () => {
     advices,
     playerAdvices,
     unreadCount,
-    markAdvicesRead: async (): Promise<void> => {
-      if (unreadCount < 1 || !gameCode || !playerId) {
-        return;
-      }
-      try {
-        await axios.patch(`/api/games/${gameCode}/players/${playerId}/advices`);
-      } catch (error) {
-        console.error('Unable to mark advices viewed!', error);
-      }
-    },
+    markAdvicesRead: async (): Promise<void> =>
+      unreadCount < 1 || !gameCode || !playerId
+        ? Promise.resolve()
+        : axios.patch(`/api/games/${gameCode}/players/${playerId}/advices`),
   };
 };
 

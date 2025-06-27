@@ -40,8 +40,7 @@ const parseActivity = (activity: Activity): string => {
     case 'WIN':
       return `${val1} won The Strategists!`;
     default:
-      console.warn(activity);
-      return `Unknwon activity type: ${type}`;
+      throw new Error(`Unknwon activity type: ${type}`);
   }
 };
 

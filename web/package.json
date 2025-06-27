@@ -3,6 +3,16 @@
   "description": "The Strategists - Front-end Application",
   "version": "1.0.0",
   "private": true,
+  "scripts": {
+    "prepare": "cd .. && husky || true",
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "lint:check": "eslint './src/**/*.{js,jsx,ts,tsx}'",
+    "lint:fix": "eslint --fix './src/**/*.{js,jsx,ts,tsx}'",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
   "dependencies": {
     "@ant-design/icons": "^6.0.0",
     "@antv/g2": "^5.3.3",
@@ -10,6 +20,7 @@
     "@netlify/edge-functions": "^2.14.5",
     "@netlify/functions": "^4.1.5",
     "@react-oauth/google": "^0.12.2",
+    "@reduxjs/toolkit": "^2.8.2",
     "antd": "^5.26.0",
     "axios": "^1.10.0",
     "cytoscape": "^3.32.0",
@@ -22,40 +33,15 @@
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.6.2",
     "redux": "^5.0.1",
+    "redux-logger": "^3.0.6",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
-    "tsparticles-confetti": "^2.12.0"
-  },
-  "scripts": {
-    "prepare": "cd .. && husky || true",
-    "format:check": "prettier --check .",
-    "format:fix": "prettier --write .",
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+    "tsparticles-confetti": "^2.12.0",
+    "web-vitals": "^5.0.3"
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@babel/plugin-transform-private-property-in-object": "^7.27.1",
     "@redux-devtools/extension": "^3.3.0",
-    "@reduxjs/toolkit": "^2.8.2",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
@@ -68,14 +54,35 @@
     "@types/react-dom": "^18.3.7",
     "@types/react-google-recaptcha": "^2.1.9",
     "@types/redux-logger": "^3.0.13",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "@vitejs/plugin-react": "^4.5.2",
+    "eslint": "^8.57.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-config-airbnb-typescript": "^18.0.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-prettier": "^5.4.1",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^4.6.2",
     "husky": "^9.1.7",
     "prettier": "^3.5.3",
-    "redux-logger": "^3.0.6",
     "sass": "^1.89.2",
     "typescript": "^4.9.5",
     "vite": "^6.3.5",
-    "vite-tsconfig-paths": "^5.1.4",
-    "web-vitals": "^5.0.3"
+    "vite-tsconfig-paths": "^5.1.4"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

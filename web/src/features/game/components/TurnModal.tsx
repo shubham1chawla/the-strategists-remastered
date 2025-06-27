@@ -4,7 +4,7 @@ import { HomeOutlined } from '@ant-design/icons';
 import useGame from '@game/hooks/useGame';
 import useLogin from '@login/hooks/useLogin';
 
-const TurnModal = () => {
+function TurnModal() {
   const { player } = useLogin();
   const { lands, winnerPlayer } = useGame();
   const [open, setOpen] = useState(false);
@@ -36,6 +36,6 @@ const TurnModal = () => {
       </Space>
     </Modal>
   );
-};
+}
 
 export default TurnModal;

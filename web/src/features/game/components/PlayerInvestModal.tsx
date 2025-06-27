@@ -22,23 +22,36 @@ import {
   SlidersOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
+import axios from 'axios';
+import useNotifications from '@shared/hooks/useNotifications';
 import useGame from '@game/hooks/useGame';
 import InvestmentStrategy from '@game/utils/InvestmentStrategy';
 import useLogin from '@login/hooks/useLogin';
-import useNotifications from '@shared/hooks/useNotifications';
 import LandStats from './LandStats';
 import PortfolioTable from './PortfolioTable';
-import axios from 'axios';
+
+const prepareSliderMarks = (strategy: InvestmentStrategy): SliderMarks => {
+  const max = strategy.maxOfferableOwnership;
+  const style = {
+    color: 'var(--text-color)',
+    marginTop: '0.5rem',
+  };
+  const marks: SliderMarks = {};
+  [0, Math.floor(max / 2), max].forEach((ownership) => {
+    marks[ownership] = { label: `${ownership}%`, style };
+  });
+  return marks;
+};
 
 interface PlayerInvestModalProps {
   open: boolean;
   onCancel: () => void;
 }
 
-const PlayerInvestModal = ({
+function PlayerInvestModal({
   open,
   onCancel,
-}: Partial<PlayerInvestModalProps>) => {
+}: Partial<PlayerInvestModalProps>) {
   const { gameCode, player } = useLogin();
   const { lands } = useGame();
   const { errorNotification } = useNotifications();
@@ -62,6 +75,13 @@ const PlayerInvestModal = ({
   // Setting up investment strategy
   const strategy = new InvestmentStrategy(player, land, ownership);
 
+  // Ensuring that if model closes, we are resetting states
+  const onModalCancel = () => {
+    setOwnership(0);
+    setInvesting(false);
+    if (onCancel) onCancel();
+  };
+
   const onInvest = async () => {
     setInvesting(true);
     try {
@@ -77,7 +97,6 @@ const PlayerInvestModal = ({
       // Closing the modal
       onModalCancel();
     } catch (error) {
-      console.error(error);
       errorNotification({
         message: 'Something went wrong!',
         description: 'Please refresh the page and try again.',
@@ -85,13 +104,6 @@ const PlayerInvestModal = ({
     } finally {
       setInvesting(false);
     }
-  };
-
-  // Ensuring that if model closes, we are resetting states
-  const onModalCancel = () => {
-    setOwnership(0);
-    setInvesting(false);
-    if (onCancel) onCancel();
   };
 
   return (
@@ -172,7 +184,7 @@ const PlayerInvestModal = ({
           tooltip={{
             formatter: (value) => `${value}%`,
           }}
-          autoFocus={true}
+          autoFocus
           marks={prepareSliderMarks(strategy)}
         />
         <Row justify="center">
@@ -184,7 +196,7 @@ const PlayerInvestModal = ({
       </Card>
       <Collapse
         bordered={false}
-        ghost={true}
+        ghost
         expandIconPosition="end"
         items={[
           {
@@ -193,7 +205,7 @@ const PlayerInvestModal = ({
               land.totalOwnership > 0 ? (
                 <Space>
                   <SlidersOutlined />
-                  <span>Click to check {land.name}'s investments</span>
+                  <span>Click to check {land.name}&apos;s investments</span>
                 </Space>
               ) : (
                 <Space>
@@ -209,19 +221,6 @@ const PlayerInvestModal = ({
       />
     </Modal>
   );
-};
-
-const prepareSliderMarks = (strategy: InvestmentStrategy): SliderMarks => {
-  const max = strategy.maxOfferableOwnership;
-  const style = {
-    color: 'var(--text-color)',
-    marginTop: '0.5rem',
-  };
-  const marks: SliderMarks = {};
-  [0, Math.floor(max / 2), max].forEach(
-    (ownership) => (marks[ownership] = { label: `${ownership}%`, style }),
-  );
-  return marks;
-};
+}
 
 export default PlayerInvestModal;
