@@ -1,4 +1,4 @@
-echo "🕒 Running prettier..."
+echo "🕒 Running lint check..."
 cd web
-npm run format:check
+npm run lint:check
 echo "✔️ Completed!"

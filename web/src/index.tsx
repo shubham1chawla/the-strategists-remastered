@@ -1,6 +1,6 @@
 import { createRoot } from 'react-dom/client';
 import { GoogleOAuthProvider } from '@react-oauth/google';
-import { App } from './App';
+import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 createRoot(document.getElementById('root') as HTMLElement).render(
@@ -13,7 +13,7 @@ createRoot(document.getElementById('root') as HTMLElement).render(
     {!import.meta.env.VITE_GOOGLE_CLIENT_ID && (
       <h1 style={{ color: 'red', position: 'absolute' }}>
         <b>
-          DEV NOTE: You have not configured Google's Client ID in the
+          DEV NOTE: You have not configured Google&apos;s Client ID in the
           environment variables! Add it to the .env file!
         </b>
       </h1>

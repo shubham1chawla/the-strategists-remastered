@@ -17,14 +17,14 @@ interface PlayerStatsProps {
   winner?: boolean;
 }
 
-const PlayerStats = (props: PlayerStatsProps) => {
-  const { player, winner } = props;
+function PlayerStats(props: PlayerStatsProps) {
+  const { player, winner, showRemainingSkipsCount } = props;
 
   // Determining whether to show remaining skip counts
-  const showRemainingSkipsCount =
+  const shouldShowRemainingSkipsCount =
     !!player.remainingSkipsCount &&
     !!player.allowedSkipsCount &&
-    !!props.showRemainingSkipsCount &&
+    !!showRemainingSkipsCount &&
     player.state !== 'BANKRUPT';
 
   const remainingSkipsCount = player.remainingSkipsCount || 0;
@@ -47,12 +47,14 @@ const PlayerStats = (props: PlayerStatsProps) => {
                 {player.state === 'BANKRUPT' && (
                   <Tag icon={<AuditOutlined />}>Bankrupt</Tag>
                 )}
-                {showRemainingSkipsCount && (
+                {shouldShowRemainingSkipsCount && (
                   <Tag>
                     {[...Array(remainingSkipsCount)].map((_, i) => (
+                      // eslint-disable-next-line react/no-array-index-key
                       <HeartFilled key={i} />
                     ))}
                     {[...Array(skipsCount)].map((_, i) => (
+                      // eslint-disable-next-line react/no-array-index-key
                       <HeartOutlined key={i} />
                     ))}
                   </Tag>
@@ -96,6 +98,6 @@ const PlayerStats = (props: PlayerStatsProps) => {
       </Row>
     </div>
   );
-};
+}
 
 export default PlayerStats;

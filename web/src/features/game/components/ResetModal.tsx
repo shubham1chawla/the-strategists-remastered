@@ -9,18 +9,18 @@ interface ResetModalProps {
   onCancel: () => void;
 }
 
-const ResetModal = (props: ResetModalProps) => {
+function ResetModal(props: ResetModalProps) {
   const [checked, setChecked] = useState(false);
   const { open, onCancel, gameCode } = props;
-
-  const reset = async () => {
-    await axios.delete(`/api/games/${gameCode}`);
-    cancel();
-  };
 
   const cancel = () => {
     setChecked(false);
     onCancel();
+  };
+
+  const reset = async () => {
+    await axios.delete(`/api/games/${gameCode}`);
+    cancel();
   };
 
   return (
@@ -64,6 +64,6 @@ const ResetModal = (props: ResetModalProps) => {
       <Divider />
     </Modal>
   );
-};
+}
 
 export default ResetModal;

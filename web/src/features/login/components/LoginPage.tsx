@@ -1,7 +1,7 @@
 import { Button, Divider, Row } from 'antd';
 import { GithubOutlined } from '@ant-design/icons';
-import LoginWorkflowProvider from '@login/providers/loginWorkflowProvider';
 import StrategistsLogo from '@shared/components/StrategistsLogo';
+import LoginWorkflowProvider from '@login/providers/loginWorkflowProvider';
 import ActionsWorklfow from './ActionsWorkflow';
 import EnteringWorkflow from './EnteringWorkflow';
 import GoogleLoginWorkflow from './GoogleLoginWorkflow';
@@ -11,7 +11,7 @@ import ResumeWorkflow from './ResumeWorkflow';
 import UnreachableWorkflow from './UnreachableWorkflow';
 import VerifyingWorkflow from './VerifyingWorkflow';
 
-export const LoginPage = () => {
+function LoginPage() {
   return (
     <LoginWorkflowProvider>
       <main className="strategists-login strategists-wallpaper">
@@ -45,6 +45,6 @@ export const LoginPage = () => {
       </main>
     </LoginWorkflowProvider>
   );
-};
+}
 
 export default LoginPage;

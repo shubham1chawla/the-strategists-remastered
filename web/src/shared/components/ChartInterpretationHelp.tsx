@@ -5,12 +5,12 @@ interface ChartInterpretationHelpProps {
   message: string;
 }
 
-const ChartInterpretationHelp = (props: ChartInterpretationHelpProps) => {
+function ChartInterpretationHelp(props: ChartInterpretationHelpProps) {
   const { message } = props;
   return (
     <Collapse
       bordered={false}
-      ghost={true}
+      ghost
       expandIconPosition="end"
       items={[
         {
@@ -26,6 +26,6 @@ const ChartInterpretationHelp = (props: ChartInterpretationHelpProps) => {
       ]}
     />
   );
-};
+}
 
 export default ChartInterpretationHelp;

@@ -11,20 +11,19 @@ const useCytoscapePlayerNodeDefinitions = () => {
   const playerNodes = useMemo(() => {
     // Creating players count per land array to space players uniformly
     // This can not be in its own 'useMemo' since we will be mutating this array below!
-    const playersCountPerLandIndex: number[] = players.reduce(
-      (counts, player) => {
-        if (player.state !== 'BANKRUPT') {
-          counts[player.index]++;
-        }
-        return counts;
-      },
-      Array((lands || []).length).fill(0),
-    );
+    const playersCountPerLandIndex: number[] = Array(lands.length)
+      .fill(0)
+      .map(
+        (_, i) =>
+          players.filter(
+            (player) => player.state !== 'BANKRUPT' && player.index === i,
+          ).length,
+      );
 
     const nodes: NodeDefinition[] = [];
-    for (const player of players || []) {
+    players.forEach((player) => {
       // Not rendering bankrupted player's node
-      if (player.state === 'BANKRUPT') continue;
+      if (player.state === 'BANKRUPT') return;
 
       // Player's current land
       const land = lands[player.index];
@@ -33,6 +32,7 @@ const useCytoscapePlayerNodeDefinitions = () => {
         y: land.playerPosition.startsWith('top') ? -1 : 1,
       };
 
+      // Adding the node
       nodes.push({
         data: {
           player,
@@ -41,14 +41,16 @@ const useCytoscapePlayerNodeDefinitions = () => {
           color: getPlayerColor(player),
         },
         position: {
-          x:
-            land.x + position.x * playersCountPerLandIndex[player.index]-- * 60,
+          x: land.x + position.x * playersCountPerLandIndex[player.index] * 60,
           y: land.y + position.y * 60,
         },
         selectable: false,
         classes: 'player',
       });
-    }
+
+      // Updating the number of players on a land
+      playersCountPerLandIndex[player.index] -= 1;
+    });
     return nodes;
   }, [getPlayerColor, lands, players]);
 

@@ -13,33 +13,8 @@ const defaultProps: ConfettiBackdropProps = {
   interval: 200,
 };
 
-const ConfettiBackdrop = (props: Partial<ConfettiBackdropProps>) => {
-  const { accentColor, textColor } = useTheme();
-  const [count, setCount] = useState(0);
-  const type = props.type || defaultProps.type;
-  const interval = props.interval || defaultProps.interval;
-
-  // setting onfocus to resume confetti
-  window.onfocus = () => setCount(count + 1);
-
-  useEffect(() => {
-    // rendering confetti
-    confetti(
-      'confetti-container',
-      getConfiguration(type, count, [accentColor, textColor]),
-    );
-
-    // use effect will re-trigger when count state changes
-    if (type === 'multiple' && document.hasFocus()) {
-      setTimeout(() => setCount(count + 1), interval);
-    }
-  }, [count, type, interval, accentColor, textColor]);
-
-  return <div id="confetti-container"></div>;
-};
-
 const getConfiguration = (
-  type: 'single' | 'multiple' = 'single',
+  type: 'single' | 'multiple',
   count: number,
   colors: string[],
 ): Partial<IConfettiOptions> => {
@@ -64,9 +39,34 @@ const getConfiguration = (
         position: { x: 20 * (count % 5), y: -10 * ((count % 2) + 1) },
       };
     default:
+      // eslint-disable-next-line no-console
       console.error(`Unknown confetti type ${type}`);
       return baseConfig;
   }
 };
+
+function ConfettiBackdrop(props: Partial<ConfettiBackdropProps>) {
+  const { accentColor, textColor } = useTheme();
+  const [count, setCount] = useState(0);
+  const { type = defaultProps.type, interval = defaultProps.interval } = props;
+
+  // setting onfocus to resume confetti
+  window.onfocus = () => setCount(count + 1);
+
+  useEffect(() => {
+    // rendering confetti
+    confetti(
+      'confetti-container',
+      getConfiguration(type, count, [accentColor, textColor]),
+    );
+
+    // use effect will re-trigger when count state changes
+    if (type === 'multiple' && document.hasFocus()) {
+      setTimeout(() => setCount(count + 1), interval);
+    }
+  }, [count, type, interval, accentColor, textColor]);
+
+  return <div id="confetti-container" />;
+}
 
 export default ConfettiBackdrop;

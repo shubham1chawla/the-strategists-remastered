@@ -1,10 +1,10 @@
 import { Alert, Divider } from 'antd';
 import useCytoscape from '@game/hooks/useCytoscape';
 import { Land, Player } from '@game/state';
-import PlayerStats from './PlayerStats';
 import LandStats from './LandStats';
+import PlayerStats from './PlayerStats';
 
-const MapTooltip = () => {
+function MapTooltip() {
   const { tooltipRef, hoveredNode, isTooltipHidden } = useCytoscape();
   return (
     <div
@@ -34,6 +34,6 @@ const MapTooltip = () => {
       </Divider>
     </div>
   );
-};
+}
 
 export default MapTooltip;

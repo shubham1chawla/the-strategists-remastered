@@ -1,7 +1,7 @@
+import { useContext } from 'react';
 import NotificationsProvider, {
   NotificationsContext,
 } from '@shared/providers/notificationsProvider';
-import { useContext } from 'react';
 
 const useNotifications = () => {
   const value = useContext(NotificationsContext);

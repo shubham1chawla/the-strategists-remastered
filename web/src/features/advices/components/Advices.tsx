@@ -8,7 +8,7 @@ import useAdvices from '@advices/hooks/useAdvices';
 import AdviceDescription from './AdviceDescription';
 import AdviceTitle from './AdviceTitle';
 
-const Advices = () => {
+function Advices() {
   const { playerAdvices } = useAdvices();
   return (
     <Space direction="vertical" className="strategists-advice">
@@ -22,7 +22,8 @@ const Advices = () => {
               </Space>
             }
           >
-            You are doing great! We don't have any advice for you right now.
+            You are doing great! We don&apos;t have any advice for you right
+            now.
           </Card>
         </div>
       )}
@@ -53,6 +54,6 @@ const Advices = () => {
       ))}
     </Space>
   );
-};
+}
 
 export default Advices;

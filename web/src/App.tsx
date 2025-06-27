@@ -1,14 +1,14 @@
-import { Provider } from 'react-redux';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import GamePage from '@game/components/GamePage';
-import LoginPage from '@login/components/LoginPage';
+import { Provider } from 'react-redux';
 import NotFoundPage from '@shared/components/NotFoundPage';
 import NotificationsProvider from '@shared/providers/notificationsProvider';
 import ThemeProvider from '@shared/providers/themeProvider';
+import GamePage from '@game/components/GamePage';
+import LoginPage from '@login/components/LoginPage';
 import store from './store';
 import './App.scss';
 
-export const App = () => {
+function App() {
   return (
     <Provider store={store}>
       <ThemeProvider>
@@ -25,4 +25,6 @@ export const App = () => {
       </ThemeProvider>
     </Provider>
   );
-};
+}
+
+export default App;

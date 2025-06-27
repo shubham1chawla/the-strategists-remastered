@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { Button, Card, Form, Input, Space } from 'antd';
 import { AppstoreOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import axios from 'axios';
+import useNotifications from '@shared/hooks/useNotifications';
 import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
 import { loggedIn, LoginState } from '@login/state';
-import useNotifications from '@shared/hooks/useNotifications';
-import axios from 'axios';
 
-const JoinActionWorkflow = () => {
+function JoinActionWorkflow() {
   const { loginWorkflow, googleLoginCredential, setLoginWorkflow } =
     useLoginWorkflow();
   const { errorNotification } = useNotifications();
@@ -93,7 +93,6 @@ const JoinActionWorkflow = () => {
           form={form}
           layout="inline"
           onFinish={({ code }) => handleJoinAction(code)}
-          onFinishFailed={console.error}
         >
           <Space.Compact>
             <Form.Item
@@ -134,6 +133,6 @@ const JoinActionWorkflow = () => {
       </Card>
     </div>
   );
-};
+}
 
 export default JoinActionWorkflow;

@@ -1,8 +1,10 @@
 import { PropsWithChildren, useEffect, useMemo } from 'react';
-import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { Dispatch, UnknownAction } from 'redux';
+import { useDispatch } from 'react-redux';
 import { DisconnectOutlined } from '@ant-design/icons';
+import axios from 'axios';
+import useNotifications from '@shared/hooks/useNotifications';
 import useActivities from '@activities/hooks/useActivities';
 import {
   activityAdded,
@@ -31,9 +33,7 @@ import {
   predictionsAdded,
   predictionsSetted,
 } from '@predictions/state';
-import useNotifications from '@shared/hooks/useNotifications';
 import { Trend, trendsAdded, trendsSetted } from '@trends/state';
-import axios from 'axios';
 
 interface UpdatePayload {
   type: UpdateType;
@@ -86,7 +86,7 @@ const alertUser = (event: BeforeUnloadEvent) => {
   return 'You are about to exit The Strategists! Do you want to continue?';
 };
 
-const GameWrapper = ({ children }: PropsWithChildren) => {
+function GameWrapper({ children }: PropsWithChildren) {
   const { gameCode, playerId } = useLogin();
   const { subscribedTypes } = useActivities();
   const { openNotification, errorNotification } = useNotifications();
@@ -97,12 +97,11 @@ const GameWrapper = ({ children }: PropsWithChildren) => {
   useEffect(() => {
     if (!gameCode) {
       navigate('/login');
-      return;
+      return undefined;
     }
 
     // Syncing game's state
-    syncGameStates(gameCode, dispatch).catch((error) => {
-      console.error(error);
+    syncGameStates(gameCode, dispatch).catch(() => {
       errorNotification({
         message: 'Something went wrong!',
         description:
@@ -136,9 +135,7 @@ const GameWrapper = ({ children }: PropsWithChildren) => {
     if (!updates || !gameCode) return;
 
     // Setting up onerror startegy for the event source
-    updates.onerror = (error) => {
-      console.error(error);
-
+    updates.onerror = () => {
       // Preventing reconnection using the same instance.
       updates.close();
 
@@ -222,7 +219,7 @@ const GameWrapper = ({ children }: PropsWithChildren) => {
           // Do nothing
           break;
         default:
-          console.warn(`Unsupported update type: ${type}`);
+          throw new Error(`Unsupported update type: ${type}`);
       }
       if (!activity) return;
       dispatch(activityAdded(activity));
@@ -255,7 +252,7 @@ const GameWrapper = ({ children }: PropsWithChildren) => {
     };
   }, [updates]);
 
-  return <>{children}</>;
-};
+  return children;
+}
 
 export default GameWrapper;

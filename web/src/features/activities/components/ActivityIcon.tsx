@@ -12,14 +12,14 @@ import {
   UserAddOutlined,
   UserDeleteOutlined,
 } from '@ant-design/icons';
-import { UpdateType } from '@activities/state';
 import BankruptcyIcon from '@shared/components/BankruptcyIcon';
+import { UpdateType } from '@activities/state';
 
 interface ActivityIconProps {
   type: UpdateType;
 }
 
-const ActivityIcon = ({ type }: ActivityIconProps) => {
+function ActivityIcon({ type }: ActivityIconProps) {
   switch (type) {
     case 'BANKRUPTCY':
       return <BankruptcyIcon />;
@@ -50,6 +50,6 @@ const ActivityIcon = ({ type }: ActivityIconProps) => {
     default:
       return null;
   }
-};
+}
 
 export default ActivityIcon;

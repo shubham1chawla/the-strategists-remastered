@@ -13,7 +13,7 @@ export interface PortfolioTableProps {
   playerLands: PlayerLand[];
 }
 
-const PortfolioTable = (props: PortfolioTableProps) => {
+function PortfolioTable(props: PortfolioTableProps) {
   const { perspective, playerLands } = props;
   const portfolioItems = usePortfolioItems(perspective, playerLands);
   return (
@@ -57,6 +57,6 @@ const PortfolioTable = (props: PortfolioTableProps) => {
       ]}
     />
   );
-};
+}
 
 export default PortfolioTable;

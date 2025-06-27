@@ -8,9 +8,9 @@ const useCytoscapePlayerEdgeDefinitions = () => {
   // Creating player to land edges
   const playerEdges = useMemo(() => {
     const edges: EdgeDefinition[] = [];
-    for (const player of players) {
+    players.forEach((player) => {
       // Not rendering bankrupted player's edge
-      if (player.state === 'BANKRUPT') continue;
+      if (player.state === 'BANKRUPT') return;
       edges.push({
         data: {
           id: `${player.username}->${lands[player.index].id}`,
@@ -20,7 +20,7 @@ const useCytoscapePlayerEdgeDefinitions = () => {
         selectable: false,
         classes: 'player-edge',
       });
-    }
+    });
     return edges;
   }, [lands, players]);
 

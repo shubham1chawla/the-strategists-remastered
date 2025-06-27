@@ -12,7 +12,7 @@ interface LandStatsProps {
   land: Land;
 }
 
-const LandStats = (props: LandStatsProps) => {
+function LandStats(props: LandStatsProps) {
   const { land } = props;
   return (
     <div className="strategists-stats">
@@ -56,6 +56,6 @@ const LandStats = (props: LandStatsProps) => {
       </Row>
     </div>
   );
-};
+}
 
 export default LandStats;

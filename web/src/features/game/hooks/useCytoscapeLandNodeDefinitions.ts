@@ -58,7 +58,7 @@ const useCytoscapeLandNodeDefinitions = () => {
           },
           position: { x: land.x, y: land.y },
           selectable: false,
-          classes: classes,
+          classes,
         };
       }),
     [lands, sortedPlayers],

@@ -8,18 +8,18 @@ import {
   LogoutOutlined,
   StopFilled,
 } from '@ant-design/icons';
-import useLogin from '@login/hooks/useLogin';
-import { loggedOut } from '@login/state';
-import useGame from '@game/hooks/useGame';
-import PredictionsChart from '@predictions/components/PredictionsChart';
 import ConfettiBackdrop from '@shared/components/ConfettiBackdrop';
 import StrategistsLogo from '@shared/components/StrategistsLogo';
+import useGame from '@game/hooks/useGame';
+import useLogin from '@login/hooks/useLogin';
+import { loggedOut } from '@login/state';
+import PredictionsChart from '@predictions/components/PredictionsChart';
 import TrendsChart from '@trends/components/TrendsChart';
 import PlayerStats from './PlayerStats';
 import PortfolioChart from './PortfolioChart';
 import ResetModal from './ResetModal';
 
-const WinModal = () => {
+function WinModal() {
   const { gameCode, player } = useLogin();
   const { winnerPlayer } = useGame();
   const [showResetModal, setShowResetModal] = useState(false);
@@ -114,6 +114,6 @@ const WinModal = () => {
       )}
     </>
   );
-};
+}
 
 export default WinModal;

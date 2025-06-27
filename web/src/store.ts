@@ -1,11 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
+import logger from 'redux-logger';
 import activitiesReducer, { ActivitiesState } from '@activities/state';
 import advicesReducer, { AdvicesState } from '@advices/state';
 import gameReducer, { GameState } from '@game/state';
 import loginReducer, { LoginState } from '@login/state';
 import predictionsReducer, { PredictionsState } from '@predictions/state';
 import trendsReducer, { TrendsState } from '@trends/state';
-import logger from 'redux-logger';
 
 export interface State {
   activities: ActivitiesState;

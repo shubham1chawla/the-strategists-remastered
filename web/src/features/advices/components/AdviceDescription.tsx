@@ -4,7 +4,7 @@ interface AdviceDescriptionProps {
   advice: Advice;
 }
 
-const AdviceDescription = ({ advice }: AdviceDescriptionProps) => {
+function AdviceDescription({ advice }: AdviceDescriptionProps) {
   const { type, val1, val2 } = advice;
   let description = 'Unknown Advice';
   switch (type) {
@@ -25,9 +25,9 @@ const AdviceDescription = ({ advice }: AdviceDescriptionProps) => {
       description = `Try investing more than ${val1}% to get steep rent from others.`;
       break;
     default:
-      console.warn(`Unknown advice type: ${type}`);
+      throw new Error(`Unknown advice type: ${type}`);
   }
-  return <>{description}</>;
-};
+  return description;
+}
 
 export default AdviceDescription;

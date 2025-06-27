@@ -1,8 +1,8 @@
 import useCytoscape from '@game/hooks/useCytoscape';
-import PortfolioModal from './PortfolioModal';
 import MapTooltip from './MapTooltip';
+import PortfolioModal from './PortfolioModal';
 
-const MapPanel = () => {
+function MapPanel() {
   const { cytoscapeContainerRef, clickedNode, clearClickedNode } =
     useCytoscape();
   return (
@@ -14,9 +14,9 @@ const MapPanel = () => {
         perspective={clickedNode?.type}
         node={clickedNode?.value}
       />
-      <div ref={cytoscapeContainerRef} className="strategists-map"></div>
+      <div ref={cytoscapeContainerRef} className="strategists-map" />
     </>
   );
-};
+}
 
 export default MapPanel;

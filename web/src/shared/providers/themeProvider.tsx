@@ -8,10 +8,10 @@ import {
 import { useSelector } from 'react-redux';
 import { ConfigProvider } from 'antd';
 import { scaleOrdinal, schemeSet1 } from 'd3';
+import { State } from '@/store';
+import EmptyContainer from '@shared/components/EmptyContainer';
 import { Player } from '@game/state';
 import useLogin from '@login/hooks/useLogin';
-import EmptyContainer from '@shared/components/EmptyContainer';
-import { State } from '@/store';
 
 /**
  * Theme colors are defined here, all CSS classes should refer to these variables.
@@ -44,7 +44,7 @@ export interface Theme {
 
 export const ThemeContext = createContext<Theme | null>(null);
 
-const ThemeProvider = ({ children }: PropsWithChildren) => {
+function ThemeProvider({ children }: PropsWithChildren) {
   const { player: loggedInPlayer } = useLogin();
   const { players } = useSelector((state: State) => state.game);
 
@@ -91,19 +91,22 @@ const ThemeProvider = ({ children }: PropsWithChildren) => {
 
   // Setting up documents theme colors
   useEffect(() => {
-    for (const [key, value] of Object.entries(variables)) {
-      document.documentElement.style.setProperty(key, value);
-    }
+    Object.entries(variables).forEach(([key, value]) =>
+      document.documentElement.style.setProperty(key, value),
+    );
   }, [variables]);
 
   // Creating theme context value
-  const value: Theme = {
-    darkColor: DefaultCssVariables['--dark-color'],
-    textColor: DefaultCssVariables['--text-color'],
-    accentColor,
-    playerColors,
-    getPlayerColor,
-  };
+  const value: Theme = useMemo(
+    () => ({
+      darkColor: DefaultCssVariables['--dark-color'],
+      textColor: DefaultCssVariables['--text-color'],
+      accentColor,
+      playerColors,
+      getPlayerColor,
+    }),
+    [accentColor, getPlayerColor, playerColors],
+  );
 
   return (
     <ThemeContext.Provider value={value}>
@@ -153,6 +156,6 @@ const ThemeProvider = ({ children }: PropsWithChildren) => {
       </ConfigProvider>
     </ThemeContext.Provider>
   );
-};
+}
 
 export default ThemeProvider;

@@ -1,9 +1,9 @@
 import { useCallback } from 'react';
 import { GoogleCredentialResponse, GoogleLogin } from '@react-oauth/google';
-import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
 import useNotifications from '@shared/hooks/useNotifications';
+import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
 
-const GoogleLoginWorkflow = () => {
+function GoogleLoginWorkflow() {
   const { loginWorkflow, setLoginWorkflow, setGoogleLoginCredential } =
     useLoginWorkflow();
   const { errorNotification } = useNotifications();
@@ -40,6 +40,6 @@ const GoogleLoginWorkflow = () => {
       useOneTap
     />
   );
-};
+}
 
 export default GoogleLoginWorkflow;

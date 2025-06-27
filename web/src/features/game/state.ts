@@ -63,8 +63,9 @@ const slice = createSlice({
       state,
       { payload }: { payload: [number, number] },
     ) => {
-      state.minPlayersCount = payload[0];
-      state.maxPlayersCount = payload[1];
+      const [minPlayersCount, maxPlayersCount] = payload;
+      state.minPlayersCount = minPlayersCount;
+      state.maxPlayersCount = maxPlayersCount;
     },
     playersSetted: (state, { payload }: { payload: Player[] }) => {
       state.players = [...payload];
@@ -76,10 +77,10 @@ const slice = createSlice({
       state.players = state.players.filter(({ id }) => id !== payload);
     },
     playersPatched: (state, { payload }: { payload: Player[] }) => {
-      const patches = new Map<number, Player>();
-      for (const p of payload || []) {
-        patches.set(p.id, p);
-      }
+      const patches = (payload || []).reduce((map, player) => {
+        map.set(player.id, player);
+        return map;
+      }, new Map<number, Player>());
       state.players = state.players.map(
         (player) => patches.get(player.id) || player,
       );
@@ -88,10 +89,10 @@ const slice = createSlice({
       state.lands = [...payload];
     },
     landsPatched: (state, { payload }: { payload: Land[] }) => {
-      const patches = new Map<number, Land>();
-      for (const land of payload || []) {
-        patches.set(land.id, land);
-      }
+      const patches = (payload || []).reduce((map, land) => {
+        map.set(land.id, land);
+        return map;
+      }, new Map<number, Land>());
       state.lands = state.lands.map((land) => patches.get(land.id) || land);
     },
   },

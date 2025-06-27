@@ -1,4 +1,4 @@
-import { createContext, PropsWithChildren } from 'react';
+import { createContext, PropsWithChildren, useMemo } from 'react';
 import { notification } from 'antd';
 import { ArgsProps } from 'antd/es/notification';
 import { NotificationInstance } from 'antd/es/notification/interface';
@@ -17,33 +17,36 @@ interface NotificationsContextValue {
 export const NotificationsContext =
   createContext<NotificationsContextValue | null>(null);
 
-const NotificationsProvider = ({ children }: PropsWithChildren) => {
+function NotificationsProvider({ children }: PropsWithChildren) {
   const [instance, contextHolder] = notification.useNotification({
     stack: NOTIFICATIONS_STACK,
     maxCount: NOTIFICATION_MAX_COUNT,
   });
 
-  const value: NotificationsContextValue = {
-    instance,
-    openNotification: (args: ArgsProps) => {
-      instance.open({
-        ...args,
-        duration: args.duration || NOTIFICATION_DURATION,
-      });
-    },
-    infoNotification: (args: ArgsProps) => {
-      instance.info({
-        ...args,
-        duration: args.duration || NOTIFICATION_DURATION,
-      });
-    },
-    errorNotification: (args: ArgsProps) => {
-      instance.error({
-        ...args,
-        duration: args.duration || NOTIFICATION_DURATION,
-      });
-    },
-  };
+  const value: NotificationsContextValue = useMemo(
+    () => ({
+      instance,
+      openNotification: (args: ArgsProps) => {
+        instance.open({
+          ...args,
+          duration: args.duration || NOTIFICATION_DURATION,
+        });
+      },
+      infoNotification: (args: ArgsProps) => {
+        instance.info({
+          ...args,
+          duration: args.duration || NOTIFICATION_DURATION,
+        });
+      },
+      errorNotification: (args: ArgsProps) => {
+        instance.error({
+          ...args,
+          duration: args.duration || NOTIFICATION_DURATION,
+        });
+      },
+    }),
+    [instance],
+  );
 
   return (
     <NotificationsContext.Provider value={value}>
@@ -51,6 +54,6 @@ const NotificationsProvider = ({ children }: PropsWithChildren) => {
       {children}
     </NotificationsContext.Provider>
   );
-};
+}
 
 export default NotificationsProvider;
