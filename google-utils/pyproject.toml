@@ -1,18 +1,19 @@
-[tool.poetry]
+[project]
 name = "google-utils"
 version = "0.1.0"
 description = "The Strategists Google API Utilities and Wrappers"
-authors = ["Shubham Chawla <shubham_chawla@live.com>"]
+authors = [{ name = "Shubham Chawla", email = "shubham_chawla@live.com" }]
+requires-python = ">=3.12, <4"
 readme = "README.md"
+dependencies = [
+    "google-api-python-client>=2.174.0",
+    "google-auth-httplib2>=0.2.0",
+    "google-auth-oauthlib>=1.2.2",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-google-auth = "^2.29.0"
-google-api-python-client = "^2.126.0"
-google-auth-httplib2 = "^0.2.0"
-google-auth-oauthlib = "^1.2.0"
-
+[tool.hatch.build]
+include = ['src/**']
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"

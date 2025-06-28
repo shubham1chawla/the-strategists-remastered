@@ -1,9 +1,9 @@
-import os
 import json
 import logging as log
-from typing import final, Any
+import os
 from dataclasses import dataclass
 from enum import Enum, unique
+from typing import final, Any
 
 from google.oauth2.service_account import Credentials
 from googleapiclient.errors import HttpError
@@ -52,7 +52,6 @@ class PermissionUtils:
             os.mkdir(self.export_dir)
         self.export_file_path = os.path.join(self.export_dir, 'permissions.json')
 
-
     def get_permission_groups(self) -> list[PermissionGroup]:
 
         # Finding results from Google Sheets
@@ -68,13 +67,12 @@ class PermissionUtils:
         # Converting response to permissions
         return [PermissionGroup(value[0], PermissionStatus(value[1])) for value in response['values']]
 
-
     def export_permission_groups(self) -> None:
 
         # Fetching permissions
         permissions = self.get_permission_groups()
         log.info(f'Found {len(permissions)} permission groups')
-        
+
         # Exporting permissions
         with open(self.export_file_path, 'w') as file:
             file.write(json.dumps([permission.__dict__ for permission in permissions], indent=4))
@@ -113,7 +111,6 @@ class PredictionUtils:
             log.info(f'Creating directory: {self.game_data_dir}')
             os.mkdir(self.game_data_dir)
 
-    
     def list_csv_files(self, folder_id: str) -> list[Any]:
         files = self.service.list(
             q=f'(mimeType=\'text/csv\') and (\'{folder_id}\' in parents)',
@@ -121,7 +118,6 @@ class PredictionUtils:
             fields='nextPageToken, files(id, name)'
         )
         return files
-    
 
     def list_local_csv_files(self) -> list[str]:
         local_csv_files = []
@@ -129,7 +125,6 @@ class PredictionUtils:
             if file_name.endswith('.csv'):
                 local_csv_files.append(file_name)
         return local_csv_files
-    
 
     def download_csv_files(self) -> None:
 
@@ -143,15 +138,15 @@ class PredictionUtils:
         # Getting CSV files already present in the directory
         local_csv_files = set(self.list_local_csv_files())
         log.info(f'Found {len(local_csv_files)} Game CSV files present in {self.game_data_dir}')
-            
+
         # Saving CSV files' bytes
         downloaded_csv_bytes = []
         for i, csv_file in enumerate(csv_files):
             csv_file_id, csv_file_name = csv_file.get('id'), csv_file.get('name')
-            
+
             # Checking if CSV file already downloaded
             if csv_file_name in local_csv_files and self.download_strategy == DownloadStrategy.MISSING:
-                log.debug(f'[{i+1:>4}/{len(csv_files):<4}] Skipped downloading {csv_file_name}')
+                log.debug(f'[{i + 1:>4}/{len(csv_files):<4}] Skipped downloading {csv_file_name}')
                 continue
 
             try:
@@ -163,13 +158,12 @@ class PredictionUtils:
                 export_file_path = os.path.join(self.game_data_dir, csv_file_name)
                 with open(export_file_path, 'wb') as csv:
                     csv.write(csv_bytes)
-                log.debug(f'[{i+1:>4}/{len(csv_files):<4}] Downloaded {csv_file_name}')
+                log.debug(f'[{i + 1:>4}/{len(csv_files):<4}] Downloaded {csv_file_name}')
 
             except HttpError as error:
                 log.error(f'Error occured while downloading {csv_file_name}. Message: {error.reason}')
-                
-        log.info(f'Downloaded {len(downloaded_csv_bytes)} to {self.game_data_dir}')
 
+        log.info(f'Downloaded {len(downloaded_csv_bytes)} to {self.game_data_dir}')
 
     def upload_csv_files(self) -> None:
 
@@ -189,28 +183,28 @@ class PredictionUtils:
 
             # Checking if file is already present in Google Drive
             if local_csv_file in drive_csv_files:
-                log.debug(f'[{i+1:>4}/{len(local_csv_files):<4}] Skipped uploading {local_csv_file}')
+                log.debug(f'[{i + 1:>4}/{len(local_csv_files):<4}] Skipped uploading {local_csv_file}')
                 continue
 
             try:
 
                 # Uploading CSV file to the upload folder
                 local_csv_file_path = os.path.join(self.game_data_dir, local_csv_file)
-                mimeType = 'text/csv'
+                mime_type = 'text/csv'
                 uploaded_csv_file_id = self.service.create(
-                    MediaFileUpload(local_csv_file_path, mimetype=mimeType),
+                    MediaFileUpload(local_csv_file_path, mimetype=mime_type),
                     {
                         'name': local_csv_file,
-                        'mimeType': mimeType,
+                        'mimeType': mime_type,
                         'parents': [self.upload_folder_id]
                     }
                 )
                 uploaded_csv_files.append(uploaded_csv_file_id)
-                log.debug(f'[{i+1:>4}/{len(local_csv_files):<4}] Uploaded {local_csv_file}')
+                log.debug(f'[{i + 1:>4}/{len(local_csv_files):<4}] Uploaded {local_csv_file}')
 
             except HttpError as error:
-                log.error(f'Error occured while uploading {local_csv_file}. Message: {error.reason}')
-        
+                log.error(f'Error occurred while uploading {local_csv_file}. Message: {error.reason}')
+
         log.info(f'Uploaded {len(uploaded_csv_files)} from {self.game_data_dir}')
 
 
@@ -238,7 +232,6 @@ class AdviceUtils:
             log.info(f'Creating directory: {self.advice_data_dir}')
             os.mkdir(self.advice_data_dir)
 
-
     def list_csv_files(self) -> list[Any]:
         files = self.service.list(
             q=f'(mimeType=\'text/csv\') and (\'{self.upload_folder_id}\' in parents)',
@@ -246,7 +239,6 @@ class AdviceUtils:
             fields='nextPageToken, files(id, name)'
         )
         return files
-    
 
     def list_local_csv_files(self) -> list[str]:
         local_json_files = []
@@ -255,9 +247,8 @@ class AdviceUtils:
                 local_json_files.append(file_name)
         return local_json_files
 
-
     def upload_csv_files(self):
-        
+
         # Finding CSV files in the download and upload folders
         drive_csv_files = set([drive_csv_file.get('name') for drive_csv_file in self.list_csv_files()])
         log.info(f'Found {len(drive_csv_files)} Advice CSV files present in Google Drive')
@@ -268,26 +259,26 @@ class AdviceUtils:
 
             # Checking if file is already present in Google Drive
             if local_csv_file in drive_csv_files:
-                log.debug(f'[{i+1:>4}/{len(local_csv_files):<4}] Skipped uploading {local_csv_file}')
+                log.debug(f'[{i + 1:>4}/{len(local_csv_files):<4}] Skipped uploading {local_csv_file}')
                 continue
 
             try:
 
                 # Uploading CSV file to the upload folder
                 local_csv_file_path = os.path.join(self.advice_data_dir, local_csv_file)
-                mimeType = 'text/csv'
+                mime_type = 'text/csv'
                 uploaded_csv_file_id = self.service.create(
-                    MediaFileUpload(local_csv_file_path, mimetype=mimeType),
+                    MediaFileUpload(local_csv_file_path, mimetype=mime_type),
                     {
                         'name': local_csv_file,
-                        'mimeType': mimeType,
+                        'mimeType': mime_type,
                         'parents': [self.upload_folder_id]
                     }
                 )
                 uploaded_csv_files.append(uploaded_csv_file_id)
-                log.debug(f'[{i+1:>4}/{len(local_csv_files):<4}] Uploaded {local_csv_file}')
+                log.debug(f'[{i + 1:>4}/{len(local_csv_files):<4}] Uploaded {local_csv_file}')
 
             except HttpError as error:
-                log.error(f'Error occured while uploading {local_csv_file}. Message: {error.reason}')
-        
+                log.error(f'Error occurred while uploading {local_csv_file}. Message: {error.reason}')
+
         log.info(f'Uploaded {len(uploaded_csv_files)} from {self.advice_data_dir}')
