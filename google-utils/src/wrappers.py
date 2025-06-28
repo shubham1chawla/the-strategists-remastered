@@ -22,7 +22,6 @@ class GoogleSheetsService(AbstractGoogleService):
         super().__init__('sheets', 'v4', credentials)
         log.info(f'INITIATED: {self.__class__.__name__} {self}')
 
-    
     def get(self, **criteria) -> Any:
         log.debug(f'Google Sheets | GET: {criteria}')
 
@@ -36,7 +35,6 @@ class GoogleDriveService(AbstractGoogleService):
         super().__init__('drive', 'v3', credentials)
         log.info(f'INITIATED: {self.__class__.__name__} {self}')
 
-    
     def create(self, media: MediaFileUpload, metadata: Any) -> Any:
         log.debug(f'Google Drive | CREATE: metadata={metadata}, media={media}')
 
@@ -47,8 +45,7 @@ class GoogleDriveService(AbstractGoogleService):
             .execute()
         )
         return file.get('id')
-    
-    
+
     def list(self, **criteria) -> list[Any]:
         log.debug(f'Google Drive | LIST: {criteria}')
         all_files, page_token = [], None
@@ -69,10 +66,9 @@ class GoogleDriveService(AbstractGoogleService):
             # Checking if more files exists
             if page_token is None:
                 break
-        
+
         # Returning files
         return all_files
-    
 
     def get_media(self, file_id: str) -> bytes:
         log.debug(f'Google Drive | GET_MEDIA: fileId={file_id}')
@@ -85,6 +81,6 @@ class GoogleDriveService(AbstractGoogleService):
         while downloaded is False:
             status, downloaded = downloader.next_chunk()
             log.debug(f'Progress: {int(status.progress() * 100)}%')
-        
+
         # Returning bytes of the file
         return file.getvalue()

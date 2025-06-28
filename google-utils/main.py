@@ -5,7 +5,6 @@ import logging as log
 from src.cli import get_argument_parser
 from src.utils import PermissionUtils, PredictionUtils, AdviceUtils
 
-
 if __name__ == '__main__':
     log.basicConfig(level=log.INFO)
     log.getLogger('googleapiclient.discovery_cache').setLevel(log.ERROR)
@@ -14,13 +13,19 @@ if __name__ == '__main__':
     parser = get_argument_parser()
     args = parser.parse_args()
 
-    if args.command == 'permissions':
-        PermissionUtils(**args.__dict__).export_permission_groups()
-    elif args.command == 'predictions' and args.subcommand == 'download':
-        PredictionUtils(**args.__dict__).download_csv_files()
-    elif args.command == 'predictions' and args.subcommand == 'upload':
-        PredictionUtils(**args.__dict__).upload_csv_files()
-    elif args.command == 'advices':
-        AdviceUtils(**args.__dict__).upload_csv_files()
-    else:
-        raise ValueError(f'Unknown command and subcommand combination!')
+    match args.command:
+        case 'permissions':
+            PermissionUtils(**args.__dict__).export_permission_groups()
+        case 'predictions':
+            utils = PredictionUtils(**args.__dict__)
+            match args.subcommand:
+                case 'download':
+                    utils.download_csv_files()
+                case 'upload':
+                    utils.upload_csv_files()
+                case _:
+                    raise ValueError(f'Unknown predictions subcommand: {args.subcommand}')
+        case 'advices':
+            AdviceUtils(**args.__dict__).upload_csv_files()
+        case _:
+            raise ValueError(f'Unknown command: {args.command}')

@@ -1,5 +1,5 @@
-from enum import IntEnum, unique
 from argparse import ArgumentParser
+from enum import IntEnum, unique
 
 from src.utils import DownloadStrategy
 
@@ -16,30 +16,56 @@ class Argument(IntEnum):
     DOWNLOAD_STRATEGY = 7
     ADVICE_DATA_DIRECTORY = 8
 
-
     def add_to(self, parser: ArgumentParser) -> None:
-        if self == Argument.SERVICE_ACCOUNT_CREDENTIALS_JSON:
-            parser.add_argument('--credentials-json', type=str, help='Google Service Account Credentials JSON file path.', required=True)
-        elif self == Argument.GOOGLE_SPREADSHEET_ID:
-            parser.add_argument('--spreadsheet-id', type=str, help='Google Sheets ID', required=True)
-        elif self == Argument.GOOGLE_SPREADSHEET_RANGE:
-            parser.add_argument('--spreadsheet-range', type=str, help='Google Sheets range to query', required=True)
-        elif self == Argument.PERMISSIONS_EXPORT_DIR:
-            parser.add_argument('--export-dir', type=str, help='Fetched permissions export directory', required=True)
-        elif self == Argument.GOOGLE_DOWNLOAD_FOLDER_ID:
-            parser.add_argument('--download-folder-id', type=str, help='Google Drive download folder ID', required=True)
-        elif self == Argument.GOOGLE_UPLOAD_FOLDER_ID:
-            parser.add_argument('--upload-folder-id', type=str, help='Google Drive upload folder ID', required=True)
-        elif self == Argument.GAME_DATA_DIRECTORY:
-            parser.add_argument('--game-data-dir', type=str, help='Game data directory', required=True)
-        elif self == Argument.DOWNLOAD_STRATEGY:
-            default = DownloadStrategy.MISSING
-            choices = [strategy.value for strategy in DownloadStrategy]
-            parser.add_argument('--strategy', type=DownloadStrategy, help='Download strategy', default=default, choices=choices)
-        elif self == Argument.ADVICE_DATA_DIRECTORY:
-            parser.add_argument('--advice-data-dir', type=str, help='Advice data directory', required=True)
-        else:
-            raise ValueError(f'Unknown argument: {self}')
+        match self:
+            case Argument.SERVICE_ACCOUNT_CREDENTIALS_JSON:
+                parser.add_argument('--credentials-json',
+                                    type=str,
+                                    help='Google Service Account Credentials JSON file path.',
+                                    required=True)
+            case Argument.GOOGLE_SPREADSHEET_ID:
+                parser.add_argument('--spreadsheet-id',
+                                    type=str,
+                                    help='Google Sheets ID',
+                                    required=True)
+            case Argument.GOOGLE_SPREADSHEET_RANGE:
+                parser.add_argument('--spreadsheet-range',
+                                    type=str,
+                                    help='Google Sheets range to query',
+                                    required=True)
+            case Argument.PERMISSIONS_EXPORT_DIR:
+                parser.add_argument('--export-dir',
+                                    type=str,
+                                    help='Fetched permissions export directory',
+                                    required=True)
+            case Argument.GOOGLE_DOWNLOAD_FOLDER_ID:
+                parser.add_argument('--download-folder-id',
+                                    type=str,
+                                    help='Google Drive download folder ID',
+                                    required=True)
+            case Argument.GOOGLE_UPLOAD_FOLDER_ID:
+                parser.add_argument('--upload-folder-id',
+                                    type=str,
+                                    help='Google Drive upload folder ID',
+                                    required=True)
+            case Argument.GAME_DATA_DIRECTORY:
+                parser.add_argument('--game-data-dir',
+                                    type=str,
+                                    help='Game data directory',
+                                    required=True)
+            case Argument.DOWNLOAD_STRATEGY:
+                parser.add_argument('--strategy',
+                                    type=DownloadStrategy,
+                                    help='Download strategy',
+                                    default=DownloadStrategy.MISSING,
+                                    choices=[strategy.value for strategy in DownloadStrategy])
+            case Argument.ADVICE_DATA_DIRECTORY:
+                parser.add_argument('--advice-data-dir',
+                                    type=str,
+                                    help='Advice data directory',
+                                    required=True)
+            case _:
+                raise ValueError(f'Unknown argument: {self}')
 
 
 def set_permissions_arguments(parser: ArgumentParser) -> None:
@@ -94,15 +120,18 @@ def get_argument_parser() -> ArgumentParser:
     subparsers = parser.add_subparsers(dest='command', required=True)
 
     # Adding permissions command
-    parser_permissions = subparsers.add_parser('permissions', description='The Strategists Google Sheets-based permissions utility.')
+    parser_permissions = subparsers.add_parser('permissions',
+                                               description='The Strategists Google Sheets-based permissions utility.')
     set_permissions_arguments(parser_permissions)
 
     # Adding predictions command
-    parser_predictions = subparsers.add_parser('predictions', description='The Strategists Google Drive-based predictions utility.')
+    parser_predictions = subparsers.add_parser('predictions',
+                                               description='The Strategists Google Drive-based predictions utility.')
     set_predictions_arguments(parser_predictions)
 
     # Adding advice command
-    parser_advices = subparsers.add_parser('advices', description='The Strategists Google Drive-based advices utility.')
+    parser_advices = subparsers.add_parser('advices',
+                                           description='The Strategists Google Drive-based advices utility.')
     set_advices_arguments(parser_advices)
 
     return parser
