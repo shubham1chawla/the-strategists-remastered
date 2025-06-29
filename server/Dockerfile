@@ -1,6 +1,6 @@
 ######## Maven Build Stage ########
 
-FROM maven:3.8.5-openjdk-17 as maven_build
+FROM maven:3.9.8-eclipse-temurin-21 as maven_build
 WORKDIR /app
 
 # copying pom.xml
@@ -17,11 +17,17 @@ RUN mkdir -p target/docker-packaging && cd target/docker-packaging && jar -xf ..
 
 ######## Extracting Jar & Prediction Model ########
 
-# installing python 3.9 and java jdk 17
-FROM python:3.9-slim
-COPY --from=openjdk:17-jdk-slim-buster /usr/local/openjdk-17 /usr/local/openjdk-17
-ENV JAVA_HOME /usr/local/openjdk-17
-RUN update-alternatives --install /usr/bin/java java /usr/local/openjdk-17/bin/java 1
+FROM python:3.12-slim-bookworm
+
+# installing java in the image
+COPY --from=openjdk:21-jdk-slim-buster /usr/local/openjdk-21 /usr/local/openjdk-21
+ENV JAVA_HOME /usr/local/openjdk-21
+RUN update-alternatives --install /usr/bin/java java /usr/local/openjdk-21/bin/java 1
+
+# installing uv in the image
+COPY --from=ghcr.io/astral-sh/uv:0.7.16 /uv /uvx /bin/
+
+# moving to working directory
 WORKDIR /app
 
 # copying built Spring Boot app layer by layer
@@ -33,22 +39,16 @@ COPY --from=maven_build ${DOCKER_PACKAGING_DIR}/META-INF /app/server/META-INF
 # copying prediction model
 COPY prediction /app/prediction
 
-# installing poetry
+# setting up python venv
 WORKDIR /app/prediction
-RUN python3 -m pip install --upgrade pip && \
-    pip3 install poetry && \
-    poetry config virtualenvs.in-project true && \
-    poetry install
+RUN uv sync --locked
 
 # copying google-utils model
 COPY google-utils /app/google-utils
 
-# installing poetry
+# setting up python venv
 WORKDIR /app/google-utils
-RUN python3 -m pip install --upgrade pip && \
-    pip3 install poetry && \
-    poetry config virtualenvs.in-project true && \
-    poetry install
+RUN uv sync --locked
 
 ######## Execution Stage ########
 

@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { GoogleCredentialResponse, GoogleLogin } from '@react-oauth/google';
 import useNotifications from '@shared/hooks/useNotifications';
 import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
+import InvalidGoogleClientIDPrompt from './InvalidGoogleClientIDPrompt';
 
 function GoogleLoginWorkflow() {
   const { loginWorkflow, setLoginWorkflow, setGoogleLoginCredential } =
@@ -30,15 +31,18 @@ function GoogleLoginWorkflow() {
 
   if (loginWorkflow !== 'VERIFIED') return null;
   return (
-    <GoogleLogin
-      onSuccess={handleGoogleLoginSuccess}
-      onError={handleGoogleLoginError}
-      theme="filled_black"
-      size="medium"
-      shape="rectangular"
-      text="signin_with"
-      useOneTap
-    />
+    <>
+      <InvalidGoogleClientIDPrompt />
+      <GoogleLogin
+        onSuccess={handleGoogleLoginSuccess}
+        onError={handleGoogleLoginError}
+        theme="filled_black"
+        size="medium"
+        shape="rectangular"
+        text="signin_with"
+        useOneTap
+      />
+    </>
   );
 }
 
