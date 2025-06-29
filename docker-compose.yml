@@ -6,11 +6,12 @@ version: '3.7'
 services:
   strategists-web:
     container_name: strategists-web
-    # image: <REPOSITORY_NAME>/strategists-web:<TAG_NAME>
     platform: linux/amd64
     build:
       context: web
       dockerfile: Dockerfile
+    env_file:
+      - shared/secrets/web.env.list
     ports:
       - "3000:80"
     depends_on:
@@ -20,7 +21,6 @@ services:
   
   strategists-service:
     container_name: strategists-service
-    # image: <REPOSITORY_NAME>/strategists-service:<TAG_NAME>
     platform: linux/amd64
     build: 
       context: .

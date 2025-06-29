@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
 import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
+import InvalidGoogleRecaptchaSiteKeyPrompt from './InvalidGoogleRecaptchaSiteKeyPrompt';
 
 function RecaptchaWorkflow() {
   const { loginWorkflow, setLoginWorkflow } = useLoginWorkflow();
@@ -25,15 +26,18 @@ function RecaptchaWorkflow() {
    * https://github.com/google/recaptcha/issues/269#issuecomment-606838861
    */
   return (
-    <ReCAPTCHA
-      style={{
-        display: loginWorkflow === 'NOT_VERIFIED' ? 'block' : 'none',
-      }}
-      sitekey={import.meta.env.VITE_GOOGLE_RECAPTCHA_SITE_KEY || ''}
-      theme="dark"
-      onChange={onRecaptchaChange}
-      onExpired={() => setLoginWorkflow('NOT_VERIFIED')}
-    />
+    <>
+      <InvalidGoogleRecaptchaSiteKeyPrompt />
+      <ReCAPTCHA
+        style={{
+          display: loginWorkflow === 'NOT_VERIFIED' ? 'block' : 'none',
+        }}
+        sitekey={import.meta.env.VITE_GOOGLE_RECAPTCHA_SITE_KEY || ''}
+        theme="dark"
+        onChange={onRecaptchaChange}
+        onExpired={() => setLoginWorkflow('NOT_VERIFIED')}
+      />
+    </>
   );
 }
 
