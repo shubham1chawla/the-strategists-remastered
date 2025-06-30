@@ -99,7 +99,7 @@ strategists:
         bypass-google-sheets-query-for-testing: false
         command: permissions
         export:
-          directory: ../shared/secrets/
+          directory: ${PERMISSIONS_EXPORT_DIR:}
           file-name: permissions.json
         spreadsheet:
           id: ${PERMISSIONS_SPREADSHEET_ID:}
