@@ -1,93 +1,103 @@
 # The Strategists - Backend Service
 
-This directory is a Spring Boot application that serves as a backend service for The Strategists.
+This directory contains the _Spring Boot_ application for The Strategists game.
 
 ## Setup
 
-Follow the steps below to understand how to set up the Spring Boot application and create Docker images.
+1. Please ensure you have `java` installed on your system to continue. The project requires `v21`, and recommends using
+   `openjdk@21` specifically.
+2. Import the `maven` project in the IDE of your choice. We recommend using [IntelliJ](https://www.jetbrains.com/idea/)
+   since all the source code is formatted using _IntelliJ_.
+3. Configure Environment variables & VM arguments mentioned in the following section.
+4. After setting up Environment variables & VM arguments, run `com.strategists.game.StrategistsService` to start the
+   backend service.
 
-### Step 1 - Importing Maven Project
+### Setting up Environment Variables & VM Arguments
 
-- Use any IDE, such as [Eclipse](https://www.eclipse.org/) or [IntelliJ](https://www.jetbrains.com/idea/), to import this `server` folder containing the `pom.xml` file as a maven project.
+All the VM arguments are mentioned in the [`application.yml`](./src/main/resources/application.yml) file,
+including a few environment variables that can be configured on run-time. A list of those are mentioned below.
 
-### Step 2 - Setting up Environment Variables
+In addition to all the configurations mentioned in the `application.yml` file, please refer to the following variables
+required to run the server. Please refer to the `google-utils/README.md` file for Google-related configurations.
 
-In addition to all the configurations mentioned in the `application.yml` file, please refer to the following variables required to run the server. Please refer to the `google-utils/README.md` file for Google-related configurations.
+| Variable                                     | Description                                                                                                 | Type      | Default Value |
+|----------------------------------------------|-------------------------------------------------------------------------------------------------------------|-----------|---------------|
+| ENABLE_H2_CONSOLE                            | If set, the server will expose the H2 database console URL by the server.                                   | `boolean` | `false`       |
+| ENABLE_SSE_PING                              | If set, the server will send a periodic ping to keep the SSE channel open.                                  | `boolean` | `true`        |
+| ENABLE_CLEAN_UP                              | If set, the server will delete games after some time of inactivity.                                         | `boolean` | `true`        |
+| ENABLE_SKIP_PLAYER                           | If set, the server will skip players' turns after some time of inactivity.                                  | `boolean` | `true`        |
+| ENABLE_PREDICTIONS                           | If set, the server will train and execute the prediction model.                                             | `boolean` | `true`        |
+| ENABLE_PREDICTIONS_TRAIN_ON_STARTUP          | If set, the server will train the prediction model on server start-up.                                      | `boolean` | `true`        |
+| ENABLE_PREDICTIONS_TRAIN_ON_END              | If set, the server will train the prediction model when game ends.                                          | `boolean` | `true`        |
+| ENABLE_PREDICTIONS_DATA_EXPORT               | If set, the server will export CSV files for model training and execution.                                  | `boolean` | `true`        |
+| ENABLE_PREDICTIONS_DATA_INTEGRITY_VALIDATION | If set, the server will perform integrity before exporting game's CSV file.                                 | `boolean` | `true`        |
+| ENABLE_PREDICTIONS_MODEL_EXECUTION           | If set, the server will execute the model for predictions.                                                  | `boolean` | `true`        |
+| ENABLE_ADVICES                               | If set, the server will generate advices for players                                                        | `boolean` | `true`        |
+| ENABLE_FREQUENTLY_INVEST_ADVICE              | If set, the server will generate "frequently invest" advice for players                                     | `boolean` | `true`        |
+| ENABLE_AVOID_TIMEOUT_ADVICE                  | If set, the server will generate "avoid timeout" advice for players                                         | `boolean` | `true`        |
+| ENABLE_SIGNIFICANT_INVESTMENTS_ADVICE        | If set, the server will generate "significant investments" advice for players                               | `boolean` | `true`        |
+| ENABLE_CONCENTRATE_INVESTMENTS_ADVICE        | If set, the server will generate "concentrate investments" advice for players                               | `boolean` | `true`        |
+| ENABLE_POTENTIAL_BANKRUPTCY_ADVICE           | If set, the server will generate "potential bankruptcy" advice for players                                  | `boolean` | `true`        |
+| GOOGLE_RECAPTCHA_SECRET_KEY                  | Google Recaptcha Secret Key (Version 2) that will verify users after they check the 'I am not a robot' box. | `String`  | none          |
+| GOOGLE_CREDENTIALS_JSON                      | Path to the Google Service Account's Credentials as a JSON file.                                            | `String`  | none          |
+| PERMISSIONS_EXPORT_DIR                       | Path to the directory where permissions JSON will be exported.                                              | `String`  | none          |
+| PERMISSIONS_SPREADSHEET_ID                   | Google Spreadsheet ID, which manages user permission groups.                                                | `String`  | none          |
+| PERMISSIONS_SPREADSHEET_RANGE                | Range you want the server to query to fetch the permission groups.                                          | `String`  | none          |
+| PREDICTIONS_DOWNLOAD_FOLDER_ID               | Google Drive folder ID where all the game data is present.                                                  | `String`  | none          |
+| PREDICTIONS_UPLOAD_FOLDER_ID                 | Google Drive folder ID where the server should upload new game data.                                        | `String`  | none          |
+| ADVICES_UPLOAD_FOLDER_ID                     | Google Drive folder ID where the server should upload new advice data.                                      | `String`  | none          |
 
 > [!NOTE]
-> If you are using an IDE like Eclipse, you can pass these environment variables to the application as `-D<VARIABLE_NAME>=<VALUE>` by adding them to the VM arguments of the run configuration.
+> You can pass these environment variables and other VM arguments to the application as `-D<VARIABLE_NAME>=<VALUE>`
+> by adding them to the VM arguments section of the run configuration in your IDE.
 
-Variable | Description | Type | Default Value
---- | --- | --- | ---
-ENABLE_H2_CONSOLE | If set, the server will expose the H2 database console URL by the server. | `boolean` | `false`
-ENABLE_SSE_PING | If set, the server will send a periodic ping to keep the SSE channel open. | `boolean` | `true`
-ENABLE_CLEAN_UP | If set, the server will delete games after some time of inactivity. | `boolean` | `true`
-ENABLE_SKIP_PLAYER | If set, the server will skip players' turns after some time of inactivity. | `boolean` | `true`
-ENABLE_PREDICTIONS | If set, the server will train and execute the prediction model. | `boolean` | `true`
-ENABLE_PREDICTIONS_TRAIN_ON_STARTUP | If set, the server will train the prediction model on server start-up. | `boolean` | `true`
-ENABLE_PREDICTIONS_TRAIN_ON_END | If set, the server will train the prediction model when game ends. | `boolean` | `true`
-ENABLE_PREDICTIONS_DATA_EXPORT | If set, the server will export CSV files for model training and execution. | `boolean` | `true`
-ENABLE_PREDICTIONS_DATA_INTEGRITY_VALIDATION | If set, the server will perform integrity before exporting game's CSV file. | `boolean` | `true`
-ENABLE_PREDICTIONS_MODEL_EXECUTION | If set, the server will execute the model for predictions. | `boolean` | `true`
-ENABLE_ADVICES | If set, the server will generate advices for players | `boolean` | `true`
-ENABLE_FREQUENTLY_INVEST_ADVICE | If set, the server will generate "frequently invest" advice for players | `boolean` | `true`
-ENABLE_AVOID_TIMEOUT_ADVICE | If set, the server will generate "avoid timeout" advice for players | `boolean` | `true`
-ENABLE_SIGNIFICANT_INVESTMENTS_ADVICE | If set, the server will generate "significant investments" advice for players | `boolean` | `true`
-ENABLE_CONCENTRATE_INVESTMENTS_ADVICE | If set, the server will generate "concentrate investments" advice for players | `boolean` | `true`
-ENABLE_POTENTIAL_BANKRUPTCY_ADVICE | If set, the server will generate "potential bankruptcy" advice for players | `boolean` | `true`
-GOOGLE_RECAPTCHA_SECRET_KEY | Google Recaptcha Secret Key (Version 2) that will verify users after they check the 'I am not a robot' box. It would be best if you either created your own or used the testing one mentioned on [this website](https://developers.google.com/recaptcha/docs/faq#id-like-to-run-automated-tests-with-recaptcha.-what-should-i-do). | `String` | none
-GOOGLE_CREDENTIALS_JSON | Path to the Google Service Account's Credentials as a JSON file. Learn how to create service accounts from [this webpage](https://cloud.google.com/iam/docs/service-accounts-create). | `String` | none
-PERMISSIONS_SPREADSHEET_ID | Google Spreadsheet ID, which manages user permission groups. | `String` | none
-PERMISSIONS_SPREADSHEET_RANGE | Range you want the server to query to fetch the permission groups. | `String` | none
-PREDICTIONS_DOWNLOAD_FOLDER_ID | Google Drive folder ID where all the game data is present. | `String` | none
-PREDICTIONS_UPLOAD_FOLDER_ID | Google Drive folder ID where the server should upload new game data. | `String` | none
-ADVICES_UPLOAD_FOLDER_ID | Google Drive folder ID where the server should upload new advice data. | `String` | none
+#### Google ReCAPTCHA
 
-### Step 3 - Running Server
+Please follow The Strategist's Web project's [README](../web/README.md) to learn more about how to configure
+_Google ReCAPTCHA_ `Site Key` and `Secret Key`. Once you have created those, you can supply the `Secret Key` to
+`GOOGLE_RECAPTCHA_SECRET_KEY` environment variable for server-based authentication of whether user is real or is a bot.
 
-- After configuring the VM arguments, you can run the `StrategistsService.java` file from your IDE to start the backend server.
+#### Google Service Account
 
-## Docker
+To configure _Google Service Account_, you can follow these steps. Also read more about it from _Google_'s documentation
+on [this webpage](https://cloud.google.com/iam/docs/service-accounts-create).
 
-Read the following steps to build and run the backend service's Docker image.
+1. Navigate to [Google Cloud Console](https://console.cloud.google.com/) website.
+2. Create a project from the welcome screen, you can name it anything you want, as long as you remember it.
+3. Once the project is selected, navigate to the [IAM & Admin](https://console.cloud.google.com/iam-admin) page.
+4. Select the _Service Accounts_ tab.
+5. Click on the _Create service account_ button.
+6. Enter _Service account name_ and _Service account ID_ as `strategists-service-account`.
+7. Enter a short description for the service account for your reference.
+8. For _Permissions_, you can either ignore it or set it as `Editor`.
+9. You can ignore the `Principals with access` section and create the service account.
+10. Once created, open the service account, and navigate to the _Keys_ section.
+11. Click on _Add key_ dropdown and select the `JSON` option.
+12. You will see a prompt and the credentials `JSON` file will be downloaded.
+    **Save this JSON file at a secure location for further use as you won't be able to download it again.**
+13. Use the path to this credentials file for the `GOOGLE_CREDENTIALS_JSON` environment variable.
 
-### Step 1 - How to build a Docker Image?
+> Now that you have downloaded the _Service Account_'s credentials file, you can use the `client_email` in the `JSON`
+> file to access The Strategists' Permissions' _Google Spreadsheet_ & _Drive_ folders. Refer to The Strategists'
+> Google Utils' [README](../google-utils/README.md) file for more details.
 
-> [!IMPORTANT]
-> Ensure you execute this build command from the root directory, not inside the `server` directory!
+##### Bypassing Google Service Account requirements for local testing
 
-You can use the following command to build a Docker image for the backend service.
+For local testing, you can bypass the requirement of _Google's Service Account_ by editing the `application.yml` file
+or by overriding it via VM arguments.
 
-    docker buildx build -f server/Dockerfile -t strategists-service .
-
-> [!TIP]
-> You can also use the `docker-compose build` command from the root directory to build the server's Docker image.
-
-### Step 2 - Setting up environment variables file
-
-- Copy/Move the service account's `credentials.json` file in the `shared/secrets` directory.
-- Create a `service.env.list` file inside the `shared/secrets` directory containing all the required environment variables.
-
-> [!TIP]
-> You can bypass Google Utils functionalities for **TESTING ONLY** by following the steps mentioned here.
-> - Either edit the `application.yml` file or pass VM argument `-Dstrategists.google.utils.permissions.bypass-google-sheets-query-for-testing=true` to bypass querying Google Spreadsheets for fetching the permission groups. You must manually create a testing `permissions.json` file in the `shared/secrets` directory.
-> - Either edit the `application.yml` file or pass VM argument `-Dstrategists.google.utils.predictions.bypass-google-drive-sync-for-testing=true` to bypass downloading and uploading of CSV files to Google Drive. You must manually maintain game data in the `shared/data` directory.
-
-### Step 3 - How to run this Docker image?
-
-You can run a container from this Docker image using the following command.
-
-    docker run \
-    --env-file shared/secrets/server.env.list \
-    -v ./shared:/app/shared \
-    -p 8090:8090 \
-    strategists-service
-
-> [!TIP]
-> You can also use the `docker-compose up` command from the root directory to run the server's Docker image. Please make the necessary changes to expose the server's port so that APIs can be accessed.
-
-### Step 4 - How do you enter an interactive shell attached to a running Docker container?
-- To check the files in the Docker container, enter its shell using the `docker exec -it <CONTAINER_ID or CONTAINER_NAME> sh` command.
+1. Use `-Dstrategists.google.utils.permissions.bypass-google-sheets-query-for-testing=true` to bypass querying _Google
+   Spreadsheets_ for fetching the permission groups. You must manually create a testing `permissions.json` file in the
+   permissions export directory you have specified in the `PERMISSIONS_EXPORT_DIR` variable. Refer to The Strategists'
+   Google Utils' [README](../google-utils/README.md) file for more details.
+2. Use `-Dstrategists.google.utils.predictions.bypass-google-drive-sync-for-testing=true` to bypass downloading and
+   uploading of CSV files to _Google Drive_. You must manually maintain game data in the `shared/data` directory or
+   disable the predictions' functionality.
+3. Use `-Dstrategists.google.utils.advices.bypass-google-drive-sync-for-testing=true` to bypass uploading of Advice CSV
+   files to _Google Drive_. You must manually maintain advices data in the `shared/advices` directory or disable the
+   advices' functionality.
 
 ## References
-- Starter Dockerfile is from [this StackOverflow article](https://stackoverflow.com/questions/27767264/how-to-dockerize-maven-project-and-how-many-ways-to-accomplish-it). Read it to learn more.
+
+- Read more about the starter Dockerfile for maven projects from
+  [this StackOverflow article](https://stackoverflow.com/questions/27767264/how-to-dockerize-maven-project-and-how-many-ways-to-accomplish-it).
