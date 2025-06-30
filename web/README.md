@@ -53,6 +53,7 @@ http://localhost:8888
 #### Setting up Google ReCAPTCHA
 
 The project uses Google ReCAPTCHA to prevent bots from accessing the game, and for the UI application to check whether the backend services are available.
+It would be best if you created your own. Additionally, you may use the testing one mentioned on [this website](https://developers.google.com/recaptcha/docs/faq#id-like-to-run-automated-tests-with-recaptcha.-what-should-i-do).
 
 1. Navigate to Google ReCAPTCHA's [create page](https://www.google.com/u/0/recaptcha/admin/create).
 2. Enter _Label_ as `The Strategists Web`.
