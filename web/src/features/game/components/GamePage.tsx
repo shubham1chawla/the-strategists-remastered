@@ -5,6 +5,7 @@ import MapPanel from './MapPanel';
 import PlayerPanel from './PlayerPanel';
 import TurnModal from './TurnModal';
 import WinModal from './WinModal';
+import WinnerConfettiBackdrop from './WinnerConfettiBackdrop';
 
 function GamePage() {
   return (
@@ -23,6 +24,7 @@ function GamePage() {
           </CytoscapeProvider>
         </Col>
       </Row>
+      <WinnerConfettiBackdrop />
       <WinModal />
     </GameWrapper>
   );
