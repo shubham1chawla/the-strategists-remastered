@@ -10,8 +10,7 @@ function TurnModal() {
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
-    if (winnerPlayer) return;
-    setOpen(player?.turn || false);
+    setOpen((player?.turn && !winnerPlayer) || false);
   }, [player, winnerPlayer]);
 
   if (!player) {

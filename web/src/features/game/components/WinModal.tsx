@@ -8,7 +8,6 @@ import {
   LogoutOutlined,
   StopFilled,
 } from '@ant-design/icons';
-import ConfettiBackdrop from '@shared/components/ConfettiBackdrop';
 import StrategistsLogo from '@shared/components/StrategistsLogo';
 import useGame from '@game/hooks/useGame';
 import useLogin from '@login/hooks/useLogin';
@@ -28,7 +27,6 @@ function WinModal() {
   if (!gameCode || !winnerPlayer) return null;
   return (
     <>
-      <ConfettiBackdrop type="multiple" />
       <Modal
         open={!!winnerPlayer}
         onCancel={() => setShowResetModal(false)}
@@ -105,13 +103,11 @@ function WinModal() {
           ]}
         />
       </Modal>
-      {showResetModal && (
-        <ResetModal
-          open={showResetModal}
-          gameCode={gameCode}
-          onCancel={() => setShowResetModal(false)}
-        />
-      )}
+      <ResetModal
+        open={showResetModal}
+        gameCode={gameCode}
+        onCancel={() => setShowResetModal(false)}
+      />
     </>
   );
 }
