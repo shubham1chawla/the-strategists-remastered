@@ -4,10 +4,15 @@ on:
   push:
     branches:
       - main
-      - 'feature/**'
   pull_request:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build (leave empty to use current branch)'
+        required: false
+        type: string
 
 env:
   REGISTRY: ghcr.io
@@ -24,6 +29,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -44,8 +51,8 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value={{branch}}-{{date 'YYYYMMDD-HHmmss'}},enable={{is_default_branch}}
-            type=raw,value={{branch}}-{{date 'YYYYMMDD-HHmmss'}},enable=${{ startsWith(github.ref, 'refs/heads/feature/') }}
+            type=raw,value=main-{{date 'YYYYMMDD-HHmmss'}},enable={{is_default_branch}}
+            type=raw,value=${{ github.event.inputs.branch || github.ref_name }}-{{date 'YYYYMMDD-HHmmss'}},enable=${{ github.event_name == 'workflow_dispatch' }}
 
       - name: Generate metadata for service image
         id: meta-service
@@ -56,8 +63,8 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value={{branch}}-{{date 'YYYYMMDD-HHmmss'}},enable={{is_default_branch}}
-            type=raw,value={{branch}}-{{date 'YYYYMMDD-HHmmss'}},enable=${{ startsWith(github.ref, 'refs/heads/feature/') }}
+            type=raw,value=main-{{date 'YYYYMMDD-HHmmss'}},enable={{is_default_branch}}
+            type=raw,value=${{ github.event.inputs.branch || github.ref_name }}-{{date 'YYYYMMDD-HHmmss'}},enable=${{ github.event_name == 'workflow_dispatch' }}
 
       - name: Build and push web image
         uses: docker/build-push-action@v5
