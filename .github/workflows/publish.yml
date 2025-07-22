@@ -22,11 +22,22 @@ env:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+    environment: ${{ github.event_name == 'workflow_dispatch' && 'manual-builds' || '' }}
     permissions:
       contents: read
       packages: write
 
     steps:
+      - name: Check authorization for manual triggers
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          if [[ "${{ github.actor }}" != "shubham1chawla" ]]; then
+            echo "❌ Unauthorized user: ${{ github.actor }}"
+            echo "Only shubham1chawla can manually trigger this workflow"
+            exit 1
+          fi
+          echo "✅ Authorized user: ${{ github.actor }}"
+
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
