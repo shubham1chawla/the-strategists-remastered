@@ -1,15 +1,20 @@
-version: '3.7'
+version: '3.8'
 
-# If you face issues running the `docker-compose up` command.
-# Please refer to the README file of the front-end and back-end applications.
+# Docker Compose will automatically:
+# 1. Try to pull the image from the registry
+# 2. If image doesn't exist or pull fails, build locally using the build context
+# 3. If build succeeds, tag it with the image name for future use
 
 services:
   strategists-web:
     container_name: strategists-web
-    platform: linux/amd64
+    image: ghcr.io/shubham1chawla/strategists-web:latest
     build:
-      context: web
+      context: ./web
       dockerfile: Dockerfile
+      tags:
+        - ghcr.io/shubham1chawla/strategists-web:latest
+        - strategists-web:local
     env_file:
       - shared/secrets/web.env.list
     ports:
@@ -18,21 +23,25 @@ services:
       - strategists-service
     networks:
       - strategists-network
+    pull_policy: always
   
   strategists-service:
     container_name: strategists-service
-    platform: linux/amd64
+    image: ghcr.io/shubham1chawla/strategists-service:latest
     build: 
       context: .
       dockerfile: server/Dockerfile
+      tags:
+        - ghcr.io/shubham1chawla/strategists-service:latest
+        - strategists-service:local
     env_file:
       - shared/secrets/server.env.list
     networks:
       - strategists-network
     volumes:
       - ./shared:/app/shared
+    pull_policy: always
 
 networks:
   strategists-network:
     driver: bridge
-    
