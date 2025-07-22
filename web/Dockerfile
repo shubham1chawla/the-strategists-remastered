@@ -1,6 +1,6 @@
 ######## React Build Stage ########
 
-FROM node:22-alpine as build
+FROM node:22-alpine AS build
 WORKDIR /app
 
 # copying package.json and package-lock.json to the working directory

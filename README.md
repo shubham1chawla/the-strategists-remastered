@@ -1,6 +1,7 @@
 # The Strategists - Monopoly-Inspired Multiplayer Game
 
 [![Netlify Status](https://api.netlify.com/api/v1/badges/9fd07386-0ff5-4f26-97c7-503273b3f276/deploy-status)](https://app.netlify.com/sites/strategists/deploys)
+[![Build and Push Docker Images](https://github.com/shubham1chawla/the-strategists-remastered/actions/workflows/publish.yml/badge.svg?branch=main)](https://github.com/shubham1chawla/the-strategists-remastered/actions/workflows/publish.yml)
 
 The Strategists represents a sophisticated turn-based online multiplayer gaming platform designed to accommodate 2-6 participants in strategic competition. This gaming environment offers an immersive experience wherein players engage in calculated decision-making within a structured virtual battleground.
 
