@@ -6,6 +6,78 @@ version: '3.8'
 # 3. If build succeeds, tag it with the image name for future use
 
 services:
+  strategists-permissions:
+    container_name: strategists-permissions
+    image: ghcr.io/shubham1chawla/strategists-permissions:latest
+    build:
+      context: ./permissions
+      dockerfile: Dockerfile
+      tags:
+        - ghcr.io/shubham1chawla/strategists-permissions:latest
+        - strategists-permissions:local
+    env_file:
+      - shared/secrets/permissions.env.list
+    networks:
+      - strategists-network
+    volumes:
+      - ./shared:/app/shared
+    pull_policy: always
+
+  strategists-storage:
+    container_name: strategists-storage
+    image: ghcr.io/shubham1chawla/strategists-storage:latest
+    build:
+      context: ./storage
+      dockerfile: Dockerfile
+      tags:
+        - ghcr.io/shubham1chawla/strategists-storage:latest
+        - strategists-storage:local
+    env_file:
+      - shared/secrets/storage.env.list
+    networks:
+      - strategists-network
+    volumes:
+      - ./shared:/app/shared
+    pull_policy: always
+
+  strategists-predictions:
+    container_name: strategists-predictions
+    image: ghcr.io/shubham1chawla/strategists-predictions:latest
+    build:
+      context: ./predictions
+      dockerfile: Dockerfile
+      tags:
+        - ghcr.io/shubham1chawla/strategists-predictions:latest
+        - strategists-predictions:local
+    env_file:
+      - shared/secrets/predictions.env.list
+    networks:
+      - strategists-network
+    volumes:
+      - ./shared:/app/shared
+    pull_policy: always
+
+  strategists-service:
+    container_name: strategists-service
+    image: ghcr.io/shubham1chawla/strategists-service:latest
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
+      tags:
+        - ghcr.io/shubham1chawla/strategists-service:latest
+        - strategists-service:local
+    env_file:
+      - shared/secrets/server.env.list
+    networks:
+      - strategists-network
+    volumes:
+      - ./shared:/app/shared
+    depends_on:
+      - strategists-permissions
+      - strategists-storage
+      - strategists-predictions
+    pull_policy: always
+
   strategists-web:
     container_name: strategists-web
     image: ghcr.io/shubham1chawla/strategists-web:latest
@@ -23,23 +95,6 @@ services:
       - strategists-service
     networks:
       - strategists-network
-    pull_policy: always
-  
-  strategists-service:
-    container_name: strategists-service
-    image: ghcr.io/shubham1chawla/strategists-service:latest
-    build: 
-      context: .
-      dockerfile: server/Dockerfile
-      tags:
-        - ghcr.io/shubham1chawla/strategists-service:latest
-        - strategists-service:local
-    env_file:
-      - shared/secrets/server.env.list
-    networks:
-      - strategists-network
-    volumes:
-      - ./shared:/app/shared
     pull_policy: always
 
 networks:

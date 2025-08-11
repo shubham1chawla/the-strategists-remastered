@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from 'react';
 import useGame from '@game/hooks/useGame';
 import { Player } from '@game/state';
-import { Prediction } from '@predictions/state';
+import { PlayerPrediction } from '@predictions/state';
 import useTrends from '@trends/hooks/useTrends';
 import usePredictions from './usePredictions';
 
@@ -67,7 +67,7 @@ const usePredictionsChartItems = (player: Player) => {
     addMissingPlayers(collection, {
       winnerProbability: 0,
       bankruptProbability: 1,
-      type: 'BANKRUPT',
+      prediction: 'BANKRUPT',
       playerId: -1,
       turn: -1,
     });
@@ -87,7 +87,7 @@ const usePredictionsChartItems = (player: Player) => {
   // Utility method to find the visualization method
   const getVisualizationMethod = useCallback(
     (
-      playerPredictionMap?: Map<number, Prediction>,
+      playerPredictionMap?: Map<number, PlayerPrediction>,
     ): 'NETWORTH' | 'PREDICTION' => {
       if (!playerPredictionMap) return 'NETWORTH';
       const playerPredictions = Array.from(playerPredictionMap.values());
@@ -95,7 +95,7 @@ const usePredictionsChartItems = (player: Player) => {
         (p1, p2) => p2.winnerProbability - p1.winnerProbability,
       );
       return playerPredictions.length > 1 &&
-        playerPredictions[0].type === 'WINNER'
+        playerPredictions[0].prediction === 'WINNER'
         ? 'PREDICTION'
         : 'NETWORTH';
     },

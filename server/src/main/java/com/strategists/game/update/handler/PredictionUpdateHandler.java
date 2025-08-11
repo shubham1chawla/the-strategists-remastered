@@ -2,7 +2,7 @@ package com.strategists.game.update.handler;
 
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Game;
-import com.strategists.game.entity.Prediction;
+import com.strategists.game.entity.PlayerPrediction;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.PredictionUpdatePayload;
 import lombok.val;
@@ -27,7 +27,7 @@ public class PredictionUpdateHandler extends AbstractUpdateHandler<PredictionUpd
         val game = (Game) args[0];
 
         @SuppressWarnings("unchecked")
-        val predictions = (List<Prediction>) returnValue;
+        val predictions = (List<PlayerPrediction>) returnValue;
         if (CollectionUtils.isEmpty(predictions)) {
             return;
         }

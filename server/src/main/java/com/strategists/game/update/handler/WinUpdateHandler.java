@@ -28,7 +28,7 @@ public class WinUpdateHandler extends AbstractUpdateHandler<WinUpdatePayload> {
         if (Objects.isNull(player)) {
 
             // Executing prediction model
-            executePredictionModelAsync(game);
+            inferPredictionsModelAsync(game);
 
             // Generating advice for players
             generateAdvicesAsync(game);
@@ -40,7 +40,7 @@ public class WinUpdateHandler extends AbstractUpdateHandler<WinUpdatePayload> {
         }
 
         // Exporting data and training the prediction model
-        trainPredictionModelAsync(game);
+        trainPredictionsModelAsync(game);
 
         // Exporting advice data
         exportAdvicesAsync(game);

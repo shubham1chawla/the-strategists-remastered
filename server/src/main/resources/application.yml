@@ -12,7 +12,6 @@ spring:
       maximum-pool-size: 64
       connection-timeout: 120000
   jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
     defer-datasource-initialization: true
     show-sql: false
     properties:
@@ -35,39 +34,61 @@ strategists:
     clean-up:
       enabled: ${ENABLE_CLEAN_UP:true}
       delay: 300000
-      thread-pool-size: 2 
+      thread-pool-size: 2
     skip-player:
-      enabled: ${ENABLE_SKIP_PLAYER:true} 
+      enabled: ${ENABLE_SKIP_PLAYER:true}
       allowed-count: 3
       timeout: 90000
       thread-pool-size: 4
-  prediction:
+  permissions:
+    health-check:
+      bypass-for-testing: false
+      api-endpoint: ${PERMISSIONS_API_HOST:http://localhost:8001}/health
+    google-recaptcha:
+      bypass-for-testing: false
+      api-endpoint: ${PERMISSIONS_API_HOST:http://localhost:8001}/api/google-recaptcha-verify
+    permission-group:
+      bypass-for-testing: false
+      api-endpoint: ${PERMISSIONS_API_HOST:http://localhost:8001}/api/permission-group
+  storage:
+    health-check:
+      bypass-for-testing: false
+      api-endpoint: ${STORAGE_API_HOST:http://localhost:8002}/health
+    download:
+      bypass-for-testing: false
+      api-endpoint: ${STORAGE_API_HOST:http://localhost:8002}/api/download
+    upload:
+      bypass-for-testing: false
+      api-endpoint: ${STORAGE_API_HOST:http://localhost:8002}/api/upload
+  predictions:
     enabled: ${ENABLE_PREDICTIONS:true}
+    data-directory: ${PREDICTIONS_DATA_DIR:../shared/data}
+    google-drive:
+      download-folder-id: ${PREDICTIONS_DOWNLOAD_FOLDER_ID:}
+      upload-folder-id: ${PREDICTIONS_UPLOAD_FOLDER_ID:}
     strategies:
       train-on-startup-enabled: ${ENABLE_PREDICTIONS_TRAIN_ON_STARTUP:true}
       train-on-end-enabled: ${ENABLE_PREDICTIONS_TRAIN_ON_END:true}
       data-export-enabled: ${ENABLE_PREDICTIONS_DATA_EXPORT:true}
-      data-integrity-validation-enabled: ${ENABLE_PREDICTIONS_DATA_INTEGRITY_VALIDATION:true} 
-      model-execution-enabled: ${ENABLE_PREDICTIONS_MODEL_EXECUTION:true}
-    python:
-      executable: ../prediction/.venv/bin/python
-      script: ../prediction/main.py
-    export:
-      directory: ../shared/model/
-      file-name: classifier.pkl
-    train:
-      command: train
-      directory:
-        data: ../shared/data/
-        metadata: ../shared/metadata/
-    predict:
-      command: predict
-      directory:
-        test: ../shared/test/
+      data-integrity-validation-enabled: ${ENABLE_PREDICTIONS_DATA_INTEGRITY_VALIDATION:true}
+      model-inference-enabled: ${ENABLE_PREDICTIONS_MODEL_INFERENCE:true}
+    health-check:
+      bypass-for-testing: false
+      api-endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/health
+    get-model:
+      bypass-for-testing: false
+      api-endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/api/predictions-model/{game_map_id}
+    train-model:
+      bypass-for-testing: false
+      api-endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/api/predictions-model/{game_map_id}/train
+    infer-model:
+      bypass-for-testing: false
+      api-endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/api/predictions-model/{game_map_id}/infer
   advice:
     enabled: ${ENABLE_ADVICES:true}
-    export:
-      directory: ../shared/advices/
+    data-directory: ${ADVICES_DATA_DIR:../shared/advices/}
+    google-drive:
+      upload-folder-id: ${ADVICES_UPLOAD_FOLDER_ID:}
     frequently-invest:
       enabled: ${ENABLE_FREQUENTLY_INVEST_ADVICE:true}
       priority: 3
@@ -86,34 +107,3 @@ strategists:
     potential-bankruptcy:
       enabled: ${ENABLE_POTENTIAL_BANKRUPTCY_ADVICE:true}
       priority: 1
-  google:
-    recaptcha:
-      api-url: https://www.google.com/recaptcha/api/siteverify
-      secret-key: ${GOOGLE_RECAPTCHA_SECRET_KEY:}
-    utils:
-      credentials-json-file: ${GOOGLE_CREDENTIALS_JSON:}
-      python:
-        executable: ../google-utils/.venv/bin/python
-        script: ../google-utils/main.py
-      permissions:
-        bypass-google-sheets-query-for-testing: false
-        command: permissions
-        export:
-          directory: ${PERMISSIONS_EXPORT_DIR:}
-          file-name: permissions.json
-        spreadsheet:
-          id: ${PERMISSIONS_SPREADSHEET_ID:}
-          range: ${PERMISSIONS_SPREADSHEET_RANGE:}
-      predictions:
-        bypass-google-drive-sync-for-testing: false
-        command: predictions
-        download:
-          sub-command: download
-          drive-folder-id: ${PREDICTIONS_DOWNLOAD_FOLDER_ID:}
-        upload: 
-          sub-command: upload
-          drive-folder-id: ${PREDICTIONS_UPLOAD_FOLDER_ID:}
-      advices:
-        bypass-google-drive-sync-for-testing: false
-        command: advices
-        drive-folder-id: ${ADVICES_UPLOAD_FOLDER_ID:}

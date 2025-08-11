@@ -1,17 +1,17 @@
 package com.strategists.game.controller;
 
-import com.strategists.game.entity.PermissionGroup.PermissionStatus;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.request.GoogleOAuthCredential;
 import com.strategists.game.response.EnterGameResponse;
 import com.strategists.game.response.GameResponse;
+import com.strategists.game.response.PermissionGroupResponse;
 import com.strategists.game.service.AdviceService;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PermissionsService;
 import com.strategists.game.service.PlayerService;
-import com.strategists.game.service.PredictionService;
+import com.strategists.game.service.PredictionsService;
 import lombok.extern.log4j.Log4j2;
 import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ public class GameController {
     private TrendRepository trendRepository;
 
     @Autowired(required = false)
-    private PredictionService predictionService;
+    private PredictionsService predictionsService;
 
     @Autowired(required = false)
     private AdviceService adviceService;
@@ -73,8 +73,8 @@ public class GameController {
                     .trends(trendRepository.findByGameOrderByIdAsc(game));
 
             // Adding predictions, if enabled
-            if (Objects.nonNull(predictionService)) {
-                builder.predictions(predictionService.getPredictionsByGame(game));
+            if (Objects.nonNull(predictionsService)) {
+                builder.playerPredictions(predictionsService.getPlayerPredictionsByGame(game));
             }
 
             // Adding advice, if enabled
@@ -113,8 +113,8 @@ public class GameController {
 
         // Checking if requesting user can create the game
         val opt = permissionsService.getPermissionGroupByEmail(credential.getEmail());
-        val status = opt.isPresent() ? opt.get().getGameCreationPermissionStatus() : PermissionStatus.DISABLED;
-        if (PermissionStatus.DISABLED.equals(status)) {
+        val status = opt.isPresent() ? opt.get().getGameCreation() : PermissionGroupResponse.PermissionStatus.DISABLED;
+        if (PermissionGroupResponse.PermissionStatus.DISABLED.equals(status)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 

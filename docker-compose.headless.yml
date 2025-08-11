@@ -1,0 +1,83 @@
+version: '3.8'
+
+# Headless Docker Compose - API only (no web frontend)
+# Exposes the server API on port 80 for external access
+
+services:
+  strategists-permissions:
+    container_name: strategists-permissions
+    image: ghcr.io/shubham1chawla/strategists-permissions:latest
+    build:
+      context: ./permissions
+      dockerfile: Dockerfile
+      tags:
+        - ghcr.io/shubham1chawla/strategists-permissions:latest
+        - strategists-permissions:local
+    env_file:
+      - shared/secrets/permissions.env.list
+    networks:
+      - strategists-network
+    volumes:
+      - ./shared:/app/shared
+    pull_policy: always
+
+  strategists-storage:
+    container_name: strategists-storage
+    image: ghcr.io/shubham1chawla/strategists-storage:latest
+    build:
+      context: ./storage
+      dockerfile: Dockerfile
+      tags:
+        - ghcr.io/shubham1chawla/strategists-storage:latest
+        - strategists-storage:local
+    env_file:
+      - shared/secrets/storage.env.list
+    networks:
+      - strategists-network
+    volumes:
+      - ./shared:/app/shared
+    pull_policy: always
+
+  strategists-predictions:
+    container_name: strategists-predictions
+    image: ghcr.io/shubham1chawla/strategists-predictions:latest
+    build:
+      context: ./predictions
+      dockerfile: Dockerfile
+      tags:
+        - ghcr.io/shubham1chawla/strategists-predictions:latest
+        - strategists-predictions:local
+    env_file:
+      - shared/secrets/predictions.env.list
+    networks:
+      - strategists-network
+    volumes:
+      - ./shared:/app/shared
+    pull_policy: always
+
+  strategists-service:
+    container_name: strategists-service
+    image: ghcr.io/shubham1chawla/strategists-service:latest
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
+      tags:
+        - ghcr.io/shubham1chawla/strategists-service:latest
+        - strategists-service:local
+    env_file:
+      - shared/secrets/server.env.list
+    networks:
+      - strategists-network
+    volumes:
+      - ./shared:/app/shared
+    ports:
+      - "80:8090"
+    depends_on:
+      - strategists-permissions
+      - strategists-storage
+      - strategists-predictions
+    pull_policy: always
+
+networks:
+  strategists-network:
+    driver: bridge

@@ -6,7 +6,7 @@ import com.strategists.game.entity.Advice;
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
-import com.strategists.game.entity.Prediction;
+import com.strategists.game.entity.PlayerPrediction;
 import com.strategists.game.entity.Trend;
 import lombok.Builder;
 import lombok.Getter;
@@ -28,7 +28,7 @@ public class GameResponse {
 
     private List<Trend> trends;
 
-    private List<Prediction> predictions;
+    private List<PlayerPrediction> playerPredictions;
 
     private List<Advice> advices;
 

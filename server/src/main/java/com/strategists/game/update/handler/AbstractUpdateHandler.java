@@ -6,7 +6,7 @@ import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.service.AdviceService;
 import com.strategists.game.service.CleanUpService;
-import com.strategists.game.service.PredictionService;
+import com.strategists.game.service.PredictionsService;
 import com.strategists.game.service.SkipPlayerService;
 import com.strategists.game.service.UpdateService;
 import com.strategists.game.update.payload.UpdatePayload;
@@ -29,7 +29,7 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
     private UpdateService updateService;
 
     @Autowired(required = false)
-    private PredictionService predictionService;
+    private PredictionsService predictionsService;
 
     @Autowired(required = false)
     private AdviceService adviceService;
@@ -47,19 +47,19 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
     protected void reset(Game game) {
         activityRepository.deleteByGame(game);
         trendRepository.deleteByGame(game);
-        if (Objects.nonNull(predictionService)) {
-            predictionService.clearPredictions(game);
+        if (Objects.nonNull(predictionsService)) {
+            predictionsService.clearPlayerPredictions(game);
         }
         if (Objects.nonNull(adviceService)) {
             adviceService.clearAdvices(game);
         }
     }
 
-    protected void trainPredictionModelAsync(Game game) {
-        if (Objects.nonNull(predictionService)) {
+    protected void trainPredictionsModelAsync(Game game) {
+        if (Objects.nonNull(predictionsService)) {
             CompletableFuture.runAsync(() -> {
                 try {
-                    predictionService.trainPredictionModel(game);
+                    predictionsService.trainPredictionsModel(game);
                 } catch (Exception ex) {
                     log.error("Failed to train prediction model!", ex);
                 }
@@ -67,11 +67,11 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
         }
     }
 
-    protected void executePredictionModelAsync(Game game) {
-        if (Objects.nonNull(predictionService)) {
+    protected void inferPredictionsModelAsync(Game game) {
+        if (Objects.nonNull(predictionsService)) {
             CompletableFuture.runAsync(() -> {
                 try {
-                    predictionService.executePredictionModel(game);
+                    predictionsService.inferPredictionsModel(game);
                 } catch (Exception ex) {
                     log.error("Failed to execute prediction model!", ex);
                 }

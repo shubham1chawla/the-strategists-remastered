@@ -1,0 +1,7 @@
+.idea
+.venv
+.gitignore
+__pycache__
+.env
+mlruns
+input_example.json

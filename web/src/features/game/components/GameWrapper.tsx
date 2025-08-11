@@ -29,9 +29,9 @@ import {
 import useLogin from '@login/hooks/useLogin';
 import { loggedOut } from '@login/state';
 import {
-  Prediction,
-  predictionsAdded,
-  predictionsSetted,
+  PlayerPrediction,
+  playerPredictionsAdded,
+  playerPredictionsSetted,
 } from '@predictions/state';
 import { Trend, trendsAdded, trendsSetted } from '@trends/state';
 
@@ -49,7 +49,7 @@ interface GameResponse {
   lands: Land[];
   activities: Activity[];
   trends: Trend[];
-  predictions: Prediction[] | null;
+  playerPredictions: PlayerPrediction[] | null;
   advices: Advice[] | null;
 }
 
@@ -66,7 +66,7 @@ const syncGameStates = async (
     lands,
     activities,
     trends,
-    predictions,
+    playerPredictions,
     advices,
   } = data;
   [
@@ -76,7 +76,7 @@ const syncGameStates = async (
     landsSetted(lands),
     activitiesSetted(activities),
     trendsSetted(trends),
-    predictionsSetted(predictions || []),
+    playerPredictionsSetted(playerPredictions || []),
     advicesSetted(advices || []),
   ].forEach(dispatch);
 };
@@ -194,7 +194,7 @@ function GameWrapper({ children }: PropsWithChildren) {
           // Do nothing
           break;
         case 'PREDICTION':
-          dispatch(predictionsAdded(payload));
+          dispatch(playerPredictionsAdded(payload));
           break;
         case 'RENT':
           dispatch(playersPatched(payload));

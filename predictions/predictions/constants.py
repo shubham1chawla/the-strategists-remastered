@@ -1,0 +1,11 @@
+# Environment variables
+PREDICTIONS_DATA_DIR = "PREDICTIONS_DATA_DIR"
+
+# Constants
+TEST_SIZE = 0.25
+RANDOM_STATE = 42
+N_SPLITS = 4
+VAL_ACCURACY_DELTA = 0.01
+INPUT_EXAMPLE_SIZE = 5
+MODEL_NAME_PREFIX = "strategists-predictions-"
+EXPERIMENT_NAME_SUFFIX = "-experiment"

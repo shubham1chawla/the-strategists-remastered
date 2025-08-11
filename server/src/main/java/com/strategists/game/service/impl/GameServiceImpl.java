@@ -108,6 +108,7 @@ public class GameServiceImpl implements GameService {
         Game game = new Game();
         game.setTurn(0);
         game.setState(State.LOBBY);
+        game.setGameMapId(gameMap.getId());
 
         // Setting up game's instance with required configurations
         game.setPlayerBaseCash(gameMap.getPlayerBaseCash());

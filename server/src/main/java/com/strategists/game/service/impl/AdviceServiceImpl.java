@@ -2,26 +2,24 @@ package com.strategists.game.service.impl;
 
 import com.strategists.game.advice.AdviceContext;
 import com.strategists.game.advice.handler.AbstractAdviceHandler;
+import com.strategists.game.csv.impl.AdvicesCSV;
 import com.strategists.game.entity.Advice;
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Player;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.AdviceRepository;
+import com.strategists.game.request.UploadLocalFilesRequest;
 import com.strategists.game.service.AdviceService;
-import com.strategists.game.service.DataSyncService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
+import com.strategists.game.service.StorageService;
 import com.strategists.game.update.UpdateMapping;
 import com.strategists.game.update.UpdateType;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
 import lombok.extern.log4j.Log4j2;
 import lombok.val;
 import org.apache.commons.chain.impl.ChainBase;
-import org.apache.commons.csv.CSVFormat;
-import org.apache.commons.csv.CSVPrinter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -30,11 +28,8 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 @Log4j2
 @Service
@@ -42,8 +37,11 @@ import java.util.stream.Stream;
 @ConditionalOnProperty(name = "strategists.advice.enabled", havingValue = "true")
 public class AdviceServiceImpl implements AdviceService {
 
-    @Value("${strategists.advice.export.directory}")
-    private File exportDirectory;
+    @Value("${strategists.advice.data-directory}")
+    private File dataDirectory;
+
+    @Value("${strategists.advice.google-drive.upload-folder-id}")
+    private String uploadGoogleDriveFolderId;
 
     @Autowired
     private PlayerService playerService;
@@ -55,7 +53,7 @@ public class AdviceServiceImpl implements AdviceService {
     private ActivityRepository activityRepository;
 
     @Autowired
-    private DataSyncService dataSyncService;
+    private StorageService storageService;
 
     @Autowired
     private AdviceRepository adviceRepository;
@@ -65,12 +63,13 @@ public class AdviceServiceImpl implements AdviceService {
 
     @PostConstruct
     public void setup() {
+        log.info("Advices enabled! Total handlers registered: {}", handlers.size());
+
         // Validating export directory
-        if (!exportDirectory.exists()) {
-            Assert.state(exportDirectory.mkdir(), "Unable to create directory: " + exportDirectory);
-            log.info("Created directory: {}", exportDirectory);
+        if (!dataDirectory.exists()) {
+            Assert.state(dataDirectory.mkdir(), "Unable to create directory: " + dataDirectory);
+            log.info("Created directory: {}", dataDirectory);
         }
-        log.info("Checked advice-related directories!");
     }
 
     @Override
@@ -100,7 +99,7 @@ public class AdviceServiceImpl implements AdviceService {
         try {
             chain.execute(context);
         } catch (Exception ex) {
-            log.error("Unable to complete advice chain! Message: " + ex.getMessage(), ex);
+            log.error("Unable to complete advice chain! Message: {}", ex.getMessage(), ex);
             return List.of();
         }
 
@@ -121,10 +120,7 @@ public class AdviceServiceImpl implements AdviceService {
         if (CollectionUtils.isEmpty(advices)) {
             return List.of();
         }
-        return adviceRepository.saveAll(advices.stream().map(advice -> {
-            advice.setViewed(true);
-            return advice;
-        }).toList());
+        return adviceRepository.saveAll(advices.stream().peek(advice -> advice.setViewed(true)).toList());
     }
 
     @Override
@@ -134,41 +130,30 @@ public class AdviceServiceImpl implements AdviceService {
 
     @Override
     public void exportAdvices(Game game) {
-        val filename = String.format("advice-%s-%s.csv", game.getCode(), System.currentTimeMillis());
-        val csv = new File(exportDirectory, filename);
-        val headers = Stream.of(CSVColumn.values()).map(CSVColumn::getHeader).toArray(String[]::new);
-        val format = CSVFormat.DEFAULT.builder().setHeader(headers).build();
+        // Preparing advices CSV
+        var advices = getAdvicesByGame(game);
+        var advicesCSV = new AdvicesCSV(game, advices);
 
-        try (final CSVPrinter printer = new CSVPrinter(new FileWriter(csv), format)) {
-
-            // Adding rows to the CSV file
-            for (Advice advice : getAdvicesByGame(game)) {
-                val values = Stream.of(CSVColumn.values()).map(column -> column.getExtractor().apply(advice)).toArray();
-                printer.printRecord(values);
-            }
-
-            log.debug("Exported: {}", csv.getAbsolutePath());
+        // Exporting advices CSV file
+        File advicesCSVFile;
+        try {
+            advicesCSVFile = advicesCSV.export(dataDirectory);
         } catch (IOException ex) {
             log.warn("Unable to export Advice's CSV file! Message: {}", ex.getMessage());
             return;
         }
 
-        // Uploading Advice CSV file
-        dataSyncService.uploadAdviceCSVFiles(exportDirectory);
+        // Uploading exported advices CSV file
+        log.info("Exported advices CSV at path: {}", advicesCSVFile.getAbsolutePath());
+        uploadAdvicesCSV();
     }
 
-    @Getter
-    @AllArgsConstructor
-    private enum CSVColumn {
-        GAME("game.code", advice -> advice.getGame().getCode()), PLAYER("player.id", Advice::getPlayerId),
-        TYPE("advice.type", Advice::getType), STATE("advice.state", Advice::getState),
-        PRIORITY("advice.priority", Advice::getPriority), VIEWED("advice.viewed", Advice::getViewed),
-        VAL1("advice.val1", Advice::getVal1), VAL2("advice.val2", Advice::getVal2),
-        VAL3("advice.val3", Advice::getVal3), NEW_COUNT("advice.newCount", Advice::getNewCount),
-        FOLLOWED_COUNT("advice.followedCount", Advice::getFollowedCount);
-
-        private final String header;
-        private final Function<Advice, Object> extractor;
+    private void uploadAdvicesCSV() {
+        var request = new UploadLocalFilesRequest();
+        request.setGoogleDriveFolderId(uploadGoogleDriveFolderId);
+        request.setMimetype("text/csv");
+        request.setLocalDataDirectory(dataDirectory);
+        storageService.uploadLocalFiles(request);
     }
 
 }
