@@ -46,6 +46,9 @@ public class Game implements Serializable {
     @Column(nullable = false, unique = false)
     private Integer maxPlayersCount;
 
+    @Column(nullable = false)
+    private String gameMapId;
+
     @JsonIgnore
     @Column(nullable = false, unique = false, precision = MathUtil.PRECISION)
     private Double playerBaseCash;

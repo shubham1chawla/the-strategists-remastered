@@ -15,6 +15,9 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME_WEB: strategists-web
   IMAGE_NAME_SERVICE: strategists-service
+  IMAGE_NAME_PERMISSIONS: strategists-permissions
+  IMAGE_NAME_STORAGE: strategists-storage
+  IMAGE_NAME_PREDICTIONS: strategists-predictions
 
 jobs:
   build-and-push:
@@ -50,11 +53,35 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Generate metadata for web image
-        id: meta-web
+      - name: Generate metadata for permissions image
+        id: meta-permissions
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_WEB }}
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_PERMISSIONS }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=main-{{date 'YYYYMMDD-HHmmss'}},enable={{is_default_branch}}
+            type=raw,value=${{ github.event.inputs.branch || github.ref_name }}-{{date 'YYYYMMDD-HHmmss'}},enable=${{ github.event_name == 'workflow_dispatch' }}
+
+      - name: Generate metadata for storage image
+        id: meta-storage
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_STORAGE }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=main-{{date 'YYYYMMDD-HHmmss'}},enable={{is_default_branch}}
+            type=raw,value=${{ github.event.inputs.branch || github.ref_name }}-{{date 'YYYYMMDD-HHmmss'}},enable=${{ github.event_name == 'workflow_dispatch' }}
+
+      - name: Generate metadata for predictions image
+        id: meta-predictions
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_PREDICTIONS }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -74,6 +101,66 @@ jobs:
             type=raw,value=main-{{date 'YYYYMMDD-HHmmss'}},enable={{is_default_branch}}
             type=raw,value=${{ github.event.inputs.branch || github.ref_name }}-{{date 'YYYYMMDD-HHmmss'}},enable=${{ github.event_name == 'workflow_dispatch' }}
 
+      - name: Generate metadata for web image
+        id: meta-web
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ github.repository_owner }}/${{ env.IMAGE_NAME_WEB }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=main-{{date 'YYYYMMDD-HHmmss'}},enable={{is_default_branch}}
+            type=raw,value=${{ github.event.inputs.branch || github.ref_name }}-{{date 'YYYYMMDD-HHmmss'}},enable=${{ github.event_name == 'workflow_dispatch' }}
+
+      - name: Build and push permissions image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./permissions
+          file: ./permissions/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-permissions.outputs.tags }}
+          labels: ${{ steps.meta-permissions.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push storage image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./storage
+          file: ./storage/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-storage.outputs.tags }}
+          labels: ${{ steps.meta-storage.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push predictions image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./predictions
+          file: ./predictions/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-predictions.outputs.tags }}
+          labels: ${{ steps.meta-predictions.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build and push service image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./server
+          file: ./server/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta-service.outputs.tags }}
+          labels: ${{ steps.meta-service.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
       - name: Build and push web image
         uses: docker/build-push-action@v5
         with:
@@ -86,19 +173,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push service image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./server/Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta-service.outputs.tags }}
-          labels: ${{ steps.meta-service.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
       - name: Output image digests
         run: |
-          echo "Web image digest: ${{ steps.meta-web.outputs.digest }}"
+          echo "Permissions image digest: ${{ steps.meta-permissions.outputs.digest }}"
+          echo "Storage image digest: ${{ steps.meta-storage.outputs.digest }}"
+          echo "Predictions image digest: ${{ steps.meta-predictions.outputs.digest }}"
           echo "Service image digest: ${{ steps.meta-service.outputs.digest }}"
+          echo "Web image digest: ${{ steps.meta-web.outputs.digest }}"

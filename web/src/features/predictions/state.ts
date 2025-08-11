@@ -1,14 +1,14 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-export interface Prediction {
+export interface PlayerPrediction {
   playerId: number;
   winnerProbability: number;
   bankruptProbability: number;
-  type: 'WINNER' | 'BANKRUPT';
+  prediction: 'WINNER' | 'BANKRUPT';
   turn: number;
 }
 
-export type PredictionsState = Prediction[];
+export type PredictionsState = PlayerPrediction[];
 
 const initialState: PredictionsState = [];
 
@@ -16,16 +16,18 @@ const slice = createSlice({
   name: 'predictions',
   initialState,
   reducers: {
-    predictionsSetted: (_, { payload }: { payload: Prediction[] }) => [
-      ...payload,
-    ],
-    predictionsAdded: (state, { payload }: { payload: Prediction[] }) => [
-      ...state,
-      ...payload,
-    ],
+    playerPredictionsSetted: (
+      _,
+      { payload }: { payload: PlayerPrediction[] },
+    ) => [...payload],
+    playerPredictionsAdded: (
+      state,
+      { payload }: { payload: PlayerPrediction[] },
+    ) => [...state, ...payload],
   },
 });
 
-export const { predictionsSetted, predictionsAdded } = slice.actions;
+export const { playerPredictionsSetted, playerPredictionsAdded } =
+  slice.actions;
 
 export default slice.reducer;

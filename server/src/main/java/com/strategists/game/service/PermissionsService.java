@@ -1,13 +1,13 @@
 package com.strategists.game.service;
 
-import com.strategists.game.entity.PermissionGroup;
+import com.strategists.game.response.PermissionGroupResponse;
 
 import java.util.Optional;
 
 public interface PermissionsService {
 
-    void loadPermissionGroups();
+    boolean verifyGoogleRecaptcha(String clientToken);
 
-    Optional<PermissionGroup> getPermissionGroupByEmail(String email);
+    Optional<PermissionGroupResponse> getPermissionGroupByEmail(String email);
 
 }

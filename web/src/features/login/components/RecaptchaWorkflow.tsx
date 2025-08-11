@@ -12,7 +12,7 @@ function RecaptchaWorkflow() {
       if (!clientToken) return;
       setLoginWorkflow('VERIFYING');
       axios
-        .post('/api/recaptcha', { clientToken })
+        .post('/api/google-recaptcha-verify', { clientToken })
         .then(() => setLoginWorkflow('VERIFIED'))
         .catch(({ response: { status } }) =>
           setLoginWorkflow(status === 403 ? 'NOT_VERIFIED' : 'UNREACHABLE'),

@@ -1,0 +1,15 @@
+[project]
+name = "predictions"
+version = "0.1.0"
+description = "The Strategists Predictions API"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas",
+    "scikit-learn",
+    "mlflow",
+    "xgboost",
+    "lightgbm",
+    "catboost",
+    "fastapi[standard]",
+]
