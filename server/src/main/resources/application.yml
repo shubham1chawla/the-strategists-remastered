@@ -62,7 +62,7 @@ strategists:
       api-endpoint: ${STORAGE_API_HOST:http://localhost:8002}/api/upload
   predictions:
     enabled: ${ENABLE_PREDICTIONS:true}
-    data-directory: ${PREDICTIONS_DATA_DIR:../shared/data}
+    data-directory: ${PREDICTIONS_DATA_DIR:../resources/data}
     google-drive:
       download-folder-id: ${PREDICTIONS_DOWNLOAD_FOLDER_ID:}
       upload-folder-id: ${PREDICTIONS_UPLOAD_FOLDER_ID:}
@@ -86,7 +86,7 @@ strategists:
       api-endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/api/predictions-model/{game_map_id}/infer
   advice:
     enabled: ${ENABLE_ADVICES:true}
-    data-directory: ${ADVICES_DATA_DIR:../shared/advices/}
+    data-directory: ${ADVICES_DATA_DIR:../resources/advices/}
     google-drive:
       upload-folder-id: ${ADVICES_UPLOAD_FOLDER_ID:}
     frequently-invest:

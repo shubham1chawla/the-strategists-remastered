@@ -14,11 +14,11 @@ services:
         - ghcr.io/shubham1chawla/strategists-permissions:latest
         - strategists-permissions:local
     env_file:
-      - shared/secrets/permissions.env.list
+      - resources/secrets/permissions.env.list
     networks:
       - strategists-network
     volumes:
-      - ./shared:/app/shared
+      - ./resources:/resources
     pull_policy: always
 
   strategists-storage:
@@ -31,11 +31,11 @@ services:
         - ghcr.io/shubham1chawla/strategists-storage:latest
         - strategists-storage:local
     env_file:
-      - shared/secrets/storage.env.list
+      - resources/secrets/storage.env.list
     networks:
       - strategists-network
     volumes:
-      - ./shared:/app/shared
+      - ./resources:/resources
     pull_policy: always
 
   strategists-predictions:
@@ -48,11 +48,11 @@ services:
         - ghcr.io/shubham1chawla/strategists-predictions:latest
         - strategists-predictions:local
     env_file:
-      - shared/secrets/predictions.env.list
+      - resources/secrets/predictions.env.list
     networks:
       - strategists-network
     volumes:
-      - ./shared:/app/shared
+      - ./resources:/resources
     pull_policy: always
 
   strategists-service:
@@ -65,11 +65,11 @@ services:
         - ghcr.io/shubham1chawla/strategists-service:latest
         - strategists-service:local
     env_file:
-      - shared/secrets/server.env.list
+      - resources/secrets/server.env.list
     networks:
       - strategists-network
     volumes:
-      - ./shared:/app/shared
+      - ./resources:/resources
     ports:
       - "80:8090"
     depends_on:

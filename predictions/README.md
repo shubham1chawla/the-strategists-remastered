@@ -22,7 +22,8 @@ volumes. These directories are -
 ## Setup
 
 1. Make sure you have Python `3.12` version installed on your system.
-2. Make sure you have `uv` installed on your system. If not, refer to the [installation page](https://docs.astral.sh/uv/getting-started/installation/).
+2. Make sure you have `uv` installed on your system. If not, refer to the
+   [installation page](https://docs.astral.sh/uv/getting-started/installation/).
 3. Use the following command to install dependencies and create virtual environment.
 
 ```sh
@@ -32,12 +33,12 @@ uv sync --locked
 4. Create a `.env` file in the root of this project, and paste the following variables in it.
 
 ```
-PREDICTIONS_DATA_DIR=../shared/data
-MLFLOW_TRACKING_URI=../shared/mlflow
+PREDICTIONS_DATA_DIR=../resources/data
+MLFLOW_TRACKING_URI=../resources/mlflow
 ```
 
 > [!NOTE]
-> The `.env` file assumes that you have a `shared` directory in the project's root directory.
+> The `.env` file assumes that you have a `resources` directory in the project's root directory.
 
 ## Execution
 
@@ -53,7 +54,7 @@ fastapi dev main.py --port 8003
 - You can start _MLFlow_'s UI by running the following command.
 
 ```sh
-mlflow server --host 127.0.0.1 --port 5000 --backend-store-uri ../shared/mlflow
+mlflow server --host 127.0.0.1 --port 5000 --backend-store-uri ../resources/mlflow
 ```
 
 ## Testing

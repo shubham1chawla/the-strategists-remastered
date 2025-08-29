@@ -34,7 +34,7 @@ required to run the server.
 | PERMISSIONS_API_HOST                         | Permissions API's host name                                                               | `String`  | `http://localhost:8001` |
 | STORAGE_API_HOST                             | Storage API's host name                                                                   | `String`  | `http://localhost:8002` |
 | ENABLE_PREDICTIONS                           | If set, the server will train and execute the prediction model.                           | `boolean` | `true`                  |
-| PREDICTIONS_DATA_DIR                         | Path to a directory where predictions-related `CSV` files will be exported.               | `String`  | `../shared/data`        |
+| PREDICTIONS_DATA_DIR                         | Path to a directory where predictions-related `CSV` files will be exported.               | `String`  | `../resources/data`     |
 | PREDICTIONS_DOWNLOAD_FOLDER_ID               | _Google Drive_ folder `ID` from where predictions-related `CSV` files will be downloaded. | `String`  | none                    |
 | PREDICTIONS_UPLOAD_FOLDER_ID                 | _Google Drive_ folder `ID` to where predictions-related `CSV` files will be uploaded.     | `String`  | none                    |
 | ENABLE_PREDICTIONS_TRAIN_ON_STARTUP          | If set, the server will train the prediction model on server start-up.                    | `boolean` | `true`                  |
@@ -44,7 +44,7 @@ required to run the server.
 | ENABLE_PREDICTIONS_MODEL_INFERENCE           | If set, the server will infer the model for predictions.                                  | `boolean` | `true`                  |
 | PREDICTIONS_API_HOST                         | Predictions API's host name                                                               | `String`  | `http://localhost:8003` |
 | ENABLE_ADVICES                               | If set, the server will generate advices for players                                      | `boolean` | `true`                  |
-| ADVICES_DATA_DIR                             | Path to a directory where advice-related `CSV` files will be exported.                    | `String`  | `../shared/advices`     |
+| ADVICES_DATA_DIR                             | Path to a directory where advice-related `CSV` files will be exported.                    | `String`  | `../resources/advices`  |
 | ADVICES_UPLOAD_FOLDER_ID                     | _Google Drive_ folder `ID` to where advice-related `CSV` files will be uploaded.          | `String`  | none                    |
 | ENABLE_FREQUENTLY_INVEST_ADVICE              | If set, the server will generate "frequently invest" advice for players                   | `boolean` | `true`                  |
 | ENABLE_AVOID_TIMEOUT_ADVICE                  | If set, the server will generate "avoid timeout" advice for players                       | `boolean` | `true`                  |
