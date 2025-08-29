@@ -13,16 +13,16 @@ them correctly.
 > All the directories and files mentioned in this section is relative to the project's root
 > directory.
 
-1. The project relies on the [`shared`](../shared/) directory as a _Docker_ volume for managing
-   and sharing data and configurations across services. If you don't see this directory in the
-   root of this project, create it and name it `shared`. This directory mounts as _Docker_
-   volume as `/app/shared`.
-2. Inside the `shared` directory, create a folder called `secrets`. This directory will store
+1. The project relies on the [`resources`](../resources/) directory as a _Docker_ volume for
+   managing and sharing data and configurations across services. If you don't see this directory
+   in the root of this project, create it and name it `resources`. This directory mounts as
+   _Docker_ volume as `/resources`.
+2. Inside the `resources` directory, create a folder called `secrets`. This directory will store
    all the sensitive information, including credentials to access _Google_ services.
-3. Create the following files inside the `shared/secrets` directory.
+3. Create the following files inside the `resources/secrets` directory.
 
 ```
-ROOT/shared/secrets
+ROOT/resources/secrets
 ├── permissions.env.list
 ├── predictions.env.list
 ├── server.env.list
@@ -36,7 +36,7 @@ Paste the following contents inside `permissions.env.list` file.
 
 ```
 GOOGLE_RECAPTCHA_SECRET_KEY=<YOUR_GOOGLE_RECAPTCHA_SECRET_KEY>
-GOOGLE_CREDENTIALS_JSON_PATH=/app/shared/secrets/credentials.json
+GOOGLE_CREDENTIALS_JSON_PATH=/resources/secrets/credentials.json
 PERMISSIONS_SPREADSHEET_ID=<YOUR_GOOGLE_SPREADSHEET_ID>
 PERMISSIONS_SPREADSHEET_RANGE=Permission Groups!A2:B
 ```
@@ -44,8 +44,8 @@ PERMISSIONS_SPREADSHEET_RANGE=Permission Groups!A2:B
 > [!NOTE]
 > For the _Google ReCAPTCHA Secret Key_ and _Google Spreadsheet ID_ for permissions, refer
 > to the Permission API's project's [prerequisites](../permissions/README.md#prerequisites).
-> The example `env` file above assumes that you have configured the `shared` volume to mount
-> with _Docker_'s `/app/shared` directory and the _Google Spreadsheet_'s sheet name is
+> The example `env` file above assumes that you have configured the `resources` volume to
+> mount with _Docker_'s `/resources` directory and the _Google Spreadsheet_'s sheet name is
 > `Permission Groups`.
 
 ## Setting up Storage API
@@ -53,12 +53,12 @@ PERMISSIONS_SPREADSHEET_RANGE=Permission Groups!A2:B
 Paste the following contents inside `storage.env.list` file.
 
 ```
-GOOGLE_CREDENTIALS_JSON_PATH=/app/shared/secrets/credentials.json
+GOOGLE_CREDENTIALS_JSON_PATH=/resources/secrets/credentials.json
 ```
 
 > [!NOTE]
 > This `env` file assumes you have saved the _Google Service Account_'s credentials `JSON`
-> file inside the `shared/secrets` directory, which mounts to _Docker_'s `/app/shared`
+> file inside the `resources/secrets` directory, which mounts to _Docker_'s `/resources`
 > directory.
 
 ## Setting up Predictions API
@@ -66,13 +66,13 @@ GOOGLE_CREDENTIALS_JSON_PATH=/app/shared/secrets/credentials.json
 Paste the following contents inside `predictions.env.list` file.
 
 ```
-PREDICTIONS_DATA_DIR=/app/shared/data
-MLFLOW_TRACKING_URI=/app/shared/mlflow
+PREDICTIONS_DATA_DIR=/resources/data
+MLFLOW_TRACKING_URI=/resources/mlflow
 ```
 
 > [!NOTE]
 > This `env` file assumes you have created the directory containing predictions-related
-> `CSV` files inside the `shared/data` directory. Please refer to Predictions API project's
+> `CSV` files inside the `resources/data` directory. Please refer to Predictions API project's
 > [prerequisites](../predictions/README.md#prerequisites) to learn more about them.
 
 ## Setting up Web Application
@@ -98,8 +98,8 @@ Paste the following contents inside `server.env.list` file.
 PERMISSIONS_API_HOST=http://strategists-permissions
 STORAGE_API_HOST=http://strategists-storage
 PREDICTIONS_API_HOST=http://strategists-predictions
-PREDICTIONS_DATA_DIR=/app/shared/data
-ADVICES_DATA_DIR=/app/shared/advices
+PREDICTIONS_DATA_DIR=/resources/data
+ADVICES_DATA_DIR=/resources/advices
 PREDICTIONS_DOWNLOAD_FOLDER_ID=<YOUR_GOOGLE_DRIVE_FOLDER_ID>
 PREDICTIONS_UPLOAD_FOLDER_ID=<YOUR_GOOGLE_DRIVE_FOLDER_ID>
 ADVICES_UPLOAD_FOLDER_ID=<YOUR_GOOGLE_DRIVE_FOLDER_ID>
@@ -108,8 +108,8 @@ ADVICES_UPLOAD_FOLDER_ID=<YOUR_GOOGLE_DRIVE_FOLDER_ID>
 > [!NOTE]
 > Refer to the server's [README](../server/README.md) for _Google Drive_ folder IDs and learn
 > more about _StrategistsService_'s other optional environment variables. The example `env`
-> file above assumes that you have configured the `shared` volume to mount with _Docker_'s
-> `/app/shared` directory.
+> file above assumes that you have configured the `resources` volume to mount with _Docker_'s
+> `/resources` directory.
 
 ## Running _The Strategists_
 
