@@ -16,7 +16,7 @@ class DownloadGoogleDriveFilesResponse(BaseModel):
 
 
 class UploadLocalFilesRequest(DownloadGoogleDriveFilesRequest):
-    reference_google_drive_folder_id: Optional[str]
+    reference_google_drive_folder_id: Optional[str] = None
 
 
 class UploadLocalFilesResponse(BaseModel):
