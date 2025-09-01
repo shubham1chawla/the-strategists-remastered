@@ -69,7 +69,7 @@ sudo docker run hello-world
 To start the backend service, execute the following command -
 
 ```sh
-docker-compose -f docker-compose.headless.yml up -d
+docker compose -f docker-compose.headless.yml up -d
 ```
 
 > [!NOTE]
