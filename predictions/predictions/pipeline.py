@@ -29,7 +29,7 @@ def create_credit_rent_average(x: pd.DataFrame) -> pd.DataFrame:
     return x
 
 
-def is_property_ownership_feature(feature: str) -> bool:
+def _is_property_ownership_feature(feature: str) -> bool:
     is_ownership = feature.startswith("ownership")
     is_total_or_count = feature.endswith("total") or feature.endswith("count")
     return is_ownership and not is_total_or_count
@@ -37,13 +37,13 @@ def is_property_ownership_feature(feature: str) -> bool:
 
 def scale_ownership_features(x: pd.DataFrame) -> pd.DataFrame:
     x = x.copy()
-    features = [feature for feature in x.columns if is_property_ownership_feature(feature)]
+    features = [feature for feature in x.columns if _is_property_ownership_feature(feature)]
     for feature in features:
         x[feature] = x[feature] / 100
     return x
 
 
-def is_property_debit_credit_feature(feature: str) -> bool:
+def _is_property_debit_credit_feature(feature: str) -> bool:
     is_debit_or_credit = feature.startswith("debit") or feature.startswith("credit")
     is_total_or_count = feature.endswith("total") or feature.endswith("count")
     return is_debit_or_credit and not is_total_or_count
@@ -51,7 +51,7 @@ def is_property_debit_credit_feature(feature: str) -> bool:
 
 def scale_debit_credit_features(x: pd.DataFrame) -> pd.DataFrame:
     x = x.copy()
-    features = [feature for feature in x.columns if is_property_debit_credit_feature(feature)]
+    features = [feature for feature in x.columns if _is_property_debit_credit_feature(feature)]
     for feature in features:
         x[feature] = x[feature] / x["player.base-cash"]
     return x

@@ -21,7 +21,7 @@ from predictions.types import PlayerPredictionResponse, PredictionsModelInfo
 logger = logging.getLogger(__name__)
 
 
-def load_training_dataset_(game_map_id: str) -> Tuple[int, pd.DataFrame]:
+def _load_training_dataset(game_map_id: str) -> Tuple[int, pd.DataFrame]:
     # Checking if predictions data directory is set
     if constants.PREDICTIONS_DATA_DIR not in os.environ:
         raise KeyError(f"Set '{constants.PREDICTIONS_DATA_DIR}' to a directory containing predictions data!")
@@ -43,13 +43,13 @@ def load_training_dataset_(game_map_id: str) -> Tuple[int, pd.DataFrame]:
     df = pd.concat([pd.read_csv(csv_path) for csv_path in csv_paths], ignore_index=True)
 
     # Preprocessing dataframe
-    df = preprocess_dataframe_(df, drop_columns=["game.export.timestamp", "game.bankruptcy-order", "player.username"])
+    df = _preprocess_dataframe(df, drop_columns=["game.export.timestamp", "game.bankruptcy-order", "player.username"])
 
     # Combining csv files
     return len(csv_paths), df
 
 
-def fit_classifier_(classifier: Classifier, x, y) -> Pipeline:
+def _fit_classifier(classifier: Classifier, x, y) -> Pipeline:
     # Preparing model
     model = Pipeline([
         ("feature_engineering", create_feature_engineering_pipeline()),
@@ -62,7 +62,7 @@ def fit_classifier_(classifier: Classifier, x, y) -> Pipeline:
     return model
 
 
-def get_best_classifier_(x_train, y_train) -> Classifier:
+def _get_best_classifier(x_train, y_train) -> Classifier:
     best_classifier, best_mean_train_accuracy, best_mean_val_accuracy = None, 0, 0
     for classifier in Classifier:
         logger.info(f"Training {classifier.name}...")
@@ -77,7 +77,7 @@ def get_best_classifier_(x_train, y_train) -> Classifier:
             x_val, y_val = x_train.iloc[val_idx], y_train.iloc[val_idx]
 
             # Preparing model
-            model = fit_classifier_(classifier, x_train_, y_train_)
+            model = _fit_classifier(classifier, x_train_, y_train_)
 
             # Adding accuracies to collection for mean calculations
             train_accuracies.append(accuracy_score(y_train_, model.predict(x_train_)))
@@ -104,7 +104,7 @@ def get_best_classifier_(x_train, y_train) -> Classifier:
 
 def train_predictions_model(game_map_id: str) -> PredictionsModelInfo:
     # Loading training dataset
-    csv_files_count, df = load_training_dataset_(game_map_id)
+    csv_files_count, df = _load_training_dataset(game_map_id)
 
     # Extracting features and label
     x = df.drop("player.state", axis=1)
@@ -117,7 +117,7 @@ def train_predictions_model(game_map_id: str) -> PredictionsModelInfo:
                                                         stratify=y)
 
     # Training and finding best classifier
-    best_classifier = get_best_classifier_(x_train, y_train)
+    best_classifier = _get_best_classifier(x_train, y_train)
 
     # Loading experiment ID from model name
     experiment_id = get_experiment_id(game_map_id)
@@ -126,7 +126,7 @@ def train_predictions_model(game_map_id: str) -> PredictionsModelInfo:
     # Starting MLFlow
     with mlflow.start_run(experiment_id=experiment_id):
         # Preparing final model
-        model = fit_classifier_(best_classifier, x_train, y_train)
+        model = _fit_classifier(best_classifier, x_train, y_train)
 
         # Extracting predictions
         train_predictions = model.predict(x_train)
@@ -200,7 +200,7 @@ def train_predictions_model(game_map_id: str) -> PredictionsModelInfo:
 
 def infer_predictions_model(game_map_id: str, data: List[dict[str, Any]]) -> List[PlayerPredictionResponse]:
     # Preparing model's input
-    model_input = preprocess_dataframe_(pd.DataFrame(data),
+    model_input = _preprocess_dataframe(pd.DataFrame(data),
                                         drop_columns=["game.export.timestamp", "game.bankruptcy-order", "player.state"])
     model_input.set_index(["game.code", "player.id"], inplace=True)
 
@@ -218,7 +218,7 @@ def infer_predictions_model(game_map_id: str, data: List[dict[str, Any]]) -> Lis
     return [PlayerPredictionResponse(**player_prediction) for player_prediction in output.to_dict(orient="records")]
 
 
-def preprocess_dataframe_(df: pd.DataFrame, *, drop_columns: Optional[List[str]] = None) -> pd.DataFrame:
+def _preprocess_dataframe(df: pd.DataFrame, *, drop_columns: Optional[List[str]] = None) -> pd.DataFrame:
     # Dropping unwanted features
     if drop_columns:
         df = df[df.columns[~df.columns.isin(drop_columns)]]

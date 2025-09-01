@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 def setup_mlflow():
     # Checking if tracking uri is provided
     if not MLFLOW_TRACKING_URI.is_set():
-        raise KeyError(f"Set '{MLFLOW_TRACKING_URI}' where models' should be exported!")
+        raise KeyError(f"Set '{MLFLOW_TRACKING_URI}' where models should be exported!")
 
     logger.info("MLFlow setup completed!")
 
