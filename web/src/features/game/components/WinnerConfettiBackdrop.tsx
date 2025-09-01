@@ -13,7 +13,7 @@ import useGame from '@game/hooks/useGame';
 const getSourceOptions = (colors: string[]): ISourceOptions => {
   const baseOptions = {
     preset: 'confetti',
-    fpsLimit: 120,
+    fpsLimit: 60,
     detectRetina: true,
     smooth: true,
     pauseOnBlur: true,
@@ -32,8 +32,8 @@ const getSourceOptions = (colors: string[]): ISourceOptions => {
           acceleration: 9.81, // More realistic gravity
         },
         speed: {
-          min: 100,
-          max: 150,
+          min: 25,
+          max: 50,
         },
         outModes: {
           top: OutMode.none,
@@ -95,11 +95,11 @@ const getSourceOptions = (colors: string[]): ISourceOptions => {
         },
       },
       wobble: {
-        distance: 30,
+        distance: 20,
         enable: true,
         speed: {
-          min: -7,
-          max: 7,
+          min: -5,
+          max: 5,
         },
       },
       shape: {
