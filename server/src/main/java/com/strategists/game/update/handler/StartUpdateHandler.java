@@ -4,7 +4,6 @@ import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Player;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.StartUpdatePayload;
-import lombok.val;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,17 +17,17 @@ public class StartUpdateHandler extends AbstractUpdateHandler<StartUpdatePayload
     @Override
     public void handle(Object returnValue, Object[] args) {
         // Starting player returned from the method
-        val player = (Player) returnValue;
+        final var player = (Player) returnValue;
 
         // Persisting the activity and sending the update
-        val activity = Activity.ofStart(player);
+        final var activity = Activity.ofStart(player);
         sendUpdate(player.getGame(), new StartUpdatePayload(saveActivity(activity), player));
 
-        // Scheduling player skip task
-        scheduleSkipPlayerTask(player.getGame());
+        // Scheduling player skip event
+        scheduleSkipPlayerEvent(player.getGame());
 
-        // Removing previously scheduled task
-        unscheduleCleanUpTask(player.getGame());
+        // Removing previously scheduled event
+        unscheduleCleanUpEvent(player.getGame());
     }
 
 }

@@ -7,7 +7,6 @@ import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Player;
 import com.strategists.game.repository.AdviceRepository;
 import com.strategists.game.update.UpdateType;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -18,13 +17,13 @@ import java.util.Optional;
 import java.util.function.ToIntFunction;
 
 @Component
-@ConditionalOnExpression("${strategists.advice.enabled} && ${strategists.advice.frequently-invest.enabled}")
+@ConditionalOnExpression("${strategists.advices.enabled} && ${strategists.advices.frequently-invest.enabled}")
 public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
 
-    @Value("${strategists.advice.frequently-invest.priority}")
+    @Value("${strategists.advices.frequently-invest.priority}")
     private int priority;
 
-    @Value("${strategists.advice.frequently-invest.turn-look-back}")
+    @Value("${strategists.advices.frequently-invest.turn-look-back}")
     private int turnLookBack;
 
     @Autowired
@@ -32,13 +31,13 @@ public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
 
     @Override
     protected void generate(AdviceContext context) {
-        val game = context.getGame();
-        val players = context.getPlayers();
-        val getLastInvestTurnByPlayer = getLastInvestTurnByPlayerFunction(context);
+        final var game = context.getGame();
+        final var players = context.getPlayers();
+        final var getLastInvestTurnByPlayer = getLastInvestTurnByPlayerFunction(context);
 
         for (Player player : players) {
             if (!player.isBankrupt()) {
-                val lastInvestTurn = getLastInvestTurnByPlayer.applyAsInt(player);
+                final var lastInvestTurn = getLastInvestTurnByPlayer.applyAsInt(player);
                 generate(game, players.size(), player, lastInvestTurn).ifPresent(context::addAdvice);
             }
         }
@@ -47,10 +46,10 @@ public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
     private Optional<Advice> generate(Game game, int playersCount, Player player, int lastInvestTurn) {
 
         // Checking if advice is needed
-        val isAdviceNeeded = (game.getTurn() - lastInvestTurn) > (playersCount * turnLookBack);
+        final var isAdviceNeeded = (game.getTurn() - lastInvestTurn) > (playersCount * turnLookBack);
 
         // Checking if we have already generated advice for this player
-        val opt = adviceRepository.findByPlayerAndType(player, AdviceType.FREQUENTLY_INVEST);
+        final var opt = adviceRepository.findByPlayerAndType(player, AdviceType.FREQUENTLY_INVEST);
 
         // Case 1 - No previous advice found and no new advice needed
         if (opt.isEmpty() && !isAdviceNeeded) {
@@ -63,7 +62,7 @@ public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
         }
 
         // Case 3 - Previous advice's state not NEW and advice needed
-        val advice = opt.get();
+        final var advice = opt.get();
         if (!Advice.State.NEW.equals(advice.getState()) && isAdviceNeeded) {
             advice.setState(Advice.State.NEW);
             advice.setNewCount(advice.getNewCount() + 1);
@@ -84,16 +83,16 @@ public class FrequentlyInvestAdviceHandler extends AbstractAdviceHandler {
     }
 
     private ToIntFunction<Player> getLastInvestTurnByPlayerFunction(AdviceContext context) {
-        val players = context.getPlayers();
-        val activities = context.getActivities();
+        final var players = context.getPlayers();
+        final var activities = context.getActivities();
 
-        val playerInvestTurnMap = new HashMap<Player, Integer>();
+        final var playerInvestTurnMap = new HashMap<Player, Integer>();
 
-        int i = 0;
+        var i = 0;
         while (i < activities.size() && playerInvestTurnMap.size() < players.size()) {
-            val activity = activities.get(i);
+            final var activity = activities.get(i);
             if (UpdateType.INVEST.equals(activity.getType())) {
-                val player = context.getPlayerByUsername(activity.getVal1());
+                final var player = context.getPlayerByUsername(activity.getVal1());
                 playerInvestTurnMap.computeIfAbsent(player, key -> activity.getTurn());
             }
             i++;

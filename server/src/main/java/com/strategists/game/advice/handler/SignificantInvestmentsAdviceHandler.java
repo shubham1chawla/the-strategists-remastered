@@ -7,7 +7,6 @@ import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.repository.AdviceRepository;
 import com.strategists.game.util.MathUtil;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -17,13 +16,13 @@ import org.springframework.util.CollectionUtils;
 import java.util.Optional;
 
 @Component
-@ConditionalOnExpression("${strategists.advice.enabled} && ${strategists.advice.significant-investments.enabled}")
+@ConditionalOnExpression("${strategists.advices.enabled} && ${strategists.advices.significant-investments.enabled}")
 public class SignificantInvestmentsAdviceHandler extends AbstractAdviceHandler {
 
-    @Value("${strategists.advice.significant-investments.priority}")
+    @Value("${strategists.advices.significant-investments.priority}")
     private int priority;
 
-    @Value("${strategists.advice.significant-investments.min-average-ownership}")
+    @Value("${strategists.advices.significant-investments.min-average-ownership}")
     private double minAverageOwnership;
 
     @Autowired
@@ -46,15 +45,15 @@ public class SignificantInvestmentsAdviceHandler extends AbstractAdviceHandler {
         }
 
         // Calculating average ownership
-        val investmentsCount = player.getPlayerLands().size();
-        val totalOwnership = MathUtil.sum(player.getPlayerLands(), PlayerLand::getOwnership);
-        val averageOwnership = totalOwnership / investmentsCount;
+        final var investmentsCount = player.getPlayerLands().size();
+        final var totalOwnership = MathUtil.sum(player.getPlayerLands(), PlayerLand::getOwnership);
+        final var averageOwnership = totalOwnership / investmentsCount;
 
         // Checking if advice is needed
-        val isAdviceNeeded = averageOwnership < minAverageOwnership;
+        final var isAdviceNeeded = averageOwnership < minAverageOwnership;
 
         // Checking if we have already generated advice for this player
-        val opt = adviceRepository.findByPlayerAndType(player, AdviceType.SIGNIFICANT_INVESTMENTS);
+        final var opt = adviceRepository.findByPlayerAndType(player, AdviceType.SIGNIFICANT_INVESTMENTS);
 
         // Case 1 - No previous advice found and no new advice needed
         if (opt.isEmpty() && !isAdviceNeeded) {
@@ -67,7 +66,7 @@ public class SignificantInvestmentsAdviceHandler extends AbstractAdviceHandler {
         }
 
         // Case 3 - Previous advice's state not NEW and advice needed
-        val advice = opt.get();
+        final var advice = opt.get();
         if (!Advice.State.NEW.equals(advice.getState()) && isAdviceNeeded) {
             advice.setState(Advice.State.NEW);
             advice.setNewCount(advice.getNewCount() + 1);

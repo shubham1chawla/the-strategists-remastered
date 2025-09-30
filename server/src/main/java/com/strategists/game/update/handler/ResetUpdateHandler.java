@@ -5,7 +5,6 @@ import com.strategists.game.entity.Game;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.ResetUpdatePayload;
 import jakarta.transaction.Transactional;
-import lombok.val;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -20,7 +19,7 @@ public class ResetUpdateHandler extends AbstractUpdateHandler<ResetUpdatePayload
     @Transactional
     public void handle(Object returnValue, Object[] args) {
         // Game instance from argument
-        val game = (Game) args[0];
+        final var game = (Game) args[0];
 
         // Resetting activities and trends
         reset(game);
@@ -28,11 +27,11 @@ public class ResetUpdateHandler extends AbstractUpdateHandler<ResetUpdatePayload
         // Sending activity
         sendUpdate(game, new ResetUpdatePayload(saveActivity(Activity.ofReset(game))));
 
-        // Removing previously scheduled task
-        unscheduleSkipPlayerTask(game);
+        // Removing previously scheduled event
+        unscheduleSkipPlayerEvent(game);
 
-        // Scheduling clean-up task
-        scheduleCleanUpTask(game);
+        // Scheduling clean-up event
+        scheduleCleanUpEvent(game);
     }
 
 }

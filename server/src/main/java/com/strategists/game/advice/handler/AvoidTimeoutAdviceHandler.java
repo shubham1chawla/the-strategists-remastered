@@ -7,7 +7,6 @@ import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Player;
 import com.strategists.game.repository.AdviceRepository;
 import com.strategists.game.update.UpdateType;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -18,10 +17,10 @@ import java.util.Optional;
 import java.util.function.ToIntFunction;
 
 @Component
-@ConditionalOnExpression("${strategists.configuration.skip-player.enabled} && ${strategists.advice.enabled} && ${strategists.advice.avoid-timeout.enabled}")
+@ConditionalOnExpression("${strategists.skip-player.enabled} && ${strategists.advices.enabled} && ${strategists.advices.avoid-timeout.enabled}")
 public class AvoidTimeoutAdviceHandler extends AbstractAdviceHandler {
 
-    @Value("${strategists.advice.avoid-timeout.priority}")
+    @Value("${strategists.advices.avoid-timeout.priority}")
     private int priority;
 
     @Autowired
@@ -29,13 +28,13 @@ public class AvoidTimeoutAdviceHandler extends AbstractAdviceHandler {
 
     @Override
     protected void generate(AdviceContext context) {
-        val game = context.getGame();
-        val players = context.getPlayers();
-        val getLastSkippedTurnByPlayer = getLastSkippedTurnByPlayerFunction(context);
+        final var game = context.getGame();
+        final var players = context.getPlayers();
+        final var getLastSkippedTurnByPlayer = getLastSkippedTurnByPlayerFunction(context);
 
         for (Player player : players) {
             if (!player.isBankrupt()) {
-                val lastSkippedTurn = getLastSkippedTurnByPlayer.applyAsInt(player);
+                final var lastSkippedTurn = getLastSkippedTurnByPlayer.applyAsInt(player);
                 generate(game, players.size(), player, lastSkippedTurn).ifPresent(context::addAdvice);
             }
         }
@@ -50,7 +49,7 @@ public class AvoidTimeoutAdviceHandler extends AbstractAdviceHandler {
         }
 
         // Checking if we have already generated advice for this player
-        val opt = adviceRepository.findByPlayerAndType(player, AdviceType.AVOID_TIMEOUT);
+        final var opt = adviceRepository.findByPlayerAndType(player, AdviceType.AVOID_TIMEOUT);
 
         // Case 1 - No previous advice found and no new advice needed
         if (opt.isEmpty() && !isAdviceNeeded) {
@@ -58,12 +57,12 @@ public class AvoidTimeoutAdviceHandler extends AbstractAdviceHandler {
         }
 
         // Case 2 - No previous advice found and new advice needed
-        if (opt.isEmpty() && isAdviceNeeded) {
+        if (opt.isEmpty()) {
             return Optional.of(Advice.ofAvoidTimeout(priority, player));
         }
 
         // Case 3 - Previous advice's state not NEW and advice needed
-        val advice = opt.get();
+        final var advice = opt.get();
         if (!Advice.State.NEW.equals(advice.getState()) && isAdviceNeeded) {
             advice.setState(Advice.State.NEW);
             advice.setNewCount(advice.getNewCount() + 1);
@@ -84,16 +83,16 @@ public class AvoidTimeoutAdviceHandler extends AbstractAdviceHandler {
     }
 
     private ToIntFunction<Player> getLastSkippedTurnByPlayerFunction(AdviceContext context) {
-        val players = context.getPlayers();
-        val activities = context.getActivities();
+        final var players = context.getPlayers();
+        final var activities = context.getActivities();
 
-        val playerSkippedTurnMap = new HashMap<Player, Integer>();
+        final var playerSkippedTurnMap = new HashMap<Player, Integer>();
 
         int i = 0;
         while (i < activities.size() && playerSkippedTurnMap.size() < players.size()) {
-            val activity = activities.get(i);
+            final var activity = activities.get(i);
             if (UpdateType.SKIP.equals(activity.getType())) {
-                val player = context.getPlayerByUsername(activity.getVal1());
+                final var player = context.getPlayerByUsername(activity.getVal1());
                 playerSkippedTurnMap.computeIfAbsent(player, key -> activity.getTurn());
             }
             i++;

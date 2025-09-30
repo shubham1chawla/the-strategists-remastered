@@ -1,5 +1,8 @@
 package com.strategists.game.service.impl;
 
+import com.strategists.game.configuration.properties.CleanUpConfigurationProperties;
+import com.strategists.game.configuration.properties.GameConfigurationProperties;
+import com.strategists.game.configuration.properties.SkipPlayerConfigurationProperties;
 import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Game.State;
 import com.strategists.game.entity.GameMap;
@@ -14,9 +17,7 @@ import com.strategists.game.update.UpdateMapping;
 import com.strategists.game.update.UpdateType;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -34,50 +35,14 @@ public class GameServiceImpl implements GameService {
 
     private static final Random RANDOM = new Random();
 
-    /**
-     * ---------- REQUIRED CONFIGURATIONS BELOW ----------
-     */
+    @Autowired
+    private GameConfigurationProperties gameConfigurationProperties;
 
-    @Value("${strategists.game.default-map}")
-    private String defaultGameMap;
+    @Autowired(required = false)
+    private SkipPlayerConfigurationProperties skipPlayerConfigurationProperties;
 
-    @Value("${strategists.game.dice-size}")
-    private int diceSize;
-
-    @Value("${strategists.game.rent-factor}")
-    private double rentFactor;
-
-    @Value("${strategists.game.code-length}")
-    private int codeLength;
-
-    @Value("${strategists.game.min-players-count}")
-    private int minPlayersCount;
-
-    @Value("${strategists.game.max-players-count}")
-    private int maxPlayersCount;
-
-    /**
-     * ---------- OPTIONAL CONFIGURATIONS BELOW ----------
-     */
-
-    @Value("${strategists.configuration.skip-player.enabled:#{false}}")
-    private boolean skipPlayerEnabled;
-
-    @Value("${strategists.configuration.skip-player.allowed-count:#{null}}")
-    private Integer allowedSkipsCount;
-
-    @Value("${strategists.configuration.skip-player.timeout:#{null}}")
-    private Integer skipPlayerTimeout;
-
-    @Value("${strategists.configuration.clean-up.enabled:#{false}}")
-    private boolean cleanUpEnabled;
-
-    @Value("${strategists.configuration.clean-up.delay:#{null}}")
-    private Integer cleanUpDelay;
-
-    /**
-     * ---------- DEPENDENCIES BELOW ----------
-     */
+    @Autowired(required = false)
+    private CleanUpConfigurationProperties cleanUpConfigurationProperties;
 
     @Autowired
     private Map<String, File> gameMapFiles;
@@ -94,38 +59,40 @@ public class GameServiceImpl implements GameService {
     @Override
     @UpdateMapping(UpdateType.CREATE)
     public Player createGame(GoogleOAuthCredential credential) {
-        val email = credential.getEmail();
+        final var email = credential.getEmail();
 
         // Checking if requesting user is not part of any other game
         Assert.hasText(email, "No email found in the request!");
         Assert.state(!playerService.existsByEmail(email), email + " already part of a game!");
 
         // Preparing game map's instance
-        val gameMap = GameMap.from(gameMapFiles.get(defaultGameMap));
-        Assert.notNull(gameMap, defaultGameMap + " game map doesn't exist!");
+        final var gameMap = GameMap.from(gameMapFiles.get(gameConfigurationProperties.defaultMap()));
+        Assert.notNull(gameMap, gameConfigurationProperties.defaultMap() + " game map doesn't exist!");
 
         // Creating game instance
-        Game game = new Game();
+        var game = new Game();
         game.setTurn(0);
         game.setState(State.LOBBY);
         game.setGameMapId(gameMap.getId());
 
         // Setting up game's instance with required configurations
         game.setPlayerBaseCash(gameMap.getPlayerBaseCash());
-        game.setMinPlayersCount(minPlayersCount);
-        game.setMaxPlayersCount(maxPlayersCount);
-        game.setDiceSize(diceSize);
-        game.setRentFactor(rentFactor);
+        game.setMinPlayersCount(gameConfigurationProperties.minPlayersCount());
+        game.setMaxPlayersCount(gameConfigurationProperties.maxPlayersCount());
+        game.setDiceSize(gameConfigurationProperties.diceSize());
+        game.setRentFactor(gameConfigurationProperties.rentFactor());
 
         // Setting skip-player optional configurations
-        if (skipPlayerEnabled) {
-            game.setAllowedSkipsCount(allowedSkipsCount);
-            game.setSkipPlayerTimeout(skipPlayerTimeout);
+        if (Objects.nonNull(skipPlayerConfigurationProperties)) {
+            log.info("Skip-player for game enabled!");
+            game.setAllowedSkipsCount(skipPlayerConfigurationProperties.allowedCount());
+            game.setSkipPlayerTimeout(skipPlayerConfigurationProperties.timeout());
         }
 
         // Setting clean-up optional configurations
-        if (cleanUpEnabled) {
-            game.setCleanUpDelay(cleanUpDelay);
+        if (Objects.nonNull(cleanUpConfigurationProperties)) {
+            log.info("Clean-up for game enabled!");
+            game.setCleanUpDelay(cleanUpConfigurationProperties.delay());
         }
 
         // Setting up share-able code for game
@@ -133,7 +100,7 @@ public class GameServiceImpl implements GameService {
             game.setCode(generateCode());
         } while (gameRepository.existsById(game.getCode()));
         game = gameRepository.save(game);
-        log.info("Created game: {}", game.getCode());
+        log.info("Created game: {}", game);
 
         // Saving lands associated with the game
         landService.save(game, gameMap);
@@ -144,7 +111,7 @@ public class GameServiceImpl implements GameService {
 
     @Override
     public Game getGameByCode(String code) {
-        val opt = gameRepository.findById(code);
+        final var opt = gameRepository.findById(code);
         Assert.isTrue(opt.isPresent(), "No game found for code: " + code);
         return opt.get();
     }
@@ -169,7 +136,7 @@ public class GameServiceImpl implements GameService {
     public Player playTurn(Game game) {
 
         // Checking if game has ended
-        Optional<Player> winner = getWinnerPlayer(game);
+        final var winner = getWinnerPlayer(game);
         if (winner.isPresent()) {
             return winner.get();
         }
@@ -179,13 +146,13 @@ public class GameServiceImpl implements GameService {
         game = gameRepository.save(game);
 
         // Assigning turn to next player
-        val player = playerService.nextPlayer(playerService.getCurrentPlayer(game));
+        final var player = playerService.nextPlayer(playerService.getCurrentPlayer(game));
 
         // Moving the current player to a new position
-        val land = playerService.movePlayer(player, RANDOM.nextInt(game.getDiceSize()) + 1);
+        final var land = playerService.movePlayer(player, RANDOM.nextInt(game.getDiceSize()) + 1);
 
         // Calculating rents on the moved land
-        val rents = landService.getPlayerRentsByLand(player, land);
+        final var rents = landService.getPlayerRentsByLand(player, land);
 
         // Paying rent to players on current land
         for (Rent rent : rents) {
@@ -236,7 +203,7 @@ public class GameServiceImpl implements GameService {
     }
 
     private Optional<Player> getWinnerPlayer(Game game) {
-        val activePlayers = playerService.getActivePlayersByGame(game);
+        final var activePlayers = playerService.getActivePlayersByGame(game);
         if (activePlayers.size() > 1) {
             return Optional.empty();
         }
@@ -247,7 +214,7 @@ public class GameServiceImpl implements GameService {
             game = gameRepository.save(game);
         }
 
-        val winner = activePlayers.get(0);
+        final var winner = activePlayers.getFirst();
         log.info("Found winner {} for game: {}", winner.getUsername(), game.getCode());
         return Optional.of(winner);
     }
@@ -258,9 +225,9 @@ public class GameServiceImpl implements GameService {
     }
 
     private String generateCode() {
-        val builder = new StringBuilder();
-        for (int i = 0; i < codeLength; i++) {
-            val c = (char) ('A' + RANDOM.nextInt(26));
+        final var builder = new StringBuilder();
+        for (int i = 0; i < gameConfigurationProperties.codeLength(); i++) {
+            final var c = (char) ('A' + RANDOM.nextInt(26));
             builder.append(c);
         }
         return builder.toString();

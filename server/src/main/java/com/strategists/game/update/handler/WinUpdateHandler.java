@@ -5,7 +5,6 @@ import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Player;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.WinUpdatePayload;
-import lombok.val;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -21,39 +20,39 @@ public class WinUpdateHandler extends AbstractUpdateHandler<WinUpdatePayload> {
     @Override
     public void handle(Object returnValue, Object[] args) {
         // Winner player returned by the method and game is passed in argument
-        val player = (Player) returnValue;
-        val game = (Game) args[0];
+        final var player = (Player) returnValue;
+        final var game = (Game) args[0];
 
         // If no winner is declared, avoid sending update
         if (Objects.isNull(player)) {
 
             // Executing prediction model
-            inferPredictionsModelAsync(game);
+            publishInferPredictionsModelEvent(game);
 
             // Generating advice for players
-            generateAdvicesAsync(game);
+            publishGenerateAdvicesEvent(game);
 
-            // Scheduling player skip task
-            scheduleSkipPlayerTask(game);
+            // Scheduling player skip event
+            scheduleSkipPlayerEvent(game);
 
             return;
         }
 
         // Exporting data and training the prediction model
-        trainPredictionsModelAsync(game);
+        publishTrainPredictionsModelEvent(game);
 
         // Exporting advice data
-        exportAdvicesAsync(game);
+        publishExportAdvicesEvent(game);
 
         // Persisting the activity and sending the update
-        val activity = Activity.ofWin(player);
+        final var activity = Activity.ofWin(player);
         sendUpdate(game, new WinUpdatePayload(saveActivity(activity), player));
 
-        // Removing previously scheduled task
-        unscheduleSkipPlayerTask(game);
+        // Removing previously scheduled event
+        unscheduleSkipPlayerEvent(game);
 
-        // Scheduling clean-up task
-        scheduleCleanUpTask(game);
+        // Scheduling clean-up event
+        scheduleCleanUpEvent(game);
     }
 
 }

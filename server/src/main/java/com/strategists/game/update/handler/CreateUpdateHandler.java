@@ -4,7 +4,6 @@ import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Player;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.CreateUpdatePayload;
-import lombok.val;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -18,13 +17,13 @@ public class CreateUpdateHandler extends AbstractUpdateHandler<CreateUpdatePaylo
     @Override
     public void handle(Object returnValue, Object[] args) {
         // Host player returned from the method
-        val player = (Player) returnValue;
+        final var player = (Player) returnValue;
 
         // Sending activity
         sendUpdate(player.getGame(), new CreateUpdatePayload(saveActivity(Activity.ofCreate(player))));
 
-        // Scheduling clean-up task
-        scheduleCleanUpTask(player.getGame());
+        // Scheduling clean-up event
+        scheduleCleanUpEvent(player.getGame());
     }
 
 }

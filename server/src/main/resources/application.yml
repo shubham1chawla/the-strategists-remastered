@@ -17,6 +17,10 @@ spring:
     properties:
       hibernate:
         format_sql: true
+        jdbc:
+          batch_size: 20
+          order_inserts: true
+          order_updates: true
   h2:
     console:
       enabled: ${ENABLE_H2_CONSOLE:false}
@@ -28,18 +32,15 @@ strategists:
     code-length: 4
     min-players-count: 2
     max-players-count: 6
-  configuration:
-    sse-ping:
-      enabled: ${ENABLE_SSE_PING:true}
-    clean-up:
-      enabled: ${ENABLE_CLEAN_UP:true}
-      delay: 300000
-      thread-pool-size: 2
-    skip-player:
-      enabled: ${ENABLE_SKIP_PLAYER:true}
-      allowed-count: 3
-      timeout: 90000
-      thread-pool-size: 4
+  sse-ping:
+    enabled: ${ENABLE_SSE_PING:true}
+  clean-up:
+    enabled: ${ENABLE_CLEAN_UP:true}
+    delay: 300000
+  skip-player:
+    enabled: ${ENABLE_SKIP_PLAYER:true}
+    allowed-count: 3
+    timeout: 90000
   permissions:
     health-check:
       bypass-for-testing: false
@@ -84,7 +85,7 @@ strategists:
     infer-model:
       bypass-for-testing: false
       api-endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/api/predictions-model/{game_map_id}/infer
-  advice:
+  advices:
     enabled: ${ENABLE_ADVICES:true}
     data-directory: ${ADVICES_DATA_DIR:../resources/advices/}
     google-drive:

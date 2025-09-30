@@ -14,7 +14,6 @@ import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.springframework.util.Assert;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -91,16 +90,6 @@ public class Game implements Serializable {
     @JsonIgnore
     public boolean isActive() {
         return State.ACTIVE.equals(state);
-    }
-
-    public void setAllowedSkipsCount(int allowedSkipsCount) {
-        Assert.isTrue(allowedSkipsCount > 0, "Allowed skips should be greater than 0!");
-        this.allowedSkipsCount = allowedSkipsCount;
-    }
-
-    public void setSkipPlayerTimeout(int skipPlayerTimeout) {
-        Assert.isTrue(skipPlayerTimeout > 10000, "Skip player timeout should be more than 10 seconds!");
-        this.skipPlayerTimeout = skipPlayerTimeout;
     }
 
 }

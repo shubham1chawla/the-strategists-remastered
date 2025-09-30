@@ -100,7 +100,8 @@ def download_google_drive_files(service,
                 logger.debug(f"Downloaded {int(status.progress() * 100)}% of '{google_drive_file_name}'.")
 
             # Writing bytes to file
-            with open(os.path.join(request.local_data_directory, google_drive_file_name), "wb") as local_file:
+            local_file_path = os.path.join(request.local_data_directory, google_drive_file_name)
+            with open(local_file_path, "wb") as local_file:
                 local_file.write(file_bytes.getvalue())
             downloaded_files.append(google_drive_file_name)
         except HttpError as e:
@@ -144,17 +145,17 @@ def upload_local_files(service,
 
         # Uploading file to Google Drive
         try:
-            request = {
+            local_file_path = os.path.join(request.local_data_directory, local_file_name)
+            drive_request = {
                 "body": {
                     "name": local_file_name,
                     "mimeType": request.mimetype,
                     "parents": [request.google_drive_folder_id],
                 },
-                "media_body": MediaFileUpload(os.path.join(request.local_data_directory, local_file_name),
-                                              mimetype=request.mimetype),
+                "media_body": MediaFileUpload(local_file_path, mimetype=request.mimetype),
                 "fields": "id",
             }
-            service.files().create(**request).execute()
+            service.files().create(**drive_request).execute()
             uploaded_files.append(local_file_name)
         except HttpError as e:
             logger.warning(f"Unable to upload '{local_file_name}', message: '{e}'")

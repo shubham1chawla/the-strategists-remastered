@@ -6,7 +6,7 @@ import com.strategists.game.entity.Player;
 
 import java.util.List;
 
-public interface AdviceService {
+public interface AdvicesService {
 
     List<Advice> generateAdvices(Game game);
 

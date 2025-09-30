@@ -6,14 +6,13 @@ import com.strategists.game.request.GoogleOAuthCredential;
 import com.strategists.game.response.EnterGameResponse;
 import com.strategists.game.response.GameResponse;
 import com.strategists.game.response.PermissionGroupResponse;
-import com.strategists.game.service.AdviceService;
+import com.strategists.game.service.AdvicesService;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PermissionsService;
 import com.strategists.game.service.PlayerService;
 import com.strategists.game.service.PredictionsService;
 import lombok.extern.log4j.Log4j2;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -57,17 +56,17 @@ public class GameController {
     private PredictionsService predictionsService;
 
     @Autowired(required = false)
-    private AdviceService adviceService;
+    private AdvicesService advicesService;
 
     @GetMapping("/{code}")
     public ResponseEntity<GameResponse> getGameResponse(@PathVariable String code) {
         try {
 
             // Finding requested game
-            val game = gameService.getGameByCode(code);
+            final var game = gameService.getGameByCode(code);
 
             // Creating response for the game
-            val builder = GameResponse.builder().game(game).players(playerService.getPlayersByGame(game))
+            final var builder = GameResponse.builder().game(game).players(playerService.getPlayersByGame(game))
                     .lands(landService.getLandsByGame(game))
                     .activities(activityRepository.findByGameOrderByIdDesc(game))
                     .trends(trendRepository.findByGameOrderByIdAsc(game));
@@ -78,8 +77,8 @@ public class GameController {
             }
 
             // Adding advice, if enabled
-            if (Objects.nonNull(adviceService)) {
-                builder.advices(adviceService.getAdvicesByGame(game));
+            if (Objects.nonNull(advicesService)) {
+                builder.advices(advicesService.getAdvicesByGame(game));
             }
 
             // Responding with 200
@@ -96,10 +95,10 @@ public class GameController {
         try {
 
             // Converting JWT string to credential instance
-            val credential = GoogleOAuthCredential.fromJWT(jwt);
+            final var credential = GoogleOAuthCredential.fromJWT(jwt);
 
             // Finding player and associated game information
-            val player = playerService.getPlayerByEmail(credential.getEmail());
+            final var player = playerService.getPlayerByEmail(credential.getEmail());
 
             return ResponseEntity.ok(EnterGameResponse.fromPlayer(player));
 
@@ -112,34 +111,34 @@ public class GameController {
     public ResponseEntity<EnterGameResponse> createGame(@RequestBody GoogleOAuthCredential credential) {
 
         // Checking if requesting user can create the game
-        val opt = permissionsService.getPermissionGroupByEmail(credential.getEmail());
-        val status = opt.isPresent() ? opt.get().getGameCreation() : PermissionGroupResponse.PermissionStatus.DISABLED;
+        final var opt = permissionsService.getPermissionGroupByEmail(credential.getEmail());
+        final var status = opt.isPresent() ? opt.get().getGameCreation() : PermissionGroupResponse.PermissionStatus.DISABLED;
         if (PermissionGroupResponse.PermissionStatus.DISABLED.equals(status)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         // Creating game for the requesting player
-        val player = gameService.createGame(credential);
+        final var player = gameService.createGame(credential);
         return ResponseEntity.ok(EnterGameResponse.fromPlayer(player));
     }
 
     @PutMapping("/{code}/start")
     public void startGame(@PathVariable String code) {
-        val game = gameService.getGameByCode(code);
+        final var game = gameService.getGameByCode(code);
         Assert.state(game.isLobby(), "Game already started!");
         gameService.startGame(game);
     }
 
     @PutMapping("/{code}/turn")
     public void playTurn(@PathVariable String code) {
-        val game = gameService.getGameByCode(code);
+        final var game = gameService.getGameByCode(code);
         Assert.state(game.isActive(), "Game not started yet!");
         gameService.playTurn(game);
     }
 
     @DeleteMapping("/{code}")
     public void resetGame(@PathVariable String code) {
-        val game = gameService.getGameByCode(code);
+        final var game = gameService.getGameByCode(code);
         gameService.resetGame(game);
     }
 

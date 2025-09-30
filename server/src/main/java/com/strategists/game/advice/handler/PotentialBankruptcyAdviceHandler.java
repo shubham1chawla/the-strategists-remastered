@@ -9,7 +9,6 @@ import com.strategists.game.entity.Rent;
 import com.strategists.game.repository.AdviceRepository;
 import com.strategists.game.service.LandService;
 import com.strategists.game.util.MathUtil;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -20,10 +19,10 @@ import java.util.Objects;
 import java.util.Optional;
 
 @Component
-@ConditionalOnExpression("${strategists.advice.enabled} && ${strategists.advice.potential-bankruptcy.enabled}")
+@ConditionalOnExpression("${strategists.advices.enabled} && ${strategists.advices.potential-bankruptcy.enabled}")
 public class PotentialBankruptcyAdviceHandler extends AbstractAdviceHandler {
 
-    @Value("${strategists.advice.potential-bankruptcy.priority}")
+    @Value("${strategists.advices.potential-bankruptcy.priority}")
     private int priority;
 
     @Autowired
@@ -44,14 +43,14 @@ public class PotentialBankruptcyAdviceHandler extends AbstractAdviceHandler {
     private Optional<Advice> generate(Player player, List<Land> lands) {
 
         // Calculating max rent to be paid in next dice size window
-        val diceSize = player.getGame().getDiceSize();
-        val offset = player.getIndex() + 1;
+        final var diceSize = player.getGame().getDiceSize();
+        final var offset = player.getIndex() + 1;
 
         Land maxRentLand = null;
         double maxRentAmount = 0;
         for (int i = 0; i < diceSize; i++) {
-            val land = lands.get((i + offset) % lands.size());
-            val totalRentAmount = MathUtil.sum(landService.getPlayerRentsByLand(player, land), Rent::getRentAmount);
+            final var land = lands.get((i + offset) % lands.size());
+            final var totalRentAmount = MathUtil.sum(landService.getPlayerRentsByLand(player, land), Rent::getRentAmount);
             if (totalRentAmount > maxRentAmount) {
                 maxRentAmount = totalRentAmount;
                 maxRentLand = land;
@@ -59,10 +58,10 @@ public class PotentialBankruptcyAdviceHandler extends AbstractAdviceHandler {
         }
 
         // Checking if advice is needed
-        val isAdviceNeeded = Objects.nonNull(maxRentLand) && maxRentAmount >= player.getCash();
+        final var isAdviceNeeded = Objects.nonNull(maxRentLand) && maxRentAmount >= player.getCash();
 
         // Checking if we have already generated advice for this player
-        val opt = adviceRepository.findByPlayerAndType(player, AdviceType.POTENTIAL_BANKRUPTCY);
+        final var opt = adviceRepository.findByPlayerAndType(player, AdviceType.POTENTIAL_BANKRUPTCY);
 
         // Case 1 - No previous advice found and no new advice needed
         if (opt.isEmpty() && !isAdviceNeeded) {
@@ -75,7 +74,7 @@ public class PotentialBankruptcyAdviceHandler extends AbstractAdviceHandler {
         }
 
         // Case 3 - Previous advice's state not NEW and advice needed
-        val advice = opt.get();
+        final var advice = opt.get();
         if (isAdviceNeeded && (!Advice.State.NEW.equals(advice.getState())
                 || !(Objects.equals(String.valueOf(maxRentAmount), advice.getVal1())
                 && Objects.equals(maxRentLand.getName(), advice.getVal2())))) {

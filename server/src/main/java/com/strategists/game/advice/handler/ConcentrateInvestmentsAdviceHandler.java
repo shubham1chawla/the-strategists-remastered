@@ -7,7 +7,6 @@ import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.PlayerLand;
 import com.strategists.game.repository.AdviceRepository;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -16,16 +15,17 @@ import org.springframework.stereotype.Component;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
-@ConditionalOnExpression("${strategists.advice.enabled} && ${strategists.advice.concentrate-investments.enabled}")
+@ConditionalOnExpression("${strategists.advices.enabled} && ${strategists.advices.concentrate-investments.enabled}")
 public class ConcentrateInvestmentsAdviceHandler extends AbstractAdviceHandler {
 
-    @Value("${strategists.advice.concentrate-investments.priority}")
+    @Value("${strategists.advices.concentrate-investments.priority}")
     private int priority;
 
-    @Value("${strategists.advice.concentrate-investments.min-investments-count}")
+    @Value("${strategists.advices.concentrate-investments.min-investments-count}")
     private int minInvestmentsCount;
 
     @Autowired
@@ -43,16 +43,16 @@ public class ConcentrateInvestmentsAdviceHandler extends AbstractAdviceHandler {
     private Optional<Advice> generate(Player player, List<Land> lands) {
 
         // Checking if player made at least minimum required investments
-        val playerLands = Optional.ofNullable(player.getPlayerLands()).orElseGet(() -> new ArrayList<PlayerLand>(0));
+        final var playerLands = Optional.ofNullable(player.getPlayerLands()).orElseGet(() -> new ArrayList<PlayerLand>(0));
         if (playerLands.size() < minInvestmentsCount) {
             return Optional.empty();
         }
 
         // Checking if advice is needed
-        val isAdviceNeeded = getMaxInvestmentsCount(player, lands) < minInvestmentsCount;
+        final var isAdviceNeeded = getMaxInvestmentsCount(player, lands) < minInvestmentsCount;
 
         // Checking if we have already generated advice for this player
-        val opt = adviceRepository.findByPlayerAndType(player, AdviceType.CONCENTRATE_INVESTMENTS);
+        final var opt = adviceRepository.findByPlayerAndType(player, AdviceType.CONCENTRATE_INVESTMENTS);
 
         // Case 1 - No previous advice found and no new advice needed
         if (opt.isEmpty() && !isAdviceNeeded) {
@@ -65,7 +65,7 @@ public class ConcentrateInvestmentsAdviceHandler extends AbstractAdviceHandler {
         }
 
         // Case 3 - Previous advice's state not NEW and advice needed
-        val advice = opt.get();
+        final var advice = opt.get();
         if (!Advice.State.NEW.equals(advice.getState()) && isAdviceNeeded) {
             advice.setState(Advice.State.NEW);
             advice.setNewCount(advice.getNewCount() + 1);
@@ -88,19 +88,23 @@ public class ConcentrateInvestmentsAdviceHandler extends AbstractAdviceHandler {
     private int getMaxInvestmentsCount(Player player, List<Land> lands) {
 
         // Creating set to access player's invested lands
-        val set = player.getPlayerLands().stream().map(PlayerLand::getLand).collect(Collectors.toSet());
+        final var set = player.getPlayerLands().stream().map(PlayerLand::getLand).collect(Collectors.toSet());
 
         // Building investments count per dice size window
-        val diceSize = player.getGame().getDiceSize();
+        final var diceSize = player.getGame().getDiceSize();
 
-        int i = 0;
-        int j = 0;
-        int count = 0;
-        int maxCount = 0;
+        return getMaxCount(lands, diceSize, set);
+    }
+
+    private int getMaxCount(List<Land> lands, Integer diceSize, Set<Land> set) {
+        var i = 0;
+        var j = 0;
+        var count = 0;
+        var maxCount = 0;
 
         while (i < lands.size()) {
             while (j - i < diceSize) {
-                val land = lands.get(j % lands.size());
+                final var land = lands.get(j % lands.size());
                 if (set.contains(land)) {
                     count++;
                 }
@@ -112,7 +116,6 @@ public class ConcentrateInvestmentsAdviceHandler extends AbstractAdviceHandler {
             }
             i++;
         }
-
         return maxCount;
     }
 

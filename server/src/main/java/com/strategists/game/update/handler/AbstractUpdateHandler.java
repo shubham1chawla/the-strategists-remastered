@@ -2,22 +2,35 @@ package com.strategists.game.update.handler;
 
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Game;
+import com.strategists.game.listener.event.AdvicesServiceEvent;
+import com.strategists.game.listener.event.CleanUpEvent;
+import com.strategists.game.listener.event.PredictionsServiceEvent;
+import com.strategists.game.listener.event.SkipPlayerEvent;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.TrendRepository;
-import com.strategists.game.service.AdviceService;
-import com.strategists.game.service.CleanUpService;
+import com.strategists.game.service.AdvicesService;
 import com.strategists.game.service.PredictionsService;
-import com.strategists.game.service.SkipPlayerService;
+import com.strategists.game.service.SchedulerService;
 import com.strategists.game.service.UpdateService;
 import com.strategists.game.update.payload.UpdatePayload;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.util.Objects;
-import java.util.concurrent.CompletableFuture;
 
 @Log4j2
 public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implements UpdateHandler {
+
+    @Value("${strategists.skip-player.enabled}")
+    private boolean isSkipPlayerEnabled;
+
+    @Value("${strategists.clean-up.enabled}")
+    private boolean isCleanUpEnabled;
+
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
     @Autowired
     private ActivityRepository activityRepository;
@@ -28,17 +41,14 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
     @Autowired
     private UpdateService updateService;
 
+    @Autowired
+    private SchedulerService schedulerService;
+
     @Autowired(required = false)
     private PredictionsService predictionsService;
 
     @Autowired(required = false)
-    private AdviceService adviceService;
-
-    @Autowired(required = false)
-    private SkipPlayerService skipPlayerService;
-
-    @Autowired(required = false)
-    private CleanUpService cleanUpService;
+    private AdvicesService advicesService;
 
     protected Activity saveActivity(Activity activity) {
         return activityRepository.saveAndFlush(activity);
@@ -50,80 +60,56 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
         if (Objects.nonNull(predictionsService)) {
             predictionsService.clearPlayerPredictions(game);
         }
-        if (Objects.nonNull(adviceService)) {
-            adviceService.clearAdvices(game);
+        if (Objects.nonNull(advicesService)) {
+            advicesService.clearAdvices(game);
         }
     }
 
-    protected void trainPredictionsModelAsync(Game game) {
+    protected void publishTrainPredictionsModelEvent(Game game) {
         if (Objects.nonNull(predictionsService)) {
-            CompletableFuture.runAsync(() -> {
-                try {
-                    predictionsService.trainPredictionsModel(game);
-                } catch (Exception ex) {
-                    log.error("Failed to train prediction model!", ex);
-                }
-            });
+            eventPublisher.publishEvent(PredictionsServiceEvent.forTrain(game));
         }
     }
 
-    protected void inferPredictionsModelAsync(Game game) {
+    protected void publishInferPredictionsModelEvent(Game game) {
         if (Objects.nonNull(predictionsService)) {
-            CompletableFuture.runAsync(() -> {
-                try {
-                    predictionsService.inferPredictionsModel(game);
-                } catch (Exception ex) {
-                    log.error("Failed to execute prediction model!", ex);
-                }
-            });
+            eventPublisher.publishEvent(PredictionsServiceEvent.forInfer(game));
         }
     }
 
-    protected void generateAdvicesAsync(Game game) {
-        if (Objects.nonNull(adviceService)) {
-            CompletableFuture.runAsync(() -> {
-                try {
-                    adviceService.generateAdvices(game);
-                } catch (Exception ex) {
-                    log.error("Failed to generate advices!", ex);
-                }
-            });
+    protected void publishGenerateAdvicesEvent(Game game) {
+        if (Objects.nonNull(advicesService)) {
+            eventPublisher.publishEvent(AdvicesServiceEvent.forGenerate(game));
         }
     }
 
-    protected void exportAdvicesAsync(Game game) {
-        if (Objects.nonNull(adviceService)) {
-            CompletableFuture.runAsync(() -> {
-                try {
-                    adviceService.exportAdvices(game);
-                } catch (Exception ex) {
-                    log.error("Failed to export advices!", ex);
-                }
-            });
+    protected void publishExportAdvicesEvent(Game game) {
+        if (Objects.nonNull(advicesService)) {
+            eventPublisher.publishEvent(AdvicesServiceEvent.forExport(game));
         }
     }
 
-    protected void scheduleSkipPlayerTask(Game game) {
-        if (Objects.nonNull(skipPlayerService)) {
-            skipPlayerService.schedule(game);
+    protected void scheduleSkipPlayerEvent(Game game) {
+        if (isSkipPlayerEnabled) {
+            schedulerService.scheduleEvent(SkipPlayerEvent.from(game));
         }
     }
 
-    protected void unscheduleSkipPlayerTask(Game game) {
-        if (Objects.nonNull(skipPlayerService)) {
-            skipPlayerService.unschedule(game);
+    protected void unscheduleSkipPlayerEvent(Game game) {
+        if (isSkipPlayerEnabled) {
+            schedulerService.unscheduleEvent(SkipPlayerEvent.getUniqueIdentifier(game.getCode()));
         }
     }
 
-    protected void scheduleCleanUpTask(Game game) {
-        if (Objects.nonNull(cleanUpService)) {
-            cleanUpService.schedule(game);
+    protected void scheduleCleanUpEvent(Game game) {
+        if (isCleanUpEnabled) {
+            schedulerService.scheduleEvent(CleanUpEvent.from(game));
         }
     }
 
-    protected void unscheduleCleanUpTask(Game game) {
-        if (Objects.nonNull(cleanUpService)) {
-            cleanUpService.unschedule(game);
+    protected void unscheduleCleanUpEvent(Game game) {
+        if (isCleanUpEnabled) {
+            schedulerService.unscheduleEvent(CleanUpEvent.getUniqueIdentifier(game.getCode()));
         }
     }
 

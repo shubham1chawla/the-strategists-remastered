@@ -9,7 +9,7 @@ import com.strategists.game.entity.Player;
 import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.AdviceRepository;
 import com.strategists.game.request.UploadLocalFilesRequest;
-import com.strategists.game.service.AdviceService;
+import com.strategists.game.service.AdvicesService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
 import com.strategists.game.service.StorageService;
@@ -18,7 +18,6 @@ import com.strategists.game.update.UpdateType;
 import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
-import lombok.val;
 import org.apache.commons.chain.impl.ChainBase;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,13 +33,13 @@ import java.util.List;
 @Log4j2
 @Service
 @Transactional
-@ConditionalOnProperty(name = "strategists.advice.enabled", havingValue = "true")
-public class AdviceServiceImpl implements AdviceService {
+@ConditionalOnProperty(name = "strategists.advices.enabled", havingValue = "true")
+public class AdvicesServiceImpl implements AdvicesService {
 
-    @Value("${strategists.advice.data-directory}")
+    @Value("${strategists.advices.data-directory}")
     private File dataDirectory;
 
-    @Value("${strategists.advice.google-drive.upload-folder-id}")
+    @Value("${strategists.advices.google-drive.upload-folder-id}")
     private String uploadGoogleDriveFolderId;
 
     @Autowired
@@ -84,16 +83,16 @@ public class AdviceServiceImpl implements AdviceService {
         }
 
         // Creating the chain from available handlers
-        val chain = new ChainBase();
+        final var chain = new ChainBase();
         for (AbstractAdviceHandler handler : handlers) {
             chain.addCommand(handler);
         }
 
         // Adding information to advice context
-        val players = playerService.getPlayersByGame(game);
-        val lands = landService.getLandsByGame(game);
-        val activities = activityRepository.findByGameOrderByIdDesc(game);
-        val context = new AdviceContext(game, players, lands, activities);
+        final var players = playerService.getPlayersByGame(game);
+        final var lands = landService.getLandsByGame(game);
+        final var activities = activityRepository.findByGameOrderByIdDesc(game);
+        final var context = new AdviceContext(game, players, lands, activities);
 
         // Executing advice chain
         try {
@@ -116,7 +115,7 @@ public class AdviceServiceImpl implements AdviceService {
     @UpdateMapping(UpdateType.ADVICE)
     public List<Advice> markPlayerAdvicesViewed(Player player) {
         log.info("Marking {}'s advices as viewed for game: {}", player.getUsername(), player.getGameCode());
-        val advices = adviceRepository.findByPlayerAndViewed(player, false);
+        final var advices = adviceRepository.findByPlayerAndViewed(player, false);
         if (CollectionUtils.isEmpty(advices)) {
             return List.of();
         }
@@ -131,8 +130,8 @@ public class AdviceServiceImpl implements AdviceService {
     @Override
     public void exportAdvices(Game game) {
         // Preparing advices CSV
-        var advices = getAdvicesByGame(game);
-        var advicesCSV = new AdvicesCSV(game, advices);
+        final var advices = getAdvicesByGame(game);
+        final var advicesCSV = new AdvicesCSV(game, advices);
 
         // Exporting advices CSV file
         File advicesCSVFile;
@@ -149,7 +148,7 @@ public class AdviceServiceImpl implements AdviceService {
     }
 
     private void uploadAdvicesCSV() {
-        var request = new UploadLocalFilesRequest();
+        final var request = new UploadLocalFilesRequest();
         request.setGoogleDriveFolderId(uploadGoogleDriveFolderId);
         request.setMimetype("text/csv");
         request.setLocalDataDirectory(dataDirectory);
