@@ -7,6 +7,15 @@ export interface PlayerLand {
   buyAmount: number;
 }
 
+export interface Rent {
+  id: number;
+  step: number;
+  rentAmount: number;
+  sourcePlayerId?: number;
+  targetPlayerId?: number;
+  landId: number;
+}
+
 export interface Player {
   id: number;
   username: string;
@@ -18,10 +27,13 @@ export interface Player {
   cash: number;
   bankruptcyOrder: number;
   lands: PlayerLand[];
+  receivedRents: Rent[] | null;
+  paidRents: Rent[] | null;
 
   // Optional fields based on configuration
+  lastInvestStep?: number;
+  lastSkippedStep?: number;
   remainingSkipsCount?: number;
-  allowedSkipsCount?: number;
 }
 
 export interface Land {
@@ -36,36 +48,53 @@ export interface Land {
   events: any[];
 }
 
-export interface GameState {
-  players: Player[];
-  lands: Land[];
+export interface Game {
+  code: string;
   state: 'LOBBY' | 'ACTIVE';
+  currentStep: number;
   minPlayersCount: number;
   maxPlayersCount: number;
+  gameMapId: string;
+  diceSize: number;
+  createdAt: number;
+  endAt?: number;
+
+  // Optional fields based on configuration
+  allowedSkipsCount?: number;
+  skipPlayerTimeout?: number;
+  cleanUpDelay?: number;
+}
+
+export interface GameState {
+  game: Game;
+  players: Player[];
+  lands: Land[];
 }
 
 const initialState: GameState = {
+  game: {
+    code: '',
+    state: 'LOBBY',
+    currentStep: 0,
+    minPlayersCount: 0,
+    maxPlayersCount: 0,
+    gameMapId: '',
+    diceSize: 0,
+    createdAt: 0,
+  },
   players: [],
   lands: [],
-  state: 'LOBBY',
-  minPlayersCount: 0,
-  maxPlayersCount: 0,
 };
 
 const slice = createSlice({
   name: 'game',
   initialState,
   reducers: {
-    gameStateSetted: (state, { payload }: { payload: GameState['state'] }) => {
-      state.state = payload;
+    gameSetted: (state, { payload }: { payload: Game }) => {
+      state.game = { ...payload };
     },
-    playersCountConstraintsSetted: (
-      state,
-      { payload }: { payload: [number, number] },
-    ) => {
-      const [minPlayersCount, maxPlayersCount] = payload;
-      state.minPlayersCount = minPlayersCount;
-      state.maxPlayersCount = maxPlayersCount;
+    gamePatched: (state, { payload }: { payload: Partial<Game> }) => {
+      state.game = { ...state.game, ...payload };
     },
     playersSetted: (state, { payload }: { payload: Player[] }) => {
       state.players = [...payload];
@@ -99,8 +128,8 @@ const slice = createSlice({
 });
 
 export const {
-  gameStateSetted,
-  playersCountConstraintsSetted,
+  gameSetted,
+  gamePatched,
   playersSetted,
   playerAdded,
   playerKicked,

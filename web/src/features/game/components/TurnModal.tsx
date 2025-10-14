@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Button, Modal, Space, Tag } from 'antd';
 import { HomeOutlined } from '@ant-design/icons';
-import useGame from '@game/hooks/useGame';
-import useLogin from '@login/hooks/useLogin';
+import useGameState from '@game/hooks/useGameState';
+import useLoginState from '@login/hooks/useLoginState';
 
 function TurnModal() {
-  const { player } = useLogin();
-  const { lands, winnerPlayer } = useGame();
+  const { player } = useLoginState();
+  const { lands, winnerPlayer } = useGameState();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {

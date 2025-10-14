@@ -2,7 +2,7 @@ import io
 import logging
 import mimetypes
 import os
-from typing import Any, List
+from typing import Any, List, Optional
 
 from google.oauth2.service_account import Credentials
 from googleapiclient import discovery
@@ -32,13 +32,24 @@ def build_service():
     return discovery.build("drive", "v3", credentials=credentials)
 
 
-def list_google_drive_files(service, *, google_drive_folder_id: str, mimetype: str) -> List[Any]:
+def list_google_drive_files(
+        service,
+        *,
+        google_drive_folder_id: str,
+        mimetype: Optional[str] = None,
+) -> List[Any]:
     # Listing files until next page token is none
     all_files, page_token = [], None
+
+    # Building query
+    queries = [f"('{google_drive_folder_id}' in parents)"]
+    if mimetype:
+        queries.append(f"(mimeType='{mimetype}')")
+
     while True:
         # Building criteria
         criteria = {
-            "q": f"(mimeType='{mimetype}') and ('{google_drive_folder_id}' in parents)",
+            "q": " and ".join(queries),
             "spaces": "drive",
             "fields": "nextPageToken, files(id, name)",
             "pageToken": page_token,
@@ -54,7 +65,7 @@ def list_google_drive_files(service, *, google_drive_folder_id: str, mimetype: s
         if page_token is None:
             break
 
-    logger.info(f"Found {len(all_files)} '{mimetype}' files in Google Drive")
+    logger.info(f"Found {len(all_files)} files in Google Drive")
     return all_files
 
 
@@ -69,18 +80,42 @@ def list_local_files(local_data_directory: str, *, file_extension: str) -> List[
     return names
 
 
-def download_google_drive_files(service,
-                                *,
-                                request: DownloadGoogleDriveFilesRequest) -> DownloadGoogleDriveFilesResponse:
-    # Listing all the files in the local directory
+def _get_file_extension(request: DownloadGoogleDriveFilesRequest) -> str:
+    # Checking if file extension provided explicitly
+    file_extension = request.file_extension
+    if request.file_extension:
+        return file_extension if file_extension.startswith(".") else "." + file_extension
+
+    # Checking if mimetype provided
+    if not request.mimetype:
+        raise ValueError("Either provide 'file_extension' or 'mimetype'!")
+
+    # Checking if file extension can be guessed
     file_extension = mimetypes.guess_extension(request.mimetype)
+    if not file_extension:
+        raise ValueError(f"Unable to figure out extension from mimetype! Provide 'file_extension' explicitly!")
+
+    # Returning file extension
+    return file_extension
+
+
+def download_google_drive_files(
+        service,
+        *,
+        request: DownloadGoogleDriveFilesRequest,
+) -> DownloadGoogleDriveFilesResponse:
+    file_extension = _get_file_extension(request)
+
+    # Listing all the files in the local directory
     local_file_names = {name for name in list_local_files(request.local_data_directory, file_extension=file_extension)}
 
     # Downloading files not in local directory
     downloaded_files, skipped_files, failed_files = [], [], []
-    for google_drive_file in list_google_drive_files(service,
-                                                     google_drive_folder_id=request.google_drive_folder_id,
-                                                     mimetype=request.mimetype):
+    for google_drive_file in list_google_drive_files(
+            service,
+            google_drive_folder_id=request.google_drive_folder_id,
+            mimetype=request.mimetype,
+    ):
 
         # Checking if the file is already downloaded
         google_drive_file_name = google_drive_file.get("name")
@@ -109,28 +144,35 @@ def download_google_drive_files(service,
             failed_files.append(google_drive_file_name)
 
     logger.info(f"Downloaded: {len(downloaded_files)} | Skipped: {len(skipped_files)} | Failed: {len(failed_files)}")
-    return DownloadGoogleDriveFilesResponse(downloaded_files=downloaded_files,
-                                            skipped_files=skipped_files,
-                                            failed_files=failed_files)
+    return DownloadGoogleDriveFilesResponse(
+        downloaded_files=downloaded_files,
+        skipped_files=skipped_files,
+        failed_files=failed_files,
+    )
 
 
-def upload_local_files(service,
-                       *,
-                       request: UploadLocalFilesRequest) -> UploadLocalFilesResponse:
+def upload_local_files(
+        service,
+        *,
+        request: UploadLocalFilesRequest,
+) -> UploadLocalFilesResponse:
+    file_extension = _get_file_extension(request)
+
     # Listing all the files uploaded to drive previously
     google_drive_folder_ids, google_drive_file_names = [request.google_drive_folder_id], set()
     if request.reference_google_drive_folder_id:
         google_drive_folder_ids.append(request.reference_google_drive_folder_id)
 
     for google_drive_folder_id in google_drive_folder_ids:
-        files = list_google_drive_files(service,
-                                        google_drive_folder_id=google_drive_folder_id,
-                                        mimetype=request.mimetype)
+        files = list_google_drive_files(
+            service,
+            google_drive_folder_id=google_drive_folder_id,
+            mimetype=request.mimetype,
+        )
         google_drive_file_names |= {file.get("name") for file in files}
     logger.info(f"Found {len(google_drive_file_names)} already uploaded to Google Drive")
 
     # Listing all the files in the local directory
-    file_extension = mimetypes.guess_extension(request.mimetype)
     local_file_names = {name for name in list_local_files(request.local_data_directory, file_extension=file_extension)}
 
     # Uploading files not in Google Drive
@@ -149,10 +191,10 @@ def upload_local_files(service,
             drive_request = {
                 "body": {
                     "name": local_file_name,
-                    "mimeType": request.mimetype,
+                    "mimeType": request.mimetype or "text/plain",
                     "parents": [request.google_drive_folder_id],
                 },
-                "media_body": MediaFileUpload(local_file_path, mimetype=request.mimetype),
+                "media_body": MediaFileUpload(local_file_path, mimetype=request.mimetype or "text/plain"),
                 "fields": "id",
             }
             service.files().create(**drive_request).execute()
@@ -162,6 +204,8 @@ def upload_local_files(service,
             failed_files.append(local_file_name)
 
     logger.info(f"Uploaded: {len(uploaded_files)} | Skipped: {len(skipped_files)} | Failed: {len(failed_files)}")
-    return UploadLocalFilesResponse(uploaded_files=uploaded_files,
-                                    skipped_files=skipped_files,
-                                    failed_files=failed_files)
+    return UploadLocalFilesResponse(
+        uploaded_files=uploaded_files,
+        skipped_files=skipped_files,
+        failed_files=failed_files,
+    )

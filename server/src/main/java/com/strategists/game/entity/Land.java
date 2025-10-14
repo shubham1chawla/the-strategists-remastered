@@ -24,7 +24,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import lombok.val;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -144,15 +143,9 @@ public class Land implements Serializable {
         return MathUtil.sum(landEvents, le -> DAMPENER * le.getEvent().getFactor() * le.getLevel() * le.getLife());
     }
 
-    @Transient
-    @JsonIgnore
-    public String getGameCode() {
-        return game.getCode();
-    }
-
     public void addEvent(Event event, int life, int level) {
         landEvents = Objects.isNull(landEvents) ? new ArrayList<>() : landEvents;
-        val opt = landEvents.stream().filter(le -> Objects.equals(le.getEventId(), event.getId())).findFirst();
+        final var opt = landEvents.stream().filter(le -> Objects.equals(le.getEventId(), event.getId())).findFirst();
         if (opt.isEmpty()) {
             landEvents.add(new LandEvent(this, event, life, level));
             return;

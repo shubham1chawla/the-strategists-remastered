@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { Land, Player, PlayerLand } from '@game/state';
-import useGame from './useGame';
+import useGameState from './useGameState';
 
 interface PortfolioItem extends PlayerLand {
   name: string;
@@ -11,7 +11,7 @@ const usePortfolioItems = (
   perspective: 'land' | 'player',
   playerLands: PlayerLand[],
 ): PortfolioItem[] => {
-  const { players, lands } = useGame();
+  const { players, lands } = useGameState();
 
   // Converting players to playerMap
   const playerMap = useMemo(

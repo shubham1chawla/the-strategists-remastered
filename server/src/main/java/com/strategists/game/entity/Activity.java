@@ -1,6 +1,7 @@
 package com.strategists.game.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.strategists.game.update.UpdateType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,9 +13,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.val;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -35,26 +36,27 @@ public class Activity implements Serializable {
     private Long id;
 
     @Column(nullable = false)
-    private Integer turn;
+    private Integer step;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private UpdateType type;
 
+    @JsonIgnore
     @Column(nullable = true)
     private String val1;
 
+    @JsonIgnore
     @Column(nullable = true)
     private String val2;
 
+    @JsonIgnore
     @Column(nullable = true)
     private String val3;
 
+    @JsonIgnore
     @Column(nullable = true)
     private String val4;
-
-    @Column(nullable = true)
-    private String val5;
 
     @JsonIgnore
     @ManyToOne
@@ -64,15 +66,65 @@ public class Activity implements Serializable {
 
     public Activity(Game game, UpdateType type, String... values) {
         this.game = game;
-        this.turn = game.getTurn();
+        this.step = game.getCurrentStep();
         this.type = type;
         this.val1 = values.length > 0 ? values[0] : null;
         this.val2 = values.length > 1 ? values[1] : null;
         this.val3 = values.length > 2 ? values[2] : null;
         this.val4 = values.length > 3 ? values[3] : null;
-        this.val5 = values.length > 4 ? values[4] : null;
-        if (values.length > 5) {
+        if (values.length > 4) {
             throw new IllegalArgumentException("More than 5 values are not supported!");
+        }
+    }
+
+    @Transient
+    @JsonProperty("text")
+    public String getText() {
+        switch (getType()) {
+            case BANKRUPTCY -> {
+                return String.format("%s declared bankruptcy!", getVal1());
+            }
+            case CREATE -> {
+                return String.format("%s created game %s", getVal1(), getVal2());
+            }
+            case INVEST -> {
+                return String.format("%s invested in %s of %s!", getVal1(), getVal2(), getVal3());
+            }
+            case JOIN -> {
+                return String.format("%s joined The Strategists!", getVal1());
+            }
+            case KICK -> {
+                return String.format("Host kicked %s out!", getVal1());
+            }
+            case MOVE -> {
+                return String.format("%s travelled %s steps and reached %s.", getVal1(), getVal2(), getVal3());
+            }
+            case PREDICTION -> {
+                return PlayerPrediction.Prediction.WINNER.name().equals(getVal2())
+                        ? String.format("%s is likely to win based on the predictions!", getVal1())
+                        : String.format("%s leads slightly based on the predictions.", getVal1());
+            }
+            case RENT -> {
+                return String.format("%s paid %s cash rent to %s for %s.", getVal1(), getVal2(), getVal3(), getVal4());
+            }
+            case RESET -> {
+                return "Host restarted The Strategists!";
+            }
+            case SKIP -> {
+                return String.format("%s's turn skipped due to inactivity!", getVal1());
+            }
+            case START -> {
+                return String.format("The Strategists started! %s's turn to invest.", getVal1());
+            }
+            case TURN -> {
+                return String.format("%s passed turn to %s.", getVal1(), getVal2());
+            }
+            case WIN -> {
+                return String.format("%s won The Strategists!", getVal1());
+            }
+            default -> {
+                return String.format("Unknown activity type: '%s'", getType());
+            }
         }
     }
 
@@ -81,12 +133,11 @@ public class Activity implements Serializable {
     }
 
     public static Activity ofCreate(Player player) {
-        return new Activity(player.getGame(), UpdateType.CREATE, player.getUsername(), player.getGameCode());
+        return new Activity(player.getGame(), UpdateType.CREATE, player.getUsername(), player.getGame().getCode());
     }
 
     public static Activity ofInvest(Player player, Land land, double ownership) {
-        return new Activity(player.getGame(), UpdateType.INVEST, player.getUsername(), Double.toString(ownership),
-                land.getName());
+        return new Activity(player.getGame(), UpdateType.INVEST, player.getUsername(), Double.toString(ownership), land.getName());
     }
 
     public static Activity ofJoin(Player player) {
@@ -98,22 +149,21 @@ public class Activity implements Serializable {
     }
 
     public static Activity ofMove(Player player, int move, Land land) {
-        val game = player.getGame();
+        final var game = player.getGame();
         return new Activity(game, UpdateType.MOVE, player.getUsername(), Integer.toString(move), land.getName());
     }
 
     public static Activity ofPrediction(PlayerPrediction playerPrediction) {
-        val player = playerPrediction.getPlayer();
+        final var player = playerPrediction.getPlayer();
         return new Activity(player.getGame(), UpdateType.PREDICTION, player.getUsername(), playerPrediction.getPrediction().name());
     }
 
     public static Activity ofRent(Rent rent) {
-        val payer = rent.getSourcePlayer();
-        val payee = rent.getTargetPlayer();
-        val land = rent.getLand();
-        val amount = rent.getRentAmount();
-        return new Activity(payer.getGame(), UpdateType.RENT, payer.getUsername(), Double.toString(amount),
-                payee.getUsername(), land.getName());
+        final var payer = rent.getSourcePlayer();
+        final var payee = rent.getTargetPlayer();
+        final var land = rent.getLand();
+        final var amount = rent.getRentAmount();
+        return new Activity(payer.getGame(), UpdateType.RENT, payer.getUsername(), Double.toString(amount), payee.getUsername(), land.getName());
     }
 
     public static Activity ofReset(Game game) {
@@ -129,7 +179,7 @@ public class Activity implements Serializable {
     }
 
     public static Activity ofTurn(Player previousPlayer, Player currentPlayer) {
-        val game = previousPlayer.getGame();
+        final var game = previousPlayer.getGame();
         return new Activity(game, UpdateType.TURN, previousPlayer.getUsername(), currentPlayer.getUsername());
     }
 

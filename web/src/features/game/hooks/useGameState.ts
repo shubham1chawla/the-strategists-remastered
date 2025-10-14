@@ -1,15 +1,15 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { State } from '@/store';
+import { StrategistsState } from '@/store';
 
-const useGame = () => {
-  const game = useSelector((state: State) => state.game);
-  const { players, state } = game;
+const useGameState = () => {
+  const gameState = useSelector((state: StrategistsState) => state.gameState);
+  const { players, game } = gameState;
 
   // Determining turn player
   const turnPlayer = useMemo(
-    () => (state === 'ACTIVE' ? players.find((p) => !!p.turn) : undefined),
-    [state, players],
+    () => (game.state === 'ACTIVE' ? players.find((p) => !!p.turn) : undefined),
+    [game.state, players],
   );
 
   // Determining active players
@@ -27,10 +27,10 @@ const useGame = () => {
   // Determining winner player
   const winnerPlayer = useMemo(
     () =>
-      state === 'ACTIVE' && activePlayers.length === 1
+      game.state === 'ACTIVE' && activePlayers.length === 1
         ? activePlayers[0]
         : undefined,
-    [state, activePlayers],
+    [game.state, activePlayers],
   );
 
   /**
@@ -58,7 +58,7 @@ const useGame = () => {
   );
 
   return {
-    ...game,
+    ...gameState,
     sortedPlayers,
     activePlayers,
     bankruptPlayers,
@@ -67,4 +67,4 @@ const useGame = () => {
   };
 };
 
-export default useGame;
+export default useGameState;

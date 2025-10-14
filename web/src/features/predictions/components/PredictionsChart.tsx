@@ -81,7 +81,7 @@ function PredictionsChart({ player, showHelp }: PredictionsChartProps) {
         ],
       })
       .transform([{ type: 'diffY' }])
-      .encode('x', 'turn')
+      .encode('x', 'step')
       .encode('y', 'share')
       .encode('color', 'side')
       .tooltip({
@@ -97,7 +97,7 @@ function PredictionsChart({ player, showHelp }: PredictionsChartProps) {
     // Drawing player's line for reference
     chart
       .line()
-      .encode('x', 'turn')
+      .encode('x', 'step')
       .encode('y', player.username)
       .style('stroke', theme.accentColor)
       .tooltip(false);
@@ -122,7 +122,7 @@ function PredictionsChart({ player, showHelp }: PredictionsChartProps) {
       <div id="predictions-container" />
       {showHelp && (
         <ChartInterpretationHelp
-          message={`The chart highlights the change in winning probabilities of ${player.username} compared to opponents per turn. A larger area represents a stark contrast in the chance of winning for any side.`}
+          message={`The chart highlights the change in winning probabilities of ${player.username} compared to opponents per step. A larger area represents a stark contrast in the chance of winning for any side.`}
         />
       )}
     </div>

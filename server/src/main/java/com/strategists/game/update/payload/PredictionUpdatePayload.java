@@ -3,21 +3,26 @@ package com.strategists.game.update.payload;
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.PlayerPrediction;
 import com.strategists.game.update.UpdateType;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.List;
 
 @Getter
-@AllArgsConstructor
 public class PredictionUpdatePayload implements UpdatePayload<List<PlayerPrediction>> {
 
-    private Activity activity;
-    private List<PlayerPrediction> payload;
+    private final Long timestamp = System.currentTimeMillis();
+    private final UpdateType type = UpdateType.PREDICTION;
+    private final String gameCode;
+    private final Integer gameStep;
+    private final Activity activity;
+    private final List<PlayerPrediction> payload;
 
-    @Override
-    public UpdateType getType() {
-        return UpdateType.PREDICTION;
+    public PredictionUpdatePayload(Activity activity, List<PlayerPrediction> playerPredictions) {
+        final var game = activity.getGame();
+        this.gameCode = game.getCode();
+        this.gameStep = game.getCurrentStep();
+        this.activity = activity;
+        this.payload = playerPredictions;
     }
 
 }

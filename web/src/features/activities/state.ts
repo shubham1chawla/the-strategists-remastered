@@ -47,12 +47,8 @@ export const getSubscribableTypes = (): UpdateType[] => {
 
 export interface Activity {
   type: UpdateType;
-  turn: number;
-  val1: string | null;
-  val2: string | null;
-  val3: string | null;
-  val4: string | null;
-  val5: string | null;
+  step: number;
+  text: string;
 }
 
 export interface ActivitiesState {

@@ -5,26 +5,24 @@ import com.strategists.game.entity.Land;
 import com.strategists.game.entity.Player;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.MoveUpdatePayload;
-import lombok.val;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
+@Getter
 @Component
 public class MoveUpdateHandler extends AbstractUpdateHandler<MoveUpdatePayload> {
 
-    @Override
-    public UpdateType getType() {
-        return UpdateType.MOVE;
-    }
+    private final UpdateType type = UpdateType.MOVE;
 
     @Override
     public void handle(Object returnValue, Object[] args) {
         // Moving player and move amount from argument with associated land returned
-        val player = (Player) args[0];
-        val move = (int) args[1];
-        val land = (Land) returnValue;
+        final var player = (Player) args[0];
+        final var move = (int) args[1];
+        final var land = (Land) returnValue;
 
         // Persisting the activity and sending the update
-        val activity = Activity.ofMove(player, move, land);
+        final var activity = Activity.ofMove(player, move, land);
         sendUpdate(player.getGame(), new MoveUpdatePayload(saveActivity(activity), player));
     }
 

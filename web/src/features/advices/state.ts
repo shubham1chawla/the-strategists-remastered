@@ -14,9 +14,7 @@ export interface Advice {
   priority: number;
   type: AdviceType;
   viewed: boolean;
-  val1: string | null;
-  val2: string | null;
-  val3: string | null;
+  text: string;
 }
 
 export type AdvicesState = Advice[];

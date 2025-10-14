@@ -69,7 +69,6 @@ public class SignificantInvestmentsAdviceHandler extends AbstractAdviceHandler {
         final var advice = opt.get();
         if (!Advice.State.NEW.equals(advice.getState()) && isAdviceNeeded) {
             advice.setState(Advice.State.NEW);
-            advice.setNewCount(advice.getNewCount() + 1);
             advice.setViewed(false);
             return Optional.of(advice);
         }
@@ -77,7 +76,6 @@ public class SignificantInvestmentsAdviceHandler extends AbstractAdviceHandler {
         // Case 4 - Previous advice's state not FOLLOWED and advice not needed
         if (!Advice.State.FOLLOWED.equals(advice.getState()) && !isAdviceNeeded) {
             advice.setState(Advice.State.FOLLOWED);
-            advice.setFollowedCount(advice.getFollowedCount() + 1);
             advice.setViewed(false);
             return Optional.of(advice);
         }

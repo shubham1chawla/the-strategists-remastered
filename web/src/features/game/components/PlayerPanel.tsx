@@ -3,9 +3,9 @@ import { Badge, Space, Tabs, TabsProps } from 'antd';
 import useNotifications from '@shared/hooks/useNotifications';
 import Activities from '@activities/components/Activities';
 import Advices from '@advices/components/Advices';
-import useAdvices from '@advices/hooks/useAdvices';
-import useGame from '@game/hooks/useGame';
-import useLogin from '@login/hooks/useLogin';
+import useAdvicesState from '@advices/hooks/useAdvicesState';
+import useGameState from '@game/hooks/useGameState';
+import useLoginState from '@login/hooks/useLoginState';
 import Lobby from './Lobby';
 import NavigationBar from './NavigationBar';
 import PlayerActionsPanel from './PlayerActionsPanel';
@@ -14,16 +14,16 @@ import PlayerStats from './PlayerStats';
 type PlayerPanelTabKey = 'LOBBY' | 'ACTIVITIES' | 'ADVICE';
 
 function PlayerPanel() {
-  const { player } = useLogin();
-  const { state } = useGame();
-  const { playerAdvices, unreadCount, markAdvicesRead } = useAdvices();
+  const { player } = useLoginState();
+  const { game } = useGameState();
+  const { playerAdvices, unreadCount, markAdvicesRead } = useAdvicesState();
   const { errorNotification } = useNotifications();
   const [activeKey, setActiveKey] = useState<PlayerPanelTabKey>('LOBBY');
 
   // Switching tabs when game's state changes
   useEffect(() => {
-    setActiveKey(state === 'ACTIVE' ? 'ACTIVITIES' : 'LOBBY');
-  }, [state]);
+    setActiveKey(game.state === 'ACTIVE' ? 'ACTIVITIES' : 'LOBBY');
+  }, [game.state]);
 
   // Validation
   if (!player) {

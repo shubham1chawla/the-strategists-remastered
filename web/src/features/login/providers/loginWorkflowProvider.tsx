@@ -8,7 +8,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import axios from 'axios';
-import useLogin from '@login/hooks/useLogin';
+import useLoginState from '@login/hooks/useLoginState';
 import { loggedIn, LoginState } from '@login/state';
 
 type LoginWorkflow =
@@ -37,7 +37,7 @@ function LoginWorkflowProvider({ children }: PropsWithChildren) {
   const [googleLoginCredential, setGoogleLoginCredential] = useState<
     string | null
   >(null);
-  const { gameCode } = useLogin();
+  const { gameCode } = useLoginState();
   const dispatch = useDispatch();
   const navigate = useNavigate();
 

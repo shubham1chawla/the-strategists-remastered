@@ -105,19 +105,21 @@ here - `https://docs.google.com/spreadsheets/d/<ID>/edit?gid=0#gid=0`. Additiona
 Assuming that you have created a _Google Service Account_ by following steps mentioned in the
 [Google Service Account](#google-service-account) section, you will need to allow this service account to have
 at least `view` access to this newly created _Google Spreadsheet_. Use the email mentioned in the credential's
-`JSON` file's `client_email` field.
+`JSON` file's `client_email` field. 
+
+Also, you will need to enable the _Google Sheets API_ inside your _Google Cloud Project_. 
+[Here](https://console.cloud.google.com/marketplace/product/google/sheets.googleapis.com) is a link to enable it. 
+Make sure you have selected the correct user and project.
 
 ## Google Drive
 
-_The Strategists_ make use of _Google Drive_ folders to upload the predictions and advice data from _Docker_
-containers. For this reason, we will need to create the following _Google Drive_ folders.
+_The Strategists_ make use of _Google Drive_ folders to upload the history data from _Docker_ containers. 
+For this reason, we will need to create the following _Google Drive_ folders.
 
-- Predictions (Download) - A folder that contains validated and verified predictions dataset to be used for
+- History (Upload & Downlaod) - A folder that contains games' history `JSONL` files, which are used for
   training the machine learning models.
-- Predictions (Upload) - A folder that the _StrategistsService_ uses to upload the predictions dataset from
-  new games. Since these new game predictions dataset may contains errors, they are uploaded to a separate
-  folder.
-- Advices (Upload) - A folder that the _StrategistsService_ uses to upload the Advice dataset from new games.
+- *(Optional and not recommended)* Legacy Predictions (Download only) - A folder that contains legacy 
+  predictions `CSV` files, which were previously used for training the machine learning models.
 
 You can extract the _Google Drive_' folder's `ID` from the URL. For instance, you can find the `<ID>` in this
 URL here - `https://drive.google.com/drive/u/0/folders/<ID>`. Use this `ID` in the environment variables.
@@ -126,3 +128,7 @@ Assuming that you have created a _Google Service Account_ by following steps men
 [Google Service Account](#google-service-account) section, you will need to allow this service account to
 have at least `view` access on the _download_ folders and `editor` access on the _upload_ folders. Use the
 email mentioned in the credential's `JSON` file's `client_email` field.
+
+Also, you will need to enable the _Google Drive API_ inside your _Google Cloud Project_. 
+[Here](https://console.cloud.google.com/marketplace/product/google/drive.googleapis.com) is a link to enable it. 
+Make sure you have selected the correct user and project.

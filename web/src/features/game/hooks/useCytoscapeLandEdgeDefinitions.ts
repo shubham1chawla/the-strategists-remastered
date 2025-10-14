@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { EdgeDefinition } from 'cytoscape';
-import useGame from './useGame';
+import useGameState from './useGameState';
 
 const useCytoscapeLandEdgeDefinitions = () => {
-  const { lands } = useGame();
+  const { lands } = useGameState();
 
   // Create land to land edges
   const landEdges = useMemo(() => {

@@ -8,10 +8,10 @@ import {
 import { useSelector } from 'react-redux';
 import { ConfigProvider } from 'antd';
 import { scaleOrdinal, schemeSet1 } from 'd3';
-import { State } from '@/store';
+import { StrategistsState } from '@/store';
 import EmptyContainer from '@shared/components/EmptyContainer';
 import { Player } from '@game/state';
-import useLogin from '@login/hooks/useLogin';
+import useLoginState from '@login/hooks/useLoginState';
 
 /**
  * Theme colors are defined here, all CSS classes should refer to these variables.
@@ -45,8 +45,8 @@ export interface Theme {
 export const ThemeContext = createContext<Theme | null>(null);
 
 function ThemeProvider({ children }: PropsWithChildren) {
-  const { player: loggedInPlayer } = useLogin();
-  const { players } = useSelector((state: State) => state.game);
+  const { player: loggedInPlayer } = useLoginState();
+  const { players } = useSelector((state: StrategistsState) => state.gameState);
 
   const playersLength = useMemo(() => players?.length || 0, [players]);
 

@@ -5,29 +5,26 @@ import com.strategists.game.entity.Game;
 import com.strategists.game.entity.PlayerPrediction;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.PredictionUpdatePayload;
-import lombok.val;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
+@Getter
 @Component
 public class PredictionUpdateHandler extends AbstractUpdateHandler<PredictionUpdatePayload> {
 
     private static final double WINNER_DIFFERENCE_THRESHOLD = 0.01;
 
-    @Override
-    public UpdateType getType() {
-        return UpdateType.PREDICTION;
-    }
+    private final UpdateType type = UpdateType.PREDICTION;
 
     @Override
     public void handle(Object returnValue, Object[] args) {
         // Game from the argument and predictions returned
-        val game = (Game) args[0];
+        final var game = (Game) args[0];
 
-        @SuppressWarnings("unchecked")
-        val predictions = (List<PlayerPrediction>) returnValue;
+        @SuppressWarnings("unchecked") final var predictions = (List<PlayerPrediction>) returnValue;
         if (CollectionUtils.isEmpty(predictions)) {
             return;
         }
@@ -43,7 +40,7 @@ public class PredictionUpdateHandler extends AbstractUpdateHandler<PredictionUpd
             }
             return p2.getWinnerProbability() > p1.getWinnerProbability() ? 1 : -1;
         });
-        val bestPrediction = predictions.get(0);
+        final var bestPrediction = predictions.get(0);
 
         // Persisting the activity and sending the update
         sendUpdate(game, new PredictionUpdatePayload(saveActivity(Activity.ofPrediction(bestPrediction)), predictions));

@@ -1,17 +1,12 @@
 package com.strategists.game.controller;
 
-import com.strategists.game.repository.ActivityRepository;
-import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.request.GoogleOAuthCredential;
 import com.strategists.game.response.EnterGameResponse;
 import com.strategists.game.response.GameResponse;
 import com.strategists.game.response.PermissionGroupResponse;
-import com.strategists.game.service.AdvicesService;
 import com.strategists.game.service.GameService;
-import com.strategists.game.service.LandService;
 import com.strategists.game.service.PermissionsService;
 import com.strategists.game.service.PlayerService;
-import com.strategists.game.service.PredictionsService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -27,8 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Objects;
-
 @Log4j2
 @RestController
 @RequestMapping("/api/games")
@@ -43,46 +36,17 @@ public class GameController {
     @Autowired
     private PlayerService playerService;
 
-    @Autowired
-    private LandService landService;
-
-    @Autowired
-    private ActivityRepository activityRepository;
-
-    @Autowired
-    private TrendRepository trendRepository;
-
-    @Autowired(required = false)
-    private PredictionsService predictionsService;
-
-    @Autowired(required = false)
-    private AdvicesService advicesService;
-
     @GetMapping("/{code}")
     public ResponseEntity<GameResponse> getGameResponse(@PathVariable String code) {
         try {
-
             // Finding requested game
             final var game = gameService.getGameByCode(code);
 
-            // Creating response for the game
-            final var builder = GameResponse.builder().game(game).players(playerService.getPlayersByGame(game))
-                    .lands(landService.getLandsByGame(game))
-                    .activities(activityRepository.findByGameOrderByIdDesc(game))
-                    .trends(trendRepository.findByGameOrderByIdAsc(game));
-
-            // Adding predictions, if enabled
-            if (Objects.nonNull(predictionsService)) {
-                builder.playerPredictions(predictionsService.getPlayerPredictionsByGame(game));
-            }
-
-            // Adding advice, if enabled
-            if (Objects.nonNull(advicesService)) {
-                builder.advices(advicesService.getAdvicesByGame(game));
-            }
+            // Preparing game response
+            final var gameResponse = gameService.getGameResponseByGame(game);
 
             // Responding with 200
-            return ResponseEntity.ok(builder.build());
+            return ResponseEntity.ok(gameResponse);
 
         } catch (Exception ex) {
             log.warn(ex.getMessage());
@@ -91,7 +55,7 @@ public class GameController {
     }
 
     @GetMapping
-    public ResponseEntity<EnterGameResponse> findGame(@RequestParam(name = "credential", required = true) String jwt) {
+    public ResponseEntity<EnterGameResponse> findGame(@RequestParam(name = "credential") String jwt) {
         try {
 
             // Converting JWT string to credential instance
@@ -118,8 +82,9 @@ public class GameController {
         }
 
         // Creating game for the requesting player
-        final var player = gameService.createGame(credential);
-        return ResponseEntity.ok(EnterGameResponse.fromPlayer(player));
+        final var gameResponse = gameService.createGame(credential);
+        final var hostPlayer = gameResponse.getHostPlayer();
+        return ResponseEntity.ok(EnterGameResponse.fromPlayer(hostPlayer));
     }
 
     @PutMapping("/{code}/start")

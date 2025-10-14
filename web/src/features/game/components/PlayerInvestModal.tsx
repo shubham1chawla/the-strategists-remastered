@@ -24,9 +24,9 @@ import {
 } from '@ant-design/icons';
 import axios from 'axios';
 import useNotifications from '@shared/hooks/useNotifications';
-import useGame from '@game/hooks/useGame';
+import useGameState from '@game/hooks/useGameState';
 import InvestmentStrategy from '@game/utils/InvestmentStrategy';
-import useLogin from '@login/hooks/useLogin';
+import useLoginState from '@login/hooks/useLoginState';
 import LandStats from './LandStats';
 import PortfolioTable from './PortfolioTable';
 
@@ -52,8 +52,8 @@ function PlayerInvestModal({
   open,
   onCancel,
 }: Partial<PlayerInvestModalProps>) {
-  const { gameCode, player } = useLogin();
-  const { lands } = useGame();
+  const { gameCode, player } = useLoginState();
+  const { lands } = useGameState();
   const { errorNotification } = useNotifications();
   const [ownership, setOwnership] = useState(0);
   const [investing, setInvesting] = useState(false);

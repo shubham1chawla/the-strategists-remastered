@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
+import java.util.Objects;
+
 @Log4j2
 @Component
 @ConditionalOnProperty(name = "strategists.advices.enabled", havingValue = "true")
@@ -28,10 +30,10 @@ public class AdvicesServiceEventListener {
         log.info("Handling AdvicesServiceEvent[type: {}] for game: {}", event.getType(), event.getGameCode());
         try {
             final var game = gameService.getGameByCode(event.getGameCode());
-            switch (event.getType()) {
-                case EXPORT -> advicesService.exportAdvices(game);
-                case GENERATE -> advicesService.generateAdvices(game);
-                default -> log.warn("Unknown AdvicesService Event Type: {}", event.getType());
+            if (Objects.requireNonNull(event.getType()) == AdvicesServiceEvent.EventType.GENERATE) {
+                advicesService.generateAdvices(game);
+            } else {
+                log.warn("Unknown AdvicesService Event Type: {}", event.getType());
             }
         } catch (Exception ex) {
             log.error("Failed to invoke AdvicesService for game: {}", event.getGameCode(), ex);

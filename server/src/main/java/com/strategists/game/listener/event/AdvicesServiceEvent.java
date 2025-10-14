@@ -10,7 +10,7 @@ import lombok.Getter;
 public class AdvicesServiceEvent {
 
     public enum EventType {
-        GENERATE, EXPORT
+        GENERATE
     }
 
     private EventType type;
@@ -18,10 +18,6 @@ public class AdvicesServiceEvent {
 
     public static AdvicesServiceEvent forGenerate(Game game) {
         return new AdvicesServiceEvent(EventType.GENERATE, game.getCode());
-    }
-
-    public static AdvicesServiceEvent forExport(Game game) {
-        return new AdvicesServiceEvent(EventType.EXPORT, game.getCode());
     }
 
 }

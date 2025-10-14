@@ -5,7 +5,13 @@ import com.strategists.game.update.UpdateType;
 
 public interface UpdatePayload<T> {
 
+    Long getTimestamp();
+
     UpdateType getType();
+
+    String getGameCode();
+
+    Integer getGameStep();
 
     Activity getActivity();
 

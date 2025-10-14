@@ -1,24 +1,26 @@
 package com.strategists.game.update.payload;
 
 import com.strategists.game.entity.Activity;
+import com.strategists.game.response.GameResponse;
 import com.strategists.game.update.UpdateType;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
-public class ResetUpdatePayload implements UpdatePayload<Object> {
+public class ResetUpdatePayload implements UpdatePayload<GameResponse> {
 
-    private Activity activity;
+    private final Long timestamp = System.currentTimeMillis();
+    private final UpdateType type = UpdateType.RESET;
+    private final String gameCode;
+    private final Integer gameStep;
+    private final Activity activity;
+    private final GameResponse payload;
 
-    @Override
-    public Object getPayload() {
-        return null;
-    }
-
-    @Override
-    public UpdateType getType() {
-        return UpdateType.RESET;
+    public ResetUpdatePayload(Activity activity, GameResponse gameResponse) {
+        final var game = activity.getGame();
+        this.gameCode = game.getCode();
+        this.gameStep = game.getCurrentStep();
+        this.activity = activity;
+        this.payload = gameResponse;
     }
 
 }

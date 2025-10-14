@@ -3,16 +3,13 @@ package com.strategists.game.request;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
-
-import java.io.File;
+import lombok.EqualsAndHashCode;
 
 @Data
+@EqualsAndHashCode(callSuper = true)
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class UploadLocalFilesRequest {
+public class UploadLocalFilesRequest extends DownloadGoogleDriveFilesRequest {
 
-    private String googleDriveFolderId;
     private String referenceGoogleDriveFolderId;
-    private String mimetype;
-    private File localDataDirectory;
 
 }

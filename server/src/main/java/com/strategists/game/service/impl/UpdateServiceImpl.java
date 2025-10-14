@@ -6,7 +6,6 @@ import com.strategists.game.service.UpdateService;
 import com.strategists.game.update.payload.PingUpdatePayload;
 import com.strategists.game.update.payload.UpdatePayload;
 import lombok.extern.log4j.Log4j2;
-import lombok.val;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -24,9 +23,9 @@ public class UpdateServiceImpl implements UpdateService {
 
     @Override
     public SseEmitter registerEmitter(Player player) {
-        val emitterKey = player.getGamePlayerKey();
+        final var emitterKey = getEmitterKey(player);
         emitters.computeIfAbsent(emitterKey, key -> {
-            val emitter = new SseEmitter(-1L);
+            final var emitter = new SseEmitter(-1L);
             emitter.onCompletion(() -> emitters.remove(key));
             emitter.onError(ex -> emitters.remove(key));
             return emitter;
@@ -65,8 +64,12 @@ public class UpdateServiceImpl implements UpdateService {
         });
     }
 
+    private String getEmitterKey(Player player) {
+        return String.format("game-%s-player-%s", player.getGame().getCode(), player.getId());
+    }
+
     private boolean filterByGame(Game game, String emitterKey) {
-        val prefix = String.format("game-%s", game.getCode());
+        final var prefix = String.format("game-%s", game.getCode());
         return emitterKey.startsWith(prefix);
     }
 

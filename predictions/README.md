@@ -8,16 +8,19 @@ This FastAPI project contains the source code of _The Strategists_ Predictions A
 The Predictions API of _The Strategists_ require you to have the following directories, accessible through _Docker_
 volumes. These directories are -
 
-- Predictions data directory containing `CSV` files for training the predictions model.
+- History data directory containing `JSONL` files or legacy predictions data directory containing `CSV` files for
+  training the predictions model.
 - MLFlow tracking directory for saving metadata and machine learning models' pickle files.
 
 > [!IMPORTANT]
 > You may not need to manually create a directory for MLFlow, since it automatically creates one, however, you will
-> need to create a directory for predictions data, and have `CSV` files present in there for the Predictions API to
-> work. If you don't have the predictions data to train the model, start the _StrategistsService_ with either
-> predictions feature disabled, or disable the training and inferring features, while keeping the exporting of data
-> enabled to start collecting the necessary data to train the model in the future. Refer to _StrategistsService_'s
-> [README](../server/README.md) to learn more about to disable predictions or use different strategies.
+> need to create a directory either for the history data or legacy predictions data, and have `JSONL` or `CSV` files
+> present in there, respectively, for the Predictions API to work.
+> If you don't have the history or legacy predictions data to train the model, start the _StrategistsService_ with
+> either predictions feature disabled, or disable the training and inferring features, while keeping the exporting of
+> history data enabled to start collecting the necessary data to train the model in the future. Refer to
+_StrategistsService_'s [README](../server/README.md) to learn more about to disable predictions or use different
+> strategies.
 
 ## Setup
 
@@ -32,8 +35,9 @@ uv sync --locked
 
 4. Create a `.env` file in the root of this project, and paste the following variables in it.
 
-```
-PREDICTIONS_DATA_DIR=../resources/data
+```env
+LEGACY_PREDICTIONS_DATA_DIR=../resources/legacy # Optional, set to loads legacy predictions `CSV` files
+HISTORY_DATA_DIR=../resources/history
 MLFLOW_TRACKING_URI=../resources/mlflow
 ```
 
@@ -86,5 +90,5 @@ python infer_example.py
 ```
 
 > [!NOTE]
-> This file loads the example dataset from MLFlow and performs inference on the latest predictions model. You must have
-> a trained model beforehand to run this script.
+> This file assumes that you have a history file to work with. You can find the predictions of players at a given step
+> of the game.

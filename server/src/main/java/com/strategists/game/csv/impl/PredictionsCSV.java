@@ -134,7 +134,7 @@ public class PredictionsCSV implements StrategistsCSV {
                         value = player.getId();
                         break;
                     case Header.PLAYER_BASE_CASH:
-                        value = player.getBaseCash();
+                        value = game.getPlayerBaseCash();
                         break;
                     case Header.PLAYER_STATE:
                         value = player.getState();

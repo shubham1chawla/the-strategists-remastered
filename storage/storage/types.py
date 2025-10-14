@@ -5,7 +5,8 @@ from pydantic import BaseModel
 
 class DownloadGoogleDriveFilesRequest(BaseModel):
     google_drive_folder_id: str
-    mimetype: str
+    mimetype: Optional[str] = None
+    file_extension: Optional[str] = None
     local_data_directory: str
 
 

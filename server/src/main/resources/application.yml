@@ -61,17 +61,25 @@ strategists:
     upload:
       bypass-for-testing: false
       api-endpoint: ${STORAGE_API_HOST:http://localhost:8002}/api/upload
+  history:
+    data-directory: ${HISTORY_DATA_DIR:../resources/history/}
+    google-drive:
+      enabled: ${ENABLE_HISTORY_UPLOAD:true}
+      folder-id: ${HISTORY_FOLDER_ID:}
   predictions:
     enabled: ${ENABLE_PREDICTIONS:true}
-    data-directory: ${PREDICTIONS_DATA_DIR:../resources/data}
-    google-drive:
-      download-folder-id: ${PREDICTIONS_DOWNLOAD_FOLDER_ID:}
-      upload-folder-id: ${PREDICTIONS_UPLOAD_FOLDER_ID:}
+    # Enable legacy features to download predictions CSV files & export for verifying with history's results
+    # New version uses historical update payloads to recreate the CSV-like structure for training and inference
+    legacy:
+      data-directory: ${LEGACY_PREDICTIONS_DATA_DIR:../resources/legacy}
+      export:
+        enabled: ${ENABLE_LEGACY_PREDICTIONS_DATA_EXPORT:false}
+      google-drive:
+        enabled: ${ENABLE_LEGACY_PREDICTIONS_DATA_DOWNLOAD:true}
+        folder-id: ${LEGACY_PREDICTIONS_FOLDER_ID:}
     strategies:
       train-on-startup-enabled: ${ENABLE_PREDICTIONS_TRAIN_ON_STARTUP:true}
       train-on-end-enabled: ${ENABLE_PREDICTIONS_TRAIN_ON_END:true}
-      data-export-enabled: ${ENABLE_PREDICTIONS_DATA_EXPORT:true}
-      data-integrity-validation-enabled: ${ENABLE_PREDICTIONS_DATA_INTEGRITY_VALIDATION:true}
       model-inference-enabled: ${ENABLE_PREDICTIONS_MODEL_INFERENCE:true}
     health-check:
       bypass-for-testing: false
@@ -87,9 +95,6 @@ strategists:
       api-endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/api/predictions-model/{game_map_id}/infer
   advices:
     enabled: ${ENABLE_ADVICES:true}
-    data-directory: ${ADVICES_DATA_DIR:../resources/advices/}
-    google-drive:
-      upload-folder-id: ${ADVICES_UPLOAD_FOLDER_ID:}
     frequently-invest:
       enabled: ${ENABLE_FREQUENTLY_INVEST_ADVICE:true}
       priority: 3

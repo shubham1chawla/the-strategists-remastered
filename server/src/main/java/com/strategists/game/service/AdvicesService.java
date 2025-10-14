@@ -16,6 +16,4 @@ public interface AdvicesService {
 
     void clearAdvices(Game game);
 
-    void exportAdvices(Game game);
-
 }

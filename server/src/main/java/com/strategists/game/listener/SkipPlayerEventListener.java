@@ -33,7 +33,7 @@ public class SkipPlayerEventListener {
 
         // Fetching the current player
         final var player = playerService.getCurrentPlayer(game);
-        log.info("Skipping {}'s turn in game: {}", player.getUsername(), player.getGameCode());
+        log.info("Skipping {}'s turn in game: {}", player.getUsername(), game.getCode());
 
         // Declaring the player bankrupt if player skipped more than a few times
         playerService.skipPlayer(player);

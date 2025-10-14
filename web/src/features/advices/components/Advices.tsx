@@ -4,12 +4,11 @@ import {
   CheckOutlined,
   ExclamationCircleOutlined,
 } from '@ant-design/icons';
-import useAdvices from '@advices/hooks/useAdvices';
-import AdviceDescription from './AdviceDescription';
+import useAdvicesState from '@advices/hooks/useAdvicesState';
 import AdviceTitle from './AdviceTitle';
 
 function Advices() {
-  const { playerAdvices } = useAdvices();
+  const { playerAdvices } = useAdvicesState();
   return (
     <Space direction="vertical" className="strategists-advice">
       {!playerAdvices.length && (
@@ -41,7 +40,7 @@ function Advices() {
               )}
             </Row>
           }
-          description={<AdviceDescription advice={advice} />}
+          description={advice.text}
           icon={
             advice.state === 'NEW' ? (
               <ExclamationCircleOutlined />

@@ -41,7 +41,7 @@ public class PlayerPrediction implements Serializable {
     private Long id;
 
     @Column(nullable = false)
-    private Integer turn;
+    private Integer step;
 
     @Column(nullable = false, precision = MathUtil.PRECISION)
     private Double winnerProbability;
@@ -67,7 +67,7 @@ public class PlayerPrediction implements Serializable {
 
     public PlayerPrediction(Player player, double bankruptProbability, double winnerProbability, Prediction prediction) {
         this.game = player.getGame();
-        this.turn = player.getGame().getTurn();
+        this.step = player.getGame().getCurrentStep();
         this.player = player;
         this.bankruptProbability = MathUtil.round(bankruptProbability);
         this.winnerProbability = MathUtil.round(winnerProbability);
@@ -78,12 +78,6 @@ public class PlayerPrediction implements Serializable {
     @JsonProperty("playerId")
     public long getPlayerId() {
         return player.getId();
-    }
-
-    @Transient
-    @JsonIgnore
-    public boolean isWinner() {
-        return Prediction.WINNER.equals(prediction);
     }
 
     @Transient

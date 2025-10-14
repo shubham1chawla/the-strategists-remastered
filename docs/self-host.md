@@ -66,13 +66,15 @@ GOOGLE_CREDENTIALS_JSON_PATH=/resources/secrets/credentials.json
 Paste the following contents inside `predictions.env.list` file.
 
 ```
-PREDICTIONS_DATA_DIR=/resources/data
+HISTORY_DATA_DIR=/resources/history
 MLFLOW_TRACKING_URI=/resources/mlflow
 ```
 
 > [!NOTE]
-> This `env` file assumes you have created the directory containing predictions-related
-> `CSV` files inside the `resources/data` directory. Please refer to Predictions API project's
+> This `env` file assumes you have created the directory containing games' history `JSONL` files 
+> inside the `resources/history` directory. Additionally, if you want to use the legacy
+> predictions `CSV` files, you can add the `LEGACY_PREDICTIONS_DATA_DIR` to `resources/legacy`
+> with the legacy predictions `CSV` files in it. Please refer to Predictions API project's
 > [prerequisites](../predictions/README.md#prerequisites) to learn more about them.
 
 ## Setting up Web Application
@@ -98,15 +100,12 @@ Paste the following contents inside `server.env.list` file.
 PERMISSIONS_API_HOST=http://strategists-permissions
 STORAGE_API_HOST=http://strategists-storage
 PREDICTIONS_API_HOST=http://strategists-predictions
-PREDICTIONS_DATA_DIR=/resources/data
-ADVICES_DATA_DIR=/resources/advices
-PREDICTIONS_DOWNLOAD_FOLDER_ID=<YOUR_GOOGLE_DRIVE_FOLDER_ID>
-PREDICTIONS_UPLOAD_FOLDER_ID=<YOUR_GOOGLE_DRIVE_FOLDER_ID>
-ADVICES_UPLOAD_FOLDER_ID=<YOUR_GOOGLE_DRIVE_FOLDER_ID>
+HISTORY_DATA_DIR=/resources/history
+HISTORY_FOLDER_ID=<YOUR_GOOGLE_DRIVE_FOLDER_ID>
 ```
 
 > [!NOTE]
-> Refer to the server's [README](../server/README.md) for _Google Drive_ folder IDs and learn
+> Refer to the server's [README](../server/README.md) for _Google Drive_ folder ID and learn
 > more about _StrategistsService_'s other optional environment variables. The example `env`
 > file above assumes that you have configured the `resources` volume to mount with _Docker_'s
 > `/resources` directory.

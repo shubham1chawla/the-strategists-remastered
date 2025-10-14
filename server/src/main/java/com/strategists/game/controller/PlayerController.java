@@ -91,7 +91,7 @@ public class PlayerController {
         Assert.notNull(advicesService, "Advice Service is not enabled!");
 
         final var player = playerService.getPlayerById(playerId);
-        Assert.state(Objects.equals(code, player.getGameCode()), "Requesting player not in the game!");
+        Assert.state(Objects.equals(code, player.getGame().getCode()), "Requesting player not in the game!");
 
         advicesService.markPlayerAdvicesViewed(player);
     }

@@ -79,7 +79,6 @@ public class PotentialBankruptcyAdviceHandler extends AbstractAdviceHandler {
                 || !(Objects.equals(String.valueOf(maxRentAmount), advice.getVal1())
                 && Objects.equals(maxRentLand.getName(), advice.getVal2())))) {
             advice.setState(Advice.State.NEW);
-            advice.setNewCount(advice.getNewCount() + 1);
             advice.setVal1(String.valueOf(maxRentAmount));
             advice.setVal2(maxRentLand.getName());
             advice.setViewed(false);
@@ -89,7 +88,6 @@ public class PotentialBankruptcyAdviceHandler extends AbstractAdviceHandler {
         // Case 4 - Previous advice's state not FOLLOWED and advice not needed
         if (!Advice.State.FOLLOWED.equals(advice.getState()) && !isAdviceNeeded) {
             advice.setState(Advice.State.FOLLOWED);
-            advice.setFollowedCount(advice.getFollowedCount() + 1);
             advice.setViewed(false);
             return Optional.of(advice);
         }

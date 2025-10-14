@@ -49,26 +49,17 @@ public class Advice implements Serializable {
     @Column(nullable = false)
     private int priority;
 
-    @JsonIgnore
-    @Column(nullable = false)
-    private int newCount;
-
-    @JsonIgnore
-    @Column(nullable = false)
-    private int followedCount;
-
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private AdviceType type;
 
+    @JsonIgnore
     @Column(nullable = true)
     private String val1;
 
+    @JsonIgnore
     @Column(nullable = true)
     private String val2;
-
-    @Column(nullable = true)
-    private String val3;
 
     @JsonIgnore
     @ManyToOne
@@ -89,13 +80,35 @@ public class Advice implements Serializable {
         this.game = player.getGame();
         this.viewed = false;
         this.state = State.NEW;
-        this.newCount = 1;
-        this.followedCount = 0;
         this.val1 = values.length > 0 ? values[0] : null;
         this.val2 = values.length > 1 ? values[1] : null;
-        this.val3 = values.length > 2 ? values[2] : null;
-        if (values.length > 3) {
+        if (values.length > 2) {
             throw new IllegalArgumentException("More than 3 values are not supported!");
+        }
+    }
+
+    @Transient
+    @JsonProperty("text")
+    public String getText() {
+        switch (getType()) {
+            case AVOID_TIMEOUT -> {
+                return "The game completed your turn because of inactivity. Please use the 'Skip' button!";
+            }
+            case CONCENTRATE_INVESTMENTS -> {
+                return String.format("You have invested all over the map; try to have at least %s investments close by!", getVal1());
+            }
+            case FREQUENTLY_INVEST -> {
+                return String.format("You have yet to invest in the last %s turns. Try investing more to get a competitive edge!", getVal1());
+            }
+            case POTENTIAL_BANKRUPTCY -> {
+                return String.format("You will go bankrupt if you land on %s! Keep more than $%s to avoid bankruptcy.", getVal2(), getVal1());
+            }
+            case SIGNIFICANT_INVESTMENTS -> {
+                return String.format("Try investing more than %s%% to get steep rent from others.", getVal1());
+            }
+            default -> {
+                return String.format("Unknown advice type: '%s'", getType());
+            }
         }
     }
 
@@ -122,8 +135,7 @@ public class Advice implements Serializable {
     }
 
     public static Advice ofPotentialBankruptcy(int priority, Player player, double maxRentAmount, Land maxRentLand) {
-        return new Advice(AdviceType.POTENTIAL_BANKRUPTCY, priority, player, String.valueOf(maxRentAmount),
-                maxRentLand.getName());
+        return new Advice(AdviceType.POTENTIAL_BANKRUPTCY, priority, player, String.valueOf(maxRentAmount), maxRentLand.getName());
     }
 
 }

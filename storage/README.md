@@ -5,8 +5,8 @@ used by the `StrategistsService` to download and upload files from and to _Googl
 
 ## Prerequisites
 
-- Refer to steps mentioned [here](../docs/google-integration.md#google-service-account) to setup
-  _Google Service Account_. Once you have the service account's credential `JSON` file, use it's path in
+- Refer to steps mentioned [here](../docs/google-integration.md#google-service-account) to set up
+  _Google Service Account_. Once you have the service account's credential `JSON` file, use its path in
   the `GOOGLE_CREDENTIALS_JSON_PATH` environment variable below.
 
 ## Setup
@@ -44,7 +44,7 @@ fastapi dev main.py --port 8002
 ```
 curl -X POST \
 -H "Content-Type: application/json" \
--d '{"google_drive_folder_id": "<YOUR_FOLDER_ID>", "mimetype": "text/csv", "local_data_directory": "<PATH/TO/DATA/DIRECTORY>"}' \
+-d '{"google_drive_folder_id": "<YOUR_FOLDER_ID>", "mimetype": "<OPTIONAL_MIMETYPE>", "file_extension": "<OPTIONAL_FILE_EXTENSION>", "local_data_directory": "<PATH/TO/DATA/DIRECTORY>"}' \
 http://localhost:8002/api/download
 ```
 
@@ -53,9 +53,13 @@ http://localhost:8002/api/download
 ```
 curl -X POST \
 -H "Content-Type: application/json" \
--d '{"google_drive_folder_id": "<YOUR_FOLDER_ID>", "reference_google_drive_folder_id": "<OPTIONAL_FOLDER_ID>", "mimetype": "text/csv", "local_data_directory": "<PATH/TO/DATA/DIRECTORY>"}' \
+-d '{"google_drive_folder_id": "<YOUR_FOLDER_ID>", "reference_google_drive_folder_id": "<OPTIONAL_FOLDER_ID>", "mimetype": "<OPTIONAL_MIMETYPE>", "file_extension": "<OPTIONAL_FILE_EXTENSION>", "local_data_directory": "<PATH/TO/DATA/DIRECTORY>"}' \
 http://localhost:8002/api/upload
 ```
+
+> [!NOTE]
+> Even though `mimetype` and `file_extension` are optional, you will need to provide either of those. If the `mimetype`
+> is not determined, `text/plain` will be used for uploads.
 
 ## Reference
 

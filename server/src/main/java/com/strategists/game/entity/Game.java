@@ -37,7 +37,7 @@ public class Game implements Serializable {
     private String code;
 
     @Column(nullable = false, unique = false)
-    private Integer turn;
+    private Integer currentStep;
 
     @Column(nullable = false, unique = false)
     private Integer minPlayersCount;
@@ -48,19 +48,24 @@ public class Game implements Serializable {
     @Column(nullable = false)
     private String gameMapId;
 
+    /**
+     * Sensitive information, the UI doesn't need to know the base cash for a given map.
+     */
     @JsonIgnore
     @Column(nullable = false, unique = false, precision = MathUtil.PRECISION)
     private Double playerBaseCash;
 
-    @JsonIgnore
     @Column(nullable = false, unique = false)
     private Integer diceSize;
 
+    /**
+     * Sensitive information, the UI doesn't need to know the rent factor of the game.
+     */
     @JsonIgnore
     @Column(nullable = false, unique = false)
     private Double rentFactor;
 
-    @JsonIgnore
+    @JsonInclude(Include.NON_NULL)
     @Column(nullable = true, unique = false)
     private Integer allowedSkipsCount;
 
@@ -68,7 +73,7 @@ public class Game implements Serializable {
     @Column(nullable = true, unique = false)
     private Integer skipPlayerTimeout;
 
-    @JsonIgnore
+    @JsonInclude(Include.NON_NULL)
     @Column(nullable = true, unique = false)
     private Integer cleanUpDelay;
 
@@ -76,7 +81,10 @@ public class Game implements Serializable {
     @Enumerated(EnumType.STRING)
     private State state;
 
-    @JsonIgnore
+    @Column(nullable = false, unique = false)
+    private Long createdAt;
+
+    @JsonInclude(Include.NON_NULL)
     @Column(nullable = true, unique = false)
     private Long endedAt;
 

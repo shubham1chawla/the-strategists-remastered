@@ -9,8 +9,8 @@ import {
   StopFilled,
 } from '@ant-design/icons';
 import StrategistsLogo from '@shared/components/StrategistsLogo';
-import useGame from '@game/hooks/useGame';
-import useLogin from '@login/hooks/useLogin';
+import useGameState from '@game/hooks/useGameState';
+import useLoginState from '@login/hooks/useLoginState';
 import { loggedOut } from '@login/state';
 import PredictionsChart from '@predictions/components/PredictionsChart';
 import TrendsChart from '@trends/components/TrendsChart';
@@ -19,8 +19,8 @@ import PortfolioChart from './PortfolioChart';
 import ResetModal from './ResetModal';
 
 function WinModal() {
-  const { gameCode, player } = useLogin();
-  const { winnerPlayer } = useGame();
+  const { gameCode, player } = useLoginState();
+  const { winnerPlayer } = useGameState();
   const [showResetModal, setShowResetModal] = useState(false);
   const dispatch = useDispatch();
 

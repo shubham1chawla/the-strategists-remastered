@@ -24,7 +24,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import lombok.val;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -58,6 +57,9 @@ public class Player implements Serializable {
     @Column(nullable = false, unique = true)
     private String username;
 
+    /**
+     * Sensitive information, UI doesn't need to know what's the user's email.
+     */
     @JsonIgnore
     @Column(nullable = false, unique = true)
     private String email;
@@ -80,6 +82,14 @@ public class Player implements Serializable {
 
     @JsonInclude(Include.NON_NULL)
     @Column(nullable = true, columnDefinition = "INTEGER DEFAULT NULL")
+    private Integer lastInvestStep;
+
+    @JsonInclude(Include.NON_NULL)
+    @Column(nullable = true, columnDefinition = "INTEGER DEFAULT NULL")
+    private Integer lastSkippedStep;
+
+    @JsonInclude(Include.NON_NULL)
+    @Column(nullable = true, columnDefinition = "INTEGER DEFAULT NULL")
     private Integer remainingSkipsCount;
 
     @JsonIgnore
@@ -94,13 +104,13 @@ public class Player implements Serializable {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "pk.player", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<PlayerLand> playerLands;
 
-    @JsonIgnore
     @ToString.Exclude
+    @JsonIgnoreProperties({"sourcePlayer", "targetPlayer", "land", "targetPlayerId"})
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "targetPlayer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rent> receivedRents;
 
-    @JsonIgnore
     @ToString.Exclude
+    @JsonIgnoreProperties({"sourcePlayer", "targetPlayer", "land", "sourcePlayerId"})
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "sourcePlayer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Rent> paidRents;
 
@@ -123,8 +133,8 @@ public class Player implements Serializable {
     @Transient
     @JsonProperty("cash")
     public double getCash() {
-        val credits = getBaseCash() + MathUtil.sum(receivedRents, Rent::getRentAmount);
-        val debits = MathUtil.sum(paidRents, Rent::getRentAmount) + MathUtil.sum(playerLands, PlayerLand::getBuyAmount);
+        final var credits = game.getPlayerBaseCash() + MathUtil.sum(receivedRents, Rent::getRentAmount);
+        final var debits = MathUtil.sum(paidRents, Rent::getRentAmount) + MathUtil.sum(playerLands, PlayerLand::getBuyAmount);
         return MathUtil.round(credits - debits);
     }
 
@@ -136,7 +146,7 @@ public class Player implements Serializable {
      */
     @Transient
     public double getNetWorth() {
-        val investments = isBankrupt() ? 0d
+        final var investments = isBankrupt() ? 0d
                 : MathUtil.sum(playerLands, pl -> pl.getLand().getMarketValue() * (pl.getOwnership() / 100));
         return MathUtil.round(investments + getCash());
     }
@@ -147,33 +157,9 @@ public class Player implements Serializable {
         return State.BANKRUPT.equals(state);
     }
 
-    @Transient
-    @JsonIgnore
-    public String getGameCode() {
-        return game.getCode();
-    }
-
-    @Transient
-    @JsonIgnore
-    public String getGamePlayerKey() {
-        return String.format("game-%s-player-%s", getGameCode(), getId());
-    }
-
-    @Transient
-    @JsonIgnore
-    public double getBaseCash() {
-        return game.getPlayerBaseCash();
-    }
-
-    @Transient
-    @JsonInclude(Include.NON_NULL)
-    public Integer getAllowedSkipsCount() {
-        return game.getAllowedSkipsCount();
-    }
-
     public void addLand(Land land, double ownership, double buyAmount) {
         playerLands = Objects.isNull(playerLands) ? new ArrayList<>() : playerLands;
-        val opt = playerLands.stream().filter(pl -> Objects.equals(pl.getLandId(), land.getId())).findFirst();
+        final var opt = playerLands.stream().filter(pl -> Objects.equals(pl.getLandId(), land.getId())).findFirst();
         if (opt.isEmpty()) {
             playerLands.add(new PlayerLand(this, land, ownership, buyAmount));
             return;

@@ -1,47 +1,47 @@
 import { useCallback, useMemo } from 'react';
-import useGame from '@game/hooks/useGame';
+import useGameState from '@game/hooks/useGameState';
 import { Player } from '@game/state';
 import { PlayerPrediction } from '@predictions/state';
-import useTrends from '@trends/hooks/useTrends';
-import usePredictions from './usePredictions';
+import useTrendsState from '@trends/hooks/useTrendsState';
+import usePredictionsState from './usePredictionsState';
 
 interface PredictionsChartItem {
   [key: string]: any;
-  turn: number;
+  step: number;
   key?: string;
   method: 'PREDICTION' | 'NETWORTH';
 }
 
 const usePredictionsChartItems = (player: Player) => {
-  const predictions = usePredictions();
-  const { playerTrends } = useTrends();
-  const { players } = useGame();
+  const predictions = usePredictionsState();
+  const { playerTrends } = useTrendsState();
+  const { players } = useGameState();
 
-  // Utility method to collect by turn and player ID
-  const collectByTurnAndPlayerId = useCallback(
-    <T extends { playerId: number; turn: number }>(list: T[]) =>
-      list.reduce((turnMap, element) => {
-        const playerMap = turnMap.get(element.turn) || new Map<number, T>();
+  // Utility method to collect by step and player ID
+  const collectByStepAndPlayerId = useCallback(
+    <T extends { playerId: number; step: number }>(list: T[]) =>
+      list.reduce((stepMap, element) => {
+        const playerMap = stepMap.get(element.step) || new Map<number, T>();
         playerMap.set(element.playerId, element);
-        turnMap.set(element.turn, playerMap);
-        return turnMap;
+        stepMap.set(element.step, playerMap);
+        return stepMap;
       }, new Map<number, Map<number, T>>()),
     [],
   );
 
   // Utility method to add dummy player record if missing
   const addMissingPlayers = useCallback(
-    <T extends { playerId: number; turn: number }>(
+    <T extends { playerId: number; step: number }>(
       map: Map<number, Map<number, T>>,
       dummy: T,
     ): void => {
-      map.forEach((playerMap, turn) => {
+      map.forEach((playerMap, step) => {
         players.forEach((p) => {
           if (playerMap.has(p.id)) return;
           playerMap.set(p.id, {
             ...dummy,
             playerId: p.id,
-            turn,
+            step,
           });
         });
       });
@@ -49,39 +49,39 @@ const usePredictionsChartItems = (player: Player) => {
     [players],
   );
 
-  // Extracting turn-wise player trends
-  const turnWisePlayerTrends = useMemo(() => {
-    const collection = collectByTurnAndPlayerId(playerTrends);
+  // Extracting step-wise player trends
+  const stepWisePlayerTrends = useMemo(() => {
+    const collection = collectByStepAndPlayerId(playerTrends);
     addMissingPlayers(collection, {
       cash: 0,
       netWorth: 0,
       playerId: -1,
-      turn: -1,
+      step: -1,
     });
     return collection;
-  }, [playerTrends, collectByTurnAndPlayerId, addMissingPlayers]);
+  }, [playerTrends, collectByStepAndPlayerId, addMissingPlayers]);
 
-  // Extracting turn-wise predictions
-  const turnWisePredictions = useMemo(() => {
-    const collection = collectByTurnAndPlayerId(predictions);
+  // Extracting step-wise predictions
+  const stepWisePredictions = useMemo(() => {
+    const collection = collectByStepAndPlayerId(predictions);
     addMissingPlayers(collection, {
       winnerProbability: 0,
       bankruptProbability: 1,
       prediction: 'BANKRUPT',
       playerId: -1,
-      turn: -1,
+      step: -1,
     });
     return collection;
-  }, [predictions, collectByTurnAndPlayerId, addMissingPlayers]);
+  }, [predictions, collectByStepAndPlayerId, addMissingPlayers]);
 
-  // Calculating maximum turns for the current game
-  const maxTurns = useMemo(
+  // Calculating maximum steps for the current game
+  const maxSteps = useMemo(
     () =>
-      Array.from(turnWisePlayerTrends.keys()).reduce(
-        (max, turn) => Math.max(turn, max),
+      Array.from(stepWisePlayerTrends.keys()).reduce(
+        (max, step) => Math.max(step, max),
         0,
       ),
-    [turnWisePlayerTrends],
+    [stepWisePlayerTrends],
   );
 
   // Utility method to find the visualization method
@@ -105,10 +105,10 @@ const usePredictionsChartItems = (player: Player) => {
   // Preparing visual prediction items
   const predictionsChartItems = useMemo(() => {
     const items: PredictionsChartItem[] = [];
-    for (let turn = 1; turn <= maxTurns; turn += 1) {
+    for (let step = 1; step <= maxSteps; step += 1) {
       // Determining whether to use NETWORTH or PREDICTION method for visualization
-      const playerPredictionMap = turnWisePredictions.get(turn);
-      const playerTrendMap = turnWisePlayerTrends.get(turn);
+      const playerPredictionMap = stepWisePredictions.get(step);
+      const playerTrendMap = stepWisePlayerTrends.get(step);
       const method = getVisualizationMethod(playerPredictionMap);
 
       // Calculating total share size in the current turn
@@ -125,8 +125,8 @@ const usePredictionsChartItems = (player: Player) => {
 
       // Figuring visual prediction item
       const item: PredictionsChartItem = {
-        turn,
-        key: `item-${turn}`,
+        step,
+        key: `item-${step}`,
         method,
       };
       item[player.username] = 0;
@@ -147,11 +147,11 @@ const usePredictionsChartItems = (player: Player) => {
     return items;
   }, [
     getVisualizationMethod,
-    maxTurns,
+    maxSteps,
     player,
     players,
-    turnWisePlayerTrends,
-    turnWisePredictions,
+    stepWisePlayerTrends,
+    stepWisePredictions,
   ]);
   return predictionsChartItems;
 };

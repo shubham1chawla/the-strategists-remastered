@@ -4,28 +4,26 @@ import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Player;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.KickUpdatePayload;
-import lombok.val;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+@Getter
 @Component
 public class KickUpdateHandler extends AbstractUpdateHandler<KickUpdatePayload> {
 
-    @Override
-    public UpdateType getType() {
-        return UpdateType.KICK;
-    }
+    private final UpdateType type = UpdateType.KICK;
 
     @Override
     public void handle(Object returnValue, Object[] args) {
-        val player = (Player) returnValue;
+        final var player = (Player) returnValue;
         if (Objects.isNull(player)) {
             return;
         }
 
         // Persisting the activity and sending the update
-        val activity = Activity.ofKick(player);
+        final var activity = Activity.ofKick(player);
         sendUpdate(player.getGame(), new KickUpdatePayload(saveActivity(activity), player.getId()));
     }
 

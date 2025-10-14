@@ -1,29 +1,29 @@
 import { configureStore } from '@reduxjs/toolkit';
 import logger from 'redux-logger';
-import activitiesReducer, { ActivitiesState } from '@activities/state';
-import advicesReducer, { AdvicesState } from '@advices/state';
-import gameReducer, { GameState } from '@game/state';
-import loginReducer, { LoginState } from '@login/state';
-import predictionsReducer, { PredictionsState } from '@predictions/state';
-import trendsReducer, { TrendsState } from '@trends/state';
+import activitiesStateReducer, { ActivitiesState } from '@activities/state';
+import advicesStateReducer, { AdvicesState } from '@advices/state';
+import gameStateReducer, { GameState } from '@game/state';
+import loginStateReducer, { LoginState } from '@login/state';
+import predictionsStateReducer, { PredictionsState } from '@predictions/state';
+import trendsStateReducer, { TrendsState } from '@trends/state';
 
-export interface State {
-  activities: ActivitiesState;
-  advices: AdvicesState;
-  game: GameState;
-  login: LoginState;
-  predictions: PredictionsState;
-  trends: TrendsState;
+export interface StrategistsState {
+  activitiesState: ActivitiesState;
+  advicesState: AdvicesState;
+  gameState: GameState;
+  loginState: LoginState;
+  predictionsState: PredictionsState;
+  trendsState: TrendsState;
 }
 
 const store = configureStore({
   reducer: {
-    activities: activitiesReducer,
-    advices: advicesReducer,
-    game: gameReducer,
-    login: loginReducer,
-    predictions: predictionsReducer,
-    trends: trendsReducer,
+    activitiesState: activitiesStateReducer,
+    advicesState: advicesStateReducer,
+    gameState: gameStateReducer,
+    loginState: loginStateReducer,
+    predictionsState: predictionsStateReducer,
+    trendsState: trendsStateReducer,
   },
   devTools: process.env.NODE_ENV !== 'production',
   middleware: (defaultMiddlewares) =>

@@ -10,14 +10,14 @@ import {
 } from '@ant-design/icons';
 import axios from 'axios';
 import useNotifications from '@shared/hooks/useNotifications';
-import useGame from '@game/hooks/useGame';
+import useGameState from '@game/hooks/useGameState';
 import InvestmentStrategy from '@game/utils/InvestmentStrategy';
-import useLogin from '@login/hooks/useLogin';
+import useLoginState from '@login/hooks/useLoginState';
 import PlayerInvestModal from './PlayerInvestModal';
 
 function PlayerActionsPanel() {
-  const { gameCode, player } = useLogin();
-  const { turnPlayer, lands } = useGame();
+  const { gameCode, player } = useLoginState();
+  const { turnPlayer, lands } = useGameState();
   const { errorNotification } = useNotifications();
   const [showModal, setShowModal] = useState(false);
   const [skipping, setSkipping] = useState(false);

@@ -8,11 +8,16 @@ import com.strategists.game.entity.Game.State;
 import com.strategists.game.entity.GameMap;
 import com.strategists.game.entity.Player;
 import com.strategists.game.entity.Rent;
+import com.strategists.game.repository.ActivityRepository;
 import com.strategists.game.repository.GameRepository;
+import com.strategists.game.repository.TrendRepository;
 import com.strategists.game.request.GoogleOAuthCredential;
+import com.strategists.game.response.GameResponse;
+import com.strategists.game.service.AdvicesService;
 import com.strategists.game.service.GameService;
 import com.strategists.game.service.LandService;
 import com.strategists.game.service.PlayerService;
+import com.strategists.game.service.PredictionsService;
 import com.strategists.game.update.UpdateMapping;
 import com.strategists.game.update.UpdateType;
 import jakarta.transaction.Transactional;
@@ -56,9 +61,21 @@ public class GameServiceImpl implements GameService {
     @Autowired
     private LandService landService;
 
+    @Autowired
+    private ActivityRepository activityRepository;
+
+    @Autowired
+    private TrendRepository trendRepository;
+
+    @Autowired(required = false)
+    private PredictionsService predictionsService;
+
+    @Autowired(required = false)
+    private AdvicesService advicesService;
+
     @Override
     @UpdateMapping(UpdateType.CREATE)
-    public Player createGame(GoogleOAuthCredential credential) {
+    public GameResponse createGame(GoogleOAuthCredential credential) {
         final var email = credential.getEmail();
 
         // Checking if requesting user is not part of any other game
@@ -71,7 +88,8 @@ public class GameServiceImpl implements GameService {
 
         // Creating game instance
         var game = new Game();
-        game.setTurn(0);
+        game.setCreatedAt(System.currentTimeMillis());
+        game.setCurrentStep(0);
         game.setState(State.LOBBY);
         game.setGameMapId(gameMap.getId());
 
@@ -103,10 +121,13 @@ public class GameServiceImpl implements GameService {
         log.info("Created game: {}", game);
 
         // Saving lands associated with the game
-        landService.save(game, gameMap);
+        landService.updateLands(game, gameMap);
 
         // Creating player for requesting user
-        return playerService.addPlayer(game, email, credential.getName(), true);
+        playerService.addPlayer(game, email, credential.getName(), true);
+
+        // Returning GameResponse for update
+        return getGameResponseByGame(game);
     }
 
     @Override
@@ -117,10 +138,34 @@ public class GameServiceImpl implements GameService {
     }
 
     @Override
+    public GameResponse getGameResponseByGame(Game game) {
+        // Creating response for the game
+        final var builder = GameResponse.builder()
+                .game(game)
+                .players(playerService.getPlayersByGame(game))
+                .lands(landService.getLandsByGame(game))
+                .activities(activityRepository.findByGameOrderByIdDesc(game))
+                .trends(trendRepository.findByGameOrderByIdAsc(game));
+
+        // Adding predictions, if enabled
+        if (Objects.nonNull(predictionsService)) {
+            builder.playerPredictions(predictionsService.getPlayerPredictionsByGame(game));
+        }
+
+        // Adding advice, if enabled
+        if (Objects.nonNull(advicesService)) {
+            builder.advices(advicesService.getAdvicesByGame(game));
+        }
+
+        // Building final GameResponse
+        return builder.build();
+    }
+
+    @Override
     public void startGame(Game game) {
 
         // Changing game's state and other information
-        game.setTurn(1);
+        game.setCurrentStep(1);
         game.setState(State.ACTIVE);
         game = gameRepository.save(game);
 
@@ -135,15 +180,15 @@ public class GameServiceImpl implements GameService {
     @UpdateMapping(UpdateType.WIN)
     public Player playTurn(Game game) {
 
+        // Updating game's current step
+        game.setCurrentStep(game.getCurrentStep() + 1);
+        game = gameRepository.save(game);
+
         // Checking if game has ended
         final var winner = getWinnerPlayer(game);
         if (winner.isPresent()) {
             return winner.get();
         }
-
-        // Updating game's turn
-        game.setTurn(game.getTurn() + 1);
-        game = gameRepository.save(game);
 
         // Assigning turn to next player
         final var player = playerService.nextPlayer(playerService.getCurrentPlayer(game));
@@ -174,11 +219,13 @@ public class GameServiceImpl implements GameService {
 
     @Override
     @UpdateMapping(UpdateType.RESET)
-    public void resetGame(Game game) {
+    public GameResponse resetGame(Game game) {
+        log.info("Resetting game: {}", game.getCode());
 
         // Changing game's state and other information
-        game.setTurn(0);
+        game.setCurrentStep(0);
         game.setState(State.LOBBY);
+        game.setCreatedAt(System.currentTimeMillis());
         game.setEndedAt(null);
         game = gameRepository.save(game);
 
@@ -187,6 +234,25 @@ public class GameServiceImpl implements GameService {
 
         // Resetting lands
         landService.resetLands(game);
+
+        // Resetting activities
+        activityRepository.deleteByGame(game);
+
+        // Resetting trends
+        trendRepository.deleteByGame(game);
+
+        // Resetting predictions, if enabled
+        if (Objects.nonNull(predictionsService)) {
+            predictionsService.clearPlayerPredictions(game);
+        }
+
+        // Resetting advices, if enabled
+        if (Objects.nonNull(advicesService)) {
+            advicesService.clearAdvices(game);
+        }
+
+        // Returning GameResponse for update
+        return getGameResponseByGame(game);
     }
 
     @Override

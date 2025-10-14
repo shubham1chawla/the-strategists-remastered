@@ -12,6 +12,7 @@ public class DownloadGoogleDriveFilesRequest {
 
     private String googleDriveFolderId;
     private String mimetype;
+    private String fileExtension;
     private File localDataDirectory;
 
 }

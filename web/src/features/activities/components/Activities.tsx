@@ -7,17 +7,16 @@ import {
   SettingOutlined,
 } from '@ant-design/icons';
 import useNotifications from '@shared/hooks/useNotifications';
-import useActivities from '@activities/hooks/useActivities';
+import useActivitiesState from '@activities/hooks/useActivitiesState';
 import {
   UpdateType,
   getSubscribableTypes,
   subscribedTypesSetted,
 } from '@activities/state';
-import parseActivity from '@activities/utils/parseActivity';
 import ActivityIcon from './ActivityIcon';
 
 function Activities() {
-  const { filteredActivites, subscribedTypes } = useActivities();
+  const { filteredActivites, subscribedTypes } = useActivitiesState();
   const { infoNotification } = useNotifications();
   const dispatch = useDispatch();
 
@@ -90,7 +89,7 @@ function Activities() {
         items={filteredActivites.map((activity) => {
           return {
             dot: <ActivityIcon type={activity.type} />,
-            children: parseActivity(activity),
+            children: activity.text,
           };
         })}
       />

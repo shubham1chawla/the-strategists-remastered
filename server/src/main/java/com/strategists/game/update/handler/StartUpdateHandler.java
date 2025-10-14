@@ -4,15 +4,14 @@ import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Player;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.StartUpdatePayload;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
+@Getter
 @Component
 public class StartUpdateHandler extends AbstractUpdateHandler<StartUpdatePayload> {
 
-    @Override
-    public UpdateType getType() {
-        return UpdateType.START;
-    }
+    private final UpdateType type = UpdateType.START;
 
     @Override
     public void handle(Object returnValue, Object[] args) {

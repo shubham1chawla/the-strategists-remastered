@@ -1,6 +1,5 @@
 import logging
-import os
-from typing import Any, List, Tuple, Optional
+from typing import Any, List, Optional
 
 import mlflow
 import numpy as np
@@ -13,40 +12,13 @@ from sklearn.utils import compute_sample_weight
 
 from predictions import constants
 from predictions.constants import MODEL_NAME_PREFIX
+from predictions.data import preprocess_dataframe, load_training_dataset, parse_update_payloads
 from predictions.mlflow import get_experiment_id, get_predictions_model, get_predictions_model_latest_version
 from predictions.models import Classifier, PredictionsModel
 from predictions.pipeline import create_feature_engineering_pipeline
 from predictions.types import PlayerPredictionResponse, PredictionsModelInfo
 
 logger = logging.getLogger(__name__)
-
-
-def _load_training_dataset(game_map_id: str) -> Tuple[int, pd.DataFrame]:
-    # Checking if predictions data directory is set
-    if constants.PREDICTIONS_DATA_DIR not in os.environ:
-        raise KeyError(f"Set '{constants.PREDICTIONS_DATA_DIR}' to a directory containing predictions data!")
-
-    # Validating predictions data directory
-    predictions_data_dir = os.getenv(constants.PREDICTIONS_DATA_DIR)
-    if not os.path.exists(predictions_data_dir) or not os.path.isdir(predictions_data_dir):
-        raise FileNotFoundError(f"'{predictions_data_dir}' either doesn't exist or is not a directory!")
-
-    # Checking if csv files in the data directory
-    logger.info(f"Loading CSV files from: '{predictions_data_dir}'")
-    csv_paths = [os.path.join(predictions_data_dir, name)
-                 for name in os.listdir(predictions_data_dir) if name.startswith(game_map_id) and name.endswith(".csv")]
-    if not csv_paths:
-        raise FileNotFoundError(f"'{predictions_data_dir}' contains no '.csv' files for game map ID '{game_map_id}'!")
-    logger.info(f"Loaded {len(csv_paths)} CSV files for game map ID: '{game_map_id}'")
-
-    # Producing combined dataframe
-    df = pd.concat([pd.read_csv(csv_path) for csv_path in csv_paths], ignore_index=True)
-
-    # Preprocessing dataframe
-    df = _preprocess_dataframe(df, drop_columns=["game.export.timestamp", "game.bankruptcy-order", "player.username"])
-
-    # Combining csv files
-    return len(csv_paths), df
 
 
 def _fit_classifier(classifier: Classifier, x, y) -> Pipeline:
@@ -104,7 +76,7 @@ def _get_best_classifier(x_train, y_train) -> Classifier:
 
 def train_predictions_model(game_map_id: str) -> PredictionsModelInfo:
     # Loading training dataset
-    csv_files_count, df = _load_training_dataset(game_map_id)
+    files_count, df = load_training_dataset(game_map_id)
 
     # Extracting features and label
     x = df.drop("player.state", axis=1)
@@ -156,7 +128,7 @@ def train_predictions_model(game_map_id: str) -> PredictionsModelInfo:
         # Setting up tags
         mlflow.set_tags({
             "classifier_name": best_classifier.name,
-            "csv_files_count": csv_files_count,
+            "files_count": files_count,
             "dataset_rows": df.shape[0],
         })
 
@@ -199,9 +171,20 @@ def train_predictions_model(game_map_id: str) -> PredictionsModelInfo:
 
 
 def infer_predictions_model(game_map_id: str, data: List[dict[str, Any]]) -> List[PlayerPredictionResponse]:
+    # Converting update payloads to CSV-like data
+    parsed_rows = parse_update_payloads(data, inference=True)
+
     # Preparing model's input
-    model_input = _preprocess_dataframe(pd.DataFrame(data),
-                                        drop_columns=["game.export.timestamp", "game.bankruptcy-order", "player.state"])
+    model_input = preprocess_dataframe(pd.DataFrame(parsed_rows), drop_columns=[
+        # Removed commonly with training
+        "game.export.timestamp",
+        "game.bankruptcy-order",
+
+        # Removing plater's state since it's the target variable
+        "player.state",
+
+        # game.code and player.id is not removed since its part of the index to send to the server later
+    ])
     model_input.set_index(["game.code", "player.id"], inplace=True)
 
     # Loading model from MLFlow
@@ -216,22 +199,6 @@ def infer_predictions_model(game_map_id: str, data: List[dict[str, Any]]) -> Lis
 
     # Converting output
     return [PlayerPredictionResponse(**player_prediction) for player_prediction in output.to_dict(orient="records")]
-
-
-def _preprocess_dataframe(df: pd.DataFrame, *, drop_columns: Optional[List[str]] = None) -> pd.DataFrame:
-    # Dropping unwanted features
-    if drop_columns:
-        df = df[df.columns[~df.columns.isin(drop_columns)]]
-
-    # Converting integer-based columns to double
-    return df.astype({
-        "ownership.count": "double",
-        "debit.invest.count": "double",
-        "debit.rent.count": "double",
-        "debit.count": "double",
-        "credit.rent.count": "double",
-        "credit.count": "double",
-    })
 
 
 def get_predictions_model_latest_info(game_map_id: str) -> Optional[PredictionsModelInfo]:

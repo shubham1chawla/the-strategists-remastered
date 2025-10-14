@@ -9,6 +9,7 @@ import {
   UserOutlined,
   WalletOutlined,
 } from '@ant-design/icons';
+import useGameState from '@game/hooks/useGameState';
 import { Player } from '@game/state';
 
 interface PlayerStatsProps {
@@ -18,17 +19,18 @@ interface PlayerStatsProps {
 }
 
 function PlayerStats(props: PlayerStatsProps) {
+  const { game } = useGameState();
   const { player, winner, showRemainingSkipsCount } = props;
 
   // Determining whether to show remaining skip counts
   const shouldShowRemainingSkipsCount =
     !!player.remainingSkipsCount &&
-    !!player.allowedSkipsCount &&
+    !!game.allowedSkipsCount &&
     !!showRemainingSkipsCount &&
     player.state !== 'BANKRUPT';
 
   const remainingSkipsCount = player.remainingSkipsCount || 0;
-  const allowedSkipsCount = player.allowedSkipsCount || 0;
+  const allowedSkipsCount = game.allowedSkipsCount || 0;
   const skipsCount = allowedSkipsCount - remainingSkipsCount;
 
   return (

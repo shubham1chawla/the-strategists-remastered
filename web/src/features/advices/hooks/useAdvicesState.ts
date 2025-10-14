@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import axios from 'axios';
-import { State } from '@/store';
-import useLogin from '@login/hooks/useLogin';
+import { StrategistsState } from '@/store';
+import useLoginState from '@login/hooks/useLoginState';
 
-const useAdvices = () => {
-  const advices = useSelector((state: State) => state.advices);
-  const { playerId, gameCode } = useLogin();
+const useAdvicesState = () => {
+  const advices = useSelector((state: StrategistsState) => state.advicesState);
+  const { playerId, gameCode } = useLoginState();
   const [unreadCount, setUnreadCount] = useState(0);
 
   // Filtering advices based on logged in player
@@ -40,4 +40,4 @@ const useAdvices = () => {
   };
 };
 
-export default useAdvices;
+export default useAdvicesState;

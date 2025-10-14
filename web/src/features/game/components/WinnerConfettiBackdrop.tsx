@@ -8,7 +8,7 @@ import {
 } from '@tsparticles/engine';
 import Particles, { initParticlesEngine } from '@tsparticles/react';
 import useTheme from '@shared/hooks/useTheme';
-import useGame from '@game/hooks/useGame';
+import useGameState from '@game/hooks/useGameState';
 
 const getSourceOptions = (colors: string[]): ISourceOptions => {
   const baseOptions = {
@@ -193,7 +193,7 @@ const getSourceOptions = (colors: string[]): ISourceOptions => {
 };
 
 function WinnerConfettiBackdrop() {
-  const { winnerPlayer } = useGame();
+  const { winnerPlayer } = useGameState();
   const { accentColor, textColor } = useTheme();
   const [init, setInit] = useState(false);
 

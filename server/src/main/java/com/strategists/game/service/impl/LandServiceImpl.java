@@ -14,7 +14,6 @@ import com.strategists.game.service.LandService;
 import com.strategists.game.update.UpdateMapping;
 import com.strategists.game.update.UpdateType;
 import lombok.extern.log4j.Log4j2;
-import lombok.val;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -37,7 +36,7 @@ public class LandServiceImpl implements LandService {
     private TrendRepository trendRepository;
 
     @Override
-    public void save(Game game, GameMap gameMap) {
+    public void updateLands(Game game, GameMap gameMap) {
         gameMap.getLands().forEach(land -> land.setGame(game));
         landRepository.saveAll(gameMap.getLands());
     }
@@ -60,11 +59,11 @@ public class LandServiceImpl implements LandService {
     @Override
     public List<Rent> getPlayerRentsByLand(Player sourcePlayer, Land land) {
         Assert.isTrue(Objects.equals(sourcePlayer.getGame(), land.getGame()), "Player's and Land's game must match!");
-        val game = sourcePlayer.getGame();
+        final var game = sourcePlayer.getGame();
 
-        val rents = new ArrayList<Rent>();
+        final var rents = new ArrayList<Rent>();
         for (PlayerLand pl : land.getPlayerLands()) {
-            val targetPlayer = pl.getPlayer();
+            final var targetPlayer = pl.getPlayer();
 
             // Avoiding self rent payment or bankrupt players
             if (Objects.equals(targetPlayer, sourcePlayer) || targetPlayer.isBankrupt()) {
@@ -72,7 +71,7 @@ public class LandServiceImpl implements LandService {
             }
 
             // Calculating rent for the target player
-            val rentAmount = game.getRentFactor() * (pl.getOwnership() / 100) * land.getMarketValue();
+            final var rentAmount = game.getRentFactor() * (pl.getOwnership() / 100) * land.getMarketValue();
             rents.add(new Rent(sourcePlayer, targetPlayer, land, rentAmount));
         }
 
@@ -81,11 +80,11 @@ public class LandServiceImpl implements LandService {
 
     @Override
     public void hostEvent(long landId, long eventId, int life, int level) {
-        val opt = landRepository.findById(landId);
+        final var opt = landRepository.findById(landId);
         Assert.isTrue(opt.isPresent(), "No land associated with ID: " + landId);
 
-        val land = opt.get();
-        val event = eventService.getEventById(eventId);
+        final var land = opt.get();
+        final var event = eventService.getEventById(eventId);
 
         land.addEvent(event, life, level);
         landRepository.save(land);
@@ -95,13 +94,12 @@ public class LandServiceImpl implements LandService {
 
     @Override
     public void resetLands(Game game) {
-        val lands = getLandsByGame(game);
+        log.info("Resetting lands for game: {}", game.getCode());
+        final var lands = getLandsByGame(game);
         for (Land land : lands) {
             land.getLandEvents().clear();
         }
-
         landRepository.saveAll(lands);
-        log.info("Reseted lands for game: {}", game.getCode());
     }
 
     @Override

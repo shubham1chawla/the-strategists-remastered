@@ -5,20 +5,18 @@ import com.strategists.game.entity.Game;
 import com.strategists.game.entity.Player;
 import com.strategists.game.update.UpdateType;
 import com.strategists.game.update.payload.AdviceUpdatePayload;
-import lombok.val;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.util.List;
 
+@Getter
 @Component
 public class AdviceUpdateHandler extends AbstractUpdateHandler<AdviceUpdatePayload> {
 
-    @Override
-    public UpdateType getType() {
-        return UpdateType.ADVICE;
-    }
+    private final UpdateType type = UpdateType.ADVICE;
 
     @Override
     public void handle(Object returnValue, Object[] args) {
@@ -31,13 +29,12 @@ public class AdviceUpdateHandler extends AbstractUpdateHandler<AdviceUpdatePaylo
         }
         Assert.notNull(game, "Unable to extract game from arguments!");
 
-        @SuppressWarnings("unchecked")
-        val advices = (List<Advice>) returnValue;
+        @SuppressWarnings("unchecked") final var advices = (List<Advice>) returnValue;
         if (CollectionUtils.isEmpty(advices)) {
             return;
         }
 
-        sendUpdate(game, new AdviceUpdatePayload(advices));
+        sendUpdate(game, new AdviceUpdatePayload(game, advices));
     }
 
 }

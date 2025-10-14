@@ -9,14 +9,14 @@ import {
 import axios from 'axios';
 import { googleLogout } from '@react-oauth/google';
 import StrategistsLogo from '@shared/components/StrategistsLogo';
-import useGame from '@game/hooks/useGame';
-import useLogin from '@login/hooks/useLogin';
+import useGameState from '@game/hooks/useGameState';
+import useLoginState from '@login/hooks/useLoginState';
 import { loggedOut } from '@login/state';
 import ResetModal from './ResetModal';
 
 function NavigationBar() {
-  const { gameCode, player } = useLogin();
-  const { state, players, minPlayersCount, maxPlayersCount } = useGame();
+  const { gameCode, player } = useLoginState();
+  const { game, players } = useGameState();
   const [showResetModal, setShowResetModal] = useState(false);
   const dispatch = useDispatch();
 
@@ -26,12 +26,12 @@ function NavigationBar() {
   }
 
   const start = () => {
-    if (state === 'ACTIVE') return;
+    if (game.state === 'ACTIVE') return;
     axios.put(`/api/games/${gameCode}/start`);
   };
 
   const reset = () => {
-    if (state === 'LOBBY') return;
+    if (game.state === 'LOBBY') return;
     setShowResetModal(true);
   };
 
@@ -57,11 +57,11 @@ function NavigationBar() {
       {player?.host && (
         <Tooltip
           title={
-            players.length < minPlayersCount
-              ? `At least ${minPlayersCount} players required to start The Strategists!`
-              : players.length > maxPlayersCount
-                ? `At most ${maxPlayersCount} players required to start The Strategists!`
-                : state === 'ACTIVE'
+            players.length < game.minPlayersCount
+              ? `At least ${game.minPlayersCount} players required to start The Strategists!`
+              : players.length > game.maxPlayersCount
+                ? `At most ${game.maxPlayersCount} players required to start The Strategists!`
+                : game.state === 'ACTIVE'
                   ? 'Reset this session of The Strategists!'
                   : 'Start this session of The Strategists!'
           }
@@ -70,13 +70,13 @@ function NavigationBar() {
             type="primary"
             htmlType="submit"
             disabled={
-              state === 'LOBBY' &&
-              (players.length < minPlayersCount ||
-                players.length > maxPlayersCount)
+              game.state === 'LOBBY' &&
+              (players.length < game.minPlayersCount ||
+                players.length > game.maxPlayersCount)
             }
-            onClick={() => (state === 'ACTIVE' ? reset() : start())}
+            onClick={() => (game.state === 'ACTIVE' ? reset() : start())}
           >
-            {state === 'LOBBY' ? <PlayCircleFilled /> : <StopFilled />}
+            {game.state === 'LOBBY' ? <PlayCircleFilled /> : <StopFilled />}
           </Button>
         </Tooltip>
       )}

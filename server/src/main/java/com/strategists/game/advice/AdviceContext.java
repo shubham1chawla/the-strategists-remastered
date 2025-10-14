@@ -31,17 +31,15 @@ public class AdviceContext extends ContextBase implements Context {
 
     private final List<Player> players;
     private final List<Land> lands;
-    private final List<Activity> activities;
     private final List<Advice> advices;
 
     @Getter(AccessLevel.PRIVATE)
     private final Map<String, Player> playerUsernameMap;
 
-    public AdviceContext(Game game, List<Player> players, List<Land> lands, List<Activity> activities) {
+    public AdviceContext(Game game, List<Player> players, List<Land> lands) {
         this.game = game;
         this.players = players;
         this.lands = lands;
-        this.activities = activities;
         this.advices = new ArrayList<>();
 
         this.playerUsernameMap = players.stream().collect(Collectors.toMap(Player::getUsername, Function.identity()));

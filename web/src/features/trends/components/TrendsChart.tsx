@@ -5,7 +5,7 @@ import EmptyContainer from '@shared/components/EmptyContainer';
 import useChartTheme from '@shared/hooks/useChartTheme';
 import useTheme from '@shared/hooks/useTheme';
 import { Theme } from '@shared/providers/themeProvider';
-import useTrends from '@trends/hooks/useTrends';
+import useTrendsState from '@trends/hooks/useTrendsState';
 import { LandTrend, PlayerTrend } from '@trends/state';
 
 const drawPlayerTrends = (
@@ -17,7 +17,7 @@ const drawPlayerTrends = (
   chart
     .area()
     .data(trends)
-    .encode('x', 'turn')
+    .encode('x', 'step')
     .encode('y', 'netWorth')
     .scale('y', { domainMin: 0 })
     .style(
@@ -30,7 +30,7 @@ const drawPlayerTrends = (
   chart
     .line()
     .data(trends)
-    .encode('x', 'turn')
+    .encode('x', 'step')
     .encode('y', 'netWorth')
     .scale('y', { domainMin: 0 })
     .style('stroke', theme.accentColor)
@@ -50,7 +50,7 @@ const drawPlayerTrends = (
   chart
     .line()
     .data(trends)
-    .encode('x', 'turn')
+    .encode('x', 'step')
     .encode('y', 'cash')
     .scale('y', { domainMin: 0 })
     .style('stroke', theme.textColor)
@@ -72,7 +72,7 @@ const drawLandTrends = (chart: Chart, trends: LandTrend[], theme: Theme) => {
   chart
     .area()
     .data(trends)
-    .encode('x', 'turn')
+    .encode('x', 'step')
     .encode('y', 'marketValue')
     .scale('y', { domainMin: 0 })
     .style(
@@ -83,8 +83,8 @@ const drawLandTrends = (chart: Chart, trends: LandTrend[], theme: Theme) => {
       title: '',
       items: [
         {
-          name: 'Turn',
-          field: 'turn',
+          name: 'Step',
+          field: 'step',
           color: 'transparent',
         },
       ],
@@ -94,7 +94,7 @@ const drawLandTrends = (chart: Chart, trends: LandTrend[], theme: Theme) => {
   chart
     .line()
     .data(trends)
-    .encode('x', 'turn')
+    .encode('x', 'step')
     .encode('y', 'marketValue')
     .scale('y', { domainMin: 0 })
     .style('stroke', theme.accentColor)
@@ -120,7 +120,7 @@ interface TrendsChartProps {
 function TrendsChart(props: TrendsChartProps) {
   const theme = useTheme();
   const chartTheme = useChartTheme();
-  const { playerTrends, landTrends } = useTrends();
+  const { playerTrends, landTrends } = useTrendsState();
   const { perspective, id, showHelp } = props;
 
   useEffect(() => {
@@ -194,8 +194,8 @@ function TrendsChart(props: TrendsChartProps) {
         <ChartInterpretationHelp
           message={
             perspective === 'player'
-              ? "The chart highlights the change in player's cash and net worth per turn."
-              : "The chart highlights the change in the land's market value per turn."
+              ? "The chart highlights the change in player's cash and net worth per step."
+              : "The chart highlights the change in the land's market value per step."
           }
         />
       )}

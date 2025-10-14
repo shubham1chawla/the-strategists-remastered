@@ -1,11 +1,11 @@
 import { useMemo } from 'react';
 import { NodeDefinition } from 'cytoscape';
 import useTheme from '@shared/hooks/useTheme';
-import useGame from './useGame';
+import useGameState from './useGameState';
 
 const useCytoscapePlayerNodeDefinitions = () => {
   const { getPlayerColor } = useTheme();
-  const { players, lands } = useGame();
+  const { players, lands } = useGameState();
 
   // Creating player nodes
   const playerNodes = useMemo(() => {

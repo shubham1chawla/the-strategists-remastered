@@ -14,7 +14,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.val;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -36,7 +35,7 @@ public class Trend implements Serializable {
     private Long id;
 
     @Column(nullable = false)
-    private Integer turn;
+    private Integer step;
 
     @JsonInclude(Include.NON_NULL)
     @Column(nullable = true)
@@ -65,9 +64,9 @@ public class Trend implements Serializable {
     private Game game;
 
     public static Trend fromPlayer(Player player) {
-        val trend = new Trend();
+        final var trend = new Trend();
         trend.setGame(player.getGame());
-        trend.setTurn(player.getGame().getTurn());
+        trend.setStep(player.getGame().getCurrentStep());
         trend.setPlayerId(player.getId());
         trend.setCash(player.getCash());
         trend.setNetWorth(player.getNetWorth());
@@ -75,9 +74,9 @@ public class Trend implements Serializable {
     }
 
     public static Trend fromLand(Land land) {
-        val trend = new Trend();
+        final var trend = new Trend();
         trend.setGame(land.getGame());
-        trend.setTurn(land.getGame().getTurn());
+        trend.setStep(land.getGame().getCurrentStep());
         trend.setLandId(land.getId());
         trend.setMarketValue(land.getMarketValue());
         return trend;

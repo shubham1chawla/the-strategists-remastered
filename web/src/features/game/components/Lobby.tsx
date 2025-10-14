@@ -11,13 +11,13 @@ import {
   StarOutlined,
 } from '@ant-design/icons';
 import axios from 'axios';
-import useGame from '@game/hooks/useGame';
+import useGameState from '@game/hooks/useGameState';
 import { Player } from '@game/state';
-import useLogin from '@login/hooks/useLogin';
+import useLoginState from '@login/hooks/useLoginState';
 
 function Lobby() {
-  const { gameCode, player } = useLogin();
-  const { state, sortedPlayers } = useGame();
+  const { gameCode, player } = useLoginState();
+  const { game, sortedPlayers } = useGameState();
 
   const kickPlayer = (event: MouseEvent, { id }: Player) => {
     event.stopPropagation();
@@ -38,13 +38,13 @@ function Lobby() {
               p.id !== player.id && (
                 <Tooltip
                   title={
-                    state === 'ACTIVE'
+                    game.state === 'ACTIVE'
                       ? `The Strategists in session, you can't kick ${p.username} now!`
                       : `Kick ${p.username} out!`
                   }
                 >
                   <Button
-                    disabled={state === 'ACTIVE'}
+                    disabled={game.state === 'ACTIVE'}
                     type="text"
                     shape="circle"
                     onClick={(event) => kickPlayer(event, p)}
@@ -59,7 +59,7 @@ function Lobby() {
                 <UserOutlined /> {p.username}
               </Space>
               <Space>
-                {state === 'ACTIVE' && p.state !== 'BANKRUPT' && (
+                {game.state === 'ACTIVE' && p.state !== 'BANKRUPT' && (
                   <Tooltip title={<>{p.username}&apos;s rank</>}>
                     <Tag icon={<CrownOutlined />}>#{index + 1}</Tag>
                   </Tooltip>
@@ -72,7 +72,7 @@ function Lobby() {
                 </Tooltip>
                 {!!p.remainingSkipsCount &&
                   player?.host &&
-                  state === 'ACTIVE' && (
+                  game.state === 'ACTIVE' && (
                     <Tooltip
                       title={`Remaining skips allowed before ${p.username} will be declared bankrupt.`}
                     >
@@ -87,7 +87,7 @@ function Lobby() {
           </List.Item>
         )}
       />
-      {state === 'LOBBY' ? (
+      {game.state === 'LOBBY' ? (
         <Row justify="center">
           <Alert
             type="info"

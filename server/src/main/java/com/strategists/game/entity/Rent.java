@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
@@ -32,6 +33,9 @@ public class Rent implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
+    private Integer step;
+
     @ManyToOne
     @JoinColumn(name = "source_id", referencedColumnName = "id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -54,10 +58,26 @@ public class Rent implements Serializable {
         Assert.isTrue(Objects.equals(sourcePlayer.getGame(), targetPlayer.getGame()), "Players' games must match!");
         Assert.isTrue(Objects.equals(sourcePlayer.getGame(), land.getGame()), "Land's game must match!");
 
+        this.step = sourcePlayer.getGame().getCurrentStep();
         this.sourcePlayer = sourcePlayer;
         this.targetPlayer = targetPlayer;
         this.land = land;
         this.rentAmount = MathUtil.round(rentAmount);
+    }
+
+    @Transient
+    public Long getLandId() {
+        return getLand().getId();
+    }
+
+    @Transient
+    public Long getSourcePlayerId() {
+        return getSourcePlayer().getId();
+    }
+
+    @Transient
+    public Long getTargetPlayerId() {
+        return getTargetPlayer().getId();
     }
 
 }

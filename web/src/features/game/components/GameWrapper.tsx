@@ -5,28 +5,28 @@ import { useDispatch } from 'react-redux';
 import { DisconnectOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import useNotifications from '@shared/hooks/useNotifications';
-import useActivities from '@activities/hooks/useActivities';
+import useActivitiesState from '@activities/hooks/useActivitiesState';
 import {
   activityAdded,
   Activity,
   UpdateType,
   activitiesSetted,
 } from '@activities/state';
-import parseActivity from '@activities/utils/parseActivity';
 import { Advice, advicesAddedOrPatched, advicesSetted } from '@advices/state';
 import {
-  gameStateSetted,
+  Game,
   Land,
+  Player,
+  gameSetted,
+  gamePatched,
   landsPatched,
   landsSetted,
-  Player,
   playerAdded,
   playerKicked,
-  playersCountConstraintsSetted,
   playersPatched,
   playersSetted,
 } from '@game/state';
-import useLogin from '@login/hooks/useLogin';
+import useLoginState from '@login/hooks/useLoginState';
 import { loggedOut } from '@login/state';
 import {
   PlayerPrediction,
@@ -36,15 +36,16 @@ import {
 import { Trend, trendsAdded, trendsSetted } from '@trends/state';
 
 interface UpdatePayload {
+  timestamp: number;
+  gameCode: string | null;
+  gameStep: number | null;
   type: UpdateType;
-  activity?: Activity;
-  payload: any;
+  activity: Activity | null;
+  payload: any | null;
 }
 
 interface GameResponse {
-  state: 'LOBBY' | 'ACTIVE';
-  minPlayersCount: number;
-  maxPlayersCount: number;
+  game: Game;
   players: Player[];
   lands: Land[];
   activities: Activity[];
@@ -53,25 +54,21 @@ interface GameResponse {
   advices: Advice[] | null;
 }
 
-const syncGameStates = async (
-  gameCode: string,
+const syncUIByGameResponse = (
+  gameResponse: GameResponse,
   dispatch: Dispatch<UnknownAction>,
-): Promise<void> => {
-  const { data } = await axios.get<GameResponse>(`/api/games/${gameCode}`);
+) => {
   const {
-    state,
-    minPlayersCount,
-    maxPlayersCount,
+    game,
     players,
     lands,
     activities,
     trends,
     playerPredictions,
     advices,
-  } = data;
+  } = gameResponse;
   [
-    gameStateSetted(state),
-    playersCountConstraintsSetted([minPlayersCount, maxPlayersCount]),
+    gameSetted(game),
     playersSetted(players),
     landsSetted(lands),
     activitiesSetted(activities),
@@ -81,14 +78,22 @@ const syncGameStates = async (
   ].forEach(dispatch);
 };
 
+const syncUIByGameCode = async (
+  gameCode: string,
+  dispatch: Dispatch<UnknownAction>,
+): Promise<void> => {
+  const { data } = await axios.get<GameResponse>(`/api/games/${gameCode}`);
+  syncUIByGameResponse(data, dispatch);
+};
+
 const alertUser = (event: BeforeUnloadEvent) => {
   event.preventDefault();
   return 'You are about to exit The Strategists! Do you want to continue?';
 };
 
 function GameWrapper({ children }: PropsWithChildren) {
-  const { gameCode, playerId } = useLogin();
-  const { subscribedTypes } = useActivities();
+  const { gameCode, playerId } = useLoginState();
+  const { subscribedTypes } = useActivitiesState();
   const { openNotification, errorNotification } = useNotifications();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -101,7 +106,7 @@ function GameWrapper({ children }: PropsWithChildren) {
     }
 
     // Syncing game's state
-    syncGameStates(gameCode, dispatch).catch(() => {
+    syncUIByGameCode(gameCode, dispatch).catch(() => {
       errorNotification({
         message: 'Something went wrong!',
         description:
@@ -152,9 +157,8 @@ function GameWrapper({ children }: PropsWithChildren) {
 
     // Setting up on message strategy for the event source
     updates.onmessage = (message: MessageEvent<any>) => {
-      const { type, payload, activity }: UpdatePayload = JSON.parse(
-        message.data,
-      );
+      const { timestamp, gameStep, type, payload, activity }: UpdatePayload =
+        JSON.parse(message.data);
       switch (type) {
         case 'ADVICE':
           dispatch(advicesAddedOrPatched(payload));
@@ -200,14 +204,14 @@ function GameWrapper({ children }: PropsWithChildren) {
           dispatch(playersPatched(payload));
           break;
         case 'RESET':
-          setTimeout(() => syncGameStates(gameCode, dispatch));
+          syncUIByGameResponse(payload, dispatch);
           break;
         case 'SKIP':
           dispatch(playersPatched([payload]));
           break;
         case 'START':
           dispatch(playersPatched([payload]));
-          dispatch(gameStateSetted('ACTIVE'));
+          dispatch(gamePatched({ state: 'ACTIVE' }));
           break;
         case 'TREND':
           dispatch(trendsAdded(payload));
@@ -216,15 +220,23 @@ function GameWrapper({ children }: PropsWithChildren) {
           dispatch(playersPatched(payload));
           break;
         case 'WIN':
-          // Do nothing
+          // Assuming win payload's timestamp as game end time
+          dispatch(gamePatched({ endAt: timestamp }));
           break;
         default:
           throw new Error(`Unsupported update type: ${type}`);
       }
+
+      // Checking if activity part of payload
       if (!activity) return;
       dispatch(activityAdded(activity));
       if (subscribedTypes.includes(type)) {
-        openNotification({ message: parseActivity(activity) });
+        openNotification({ message: activity.text });
+      }
+
+      // Updating game's turn
+      if (gameStep) {
+        dispatch(gamePatched({ currentStep: gameStep }));
       }
     };
   }, [

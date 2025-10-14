@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface LandService {
 
-    void save(Game game, GameMap gameMap);
+    void updateLands(Game game, GameMap gameMap);
 
     List<Land> getLandsByGame(Game game);
 

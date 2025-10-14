@@ -1,9 +1,11 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { State } from '@/store';
+import { StrategistsState } from '@/store';
 
-const useActivities = () => {
-  const activity = useSelector((state: State) => state.activities);
+const useActivitiesState = () => {
+  const activity = useSelector(
+    (state: StrategistsState) => state.activitiesState,
+  );
   const { activities, subscribedTypes } = activity;
 
   // Extracting filtered activities
@@ -18,4 +20,4 @@ const useActivities = () => {
   };
 };
 
-export default useActivities;
+export default useActivitiesState;
