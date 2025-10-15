@@ -24,6 +24,8 @@ spring:
   h2:
     console:
       enabled: ${ENABLE_H2_CONSOLE:false}
+      settings:
+        web-allow-others: ${ENABLE_H2_CONSOLE:false}
 strategists:
   game:
     default-map: india
