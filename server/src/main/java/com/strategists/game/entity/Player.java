@@ -157,6 +157,12 @@ public class Player implements Serializable {
         return State.BANKRUPT.equals(state);
     }
 
+    @Transient
+    @JsonIgnore
+    public boolean isActive() {
+        return State.ACTIVE.equals(state);
+    }
+
     public void addLand(Land land, double ownership, double buyAmount) {
         playerLands = Objects.isNull(playerLands) ? new ArrayList<>() : playerLands;
         final var opt = playerLands.stream().filter(pl -> Objects.equals(pl.getLandId(), land.getId())).findFirst();

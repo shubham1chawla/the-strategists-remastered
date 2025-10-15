@@ -28,15 +28,16 @@ public class AvoidTimeoutAdviceHandler extends AbstractAdviceHandler {
     protected void generate(AdviceContext context) {
         final var game = context.getGame();
         final var players = context.getPlayers();
+        final var activePlayersCount = players.stream().filter(Player::isActive).count();
 
         for (Player player : players) {
             if (!player.isBankrupt()) {
-                generate(game, players.size(), player).ifPresent(context::addAdvice);
+                generate(game, activePlayersCount, player).ifPresent(context::addAdvice);
             }
         }
     }
 
-    private Optional<Advice> generate(Game game, int playersCount, Player player) {
+    private Optional<Advice> generate(Game game, long playersCount, Player player) {
 
         // Checking if advice is needed
         boolean isAdviceNeeded = false;
