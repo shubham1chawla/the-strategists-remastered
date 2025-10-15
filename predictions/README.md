@@ -13,14 +13,18 @@ volumes. These directories are -
 - MLFlow tracking directory for saving metadata and machine learning models' pickle files.
 
 > [!IMPORTANT]
-> You may not need to manually create a directory for MLFlow, since it automatically creates one, however, you will
+> You will not need to manually create a directory for MLFlow, since it automatically creates one, however, you will
 > need to create a directory either for the history data or legacy predictions data, and have `JSONL` or `CSV` files
 > present in there, respectively, for the Predictions API to work.
+>
 > If you don't have the history or legacy predictions data to train the model, start the _StrategistsService_ with
-> either predictions feature disabled, or disable the training and inferring features, while keeping the exporting of
-> history data enabled to start collecting the necessary data to train the model in the future. Refer to
-_StrategistsService_'s [README](../server/README.md) to learn more about to disable predictions or use different
-> strategies.
+> either predictions feature disabled, while keeping the exporting of history data enabled to start collecting the
+> necessary data to train the model in the future. Refer to _StrategistsService_'s [README](../server/README.md) to
+> learn more about to disable predictions.
+
+> [!NOTE]
+> If you are switching between running the game from _Docker_ and your local setup, and vice versa you will need to
+> delete the `mlflow` directory in the `resources` folder to fix any path-related issues.
 
 ## Setup
 
@@ -36,13 +40,14 @@ uv sync --locked
 4. Create a `.env` file in the root of this project, and paste the following variables in it.
 
 ```env
-LEGACY_PREDICTIONS_DATA_DIR=../resources/legacy # Optional, set to loads legacy predictions `CSV` files
 HISTORY_DATA_DIR=../resources/history
 MLFLOW_TRACKING_URI=../resources/mlflow
 ```
 
 > [!NOTE]
-> The `.env` file assumes that you have a `resources` directory in the project's root directory.
+> The `.env` file assumes that you have a `resources` directory in the project's root directory. Optionally, you
+> can set `LEGACY_PREDICTIONS_DATA_DIR=../resources/legacy`, if you have and want to use the legacy predictions
+> `CSV` files.
 
 ## Execution
 

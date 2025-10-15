@@ -14,7 +14,7 @@ services:
         - ghcr.io/shubham1chawla/strategists-permissions:latest
         - strategists-permissions:local
     env_file:
-      - resources/secrets/permissions.env.list
+      - resources/secrets/.env
     networks:
       - strategists-network
     volumes:
@@ -31,7 +31,7 @@ services:
         - ghcr.io/shubham1chawla/strategists-storage:latest
         - strategists-storage:local
     env_file:
-      - resources/secrets/storage.env.list
+      - resources/secrets/.env
     networks:
       - strategists-network
     volumes:
@@ -48,7 +48,7 @@ services:
         - ghcr.io/shubham1chawla/strategists-predictions:latest
         - strategists-predictions:local
     env_file:
-      - resources/secrets/predictions.env.list
+      - resources/secrets/.env
     networks:
       - strategists-network
     volumes:
@@ -65,7 +65,7 @@ services:
         - ghcr.io/shubham1chawla/strategists-service:latest
         - strategists-service:local
     env_file:
-      - resources/secrets/server.env.list
+      - resources/secrets/.env
     networks:
       - strategists-network
     volumes:

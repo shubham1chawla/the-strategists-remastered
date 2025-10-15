@@ -75,7 +75,7 @@ strategists:
       export:
         enabled: ${ENABLE_LEGACY_PREDICTIONS_DATA_EXPORT:false}
       google-drive:
-        enabled: ${ENABLE_LEGACY_PREDICTIONS_DATA_DOWNLOAD:true}
+        enabled: ${ENABLE_LEGACY_PREDICTIONS_DATA_DOWNLOAD:false}
         folder-id: ${LEGACY_PREDICTIONS_FOLDER_ID:}
     strategies:
       train-on-startup-enabled: ${ENABLE_PREDICTIONS_TRAIN_ON_STARTUP:true}

@@ -28,7 +28,7 @@ uv sync --locked
 
 4. Create a `.env` file in the root of this project, and paste the following variables in it.
 
-```
+```env
 GOOGLE_RECAPTCHA_SECRET_KEY=<YOUR_GOOGLE_RECAPTCHA_SECRET_KEY>
 GOOGLE_CREDENTIALS_JSON_PATH=<PATH/TO/YOUR/GOOGLE_CREDENTIALS.JSON>
 PERMISSIONS_SPREADSHEET_ID=<YOUR_GOOGLE_SPREADSHEET_ID>

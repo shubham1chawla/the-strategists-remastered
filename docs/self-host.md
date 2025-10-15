@@ -19,101 +19,41 @@ them correctly.
    _Docker_ volume as `/resources`.
 2. Inside the `resources` directory, create a folder called `secrets`. This directory will store
    all the sensitive information, including credentials to access _Google_ services.
-3. Create the following files inside the `resources/secrets` directory.
+3. Copy the `.env.example` file inside `/resources/secrets` folder and paste it as `.env`. This
+   file will be used by _Docker_ to load the necessary environment variables.
 
-```
-ROOT/resources/secrets
-├── permissions.env.list
-├── predictions.env.list
-├── server.env.list
-├── storage.env.list
-└── web.env.list
-```
+## Setting up `/resources/secrets/.env` file for _Docker_
 
-## Setting up Permissions API
+In the `/resources/secrets/.env` file, provide the **required** environment variables -
 
-Paste the following contents inside `permissions.env.list` file.
-
-```
-GOOGLE_RECAPTCHA_SECRET_KEY=<YOUR_GOOGLE_RECAPTCHA_SECRET_KEY>
-GOOGLE_CREDENTIALS_JSON_PATH=/resources/secrets/credentials.json
-PERMISSIONS_SPREADSHEET_ID=<YOUR_GOOGLE_SPREADSHEET_ID>
-PERMISSIONS_SPREADSHEET_RANGE=Permission Groups!A2:B
-```
-
-> [!NOTE]
-> For the _Google ReCAPTCHA Secret Key_ and _Google Spreadsheet ID_ for permissions, refer
-> to the Permission API's project's [prerequisites](../permissions/README.md#prerequisites).
-> The example `env` file above assumes that you have configured the `resources` volume to
-> mount with _Docker_'s `/resources` directory and the _Google Spreadsheet_'s sheet name is
-> `Permission Groups`.
-
-## Setting up Storage API
-
-Paste the following contents inside `storage.env.list` file.
-
-```
-GOOGLE_CREDENTIALS_JSON_PATH=/resources/secrets/credentials.json
-```
+1. `GOOGLE_CREDENTIALS_JSON_PATH` - The default here assumes that you have
+   _Google's Service Account_'s `credentials.json` present inside
+   `/resources/secrets` directory. If don't have a _Service Account_ set up, please refer to
+   [this section](../docs/google-integration.md#google-service-account).
+2. `GOOGLE_RECAPTCHA_SECRET_KEY` - _Google ReCAPTCHA_'s secret key for verifying user's
+   request. If don't have Secret Key set up, please refer to
+   [this section](../docs/google-integration.md#google-recaptcha).
+3. `PERMISSIONS_SPREADSHEET_ID` - _Google Spreadsheet_'s ID for loading Permission Groups.
+   If don't have _Google Spreadsheet_ set up, please refer to
+   [this section](../docs/google-integration.md#google-spreadsheets).
+4. `PLACEHOLDER_GOOGLE_CLIENT_ID` - _Google OAuth_'s Client ID for the UI to allow users to login via
+   their _Google_ accounts. If don't have a Client ID set up, please refer to
+   [this section](../docs/google-integration.md#google-oauth2).
+5. `PLACEHOLDER_GOOGLE_RECAPTCHA_SITE_KEY` - _Google ReCAPTCHA_'s Site Key to verify that the user is
+   not a bot. If don't have Site Key set up, please refer to
+   [this section](../docs/google-integration.md#google-recaptcha).
+6. `HISTORY_FOLDER_ID` - _Google Drive_ folder ID storing the history `JSONL` files. After each game,
+   the application will upload these `JSONL` files to this folder. If don't have a _Google Drive_ set
+   up, please refer to [this section](../docs/google-integration.md#google-drive).
 
 > [!NOTE]
-> This `env` file assumes you have saved the _Google Service Account_'s credentials `JSON`
-> file inside the `resources/secrets` directory, which mounts to _Docker_'s `/resources`
-> directory.
-
-## Setting up Predictions API
-
-Paste the following contents inside `predictions.env.list` file.
-
-```
-HISTORY_DATA_DIR=/resources/history
-MLFLOW_TRACKING_URI=/resources/mlflow
-```
-
-> [!NOTE]
-> This `env` file assumes you have created the directory containing games' history `JSONL` files 
-> inside the `resources/history` directory. Additionally, if you want to use the legacy
-> predictions `CSV` files, you can add the `LEGACY_PREDICTIONS_DATA_DIR` to `resources/legacy`
-> with the legacy predictions `CSV` files in it. Please refer to Predictions API project's
-> [prerequisites](../predictions/README.md#prerequisites) to learn more about them.
-
-## Setting up Web Application
-
-Paste the following contents inside `web.env.list` file.
-
-```
-PLACEHOLDER_GOOGLE_CLIENT_ID=<YOUR_GOOGLE_CLIENT_ID>
-PLACEHOLDER_GOOGLE_RECAPTCHA_SITE_KEY=<YOUR_GOOGLE_RECAPTCHA_SITE_KEY>
-```
-
-> [!NOTE]
-> For the _Google Client ID_ and _Google ReCAPTCHA Site Key_, refer to the Web Application's
-> [prerequisites](../web/README.md#prerequisites). The `PLACEHOLDER_` prefixing is important
-> because the web project uses run-time environment variable hydration to replace these
-> `PLACEHOLDER_` variables with the actual values.
-
-## Setting up Backend Server
-
-Paste the following contents inside `server.env.list` file.
-
-```
-PERMISSIONS_API_HOST=http://strategists-permissions
-STORAGE_API_HOST=http://strategists-storage
-PREDICTIONS_API_HOST=http://strategists-predictions
-HISTORY_DATA_DIR=/resources/history
-HISTORY_FOLDER_ID=<YOUR_GOOGLE_DRIVE_FOLDER_ID>
-```
-
-> [!NOTE]
-> Refer to the server's [README](../server/README.md) for _Google Drive_ folder ID and learn
-> more about _StrategistsService_'s other optional environment variables. The example `env`
-> file above assumes that you have configured the `resources` volume to mount with _Docker_'s
-> `/resources` directory.
+> For all the **optioanl** and **default** configurations provided in the `.env.example` file, please
+> refer to the respected project's _README_ files.
 
 ## Running _The Strategists_
 
-Once you have configured all the environment files, you can start the game with the following
-command from the project's root directory.
+Once you have configured all **required** environment variables, you can start the game with the
+following command from the project's root directory.
 
 ```bash
 docker-compose up

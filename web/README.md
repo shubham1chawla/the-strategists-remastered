@@ -19,7 +19,7 @@ This directory contains the _React_ application for The Strategists game.
 3. Install the project's dependencies using `npm install` command.
 4. Create a `.env.local` file in the root of the project, and add the following environment variables.
 
-```
+```env
 VITE_GOOGLE_CLIENT_ID=<YOUR_GOOGLE_CLIENT_ID>
 VITE_GOOGLE_RECAPTCHA_SITE_KEY=<YOUR_GOOGLE_RECAPTCHA_SITE_KEY>
 ```
