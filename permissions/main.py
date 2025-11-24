@@ -3,7 +3,7 @@ import logging
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 
-from permissions.google import build_service, get_spreadsheet_values, verify_google_recaptcha_client_token
+from permissions.google import get_spreadsheet_values, verify_google_recaptcha_client_token
 from permissions.types import (
     PermissionGroupRequest, PermissionGroupResponse, PermissionStatus,
     GoogleRecaptchaVerificationRequest, GoogleRecaptchaVerificationResponse
@@ -17,9 +17,6 @@ load_dotenv()
 
 # Setting up FastAPI instance
 app = FastAPI()
-
-# Setting up Google Spreadsheets Service
-service = build_service()
 
 
 @app.get("/health")
@@ -42,7 +39,7 @@ def verify_google_recaptcha(request: GoogleRecaptchaVerificationRequest) -> Goog
 def get_permission_group(request: PermissionGroupRequest) -> PermissionGroupResponse:
     # Querying Google Spreadsheets
     try:
-        values = get_spreadsheet_values(service)
+        values = get_spreadsheet_values()
     except Exception as e:
         logger.error(e)
         raise HTTPException(status_code=500, detail="Unable to query Google Spreadsheets!")

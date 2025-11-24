@@ -20,7 +20,16 @@ public class SSEPingConfiguration {
 
     @PostConstruct
     public void setup() {
-        log.info("SSE ping enabled.");
+        final var message = """
+                
+                --------------------------------------------------\
+                
+                SSE Ping:\
+                
+                > Enabled: true\
+                
+                --------------------------------------------------""";
+        log.info(message);
     }
 
     @Scheduled(fixedRate = 30, timeUnit = TimeUnit.SECONDS)

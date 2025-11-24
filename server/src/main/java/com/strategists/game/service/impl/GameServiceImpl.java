@@ -20,6 +20,7 @@ import com.strategists.game.service.PlayerService;
 import com.strategists.game.service.PredictionsService;
 import com.strategists.game.update.UpdateMapping;
 import com.strategists.game.update.UpdateType;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,10 +44,10 @@ public class GameServiceImpl implements GameService {
     @Autowired
     private GameConfigurationProperties gameConfigurationProperties;
 
-    @Autowired(required = false)
+    @Autowired
     private SkipPlayerConfigurationProperties skipPlayerConfigurationProperties;
 
-    @Autowired(required = false)
+    @Autowired
     private CleanUpConfigurationProperties cleanUpConfigurationProperties;
 
     @Autowired
@@ -72,6 +73,13 @@ public class GameServiceImpl implements GameService {
 
     @Autowired(required = false)
     private AdvicesService advicesService;
+
+    @PostConstruct
+    public void setup() {
+        log.info(gameConfigurationProperties);
+        log.info(skipPlayerConfigurationProperties);
+        log.info(cleanUpConfigurationProperties);
+    }
 
     @Override
     @UpdateMapping(UpdateType.CREATE)
@@ -101,14 +109,14 @@ public class GameServiceImpl implements GameService {
         game.setRentFactor(gameConfigurationProperties.rentFactor());
 
         // Setting skip-player optional configurations
-        if (Objects.nonNull(skipPlayerConfigurationProperties)) {
+        if (skipPlayerConfigurationProperties.enabled()) {
             log.info("Skip-player for game enabled!");
             game.setAllowedSkipsCount(skipPlayerConfigurationProperties.allowedCount());
             game.setSkipPlayerTimeout(skipPlayerConfigurationProperties.timeout());
         }
 
         // Setting clean-up optional configurations
-        if (Objects.nonNull(cleanUpConfigurationProperties)) {
+        if (cleanUpConfigurationProperties.enabled()) {
             log.info("Clean-up for game enabled!");
             game.setCleanUpDelay(cleanUpConfigurationProperties.delay());
         }

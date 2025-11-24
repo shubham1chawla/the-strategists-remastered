@@ -27,7 +27,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -41,7 +40,7 @@ public class HistoryServiceImpl implements HistoryService {
     @Autowired
     private HistoryConfigurationProperties properties;
 
-    @Autowired
+    @Autowired(required = false)
     private StorageService storageService;
 
     // Game Code -> Pair(JSON strings, Whether valid or not)
@@ -49,6 +48,8 @@ public class HistoryServiceImpl implements HistoryService {
 
     @PostConstruct
     public void setup() {
+        log.info(properties);
+
         // Checking if history data directory exists
         final var dataDirectory = properties.dataDirectory();
         if (!dataDirectory.exists()) {
@@ -56,13 +57,8 @@ public class HistoryServiceImpl implements HistoryService {
             log.info("Created directory: {}", dataDirectory);
         }
 
-        // Downloading history files from Google Drive, if enabled
-        if (properties.googleDrive().enabled()) {
-            final var downloadedFiles = downloadHistoryFiles().map(DownloadGoogleDriveFilesResponse::getDownloadedFiles).orElse(List.of());
-            log.info("New history files downloaded: {}", downloadedFiles.size());
-        } else {
-            log.info("Skipped downloading history files to Google Drive!");
-        }
+        // Downloading history files from Google Drive
+        downloadHistoryFiles();
     }
 
     @Override
@@ -163,15 +159,8 @@ public class HistoryServiceImpl implements HistoryService {
         // Removing game's history from map
         resetHistory(game);
 
-        // Checking if Google Drive upload enabled
-        if (!properties.googleDrive().enabled()) {
-            log.info("Skipped uploading history files to Google Drive!");
-            return;
-        }
-
         // Uploading to Google Drive
-        final var uploadedFiles = uploadPredictionsCSV().map(UploadLocalFilesResponse::getUploadedFiles).orElse(List.of());
-        log.info("History files uploaded: {}", uploadedFiles.size());
+        uploadHistoryFiles();
     }
 
     @Override
@@ -186,20 +175,46 @@ public class HistoryServiceImpl implements HistoryService {
         return mapper.writeValueAsString(payload);
     }
 
-    private Optional<DownloadGoogleDriveFilesResponse> downloadHistoryFiles() {
+    private void downloadHistoryFiles() {
+        // Checking if Google Drive download enabled
+        if (!properties.googleDrive().enabled()) {
+            log.info("Skipped downloading history files from Google Drive!");
+            return;
+        }
+
+        // Sending download request
         final var request = new DownloadGoogleDriveFilesRequest();
         request.setGoogleDriveFolderId(properties.googleDrive().folderId());
         request.setFileExtension(FILE_EXTENSION);
         request.setLocalDataDirectory(properties.dataDirectory());
-        return storageService.downloadGoogleDriveFiles(request);
+        final var response = storageService.downloadGoogleDriveFiles(request);
+
+        // Logging how many new files downloaded
+        final var downloadedFiles = response
+                .map(DownloadGoogleDriveFilesResponse::getDownloadedFiles)
+                .orElse(List.of());
+        log.info("New history files downloaded: {}", downloadedFiles.size());
     }
 
-    private Optional<UploadLocalFilesResponse> uploadPredictionsCSV() {
+    private void uploadHistoryFiles() {
+        // Checking if Google Drive upload enabled
+        if (!properties.googleDrive().enabled()) {
+            log.info("Skipped uploading history files to Google Drive!");
+            return;
+        }
+
+        // Sending upload request
         final var request = new UploadLocalFilesRequest();
         request.setGoogleDriveFolderId(properties.googleDrive().folderId());
         request.setFileExtension(FILE_EXTENSION);
         request.setLocalDataDirectory(properties.dataDirectory());
-        return storageService.uploadLocalFiles(request);
+        final var response = storageService.uploadLocalFiles(request);
+
+        // Logging how many new files uploaded
+        final var uploadedFiles = response
+                .map(UploadLocalFilesResponse::getUploadedFiles)
+                .orElse(List.of());
+        log.info("History files uploaded: {}", uploadedFiles.size());
     }
 
 }

@@ -16,46 +16,46 @@ public abstract class AbstractExternalService {
 
     @PostConstruct
     protected void waitUntilReady() throws ConnectException, InterruptedException {
-        final var healthCheck = getHealthCheck();
+        final var healthCheckApi = getHealthCheckApi();
         final var externalServiceName = getExternalServiceName();
         final var log = getLogger();
 
-        // Checking if health check is by-passed!
-        if (healthCheck.bypassForTesting()) {
-            log.warn("'{}' health-check bypassed! This should only happen for local testing!", externalServiceName);
+        // Checking if health check is enabled
+        if (!healthCheckApi.enabled()) {
+            log.warn("Skipping Health Check API call! Assuming External Service '{}' is ready to use.", externalServiceName);
             return;
         }
 
         // Checking if external service is available
-        log.info("Checking '{}' readiness...", externalServiceName);
+        log.info("Checking External Service '{}' readiness...", externalServiceName);
         final var restTemplate = new RestTemplate();
         var remainingTries = MAX_RETRIES;
         while (remainingTries > 0) {
             try {
-                final var response = restTemplate.getForEntity(healthCheck.apiEndpoint(), String.class);
+                final var response = restTemplate.getForEntity(healthCheckApi.endpoint(), String.class);
                 if (!response.getStatusCode().is2xxSuccessful()) {
                     throw new ConnectException("Received unsuccessful (!=2xx) status code!");
                 }
                 break;
             } catch (Exception ex) {
                 remainingTries--;
-                log.warn("'{}' not ready! {} retries remaining...", externalServiceName, remainingTries);
+                log.warn(" External Service '{}' not ready! {} retries remaining...", externalServiceName, remainingTries);
             }
 
             // Sleeping until timeout
             Thread.sleep(TIMEOUT);
         }
         if (remainingTries == 0) {
-            final var msg = String.format("'%s' not ready after %s retries! Endpoint: %s", externalServiceName, MAX_RETRIES, healthCheck.apiEndpoint());
+            final var msg = String.format("External Service '%s' not ready after %s retries! Endpoint: %s", externalServiceName, MAX_RETRIES, healthCheckApi.endpoint());
             log.error(msg);
             throw new ConnectException(msg);
         }
-        log.info("'{}' ready to use!", externalServiceName);
+        log.info(" External Service '{}' ready to use!", externalServiceName);
     }
 
     protected abstract String getExternalServiceName();
 
-    protected abstract ExternalAPIEndpointConfigurationProperties getHealthCheck();
+    protected abstract ExternalAPIEndpointConfigurationProperties getHealthCheckApi();
 
     protected abstract Logger getLogger();
 

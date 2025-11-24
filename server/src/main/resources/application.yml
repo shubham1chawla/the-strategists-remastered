@@ -27,6 +27,7 @@ spring:
       settings:
         web-allow-others: ${ENABLE_H2_CONSOLE:false}
 strategists:
+  # Core game-related configurations
   game:
     default-map: india
     dice-size: 6
@@ -34,84 +35,159 @@ strategists:
     code-length: 4
     min-players-count: 2
     max-players-count: 6
+
+  # Enabling pinging health-check messages on SSE channels to keep it alive.
+  # Useful when running the server inside Docker or when hosted.
   sse-ping:
     enabled: ${ENABLE_SSE_PING:true}
+
+  # Deleting all the game-related data stored in the database after some time.
   clean-up:
     enabled: ${ENABLE_CLEAN_UP:true}
     delay: 300000
+
+  # Skipping player's turn after some time of inactivity.
   skip-player:
     enabled: ${ENABLE_SKIP_PLAYER:true}
     allowed-count: 3
     timeout: 90000
+
+  # Permissions module calls the FastAPI endpoints for the following:
+  # 1. Check whether user is not a bot via Google ReCAPTCHA services.
+  # 2. Check whether user has permissions to perform certain actions in the game (ex. Creating new games).
+  # By default, enforcing permissions are disabled since it requires configuring Google services.
+  # Admins should opt in for these functionalities.
   permissions:
-    health-check:
-      bypass-for-testing: false
-      api-endpoint: ${PERMISSIONS_API_HOST:http://localhost:8001}/health
-    google-recaptcha:
-      bypass-for-testing: false
-      api-endpoint: ${PERMISSIONS_API_HOST:http://localhost:8001}/api/google-recaptcha-verify
-    permission-group:
-      bypass-for-testing: false
-      api-endpoint: ${PERMISSIONS_API_HOST:http://localhost:8001}/api/permission-group
+    enabled: ${ENABLE_PERMISSIONS:false}
+
+    # Keeping health-check enabled by default to ensure FastAPI server is running.
+    health-check-api:
+      enabled: ${ENABLE_PERMISSIONS_HEALTH_CHECK_API:true}
+      endpoint: ${PERMISSIONS_API_HOST:http://localhost:8001}/health
+
+    # Admins must configure Google ReCAPTCHA verification before enabling this functionality.
+    google-recaptcha-verify-api:
+      enabled: ${ENABLE_PERMISSIONS_GOOGLE_RECAPTCHA_VERIFY_API:false}
+      endpoint: ${PERMISSIONS_API_HOST:http://localhost:8001}/api/google-recaptcha-verify
+
+    # Admins must configure Google Sheets before enabling this functionality.
+    permission-group-api:
+      enabled: ${ENABLE_PERMISSIONS_PERMISSION_GROUP_API:false}
+      endpoint: ${PERMISSIONS_API_HOST:http://localhost:8001}/api/permission-group
+
+  # Storage module calls the FastAPI endpoints for the following:
+  # 1. Downloading files onto the local file system of the server for Google Drive.
+  # 2. Uploading files to Google Drive from local file system of the server.
+  # By default, using remote storage is disabled since it requires configuring Google services.
+  # Admins should opt in for these functionalities.
   storage:
-    health-check:
-      bypass-for-testing: false
-      api-endpoint: ${STORAGE_API_HOST:http://localhost:8002}/health
-    download:
-      bypass-for-testing: false
-      api-endpoint: ${STORAGE_API_HOST:http://localhost:8002}/api/download
-    upload:
-      bypass-for-testing: false
-      api-endpoint: ${STORAGE_API_HOST:http://localhost:8002}/api/upload
+    enabled: ${ENABLE_STORAGE:false}
+
+    # Keeping health-check enabled by default to ensure FastAPI server is running.
+    health-check-api:
+      enabled: ${ENABLE_STORAGE_HEALTH_CHECK_API:true}
+      endpoint: ${STORAGE_API_HOST:http://localhost:8002}/health
+
+    # Admins must configure Google Drive before enabling this functionality.
+    download-api:
+      enabled: ${ENABLE_STORAGE_DOWNLOAD_API:false}
+      endpoint: ${STORAGE_API_HOST:http://localhost:8002}/api/download
+
+    # Admins must configure Google Drive before enabling this functionality.
+    upload-api:
+      enabled: ${ENABLE_STORAGE_UPLOAD_API:false}
+      endpoint: ${STORAGE_API_HOST:http://localhost:8002}/api/upload
+
+  # History module keeps track of all the game-related events.
+  # By default, it will export the history files to server's file system.
+  # Admins can opt in uploading these history files to Google Drive.
   history:
     data-directory: ${HISTORY_DATA_DIR:../resources/history/}
+
+    # Admins must configure Google Drive before enabling this functionality.
     google-drive:
-      enabled: ${ENABLE_HISTORY_UPLOAD:true}
+      enabled: ${ENABLE_HISTORY_GOOGLE_DRIVE_SYNC:false}
       folder-id: ${HISTORY_FOLDER_ID:}
+
+  # Predictions module calls the FastAPI endpoints for the following:
+  # 1. Loading model info for game maps to check whether models are already trained.
+  # 2. Invokes model training workflow for a given game map.
+  # 3. Infers trained models in between player trains to get their win/bankruptcy probabilities.
   predictions:
-    enabled: ${ENABLE_PREDICTIONS:true}
-    # Enable legacy features to download predictions CSV files & export for verifying with history's results
-    # New version uses historical update payloads to recreate the CSV-like structure for training and inference
-    legacy:
-      data-directory: ${LEGACY_PREDICTIONS_DATA_DIR:../resources/legacy}
-      export:
-        enabled: ${ENABLE_LEGACY_PREDICTIONS_DATA_EXPORT:false}
-      google-drive:
-        enabled: ${ENABLE_LEGACY_PREDICTIONS_DATA_DOWNLOAD:false}
-        folder-id: ${LEGACY_PREDICTIONS_FOLDER_ID:}
+    enabled: ${ENABLE_PREDICTIONS:false}
+
+    # Keeping health-check enabled by default to ensure FastAPI server is running.
+    health-check-api:
+      enabled: ${ENABLE_PREDICTIONS_HEALTH_CHECK_API:true}
+      endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/health
+
+    # Admins must ensure they have necessary data files to train the model before enabling this functionality.
+    load-model-info-api:
+      enabled: ${ENABLE_PREDICTIONS_LOAD_MODEL_INFO_API:false}
+      endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/api/predictions-model/gameMapId
+
+    # Admins must ensure they have necessary data files to train the model before enabling this functionality.
+    train-model-api:
+      enabled: ${ENABLE_PREDICTIONS_TRAIN_MODEL_API:false}
+      endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/api/predictions-model/gameMapId/train
+
+    # Admins must ensure they have necessary data files to train the model before enabling this functionality.
+    infer-model-api:
+      enabled: ${ENABLE_PREDICTIONS_INFER_MODEL_API:false}
+      endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/api/predictions-model/gameMapId/infer
+
+    # Predictions-specific configurations.
     strategies:
       train-on-startup-enabled: ${ENABLE_PREDICTIONS_TRAIN_ON_STARTUP:true}
       train-on-end-enabled: ${ENABLE_PREDICTIONS_TRAIN_ON_END:true}
       model-inference-enabled: ${ENABLE_PREDICTIONS_MODEL_INFERENCE:true}
-    health-check:
-      bypass-for-testing: false
-      api-endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/health
-    get-model:
-      bypass-for-testing: false
-      api-endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/api/predictions-model/{game_map_id}
-    train-model:
-      bypass-for-testing: false
-      api-endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/api/predictions-model/{game_map_id}/train
-    infer-model:
-      bypass-for-testing: false
-      api-endpoint: ${PREDICTIONS_API_HOST:http://localhost:8003}/api/predictions-model/{game_map_id}/infer
+
+    # Enable legacy features to download predictions CSV files & export for verifying with history's results.
+    # New version uses historical update payloads to recreate the CSV-like structure for training and inference.
+    legacy:
+      data-directory: ${LEGACY_PREDICTIONS_DATA_DIR:../resources/legacy}
+
+      # Exports legacy predictions data to server's file system.
+      # Not recommended, since server now uses historical files to train/infer models.
+      # Should only be used to compare historical files with legacy prediction files.
+      export:
+        enabled: ${ENABLE_LEGACY_PREDICTIONS_DATA_EXPORT:false}
+
+      # Admins must configure Google Drive before enabling this functionality.
+      google-drive:
+        enabled: ${ENABLE_LEGACY_PREDICTIONS_DATA_DOWNLOAD:false}
+        folder-id: ${LEGACY_PREDICTIONS_FOLDER_ID:}
+
+  # Advice module runs set of rules to check whether players require advices from the system.
+  # By default, all the advices are enabled. Admins can either disable all or specific advices.
   advices:
     enabled: ${ENABLE_ADVICES:true}
+
+    # Advice to inform players that they should invest frequently.
     frequently-invest:
       enabled: ${ENABLE_FREQUENTLY_INVEST_ADVICE:true}
       priority: 3
       turn-look-back: 3
+
+    # Advice to inform players that they should avoid inactivity timeouts.
+    # This requires skip-player functionality to be enabled.
     avoid-timeout:
       enabled: ${ENABLE_AVOID_TIMEOUT_ADVICE:true}
       priority: 1
+
+    # Advice to inform players that they should own more than a certain threshold.
     significant-investments:
       enabled: ${ENABLE_SIGNIFICANT_INVESTMENTS_ADVICE:true}
       priority: 2
       min-average-ownership: 50
+
+    # Advice to inform players that they should concentrate investments at one part of map.
     concentrate-investments:
       enabled: ${ENABLE_CONCENTRATE_INVESTMENTS_ADVICE:true}
       priority: 2
       min-investments-count: 3
+
+    # Advice to inform players that they should hold on to their cash to avoid bankruptcy.
     potential-bankruptcy:
       enabled: ${ENABLE_POTENTIAL_BANKRUPTCY_ADVICE:true}
       priority: 1

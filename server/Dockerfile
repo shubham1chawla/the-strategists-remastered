@@ -17,7 +17,7 @@ RUN mkdir -p target/docker-packaging && cd target/docker-packaging && jar -xf ..
 
 ######## Extracting Jar ########
 
-FROM openjdk:21-jdk-slim-buster
+FROM openjdk:26-ea-21-jdk-slim-trixie
 
 # copying built Spring Boot app layer by layer
 ARG DOCKER_PACKAGING_DIR=/app/target/docker-packaging

@@ -22,19 +22,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Objects;
+
 @Log4j2
 @RestController
 @RequestMapping("/api/games")
 public class GameController {
 
     @Autowired
-    private PermissionsService permissionsService;
-
-    @Autowired
     private GameService gameService;
 
     @Autowired
     private PlayerService playerService;
+
+    @Autowired(required = false)
+    private PermissionsService permissionsService;
 
     @GetMapping("/{code}")
     public ResponseEntity<GameResponse> getGameResponse(@PathVariable String code) {
@@ -74,11 +76,14 @@ public class GameController {
     @PostMapping
     public ResponseEntity<EnterGameResponse> createGame(@RequestBody GoogleOAuthCredential credential) {
 
-        // Checking if requesting user can create the game
-        final var opt = permissionsService.getPermissionGroupByEmail(credential.getEmail());
-        final var status = opt.isPresent() ? opt.get().getGameCreation() : PermissionGroupResponse.PermissionStatus.DISABLED;
-        if (PermissionGroupResponse.PermissionStatus.DISABLED.equals(status)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        // Checking if permissions are enabled, if so, checking if requesting user can create the game
+        if (Objects.nonNull(permissionsService)) {
+            final var opt = permissionsService.getPermissionGroupByEmail(credential.getEmail());
+            final var status = opt.map(PermissionGroupResponse::getGameCreation).orElse(PermissionGroupResponse.PermissionStatus.DISABLED);
+            if (PermissionGroupResponse.PermissionStatus.DISABLED.equals(status)) {
+                log.warn("Requested user doesn't have the permissions to create the game!");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
         }
 
         // Creating game for the requesting player

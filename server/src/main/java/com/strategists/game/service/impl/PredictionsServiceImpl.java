@@ -48,9 +48,6 @@ public class PredictionsServiceImpl extends AbstractExternalService implements P
     private PlayerPredictionRepository playerPredictionRepository;
 
     @Autowired
-    private StorageService storageService;
-
-    @Autowired
     private Map<String, File> gameMapFiles;
 
     @Autowired
@@ -62,9 +59,12 @@ public class PredictionsServiceImpl extends AbstractExternalService implements P
     @Autowired
     private HistoryService historyService;
 
+    @Autowired(required = false)
+    private StorageService storageService;
+
     @PostConstruct
     public void setup() {
-        log.info("Predictions enabled! Strategies: {}", properties.strategies());
+        log.info(properties);
 
         // Handle legacy predictions data directory creation
         handleLegacyDataDirectoryCreation();
@@ -124,10 +124,14 @@ public class PredictionsServiceImpl extends AbstractExternalService implements P
         }
 
         // Persisting player predictions
-        final var playerPredictions = playerPredictionsResponseOptional.get().getPlayerPredictions().stream().map(response -> {
-            final var player = playerService.getPlayerById(response.getPlayerId());
-            return new PlayerPrediction(player, response.getBankruptProbability(), response.getWinnerProbability(), response.getPrediction());
-        }).toList();
+        final var playerPredictions = playerPredictionsResponseOptional
+                .get()
+                .getPlayerPredictions()
+                .stream()
+                .map(response -> {
+                    final var player = playerService.getPlayerById(response.getPlayerId());
+                    return new PlayerPrediction(player, response.getBankruptProbability(), response.getWinnerProbability(), response.getPrediction());
+                }).toList();
         return playerPredictionRepository.saveAll(playerPredictions);
     }
 
@@ -168,13 +172,10 @@ public class PredictionsServiceImpl extends AbstractExternalService implements P
 
     private void trainPredictionsModel(String gameMapId) {
         log.info("Training predictions model for game map ID: '{}'", gameMapId);
-        final var opt = invokeTrainModelAPIEndpoint(gameMapId);
-        if (opt.isPresent()) {
-            final var response = opt.get();
-            log.info("Predictions model trained for game map ID: '{}' | Response: {}", gameMapId, response);
-        } else {
-            log.warn("No predictions model trained for game map ID: '{}'", gameMapId);
-        }
+        invokeTrainModelAPIEndpoint(gameMapId).ifPresentOrElse(
+                response -> log.info("Predictions model trained for game map ID: '{}' | Response: {}", gameMapId, response),
+                () -> log.warn("No predictions model trained for game map ID: '{}'", gameMapId)
+        );
     }
 
     private boolean doesPredictionsModelExists(String gameMapId) {
@@ -182,15 +183,15 @@ public class PredictionsServiceImpl extends AbstractExternalService implements P
     }
 
     private Optional<PredictionsModelInfo> invokeGetModelAPIEndpoint(String gameMapId) {
-        // Checking if API call is by-passed!
-        if (properties.getModel().bypassForTesting()) {
-            log.warn("Bypassing get model info for testing! This should only happen for local testing!");
+        // Checking if Load Model Info API is enabled
+        if (!properties.loadModelInfoApi().enabled()) {
+            log.warn("Skipping Load Model Info API call! Assuming that model does not exist.");
             return Optional.empty();
         }
 
         // Getting model info
         try {
-            final var endpoint = properties.getModel().apiEndpoint().replace("{game_map_id}", gameMapId);
+            final var endpoint = properties.loadModelInfoApi().endpoint().replace("gameMapId", gameMapId);
             final var restTemplate = new RestTemplate();
             final var response = restTemplate.getForObject(endpoint, PredictionsModelInfo.class);
             return Optional.ofNullable(response);
@@ -201,15 +202,15 @@ public class PredictionsServiceImpl extends AbstractExternalService implements P
     }
 
     private Optional<PredictionsModelInfo> invokeTrainModelAPIEndpoint(String gameMapId) {
-        // Checking if API call is by-passed!
-        if (properties.trainModel().bypassForTesting()) {
-            log.warn("Bypassing model training for testing! This should only happen for local testing!");
+        // Checking if Train Model API is enabled
+        if (!properties.trainModelApi().enabled()) {
+            log.warn("Skipping Train Model API call! Assuming that model is not trained.");
             return Optional.empty();
         }
 
         // Training model
         try {
-            final var endpoint = properties.trainModel().apiEndpoint().replace("{game_map_id}", gameMapId);
+            final var endpoint = properties.trainModelApi().endpoint().replace("gameMapId", gameMapId);
             final var restTemplate = new RestTemplate();
             final var response = restTemplate.postForObject(endpoint, null, PredictionsModelInfo.class);
             return Optional.ofNullable(response);
@@ -220,15 +221,15 @@ public class PredictionsServiceImpl extends AbstractExternalService implements P
     }
 
     private Optional<PlayerPredictionsResponse> invokeInferModelAPIEndpoint(String gameMapId, List<Map<String, Object>> data) {
-        // Checking if API call is by-passed!
-        if (properties.inferModel().bypassForTesting()) {
-            log.warn("Bypassing model inferring for testing! This should only happen for local testing!");
+        // Checking if Infer Model API is enabled
+        if (!properties.inferModelApi().enabled()) {
+            log.warn("Skipping Infer Model API call! Assuming that model is not inferred.");
             return Optional.empty();
         }
 
         // Inferring model
         try {
-            final var endpoint = properties.inferModel().apiEndpoint().replace("{game_map_id}", gameMapId);
+            final var endpoint = properties.inferModelApi().endpoint().replace("gameMapId", gameMapId);
             final var body = Map.of("data", data);
             final var restTemplate = new RestTemplate();
             final var response = restTemplate.postForObject(endpoint, body, PlayerPredictionsResponse.class);
@@ -297,8 +298,8 @@ public class PredictionsServiceImpl extends AbstractExternalService implements P
     }
 
     @Override
-    protected ExternalAPIEndpointConfigurationProperties getHealthCheck() {
-        return properties.healthCheck();
+    protected ExternalAPIEndpointConfigurationProperties getHealthCheckApi() {
+        return properties.healthCheckApi();
     }
 
     @Override

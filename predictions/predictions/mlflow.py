@@ -14,8 +14,6 @@ def setup_mlflow():
     if not MLFLOW_TRACKING_URI.is_set():
         raise KeyError(f"Set '{MLFLOW_TRACKING_URI}' where models should be exported!")
 
-    logger.info("MLFlow setup completed!")
-
 
 def get_experiment_id(game_map_id: str) -> str:
     client = mlflow.MlflowClient()

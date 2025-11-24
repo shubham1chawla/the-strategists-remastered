@@ -4,11 +4,11 @@ import StrategistsLogo from '@shared/components/StrategistsLogo';
 import LoginWorkflowProvider from '@login/providers/loginWorkflowProvider';
 import ActionsWorklfow from './ActionsWorkflow';
 import EnteringWorkflow from './EnteringWorkflow';
-import GoogleLoginWorkflow from './GoogleLoginWorkflow';
 import JoinActionWorkflow from './JoinActionWorkflow';
 import RecaptchaWorkflow from './RecaptchaWorkflow';
 import ResumeWorkflow from './ResumeWorkflow';
 import UnreachableWorkflow from './UnreachableWorkflow';
+import VerifiedLoginWorkflow from './VerifiedLoginWorkflow';
 import VerifyingWorkflow from './VerifyingWorkflow';
 
 function LoginPage() {
@@ -23,7 +23,7 @@ function LoginPage() {
           <Row justify="center">
             <RecaptchaWorkflow />
             <VerifyingWorkflow />
-            <GoogleLoginWorkflow />
+            <VerifiedLoginWorkflow />
             <ResumeWorkflow />
             <ActionsWorklfow />
             <JoinActionWorkflow />

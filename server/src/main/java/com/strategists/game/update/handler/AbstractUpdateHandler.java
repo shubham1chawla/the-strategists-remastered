@@ -1,5 +1,7 @@
 package com.strategists.game.update.handler;
 
+import com.strategists.game.configuration.properties.CleanUpConfigurationProperties;
+import com.strategists.game.configuration.properties.SkipPlayerConfigurationProperties;
 import com.strategists.game.entity.Activity;
 import com.strategists.game.entity.Game;
 import com.strategists.game.listener.event.CleanUpEvent;
@@ -11,16 +13,15 @@ import com.strategists.game.service.UpdateService;
 import com.strategists.game.update.payload.UpdatePayload;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 
 @Log4j2
 public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implements UpdateHandler {
 
-    @Value("${strategists.skip-player.enabled}")
-    private boolean isSkipPlayerEnabled;
+    @Autowired
+    private SkipPlayerConfigurationProperties skipPlayerConfigurationProperties;
 
-    @Value("${strategists.clean-up.enabled}")
-    private boolean isCleanUpEnabled;
+    @Autowired
+    private CleanUpConfigurationProperties cleanUpConfigurationProperties;
 
     @Autowired
     private ActivityRepository activityRepository;
@@ -39,25 +40,25 @@ public abstract class AbstractUpdateHandler<T extends UpdatePayload<?>> implemen
     }
 
     protected void scheduleSkipPlayerEvent(Game game) {
-        if (isSkipPlayerEnabled) {
+        if (skipPlayerConfigurationProperties.enabled()) {
             schedulerService.scheduleEvent(SkipPlayerEvent.from(game));
         }
     }
 
     protected void unscheduleSkipPlayerEvent(Game game) {
-        if (isSkipPlayerEnabled) {
+        if (skipPlayerConfigurationProperties.enabled()) {
             schedulerService.unscheduleEvent(SkipPlayerEvent.getUniqueIdentifier(game.getCode()));
         }
     }
 
     protected void scheduleCleanUpEvent(Game game) {
-        if (isCleanUpEnabled) {
+        if (cleanUpConfigurationProperties.enabled()) {
             schedulerService.scheduleEvent(CleanUpEvent.from(game));
         }
     }
 
     protected void unscheduleCleanUpEvent(Game game) {
-        if (isCleanUpEnabled) {
+        if (cleanUpConfigurationProperties.enabled()) {
             schedulerService.unscheduleEvent(CleanUpEvent.getUniqueIdentifier(game.getCode()));
         }
     }

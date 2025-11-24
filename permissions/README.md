@@ -6,12 +6,12 @@ Spreadsheets_.
 
 ## Prerequisites
 
-- Refer to steps mentioned [here](../docs/google-integration.md#google-recaptcha) to setup _Google ReCAPTCHA_. Once
+- Refer to steps mentioned [here](../docs/google-integration.md#google-recaptcha) to set up _Google ReCAPTCHA_. Once
   you have the _Secret Key_, use it in the `GOOGLE_RECAPTCHA_SECRET_KEY` environment variable below.
-- Refer to steps mentioned [here](../docs/google-integration.md#google-service-account) to setup _Google Service
-  Account_. Once you have the service account's credential `JSON` file, use it's path in the
+- Refer to steps mentioned [here](../docs/google-integration.md#google-service-account) to set up _Google Service
+  Account_. Once you have the service account's credential `JSON` file, use its path in the
   `GOOGLE_CREDENTIALS_JSON_PATH` environment variable below.
-- Refer to steps mentioned [here](../docs/google-integration.md#google-spreadsheets) to setup _Google Spreadsheets_.
+- Refer to steps mentioned [here](../docs/google-integration.md#google-spreadsheets) to set up _Google Spreadsheets_.
   Once you have the Spreadsheet's `ID` and `range`, use them in the `PERMISSIONS_SPREADSHEET_ID` and
   `PERMISSIONS_SPREADSHEET_RANGE` environment variables, respectively, below.
 

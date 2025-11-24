@@ -13,7 +13,12 @@ from sklearn.utils import compute_sample_weight
 from predictions import constants
 from predictions.constants import MODEL_NAME_PREFIX
 from predictions.data import preprocess_dataframe, load_training_dataset, parse_update_payloads
-from predictions.mlflow import get_experiment_id, get_predictions_model, get_predictions_model_latest_version
+from predictions.mlflow import (
+    setup_mlflow,
+    get_experiment_id,
+    get_predictions_model,
+    get_predictions_model_latest_version,
+)
 from predictions.models import Classifier, PredictionsModel
 from predictions.pipeline import create_feature_engineering_pipeline
 from predictions.types import PlayerPredictionResponse, PredictionsModelInfo
@@ -75,6 +80,9 @@ def _get_best_classifier(x_train, y_train) -> Classifier:
 
 
 def train_predictions_model(game_map_id: str) -> PredictionsModelInfo:
+    # Setting up mlflow
+    setup_mlflow()
+
     # Loading training dataset
     files_count, df = load_training_dataset(game_map_id)
 
@@ -171,6 +179,9 @@ def train_predictions_model(game_map_id: str) -> PredictionsModelInfo:
 
 
 def infer_predictions_model(game_map_id: str, data: List[dict[str, Any]]) -> List[PlayerPredictionResponse]:
+    # Setting up mlflow
+    setup_mlflow()
+
     # Converting update payloads to CSV-like data
     parsed_rows = parse_update_payloads(data, inference=True)
 
@@ -202,6 +213,9 @@ def infer_predictions_model(game_map_id: str, data: List[dict[str, Any]]) -> Lis
 
 
 def get_predictions_model_latest_info(game_map_id: str) -> Optional[PredictionsModelInfo]:
+    # Setting up mlflow
+    setup_mlflow()
+
     model_name = MODEL_NAME_PREFIX + game_map_id
     version = get_predictions_model_latest_version(model_name)
     return PredictionsModelInfo(model_id=version.model_id, model_name=model_name, model_version=version.version)

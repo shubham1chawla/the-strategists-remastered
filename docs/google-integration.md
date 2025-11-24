@@ -2,6 +2,10 @@
 
 This document covers how you can setup various _Google_ services required by _The Strategists_ various modules.
 
+> [!NOTE]
+> The following sections will instruct you to create a project on _Google Cloud Platform_. If you have already
+> created a project for any of the following sections, use the same project for other sections too.
+
 ## Google OAuth2
 
 The project uses _Google OAuth2_ to authenticate users using their Google accounts. You can refer to
@@ -37,14 +41,20 @@ http://localhost:8888
 ## Google ReCAPTCHA
 
 The project uses _Google ReCAPTCHA_ to prevent bots from accessing the game, and for the UI application to check
-whether the backend services are available. You may use the testing one mentioned on
-[this website](https://developers.google.com/recaptcha/docs/faq#id-like-to-run-automated-tests-with-recaptcha.-what-should-i-do);
-however, it is recommended that you create your own.
+whether the backend services are available.
 
-1. Navigate to Google ReCAPTCHA's [create page](https://www.google.com/u/0/recaptcha/admin/create).
-2. Enter _Label_ as `The Strategists Web`.
-3. Select _reCAPTCHA type_ as `Challenge (v2)`, once chosen, select `"I'm not a robot" Checkbox`.
-4. In the _Domains_ section, mention the following domains -
+To create the _Google ReCAPTCHA Site & Secret Keys_, follow these steps.
+
+1. Navigate to [Google Cloud Console](https://console.cloud.google.com/) website.
+2. Create a project from the welcome screen, you can name it anything you want, as long as you remember it.
+3. Once the project is selected, navigate to the [API & Services](https://console.cloud.google.com/apis/dashboard)
+   page.
+4. Click on _+ Enable APIs and services_ button on the top, and search for _reCAPTCHA Enterprise API_.
+   Once you open the API page, enable it for your project.
+5. Search for _reCAPTCHA_ on the top search bar, and click on _reCAPTCHA Product Page Security_.
+6. Navigate down and click on _+ Create Key_.
+7. Type display name as `Strategists Web`, and choose the _Application type_ as `Web`.
+8. Enter the following domains in the _Domain list_.
 
 ```
 localhost
@@ -52,15 +62,15 @@ localhost
 192.168.0.200
 ```
 
-5. Once submitted, you will see _Site Key_ and _Secret Key_. **Save them as they won't be shown again.**
-6. Use this _Site Key_ and _Secret Key_ in the environment variables.
-
-> [!TIP]
-> It is notoriously difficult to navigate to your existing _Google ReCAPTCHA_ admin panel. You can click on
-> [https://www.google.com/u/0/recaptcha/admin](https://www.google.com/u/0/recaptcha/admin) to open your existing
-> admin panel without being redirected to the _create_ page. Also, notice the _0_ in the URL, if you have multiple
-> _Google Accounts_ configured on your browser, you may need to change that _0_ to either _1_, _2_, or any other
-> number based on which _Google Account_ you used to create your _ReCAPTCHA_ keys from.
+10. Select _Will you use challenges?_ question. Keep the challenge as _Checkbox challenge_ and _Challenge difficulty_
+    as _Balanced_.
+11. Click on _Create key_ at the bottom of the screen.
+12. Once the key is created, the console will show a prompt saying "Integrating with a third party?", click on
+    _Integrate with a third-party service or plugin_.
+13. Copy the _Secret Key_ and keep it secure to be used when configuring the game.
+14. On the top of this concole view, right next to where it says "ID: <SITE*KEY>". There is a "copy" icon next to it,
+    use it to copy the \_Site Key*.
+15. Complete the process by continuing on until you see the _Go to Key Overview_ button.
 
 ## Google Service Account
 

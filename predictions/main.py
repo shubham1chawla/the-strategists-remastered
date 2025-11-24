@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 
 from predictions import service
-from predictions.mlflow import setup_mlflow
 from predictions.types import PredictionsInferRequest, PlayerPredictionsResponse, PredictionsModelInfo
 
 logging.basicConfig(level=logging.INFO, format="[%(asctime)s][%(name)s][%(levelname)s] - %(message)s")
@@ -12,9 +11,6 @@ logger = logging.getLogger("predictions")
 
 # Loading env variables
 load_dotenv()
-
-# Setting up mlflow
-setup_mlflow()
 
 # Setting up FastAPI instance
 app = FastAPI()

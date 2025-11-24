@@ -11,7 +11,9 @@ import './App.scss';
 
 function App() {
   return (
-    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || ''}>
+    <GoogleOAuthProvider
+      clientId={import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID || ''}
+    >
       <Provider store={store}>
         <ThemeProvider>
           <NotificationsProvider>

@@ -6,10 +6,7 @@ import {
   useState,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import axios from 'axios';
 import useLoginState from '@login/hooks/useLoginState';
-import { loggedIn, LoginState } from '@login/state';
 
 type LoginWorkflow =
   | 'NOT_VERIFIED'
@@ -22,6 +19,8 @@ type LoginWorkflow =
   | 'ENTERING';
 
 interface LoginWorkflowProviderValue {
+  recaptchaSiteKey: string | null;
+  googleOAuthClientId: string | null;
   loginWorkflow: LoginWorkflow;
   setLoginWorkflow: (loginWorkflow: LoginWorkflow) => void;
   googleLoginCredential: string | null;
@@ -32,23 +31,50 @@ export const LoginWorkflowContext =
   createContext<LoginWorkflowProviderValue | null>(null);
 
 function LoginWorkflowProvider({ children }: PropsWithChildren) {
-  const [loginWorkflow, setLoginWorkflow] =
-    useState<LoginWorkflow>('NOT_VERIFIED');
+  // Checking reCAPTCHA site key from env variable
+  const recaptchaSiteKey = useMemo(() => {
+    const siteKey = (
+      import.meta.env.VITE_GOOGLE_RECAPTCHA_SITE_KEY || ''
+    ).trim();
+    return !siteKey || siteKey.startsWith('PLACEHOLDER_') ? null : siteKey;
+  }, []);
+
+  // Checking Google OAuth client ID from env variable
+  const googleOAuthClientId = useMemo(() => {
+    const clientId = (
+      import.meta.env?.VITE_GOOGLE_OAUTH_CLIENT_ID || ''
+    ).trim();
+    return !clientId || clientId.startsWith('PLACEHOLDER_') ? null : clientId;
+  }, []);
+
+  // Assuming user to be not verified if reCAPTCHA is enabled
+  const [loginWorkflow, setLoginWorkflow] = useState<LoginWorkflow>(
+    !recaptchaSiteKey ? 'VERIFIED' : 'NOT_VERIFIED',
+  );
+
+  // Google Login credential either via Google or generated via Manual Login
   const [googleLoginCredential, setGoogleLoginCredential] = useState<
     string | null
   >(null);
   const { gameCode } = useLoginState();
-  const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  // Creating context value
   const value: LoginWorkflowProviderValue = useMemo(
     () => ({
+      recaptchaSiteKey,
+      googleOAuthClientId,
       loginWorkflow,
       setLoginWorkflow,
       googleLoginCredential,
       setGoogleLoginCredential,
     }),
-    [googleLoginCredential, loginWorkflow],
+    [
+      recaptchaSiteKey,
+      googleOAuthClientId,
+      googleLoginCredential,
+      loginWorkflow,
+    ],
   );
 
   // Redirecting to dashboard if user logged-in
@@ -58,24 +84,6 @@ function LoginWorkflowProvider({ children }: PropsWithChildren) {
     }
     navigate('/game');
   }, [navigate, gameCode]);
-
-  // Checking if player already part of a game
-  useEffect(() => {
-    if (loginWorkflow !== 'RESUME') return;
-    axios
-      .get<LoginState>(`/api/games?credential=${googleLoginCredential}`)
-      .then(({ data }) => {
-        dispatch(loggedIn(data));
-        navigate('/game');
-      })
-      .catch(() => setLoginWorkflow('ACTIONS'));
-  }, [
-    loginWorkflow,
-    setLoginWorkflow,
-    googleLoginCredential,
-    dispatch,
-    navigate,
-  ]);
 
   return (
     <LoginWorkflowContext.Provider value={value}>

@@ -3,6 +3,7 @@ package com.strategists.game.configuration.properties;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import lombok.NonNull;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
@@ -43,6 +44,20 @@ public record GameConfigurationProperties(@NotBlank String defaultMap,
     @AssertTrue(message = "Minimum players count should be <= Maximum players count!")
     boolean isMinMaxPlayersCountValid() {
         return minPlayersCount <= maxPlayersCount;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "\n--------------------------------------------------" +
+                "\nGame:" +
+                "\n> Default Map: " + defaultMap +
+                "\n> Dice Size: " + diceSize +
+                "\n> Rent Factor: " + rentFactor +
+                "\n> Code Length: " + codeLength +
+                "\n> Min Players Count: " + minPlayersCount +
+                "\n> Max Players Count: " + maxPlayersCount +
+                "\n--------------------------------------------------";
     }
 
 }

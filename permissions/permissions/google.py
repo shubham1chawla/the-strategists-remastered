@@ -37,7 +37,7 @@ def verify_google_recaptcha_client_token(client_token: str) -> bool:
     return response["success"]
 
 
-def build_service():
+def _build_service():
     # Looking up credentials path in environment variable
     credentials_json_path = os.getenv(GOOGLE_CREDENTIALS_JSON_PATH)
     if not credentials_json_path:
@@ -50,7 +50,10 @@ def build_service():
     return discovery.build("sheets", "v4", credentials=credentials)
 
 
-def get_spreadsheet_values(service) -> List[List[str]]:
+def get_spreadsheet_values() -> List[List[str]]:
+    # Setting up Google Spreadsheets Service
+    service = _build_service()
+
     # Looking up spreadsheet id and range in environment variables
     spreadsheet_id = os.getenv(PERMISSIONS_SPREADSHEET_ID)
     if not spreadsheet_id:

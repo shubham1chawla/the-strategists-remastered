@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 GOOGLE_CREDENTIALS_JSON_PATH = "GOOGLE_CREDENTIALS_JSON_PATH"
 
 
-def build_service():
+def _build_service():
     # Looking up credentials path in environment variable
     credentials_json_path = os.getenv(GOOGLE_CREDENTIALS_JSON_PATH)
     if not credentials_json_path:
@@ -99,11 +99,10 @@ def _get_file_extension(request: DownloadGoogleDriveFilesRequest) -> str:
     return file_extension
 
 
-def download_google_drive_files(
-        service,
-        *,
-        request: DownloadGoogleDriveFilesRequest,
-) -> DownloadGoogleDriveFilesResponse:
+def download_google_drive_files(request: DownloadGoogleDriveFilesRequest) -> DownloadGoogleDriveFilesResponse:
+    # Setting up Google Drive Service
+    service = _build_service()
+
     file_extension = _get_file_extension(request)
 
     # Listing all the files in the local directory
@@ -151,11 +150,10 @@ def download_google_drive_files(
     )
 
 
-def upload_local_files(
-        service,
-        *,
-        request: UploadLocalFilesRequest,
-) -> UploadLocalFilesResponse:
+def upload_local_files(request: UploadLocalFilesRequest) -> UploadLocalFilesResponse:
+    # Setting up Google Drive Service
+    service = _build_service()
+
     file_extension = _get_file_extension(request)
 
     # Listing all the files uploaded to drive previously
