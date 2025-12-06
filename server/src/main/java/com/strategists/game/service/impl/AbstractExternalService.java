@@ -39,7 +39,7 @@ public abstract class AbstractExternalService {
                 break;
             } catch (Exception ex) {
                 remainingTries--;
-                log.warn(" External Service '{}' not ready! {} retries remaining...", externalServiceName, remainingTries);
+                log.warn("External Service '{}' not ready! {} retries remaining...", externalServiceName, remainingTries);
             }
 
             // Sleeping until timeout
@@ -50,7 +50,7 @@ public abstract class AbstractExternalService {
             log.error(msg);
             throw new ConnectException(msg);
         }
-        log.info(" External Service '{}' ready to use!", externalServiceName);
+        log.info("External Service '{}' ready to use!", externalServiceName);
     }
 
     protected abstract String getExternalServiceName();
