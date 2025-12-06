@@ -1,33 +1,19 @@
 import { useState } from 'react';
-import {
-  Button,
-  Card,
-  Col,
-  Collapse,
-  Modal,
-  Row,
-  Slider,
-  Space,
-  Statistic,
-} from 'antd';
+import { Button, Card, Collapse, Flex, Modal, Row, Slider, Space } from 'antd';
 import { SliderMarks } from 'antd/es/slider';
 import {
   CheckCircleOutlined,
-  DollarCircleOutlined,
   ExclamationCircleOutlined,
   InfoCircleOutlined,
-  PercentageOutlined,
-  PieChartOutlined,
   RiseOutlined,
   SlidersOutlined,
-  WalletOutlined,
 } from '@ant-design/icons';
 import axios from 'axios';
 import useNotifications from '@shared/hooks/useNotifications';
 import useGameState from '@game/hooks/useGameState';
 import InvestmentStrategy from '@game/utils/InvestmentStrategy';
 import useLoginState from '@login/hooks/useLoginState';
-import LandStats from './LandStats';
+import LandCard from './LandCard';
 import PortfolioTable from './PortfolioTable';
 
 const prepareSliderMarks = (strategy: InvestmentStrategy): SliderMarks => {
@@ -98,7 +84,7 @@ function PlayerInvestModal({
       onModalCancel();
     } catch (error) {
       errorNotification({
-        message: 'Something went wrong!',
+        title: 'Something went wrong!',
         description: 'Please refresh the page and try again.',
       });
     } finally {
@@ -108,7 +94,7 @@ function PlayerInvestModal({
 
   return (
     <Modal
-      className="strategists-actions__modal"
+      className="strategists-modal strategists-invest-modal"
       title="Investment Strategy"
       open={!!open}
       onCancel={onModalCancel}
@@ -142,83 +128,55 @@ function PlayerInvestModal({
         </Row>
       }
     >
-      <LandStats land={land} />
-      <Row>
-        <Col span={12}>
-          <Card variant="borderless">
-            <Statistic
-              title={
-                <Space>
-                  <PieChartOutlined />
-                  Proposed Ownership
-                </Space>
-              }
-              value={ownership}
-              precision={0}
-              suffix={<PercentageOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col span={12}>
-          <Card variant="borderless">
-            <Statistic
-              title={
-                <Space>
-                  <WalletOutlined />
-                  Investment Cost
-                </Space>
-              }
-              value={strategy.cost}
-              precision={2}
-              prefix={<DollarCircleOutlined />}
-            />
-          </Card>
-        </Col>
-      </Row>
-      <Card className="strategists-actions__modal__slider-card">
-        <Slider
-          defaultValue={ownership}
-          min={0}
-          max={strategy.maxOfferableOwnership}
-          onChangeComplete={(value) => setOwnership(value)}
-          tooltip={{
-            formatter: (value) => `${value}%`,
-          }}
-          autoFocus
-          marks={prepareSliderMarks(strategy)}
+      <Flex orientation="vertical" gap="large">
+        <LandCard
+          land={land}
+          propsedOwnership={ownership}
+          investmentCost={strategy.cost}
         />
-        <Row justify="center">
-          <Space>
-            <InfoCircleOutlined />
-            Use this slider to adjust your investment offer.
-          </Space>
-        </Row>
-      </Card>
-      <Collapse
-        bordered={false}
-        ghost
-        expandIconPosition="end"
-        items={[
-          {
-            key: '1',
-            label:
-              land.totalOwnership > 0 ? (
-                <Space>
-                  <SlidersOutlined />
-                  <span>Click to check {land.name}&apos;s investments</span>
-                </Space>
-              ) : (
-                <Space>
-                  <CheckCircleOutlined />
-                  <span>No investments in {land.name}!</span>
-                </Space>
+        <Card>
+          <Slider
+            defaultValue={ownership}
+            min={0}
+            max={strategy.maxOfferableOwnership}
+            onChangeComplete={(value) => setOwnership(value)}
+            tooltip={{
+              formatter: (value) => `${value}%`,
+            }}
+            autoFocus
+            marks={prepareSliderMarks(strategy)}
+          />
+          <Row justify="center">
+            <Space>
+              <InfoCircleOutlined />
+              Use this slider to adjust your investment offer.
+            </Space>
+          </Row>
+        </Card>
+        <Collapse
+          expandIconPlacement="end"
+          items={[
+            {
+              key: '1',
+              label:
+                land.totalOwnership > 0 ? (
+                  <Space>
+                    <SlidersOutlined />
+                    <span>Click to check {land.name}&apos;s investments</span>
+                  </Space>
+                ) : (
+                  <Space>
+                    <CheckCircleOutlined />
+                    <span>No investments in {land.name}!</span>
+                  </Space>
+                ),
+              children: (
+                <PortfolioTable perspective="land" playerLands={land.players} />
               ),
-            children: (
-              <PortfolioTable perspective="land" playerLands={land.players} />
-            ),
-          },
-        ]}
-      />
+            },
+          ]}
+        />
+      </Flex>
     </Modal>
   );
 }

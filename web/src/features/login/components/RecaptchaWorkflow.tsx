@@ -1,4 +1,5 @@
 import { useCallback, useRef } from 'react';
+import { Row } from 'antd';
 import axios from 'axios';
 import ReCAPTCHA from 'react-google-recaptcha';
 import useNotifications from '@shared/hooks/useNotifications';
@@ -20,7 +21,7 @@ function RecaptchaWorkflow() {
         .catch(({ response: { status } }) => {
           setLoginWorkflow(status === 403 ? 'NOT_VERIFIED' : 'UNREACHABLE');
           errorNotification({
-            message:
+            title:
               status === 403
                 ? 'Unable to verify reCAPTCHA. Please try again.'
                 : 'Backend services are unreachable.',
@@ -36,16 +37,18 @@ function RecaptchaWorkflow() {
 
   // Only render reCAPTCHA when user is not verified
   return (
-    <ReCAPTCHA
-      ref={recaptchaRef}
-      style={{
-        display: loginWorkflow === 'NOT_VERIFIED' ? 'block' : 'none',
-      }}
-      sitekey={recaptchaSiteKey || ''}
-      theme="dark"
-      onChange={onRecaptchaChange}
-      onExpired={() => setLoginWorkflow('NOT_VERIFIED')}
-    />
+    <Row justify="center">
+      <ReCAPTCHA
+        ref={recaptchaRef}
+        style={{
+          display: loginWorkflow === 'NOT_VERIFIED' ? 'block' : 'none',
+        }}
+        sitekey={recaptchaSiteKey || ''}
+        theme="dark"
+        onChange={onRecaptchaChange}
+        onExpired={() => setLoginWorkflow('NOT_VERIFIED')}
+      />
+    </Row>
   );
 }
 

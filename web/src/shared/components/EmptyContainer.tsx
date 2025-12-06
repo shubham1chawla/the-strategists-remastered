@@ -1,4 +1,4 @@
-import { Row, Space } from 'antd';
+import { Alert, Row } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 interface EmptyContainerProps {
@@ -8,10 +8,12 @@ interface EmptyContainerProps {
 function EmptyContainer({ message }: EmptyContainerProps) {
   return (
     <Row justify="center" align="middle">
-      <Space>
-        <ExclamationCircleOutlined />
-        <span>{message || 'No information available!'}</span>
-      </Space>
+      <Alert
+        type="info"
+        title={message || 'No information available!'}
+        icon={<ExclamationCircleOutlined />}
+        banner
+      />
     </Row>
   );
 }

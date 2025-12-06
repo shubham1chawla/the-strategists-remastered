@@ -16,11 +16,11 @@ Please refer to the documentation before contributing - https://getbem.com/
 
   --base-unit-size: 1.2rem;
 
-  // large ant-list-item height
-  --ant-lg-padding: 24px;
+  // ant large padding size
+  --ant-padding-lg: 24px;
 
-  // Similar to default ant-card-hoverable transition
-  --ant-transition: all 0.2s ease;
+  // ant large border radius
+  --ant-border-radius-lg: 4px;
 
   // Allows us to use rems, 62.5% = 1 rem = 10px
   font-size: 62.5%;
@@ -38,7 +38,7 @@ nav.strategists-nav {
   display: flex;
   flex-wrap: nowrap;
   align-items: center;
-  padding: var(--ant-lg-padding);
+  padding: var(--ant-padding-lg);
   width: 100%;
   box-sizing: border-box;
   justify-content: space-between;
@@ -75,263 +75,27 @@ h1.strategists-logo {
   backdrop-filter: blur(calc(var(--base-unit-size)));
 }
 
-.strategists-striped {
-  background: repeating-linear-gradient(
-    -45deg,
-    var(--accent-color) 0px,
-    var(--accent-color) 1px,
-    transparent 2px,
-    transparent 12px
-  );
-}
+.strategists-card-button {
+  border-color: var(--accent-color);
+  transition: all 0.2s ease;
+  flex-basis: 100%;
 
-.strategists-viz {
-  .ant-collapse-header {
-    padding-left: 0 !important;
-    padding-right: 0 !important;
-  }
-
-  .ant-collapse-content-box {
-    padding: 0 !important;
-  }
-}
-
-// ----- LOGIN COMPONENT'S CSS DEFINED BELOW ----- //
-
-.strategists-login {
-  height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &__workflows {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    width: max(50%, 600px);
-    padding: var(--ant-lg-padding);
-    border-radius: 4px;
-    box-sizing: border-box;
-
-    &__card {
-      border-color: var(--accent-color);
-      transition: var(--ant-transition);
-
-      &:hover {
-        border-color: var(--accent-color-hover);
-        background-color: var(--dark-color);
-      }
-    }
-
-    &__manual {
-      width: 60%;
-      margin: 0 auto;
-    }
-
-    &__join {
-      width: 60%;
-      display: flex;
-      flex-direction: column;
-
-      &__back-button {
-        padding: 0;
-        color: var(--text-color);
-
-        &:hover {
-          color: var(--accent-color-hover) !important;
-        }
-      }
-
-      &__form {
-        margin-top: var(--ant-lg-padding);
-
-        .ant-space-compact,
-        .ant-input-number-affix-wrapper {
-          width: 100%;
-        }
-      }
-    }
-  }
-}
-
-// ----- DASHBOARD COMPONENT'S CSS DEFINED BELOW ----- //
-
-.strategists-dashboard {
-  height: 100vh;
-
-  // Forcing ant-col to respect parent's height constraints
-  .ant-col {
-    height: 100%;
-  }
-
-  &__panel {
-    display: flex;
-    flex-direction: column;
-    flex: 1 1 auto 1;
-
-    .ant-tabs {
-      flex-basis: 100%;
-      overflow-y: auto;
-
-      .ant-tabs-content,
-      .ant-tabs-tabpane {
-        height: 100%;
-      }
-    }
-
-    // Ensuring that lobby players & activities are scrollable inside tabs
-    .strategists-activity,
-    .strategists-lobby {
-      height: 100%;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      flex: 1 auto;
-    }
-  }
-}
-
-// ----- STATS COMPONENT'S CSS DEFINED BELOW ----- //
-
-.strategists-stats {
-  .ant-divider {
-    margin: 0;
-  }
-}
-
-// ----- ACTIONS COMPONENT'S CSS DEFINED BELOW ----- //
-
-.strategists-actions {
-  padding: var(--ant-lg-padding);
-
-  &__modal {
-    &__slider-card {
-      border-color: var(--accent-color);
-    }
-
-    .ant-collapse-header {
-      padding: var(--ant-lg-padding) 0 !important;
-    }
-
-    .ant-collapse-content-box {
-      padding: 0 !important;
-    }
-
-    .ant-divider:first-of-type {
-      margin: 0;
-    }
-  }
-
-  // Displaying waiting prompt inside the button
-  button {
-    width: 100%;
-  }
-
-  .ant-space-compact {
-    width: 100%;
-
-    // Overriding invest's button css
-    button:nth-of-type(1) {
-      flex-basis: 60%;
-    }
-
-    // Overriding skip's button css
-    button:nth-of-type(2) {
-      flex-basis: calc(40% - 40px);
-    }
-  }
-}
-
-// ----- ACTIVITY COMPONENT'S CSS DEFINED BELOW ----- //
-
-.strategists-activity {
-  &__filters {
-    margin-top: var(--base-unit-size);
-    width: 100%;
-  }
-
-  .ant-collapse-header,
-  .ant-collapse-content-box {
-    padding: calc(var(--ant-lg-padding) / 2) var(--ant-lg-padding) !important;
-  }
-
-  &__timeline {
-    overflow-y: auto;
-    padding: var(--ant-lg-padding);
-    padding-bottom: 0;
-
-    // Removing the extra space ant applies to the last element in timeline
-    .ant-timeline-item-last .ant-timeline-item-content {
-      min-height: auto;
-    }
-  }
-}
-
-// ----- LOBBY COMPONENT'S CSS DEFINED BELOW ----- //
-
-.strategists-lobby {
-  &__players {
-    flex-basis: 100%;
-    overflow-y: auto;
-  }
-}
-
-// ----- ADVICE COMPONENT'S CSS DEFINED BELOW ----- //
-
-.strategists-advice {
-  width: 100%;
-  height: 100%;
-  overflow-y: auto;
-
-  &__empty {
-    height: 100%;
-    padding: 0 var(--ant-lg-padding);
-  }
-}
-
-// ----- MAP COMPONENT'S CSS DEFINED BELOW ----- //
-
-.strategists-map {
-  height: 100%;
-  width: 99%;
-
-  &__tooltip {
-    position: absolute;
-    z-index: 1;
+  &:hover {
+    border-color: var(--accent-color-hover);
     background-color: var(--dark-color);
-    border: 1px solid var(--accent-color);
-    border-radius: 4px;
-    width: 40%;
-    max-width: 40rem;
-    padding: var(--ant-lg-padding);
-    transition: all ease 0.4s;
-    opacity: 1;
-
-    &-hidden {
-      opacity: 0;
-      z-index: -1;
-    }
-
-    .ant-divider {
-      margin: 0;
-    }
   }
 }
 
 // ----- GLOBAL ANTD OVERRIDES DEFINED BELOW ----- //
 
-.ant-tag {
-  margin-inline-end: 0;
-}
-
-.ant-notification-notice-icon {
+.ant-notification-notice-close {
   color: var(--accent-color) !important;
 }
 
 .g2-tooltip {
   background-color: var(--dark-color) !important;
   border: 1px solid var(--accent-color);
-  padding: var(--ant-lg-padding) !important;
+  padding: var(--ant-padding-lg) !important;
   font-family: var(--font-family) !important;
   font-size: 14px !important; // This is default of antd
   opacity: 1 !important;
@@ -350,4 +114,176 @@ h1.strategists-logo {
 .ant-badge-count {
   color: var(--text-color) !important;
   background: var(--accent-color) !important;
+}
+
+// ----- LOGIN COMPONENT'S CSS DEFINED BELOW ----- //
+
+.strategists-login {
+  height: 100vh;
+
+  &__card {
+    width: max(50%, 600px);
+  }
+}
+
+// ----- DASHBOARD COMPONENT'S CSS DEFINED BELOW ----- //
+
+.strategists-dashboard {
+  height: 100vh;
+
+  // Forcing ant-col to respect parent's height constraints
+  .ant-col {
+    height: 100%;
+  }
+}
+
+// ----- PLAYER PANEL & RELATED COMPONENT'S CSS DEFINED BELOW ----- //
+
+.strategists-player-panel {
+  height: 100%;
+
+  .ant-tabs {
+    flex-basis: 100%; // Required for Advice to push content
+    overflow-y: auto; // Ensuring tabs respect height constraints
+
+    // Forcing ant-tabs to respect parent's height constraints
+    .ant-tabs-content,
+    .ant-tabs-tabpane {
+      height: 100%;
+      overflow-y: auto;
+    }
+  }
+
+  // Ensuring that lobby players, activities, advices are scrollable inside tabs
+  .strategists-activities,
+  .strategists-lobby,
+  .strategists-advices {
+    height: 100%;
+    overflow-y: auto;
+
+    // Ensuring even vertical and horizontal spacing in tab content
+    padding-top: calc(var(--ant-padding-lg) / 2);
+    box-sizing: border-box;
+  }
+
+  // Ensuring that cards in panel have horizontal space
+  .strategists-player-card,
+  .strategists-advice-card {
+    margin: 0 var(--ant-padding-lg);
+  }
+}
+
+.strategists-activities {
+  &__collapse {
+    margin: 0 var(--ant-padding-lg);
+
+    &__filters {
+      margin-top: var(--base-unit-size);
+      width: 100%;
+    }
+  }
+
+  &__timeline {
+    overflow-y: auto;
+    padding: 0 var(--ant-padding-lg);
+
+    // Fixing height of last activity node
+    .ant-steps-item:last-child {
+      min-height: 0 !important;
+    }
+  }
+}
+
+.strategists-lobby {
+  // Ensuring cards have horizontal spacing
+  .strategists-player-card {
+    margin: 0 var(--ant-padding-lg);
+  }
+}
+
+.strategists-advices {
+  .ant-alert {
+    margin: 0 var(--ant-padding-lg);
+  }
+}
+
+// ----- CARDS COMPONENT'S CSS DEFINED BELOW ----- //
+
+.strategists-player-card,
+.strategists-land-card,
+.strategists-advice-card {
+  &-highlighed {
+    border: 1px solid var(--accent-color);
+  }
+}
+
+// ----- ACTIONS COMPONENT'S CSS DEFINED BELOW ----- //
+
+.strategists-actions {
+  padding: var(--ant-padding-lg);
+  max-height: calc(40px + 2 * var(--ant-padding-lg));
+
+  // Make it look like a button!
+  &__join-prompt {
+    line-height: calc(40px - 2 * 1px);
+    border: 1px solid var(--accent-color);
+    border-radius: var(--ant-border-radius-lg);
+  }
+}
+
+// ----- MAP COMPONENT'S CSS DEFINED BELOW ----- //
+
+.strategists-map {
+  height: 100%;
+  width: 99%;
+
+  &__tooltip {
+    position: absolute;
+    z-index: 1;
+    background-color: var(--dark-color);
+    border-radius: var(--ant-border-radius-lg);
+    width: min(40%, 40rem);
+    transition: all ease 0.4s;
+    opacity: 1;
+
+    &-hidden {
+      opacity: 0;
+      z-index: -1;
+    }
+  }
+}
+
+// ----- MODAL COMPONENT'S CSS DEFINED BELOW ----- //
+
+.strategists-modal {
+  .ant-modal-body {
+    padding: calc(var(--ant-padding-lg) / 2) 0;
+  }
+}
+
+.strategists-portfolio-modal {
+  &__tabs_card {
+    .ant-card-body {
+      padding: 0;
+    }
+
+    // Fixing empty container message in viz tabs
+    .ant-tabs-content {
+      margin-bottom: calc(var(--ant-padding-lg) / 2);
+    }
+  }
+}
+
+.strategists-invest-modal {
+  .ant-collapse-body {
+    padding: 0 !important;
+  }
+}
+
+.strategists-win-modal {
+  &__tabs_card {
+    .ant-card-body {
+      padding: 0;
+    }
+  }
 }

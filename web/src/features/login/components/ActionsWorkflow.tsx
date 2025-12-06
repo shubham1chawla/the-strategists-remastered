@@ -1,9 +1,10 @@
 import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Card, Space } from 'antd';
+import { Flex, Space } from 'antd';
 import { AppstoreAddOutlined, AppstoreOutlined } from '@ant-design/icons';
 import axios from 'axios';
+import CardButton from '@shared/components/CardButton';
 import useNotifications from '@shared/hooks/useNotifications';
 import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
 import { loggedIn, LoginState } from '@login/state';
@@ -27,13 +28,14 @@ function ActionsWorklfow() {
         switch (response.status) {
           case 403:
             errorNotification({
-              message: 'You are not authorized to create a game!',
-              description: 'Please contact the developers to grant access.',
+              title: 'You are not authorized to create a game!',
+              description:
+                'Please contact the developers to grant access or join existing games.',
             });
             break;
           default:
             errorNotification({
-              message: 'Unable to create the game!',
+              title: 'Unable to create a game!',
               description:
                 'Please contact the developers if this problem persists.',
             });
@@ -48,40 +50,35 @@ function ActionsWorklfow() {
     navigate,
   ]);
 
+  const handleJoinAction = useCallback(
+    () => setLoginWorkflow('JOIN_ACTION'),
+    [setLoginWorkflow],
+  );
+
   if (loginWorkflow !== 'ACTIONS') return null;
   return (
-    <Space>
-      <Card
-        className="strategists-login__workflows__card"
-        onClick={() => handleCreateAction()}
-        hoverable
-      >
-        <Card.Meta
-          title={
-            <Space>
-              <AppstoreAddOutlined />
-              Create Game
-            </Space>
-          }
-          description="A new session for you and your friends to play The Strategists!"
-        />
-      </Card>
-      <Card
-        className="strategists-login__workflows__card"
-        onClick={() => setLoginWorkflow('JOIN_ACTION')}
-        hoverable
-      >
-        <Card.Meta
-          title={
-            <Space>
-              <AppstoreOutlined />
-              Join Game
-            </Space>
-          }
-          description="Enter existing session hosted by your friends to play The Strategists!"
-        />
-      </Card>
-    </Space>
+    <Flex gap="large">
+      <CardButton
+        title={
+          <Space>
+            <AppstoreAddOutlined />
+            Create Game
+          </Space>
+        }
+        description="Create a new game session and invite your friends to join you."
+        onClickOrEnter={handleCreateAction}
+      />
+      <CardButton
+        title={
+          <Space>
+            <AppstoreOutlined />
+            Join Game
+          </Space>
+        }
+        description="Join an existing game session and play with them your friends."
+        onClickOrEnter={handleJoinAction}
+      />
+    </Flex>
   );
 }
 

@@ -1,4 +1,11 @@
-import { createContext, PropsWithChildren, useMemo } from 'react';
+import {
+  createContext,
+  PropsWithChildren,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import { notification } from 'antd';
 import { ArgsProps } from 'antd/es/notification';
 import { NotificationInstance } from 'antd/es/notification/interface';
@@ -23,29 +30,54 @@ function NotificationsProvider({ children }: PropsWithChildren) {
     maxCount: NOTIFICATION_MAX_COUNT,
   });
 
+  /**
+   * Variable `instance` keeps changing after antd@6 upgrade.
+   * Wrapping it in a `useRef` to prevent re-rendering of
+   * GameWrapper and entering infinite loop of calling API.
+   */
+  const instanceRef = useRef(instance);
+  useEffect(() => {
+    instanceRef.current = instance;
+  }, [instance]);
+
+  const openNotification = useCallback(
+    (args: ArgsProps) => {
+      instanceRef.current.open({
+        ...args,
+        duration: args.duration || NOTIFICATION_DURATION,
+      });
+    },
+    [instanceRef],
+  );
+
+  const infoNotification = useCallback(
+    (args: ArgsProps) => {
+      instanceRef.current.info({
+        ...args,
+        duration: args.duration || NOTIFICATION_DURATION,
+      });
+    },
+    [instanceRef],
+  );
+
+  const errorNotification = useCallback(
+    (args: ArgsProps) => {
+      instanceRef.current.error({
+        ...args,
+        duration: args.duration || NOTIFICATION_DURATION,
+      });
+    },
+    [instanceRef],
+  );
+
   const value: NotificationsContextValue = useMemo(
     () => ({
-      instance,
-      openNotification: (args: ArgsProps) => {
-        instance.open({
-          ...args,
-          duration: args.duration || NOTIFICATION_DURATION,
-        });
-      },
-      infoNotification: (args: ArgsProps) => {
-        instance.info({
-          ...args,
-          duration: args.duration || NOTIFICATION_DURATION,
-        });
-      },
-      errorNotification: (args: ArgsProps) => {
-        instance.error({
-          ...args,
-          duration: args.duration || NOTIFICATION_DURATION,
-        });
-      },
+      instance: instanceRef.current,
+      openNotification,
+      infoNotification,
+      errorNotification,
     }),
-    [instance],
+    [instanceRef, openNotification, infoNotification, errorNotification],
   );
 
   return (

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Badge, Space, Tabs, TabsProps } from 'antd';
+import { Badge, Flex, Space, Tabs, TabsProps } from 'antd';
 import useNotifications from '@shared/hooks/useNotifications';
 import Activities from '@activities/components/Activities';
 import Advices from '@advices/components/Advices';
@@ -9,7 +9,7 @@ import useLoginState from '@login/hooks/useLoginState';
 import Lobby from './Lobby';
 import NavigationBar from './NavigationBar';
 import PlayerActionsPanel from './PlayerActionsPanel';
-import PlayerStats from './PlayerStats';
+import PlayerCard from './PlayerCard';
 
 type PlayerPanelTabKey = 'LOBBY' | 'ACTIVITIES' | 'ADVICE';
 
@@ -63,7 +63,7 @@ function PlayerPanel() {
       if (prev === 'ADVICE') {
         markAdvicesRead().catch(() => {
           errorNotification({
-            message: 'Something went wrong!',
+            title: 'Something went wrong!',
             description:
               'Unable to mark your advices as read! If this problem persists, please contact the developers.',
           });
@@ -74,9 +74,13 @@ function PlayerPanel() {
   };
 
   return (
-    <>
+    <Flex
+      className="strategists-player-panel"
+      orientation="vertical"
+      flex="1 1 auto 1"
+    >
       <NavigationBar />
-      <PlayerStats player={player} showRemainingSkipsCount />
+      <PlayerCard player={player} showSkips />
       <Tabs
         centered
         defaultActiveKey="LOBBY"
@@ -86,7 +90,7 @@ function PlayerPanel() {
         items={items}
       />
       <PlayerActionsPanel />
-    </>
+    </Flex>
   );
 }
 

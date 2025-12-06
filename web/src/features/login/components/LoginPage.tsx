@@ -1,4 +1,5 @@
-import { Button, Divider, Row } from 'antd';
+import { useCallback } from 'react';
+import { Card, Flex, Row, Space } from 'antd';
 import { GithubOutlined } from '@ant-design/icons';
 import StrategistsLogo from '@shared/components/StrategistsLogo';
 import LoginWorkflowProvider from '@login/providers/loginWorkflowProvider';
@@ -12,37 +13,44 @@ import VerifiedLoginWorkflow from './VerifiedLoginWorkflow';
 import VerifyingWorkflow from './VerifyingWorkflow';
 
 function LoginPage() {
+  const onGithubClick = useCallback(
+    () =>
+      window.open(
+        'https://github.com/shubham1chawla/the-strategists-remastered/',
+        '_blank',
+      ),
+    [],
+  );
   return (
     <LoginWorkflowProvider>
-      <main className="strategists-login strategists-wallpaper">
-        <section className="strategists-login__workflows strategists-glossy">
-          <Divider>
-            <StrategistsLogo />
-          </Divider>
-          <br />
-          <Row justify="center">
-            <RecaptchaWorkflow />
-            <VerifyingWorkflow />
-            <VerifiedLoginWorkflow />
-            <ResumeWorkflow />
-            <ActionsWorklfow />
-            <JoinActionWorkflow />
-            <EnteringWorkflow />
-            <UnreachableWorkflow />
-          </Row>
-          <br />
-          <Divider>
-            <Button
-              target="_blank"
-              href="https://github.com/shubham1chawla/the-strategists-remastered/issues"
-              type="text"
-              icon={<GithubOutlined />}
-            >
-              Contact
-            </Button>
-          </Divider>
-        </section>
-      </main>
+      <Flex
+        className="strategists-login strategists-wallpaper"
+        justify="center"
+        align="center"
+      >
+        <Card
+          className="strategists-login__card strategists-glossy"
+          title={
+            <Row justify="center">
+              <StrategistsLogo />
+            </Row>
+          }
+          actions={[
+            <Space>
+              <GithubOutlined onClick={onGithubClick} /> GitHub
+            </Space>,
+          ]}
+        >
+          <RecaptchaWorkflow />
+          <VerifyingWorkflow />
+          <VerifiedLoginWorkflow />
+          <ResumeWorkflow />
+          <ActionsWorklfow />
+          <JoinActionWorkflow />
+          <EnteringWorkflow />
+          <UnreachableWorkflow />
+        </Card>
+      </Flex>
     </LoginWorkflowProvider>
   );
 }

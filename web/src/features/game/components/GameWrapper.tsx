@@ -108,7 +108,7 @@ function GameWrapper({ children }: PropsWithChildren) {
     // Syncing game's state
     syncUIByGameCode(gameCode, dispatch).catch(() => {
       errorNotification({
-        message: 'Something went wrong!',
+        title: 'Something went wrong!',
         description:
           'Please try logging in again. If the problem persists, please contact the developers.',
       });
@@ -147,7 +147,7 @@ function GameWrapper({ children }: PropsWithChildren) {
       // Showing notification to the user, urging them to refresh the page.
       errorNotification({
         icon: <DisconnectOutlined />,
-        message: 'Disconnected!',
+        title: 'Disconnected!',
         description:
           'We lost the connection to our servers. Refresh the page to reconnect!',
         duration: 0,
@@ -231,7 +231,7 @@ function GameWrapper({ children }: PropsWithChildren) {
       if (!activity) return;
       dispatch(activityAdded(activity));
       if (subscribedTypes.includes(type)) {
-        openNotification({ message: activity.text });
+        openNotification({ title: activity.text });
       }
 
       // Updating game's turn

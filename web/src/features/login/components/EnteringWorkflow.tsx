@@ -1,4 +1,4 @@
-import { Space } from 'antd';
+import { Row, Space } from 'antd';
 import { LoadingOutlined } from '@ant-design/icons';
 import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
 
@@ -6,10 +6,12 @@ function EnteringWorkflow() {
   const { loginWorkflow } = useLoginWorkflow();
   if (loginWorkflow !== 'ENTERING') return null;
   return (
-    <Space>
-      <LoadingOutlined />
-      Entering...
-    </Space>
+    <Row justify="center">
+      <Space>
+        <LoadingOutlined />
+        Entering...
+      </Space>
+    </Row>
   );
 }
 

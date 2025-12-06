@@ -18,6 +18,7 @@ function TurnModal() {
   }
   return (
     <Modal
+      className="strategists-modal"
       open={!!player && open}
       footer={
         <Button type="primary" onClick={() => setOpen(false)}>
@@ -31,7 +32,9 @@ function TurnModal() {
     >
       <Space>
         You have landed on
-        <Tag icon={<HomeOutlined />}>{lands[player.index].name}</Tag>
+        <Tag icon={<HomeOutlined />} variant="outlined">
+          {lands[player.index].name}
+        </Tag>
       </Space>
     </Modal>
   );

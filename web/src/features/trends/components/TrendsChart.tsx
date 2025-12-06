@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 import { Chart } from '@antv/g2';
-import ChartInterpretationHelp from '@shared/components/ChartInterpretationHelp';
 import EmptyContainer from '@shared/components/EmptyContainer';
 import useChartTheme from '@shared/hooks/useChartTheme';
 import useTheme from '@shared/hooks/useTheme';
@@ -41,7 +40,7 @@ const drawPlayerTrends = (
           name: 'Net Worth',
           field: 'netWorth',
           color: 'transparent',
-          valueFormatter: (value: number) => `$${value}`,
+          valueFormatter: (value: number) => `$${value.toLocaleString()}`,
         },
       ],
     });
@@ -114,14 +113,13 @@ const drawLandTrends = (chart: Chart, trends: LandTrend[], theme: Theme) => {
 interface TrendsChartProps {
   perspective: 'player' | 'land';
   id: number;
-  showHelp?: boolean;
 }
 
 function TrendsChart(props: TrendsChartProps) {
   const theme = useTheme();
   const chartTheme = useChartTheme();
   const { playerTrends, landTrends } = useTrendsState();
-  const { perspective, id, showHelp } = props;
+  const { perspective, id } = props;
 
   useEffect(() => {
     if (
@@ -187,20 +185,7 @@ function TrendsChart(props: TrendsChartProps) {
   ) {
     return <EmptyContainer message="No trends available!" />;
   }
-  return (
-    <div className="strategists-viz">
-      <div id="trends-container" />
-      {showHelp && (
-        <ChartInterpretationHelp
-          message={
-            perspective === 'player'
-              ? "The chart highlights the change in player's cash and net worth per step."
-              : "The chart highlights the change in the land's market value per step."
-          }
-        />
-      )}
-    </div>
-  );
+  return <div id="trends-container" />;
 }
 
 export default TrendsChart;
