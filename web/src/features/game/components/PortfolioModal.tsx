@@ -1,10 +1,17 @@
-import { Modal, Tabs } from 'antd';
+import { useState } from 'react';
+import { Card, Flex, Modal, Tabs } from 'antd';
 import { Land, Player } from '@game/state';
 import PredictionsChart from '@predictions/components/PredictionsChart';
+import PredictionsChartInterpretationHelp from '@predictions/components/PredictionsChartInterpretationHelp';
 import TrendsChart from '@trends/components/TrendsChart';
-import LandStats from './LandStats';
-import PlayerStats from './PlayerStats';
+import TrendsChartInterpretationHelp from '@trends/components/TrendsChartInterpretationHelp';
+import LandCard from './LandCard';
+import PlayerCard from './PlayerCard';
 import PortfolioChart from './PortfolioChart';
+import PortfolioChartInterpretationHelp from './PortfolioChartInterpretationHelp';
+
+type PortfolioModalTabKey = 'Trends' | 'Portfolio' | 'Predictions';
+const defaultPortfolioModelTabKey: PortfolioModalTabKey = 'Trends';
 
 export interface PortfolioModalProps {
   open: boolean;
@@ -19,6 +26,10 @@ function PortfolioModal({
   perspective,
   node,
 }: Partial<PortfolioModalProps>) {
+  const [tabKey, setTabKey] = useState<PortfolioModalTabKey>(
+    defaultPortfolioModelTabKey,
+  );
+
   if (!open || !perspective || !node) {
     return null;
   }
@@ -27,19 +38,15 @@ function PortfolioModal({
     perspective === 'land' ? (node as Land).players : (node as Player).lands;
   const tabItems = [
     {
-      key: '1',
+      key: 'Trends',
       label: 'Trends',
-      children: <TrendsChart perspective={perspective} id={node.id} showHelp />,
+      children: <TrendsChart perspective={perspective} id={node.id} />,
     },
     {
-      key: '2',
+      key: 'Portfolio',
       label: 'Portfolio',
       children: (
-        <PortfolioChart
-          perspective={perspective}
-          playerLands={playerLands}
-          showHelp
-        />
+        <PortfolioChart perspective={perspective} playerLands={playerLands} />
       ),
     },
   ];
@@ -47,14 +54,15 @@ function PortfolioModal({
   // Adding predictions tab
   if (perspective === 'player') {
     tabItems.push({
-      key: '3',
+      key: 'Predictions',
       label: 'Predictions',
-      children: <PredictionsChart player={node as Player} showHelp />,
+      children: <PredictionsChart player={node as Player} />,
     });
   }
 
   return (
     <Modal
+      className="strategists-modal strategists-portfolio-modal"
       title={
         perspective === 'land' ? `Investments' Analysis` : 'Portfolio Analysis'
       }
@@ -62,12 +70,31 @@ function PortfolioModal({
       onCancel={onCancel}
       footer={null}
     >
-      {perspective === 'land' ? (
-        <LandStats land={node as Land} />
-      ) : (
-        <PlayerStats player={node as Player} />
-      )}
-      <Tabs centered defaultActiveKey="1" size="large" items={tabItems} />
+      <Flex orientation="vertical" gap="large">
+        {perspective === 'land' ? (
+          <LandCard land={node as Land} />
+        ) : (
+          <PlayerCard player={node as Player} />
+        )}
+        <Card className="strategists-portfolio-modal__tabs_card">
+          <Tabs
+            centered
+            defaultActiveKey={defaultPortfolioModelTabKey}
+            size="large"
+            items={tabItems}
+            onChange={(key) => setTabKey(key as PortfolioModalTabKey)}
+          />
+        </Card>
+        {tabKey === 'Trends' && (
+          <TrendsChartInterpretationHelp perspective={perspective} />
+        )}
+        {tabKey === 'Portfolio' && (
+          <PortfolioChartInterpretationHelp perspective={perspective} />
+        )}
+        {tabKey === 'Predictions' && (
+          <PredictionsChartInterpretationHelp player={node as Player} />
+        )}
+      </Flex>
     </Modal>
   );
 }

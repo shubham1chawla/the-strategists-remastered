@@ -1,20 +1,11 @@
 import { useEffect } from 'react';
 import { Chart } from '@antv/g2';
-import ChartInterpretationHelp from '@shared/components/ChartInterpretationHelp';
 import EmptyContainer from '@shared/components/EmptyContainer';
 import useChartTheme from '@shared/hooks/useChartTheme';
 import usePortfolioItems from '@game/hooks/usePortfolioItems';
 import { PortfolioTableProps } from './PortfolioTable';
 
-interface PortfolioChartProps extends PortfolioTableProps {
-  showHelp?: boolean;
-}
-
-function PortfolioChart({
-  playerLands,
-  perspective,
-  showHelp,
-}: PortfolioChartProps) {
+function PortfolioChart({ playerLands, perspective }: PortfolioTableProps) {
   const chartTheme = useChartTheme();
   const portfolioItems = usePortfolioItems(perspective, playerLands);
 
@@ -70,13 +61,13 @@ function PortfolioChart({
             name: 'Ownership',
             field: 'ownership',
             color: 'transparent',
-            valueFormatter: (value: number) => `${value}%`,
+            valueFormatter: (value: number) => `${value.toLocaleString()}%`,
           },
           {
             name: 'Investment Amount',
             field: 'buyAmount',
             color: 'transparent',
-            valueFormatter: (value: number) => `$${value}`,
+            valueFormatter: (value: number) => `$${value.toLocaleString()}`,
           },
         ],
       });
@@ -93,20 +84,7 @@ function PortfolioChart({
   if (!portfolioItems.length) {
     return <EmptyContainer message="No investments available!" />;
   }
-  return (
-    <div className="strategists-viz">
-      <div id="portfolio-container" />
-      {showHelp && (
-        <ChartInterpretationHelp
-          message={
-            perspective === 'player'
-              ? "The chart highlights the player's investments across various properties. A larger circle represents a significant investment amount."
-              : "The chart highlights the property's investors. A larger circle represents a significant investment amount by the investor."
-          }
-        />
-      )}
-    </div>
-  );
+  return <div id="portfolio-container" />;
 }
 
 export default PortfolioChart;

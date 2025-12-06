@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { Collapse, Select, Space, Timeline } from 'antd';
+import { Collapse, Flex, Select, Space, Timeline } from 'antd';
 import {
   BarsOutlined,
   InfoCircleOutlined,
@@ -29,13 +29,13 @@ function Activities() {
       const set = new Set<UpdateType>(subscribedTypes);
       const updateType = updateTypes.filter((type) => !set.has(type))[0];
       infoNotification({
-        message: `Subscribed to all ${formatUpdateType(updateType)} activities!`,
+        title: `Subscribed to all ${formatUpdateType(updateType)} activities!`,
       });
     } else {
       const set = new Set<UpdateType>(updateTypes);
       const updateType = subscribedTypes.filter((type) => !set.has(type))[0];
       infoNotification({
-        message: `Unsubscribed from all ${formatUpdateType(updateType)} activities!`,
+        title: `Unsubscribed from all ${formatUpdateType(updateType)} activities!`,
       });
     }
     dispatch(subscribedTypesSetted(updateTypes));
@@ -47,10 +47,10 @@ function Activities() {
   );
 
   return (
-    <div className="strategists-activity">
+    <Flex className="strategists-activities" orientation="vertical" gap="large">
       <Collapse
-        bordered={false}
-        expandIconPosition="end"
+        className="strategists-activities__collapse"
+        expandIconPlacement="end"
         accordion
         expandIcon={SettingsIcon}
         items={[
@@ -69,7 +69,7 @@ function Activities() {
                   <span>Personalize your Timeline & Notifications.</span>
                 </Space>
                 <Select
-                  className="strategists-activity__filters"
+                  className="strategists-activities__collapse__filters"
                   mode="multiple"
                   maxTagCount={3}
                   value={subscribedTypes}
@@ -85,15 +85,15 @@ function Activities() {
         ]}
       />
       <Timeline
-        className="strategists-activity__timeline"
+        className="strategists-activities__timeline"
         items={filteredActivites.map((activity) => {
           return {
-            dot: <ActivityIcon type={activity.type} />,
-            children: activity.text,
+            icon: <ActivityIcon type={activity.type} />,
+            content: activity.text,
           };
         })}
       />
-    </div>
+    </Flex>
   );
 }
 

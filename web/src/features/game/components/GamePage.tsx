@@ -12,10 +12,7 @@ function GamePage() {
     <GameWrapper>
       <TurnModal />
       <Row className="strategists-dashboard strategists-wallpaper">
-        <Col
-          className="strategists-dashboard__panel strategists-glossy"
-          flex="30%"
-        >
+        <Col className="strategists-glossy" flex="30%">
           <PlayerPanel />
         </Col>
         <Col flex="70%">

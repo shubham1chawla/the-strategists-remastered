@@ -9,9 +9,7 @@ function ChartInterpretationHelp(props: ChartInterpretationHelpProps) {
   const { message } = props;
   return (
     <Collapse
-      bordered={false}
-      ghost
-      expandIconPosition="end"
+      expandIconPlacement="end"
       items={[
         {
           key: '1',

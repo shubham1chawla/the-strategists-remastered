@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Button, Card, Form, Input, Space } from 'antd';
-import { AppstoreOutlined, ArrowLeftOutlined } from '@ant-design/icons';
+import { Button, Col, Flex, Form, Input, Row } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import useNotifications from '@shared/hooks/useNotifications';
 import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
@@ -22,7 +22,6 @@ function JoinActionWorkflow() {
   useEffect(() => {
     const code: string | undefined = form.getFieldValue('code');
     if (code) {
-      form.setFieldValue('code', code.toUpperCase());
       form
         .validateFields({ validateOnly: true })
         .then(() => setJoinButtonDisabled(false))
@@ -36,7 +35,7 @@ function JoinActionWorkflow() {
     (code: string) => {
       setLoginWorkflow('ENTERING');
       axios
-        .post<LoginState>(`/api/games/${code}/players`, {
+        .post<LoginState>(`/api/games/${code.toUpperCase()}/players`, {
           credential: googleLoginCredential,
         })
         .then(({ data }) => {
@@ -47,12 +46,12 @@ function JoinActionWorkflow() {
           switch (response.status) {
             case 404:
               errorNotification({
-                message: 'No game found for the entered code!',
+                title: 'No game found for the entered code!',
               });
               break;
             default:
               errorNotification({
-                message: 'Unable to join the game!',
+                title: 'Unable to join the game!',
                 description:
                   'Please contact the developers if this problem persists.',
               });
@@ -71,67 +70,66 @@ function JoinActionWorkflow() {
 
   if (loginWorkflow !== 'JOIN_ACTION') return null;
   return (
-    <div className="strategists-login__workflows__join">
-      <Card variant="borderless" size="small">
-        <Card.Meta
-          title={
-            <Space>
-              <Button
-                className="strategists-login__workflows__join__back-button"
-                size="large"
-                type="link"
-                icon={<ArrowLeftOutlined />}
-                onClick={() => setLoginWorkflow('ACTIONS')}
-              >
-                Join Game
-              </Button>
-            </Space>
-          }
-        />
-        <Form
-          className="strategists-login__workflows__join__form"
-          form={form}
-          layout="inline"
-          onFinish={({ code }) => handleJoinAction(code)}
-        >
-          <Space.Compact>
+    <Flex orientation="vertical">
+      <Row justify="start">
+        <Col>
+          <Button
+            size="large"
+            type="text"
+            icon={<ArrowLeftOutlined />}
+            onClick={() => setLoginWorkflow('ACTIONS')}
+          >
+            Back
+          </Button>
+        </Col>
+      </Row>
+      <Row justify="center">
+        <Col span={15}>
+          <Form
+            layout="vertical"
+            autoComplete="off"
+            size="large"
+            requiredMark={false}
+            form={form}
+            onFinish={({ code }) => handleJoinAction(code)}
+          >
             <Form.Item
               name="code"
+              label="Game's Code"
               rules={[
                 {
                   required: true,
                   type: 'string',
                   len: 4,
                   whitespace: false,
-                  pattern: /[A-Z]/,
+                  pattern: /[A-Za-z]/,
                   validateTrigger: ['onChange', 'onBlur'],
                 },
               ]}
-              noStyle
             >
-              <Input
-                type="text"
-                placeholder="Enter game's code"
-                prefix={<AppstoreOutlined />}
+              <Input.OTP
                 size="large"
                 autoFocus
-                required
+                formatter={(code) => code.toUpperCase()}
+                separator={<span>/</span>}
+                length={4}
               />
             </Form.Item>
-            <Form.Item noStyle>
+            <Form.Item>
               <Button
                 htmlType="submit"
                 type="primary"
                 size="large"
                 disabled={joinButtonDisabled}
+                block
               >
                 Join
               </Button>
             </Form.Item>
-          </Space.Compact>
-        </Form>
-      </Card>
-    </div>
+          </Form>
+        </Col>
+      </Row>
+    </Flex>
   );
 }
 

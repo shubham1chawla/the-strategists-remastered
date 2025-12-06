@@ -1,11 +1,14 @@
-import { Alert, Divider } from 'antd';
 import useCytoscape from '@game/hooks/useCytoscape';
 import { Land, Player } from '@game/state';
-import LandStats from './LandStats';
-import PlayerStats from './PlayerStats';
+import LandCard from './LandCard';
+import PlayerCard from './PlayerCard';
 
 function MapTooltip() {
   const { tooltipRef, hoveredNode, isTooltipHidden } = useCytoscape();
+  const player: Player | null =
+    hoveredNode?.type === 'player' ? (hoveredNode.value as Player) : null;
+  const land: Land | null =
+    hoveredNode?.type === 'land' ? (hoveredNode.value as Land) : null;
   return (
     <div
       ref={tooltipRef}
@@ -14,24 +17,8 @@ function MapTooltip() {
         isTooltipHidden ? 'strategists-map__tooltip-hidden' : ''
       }`}
     >
-      {hoveredNode?.type === 'player' ? (
-        <PlayerStats player={hoveredNode.value as Player} />
-      ) : hoveredNode?.type === 'land' ? (
-        <LandStats land={hoveredNode.value as Land} />
-      ) : null}
-      <Divider>
-        <Alert
-          type="info"
-          message={
-            hoveredNode?.type === 'player'
-              ? `Click to check ${(hoveredNode.value as Player).username}'s portfolio.`
-              : hoveredNode?.type === 'land'
-                ? `Click to check ${(hoveredNode.value as Land).name}'s investments`
-                : null
-          }
-          banner
-        />
-      </Divider>
+      {player && <PlayerCard player={player} highlight />}
+      {land && <LandCard land={land} highlight />}
     </div>
   );
 }

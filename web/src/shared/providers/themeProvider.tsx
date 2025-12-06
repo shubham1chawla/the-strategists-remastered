@@ -116,6 +116,7 @@ function ThemeProvider({ children }: PropsWithChildren) {
           components: {
             Collapse: {
               headerBg: 'transparent',
+              colorBorder: `rgba(${variables['--text-color-rgb']}, 0.06)`,
             },
             Select: {
               multipleItemBg: variables['--accent-color'],
@@ -136,6 +137,7 @@ function ThemeProvider({ children }: PropsWithChildren) {
             colorTextDisabled: variables['--accent-color'],
             colorBorder: variables['--accent-color'],
             colorBgContainer: 'transparent',
+            colorBorderDisabled: variables['--accent-color'],
             colorErrorBg: 'transparent',
             colorWarningBg: 'transparent',
             colorSuccessBg: 'transparent',

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Button, Modal, Row, Space, Tabs, Tag } from 'antd';
+import { Button, Card, Flex, Modal, Row, Space, Tabs, Tag } from 'antd';
 import {
   CrownOutlined,
   HeartOutlined,
@@ -14,7 +14,7 @@ import useLoginState from '@login/hooks/useLoginState';
 import { loggedOut } from '@login/state';
 import PredictionsChart from '@predictions/components/PredictionsChart';
 import TrendsChart from '@trends/components/TrendsChart';
-import PlayerStats from './PlayerStats';
+import PlayerCard from './PlayerCard';
 import PortfolioChart from './PortfolioChart';
 import ResetModal from './ResetModal';
 
@@ -28,6 +28,7 @@ function WinModal() {
   return (
     <>
       <Modal
+        className="strategists-modal strategists-win-modal"
         open={!!winnerPlayer}
         onCancel={() => setShowResetModal(false)}
         closable={false}
@@ -35,7 +36,9 @@ function WinModal() {
         title={
           <Row justify="space-between" align="middle">
             <StrategistsLogo />
-            <Tag icon={<CrownOutlined />}>Winner</Tag>
+            <Tag icon={<CrownOutlined />} variant="outlined">
+              Winner
+            </Tag>
           </Row>
         }
         footer={
@@ -72,36 +75,40 @@ function WinModal() {
           </Row>
         }
       >
-        <PlayerStats player={winnerPlayer} winner />
-        <Tabs
-          centered
-          defaultActiveKey="1"
-          size="large"
-          items={[
-            {
-              key: '1',
-              label: 'Trends',
-              children: (
-                <TrendsChart perspective="player" id={winnerPlayer.id} />
-              ),
-            },
-            {
-              key: '2',
-              label: 'Portfolio',
-              children: (
-                <PortfolioChart
-                  perspective="player"
-                  playerLands={winnerPlayer.lands}
-                />
-              ),
-            },
-            {
-              key: '3',
-              label: 'Predictions',
-              children: <PredictionsChart player={winnerPlayer} />,
-            },
-          ]}
-        />
+        <Flex orientation="vertical" gap="large">
+          <PlayerCard player={winnerPlayer} />
+          <Card className="strategists-win-modal__tabs_card">
+            <Tabs
+              centered
+              defaultActiveKey="1"
+              size="large"
+              items={[
+                {
+                  key: '1',
+                  label: 'Trends',
+                  children: (
+                    <TrendsChart perspective="player" id={winnerPlayer.id} />
+                  ),
+                },
+                {
+                  key: '2',
+                  label: 'Portfolio',
+                  children: (
+                    <PortfolioChart
+                      perspective="player"
+                      playerLands={winnerPlayer.lands}
+                    />
+                  ),
+                },
+                {
+                  key: '3',
+                  label: 'Predictions',
+                  children: <PredictionsChart player={winnerPlayer} />,
+                },
+              ]}
+            />
+          </Card>
+        </Flex>
       </Modal>
       <ResetModal
         open={showResetModal}

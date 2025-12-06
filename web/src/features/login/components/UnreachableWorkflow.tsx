@@ -7,8 +7,8 @@ function UnreachableWorkflow() {
   return (
     <Alert
       type="error"
-      message="Servers are unreachable!"
-      description="The game is presently in a developmental stage, and we frequently deactivate the servers to reduce expenses. If you wish to engage with The Strategists, kindly reach out to the developers for access."
+      title="Servers are unreachable!"
+      description="The game is presently in a developmental stage, and we frequently deactivate the servers to reduce expenses. If you wish to engage with The Strategists, kindly reach out to the developers for access, or self-host from the GitHub link."
       showIcon
       banner
     />

@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Button, Dropdown, Space } from 'antd';
+import { Button, Col, Dropdown, Row, Space, Typography } from 'antd';
 import {
   AuditOutlined,
   EllipsisOutlined,
+  InfoCircleOutlined,
   LoadingOutlined,
   StepForwardOutlined,
   StockOutlined,
@@ -11,9 +12,58 @@ import {
 import axios from 'axios';
 import useNotifications from '@shared/hooks/useNotifications';
 import useGameState from '@game/hooks/useGameState';
+import { Player } from '@game/state';
 import InvestmentStrategy from '@game/utils/InvestmentStrategy';
 import useLoginState from '@login/hooks/useLoginState';
 import PlayerInvestModal from './PlayerInvestModal';
+
+function BankruptPrompt() {
+  return (
+    <Button disabled size="large" type="primary" icon={<AuditOutlined />} block>
+      You are declared bankrupt!
+    </Button>
+  );
+}
+
+interface TurnPlayerPromptProps {
+  turnPlayer: Player;
+}
+
+function TurnPlayerPrompt({ turnPlayer }: TurnPlayerPromptProps) {
+  return (
+    <Button
+      disabled
+      size="large"
+      type="primary"
+      icon={<LoadingOutlined />}
+      block
+    >
+      {turnPlayer.username}&apos;s turn to invest
+    </Button>
+  );
+}
+
+function JoinGamePrompt() {
+  const { game } = useGameState();
+  return (
+    <Row
+      className="strategists-actions__join-prompt"
+      align="middle"
+      justify="center"
+    >
+      <Space>
+        <InfoCircleOutlined />
+        <Typography.Text>
+          Use code
+          <Typography.Text copyable code>
+            {game.code}
+          </Typography.Text>
+          to join The Strategists.
+        </Typography.Text>
+      </Space>
+    </Row>
+  );
+}
 
 function PlayerActionsPanel() {
   const { gameCode, player } = useLoginState();
@@ -50,7 +100,7 @@ function PlayerActionsPanel() {
       await axios.put(`/api/games/${gameCode}/turn`);
     } catch (error) {
       errorNotification({
-        message: 'Something went wrong!',
+        title: 'Something went wrong!',
         description: 'Please refresh the page and try again.',
       });
     } finally {
@@ -66,35 +116,30 @@ function PlayerActionsPanel() {
       />
       <div className="strategists-actions">
         {player?.state === 'BANKRUPT' ? (
-          <Button disabled size="large" type="primary" icon={<AuditOutlined />}>
-            You are declared bankrupt!
-          </Button>
+          <BankruptPrompt />
+        ) : !turnPlayer ? (
+          <JoinGamePrompt />
         ) : !player.turn ? (
-          <Button
-            disabled
-            size="large"
-            type="primary"
-            icon={<LoadingOutlined />}
-          >
-            {turnPlayer
-              ? `${turnPlayer.username}'s turn to invest`
-              : 'The Strategists not started!'}
-          </Button>
+          <TurnPlayerPrompt turnPlayer={turnPlayer} />
         ) : (
-          <Space.Compact size="large">
-            <Button
-              type="primary"
-              disabled={!strategy.feasible}
-              icon={!strategy.feasible ? <StopOutlined /> : <StockOutlined />}
-              onClick={() => setShowModal(true)}
-            >
-              {title}
-            </Button>
+          <Space.Compact size="large" block>
+            <Col flex="60%">
+              <Button
+                type="primary"
+                disabled={!strategy.feasible}
+                icon={!strategy.feasible ? <StopOutlined /> : <StockOutlined />}
+                onClick={() => setShowModal(true)}
+                block
+              >
+                {title}
+              </Button>
+            </Col>
             <Button
               icon={<StepForwardOutlined />}
               disabled={skipping}
               onClick={onSkip}
               loading={skipping}
+              block
             >
               Skip
             </Button>

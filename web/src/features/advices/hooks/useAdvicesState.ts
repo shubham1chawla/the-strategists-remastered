@@ -15,9 +15,15 @@ const useAdvicesState = () => {
       (advice) => advice.playerId === playerId,
     );
     filteredAdvices.sort((a1, a2) => {
+      // Showing new advices first
       if (a1.state !== a2.state) {
         return a1.state === 'NEW' ? -1 : 1;
       }
+      // Showing unread advices first
+      if (a1.viewed !== a2.viewed) {
+        return a2.viewed ? -1 : 1;
+      }
+      // Showing important advices first
       return a1.priority - a2.priority;
     });
     return filteredAdvices;

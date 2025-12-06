@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Alert, Button, Checkbox, Divider, Modal, Row, Space } from 'antd';
+import { Alert, Button, Checkbox, Modal, Row, Space } from 'antd';
 import { StopOutlined } from '@ant-design/icons';
 import axios from 'axios';
 
@@ -25,15 +25,11 @@ function ResetModal(props: ResetModalProps) {
 
   return (
     <Modal
+      className="strategists-modal"
       open={open}
       onCancel={cancel}
       onOk={reset}
       title="Reset The Strategists"
-      okText={
-        <>
-          <StopOutlined /> Reset
-        </>
-      }
       footer={
         <Row justify="space-between" align="middle">
           <Space>
@@ -52,16 +48,13 @@ function ResetModal(props: ResetModalProps) {
         </Row>
       }
     >
-      <Divider />
       <Alert
-        banner
         type="error"
-        message="Do you want to reset The Strategists?"
+        title="Do you want to reset The Strategists?"
         description="This action will permanently reset the game. Are you sure you want to continue?"
         showIcon
         icon={<StopOutlined />}
       />
-      <Divider />
     </Modal>
   );
 }
