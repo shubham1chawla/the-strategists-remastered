@@ -23,13 +23,9 @@ function LoginPage() {
   );
   return (
     <LoginWorkflowProvider>
-      <Flex
-        className="strategists-login strategists-wallpaper"
-        justify="center"
-        align="center"
-      >
+      <Flex className="strategists-login" justify="center" align="center">
         <Card
-          className="strategists-login__card strategists-glossy"
+          className="strategists-login-card"
           title={
             <Row justify="center">
               <StrategistsLogo />
