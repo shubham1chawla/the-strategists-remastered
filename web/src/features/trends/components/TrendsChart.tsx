@@ -60,7 +60,7 @@ const drawPlayerTrends = (
           name: 'Cash',
           field: 'cash',
           color: 'transparent',
-          valueFormatter: (value: number) => `$${value}`,
+          valueFormatter: (value: number) => `$${value.toLocaleString()}`,
         },
       ],
     });
@@ -104,7 +104,7 @@ const drawLandTrends = (chart: Chart, trends: LandTrend[], theme: Theme) => {
           name: 'Market Value',
           field: 'marketValue',
           color: 'transparent',
-          valueFormatter: (value: number) => `$${value}`,
+          valueFormatter: (value: number) => `$${value.toLocaleString()}`,
         },
       ],
     });

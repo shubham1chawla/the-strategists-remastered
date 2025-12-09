@@ -24,7 +24,7 @@
             "name": "Chandigarh",
             "x": 40,
             "y": 100,
-            "playerPosition": "bottom-right",
+            "playerPosition": "right",
             "sensitivity": 5,
             "baseValue": 500.0
         },
@@ -56,7 +56,7 @@
             "name": "Guwahati",
             "x": 600,
             "y": 300,
-            "playerPosition": "top-left",
+            "playerPosition": "top",
             "sensitivity": 5,
             "baseValue": 350.0
         },
@@ -72,7 +72,7 @@
             "name": "Imphal",
             "x": 700,
             "y": 350,
-            "playerPosition": "bottom-right",
+            "playerPosition": "right",
             "sensitivity": 5,
             "baseValue": 275.0
         },
@@ -112,7 +112,7 @@
             "name": "Hyderabad",
             "x": 180,
             "y": 600,
-            "playerPosition": "bottom-right",
+            "playerPosition": "top",
             "sensitivity": 5,
             "baseValue": 750.0
         },
@@ -120,7 +120,7 @@
             "name": "Chennai",
             "x": 225,
             "y": 800,
-            "playerPosition": "top-right",
+            "playerPosition": "right",
             "sensitivity": 5,
             "baseValue": 650.0
         },
@@ -128,7 +128,7 @@
             "name": "Coimbatore",
             "x": 120,
             "y": 875,
-            "playerPosition": "bottom-right",
+            "playerPosition": "bottom",
             "sensitivity": 5,
             "baseValue": 450.0
         },
@@ -136,7 +136,7 @@
             "name": "Bengaluru",
             "x": 150,
             "y": 800,
-            "playerPosition": "top-left",
+            "playerPosition": "left",
             "sensitivity": 5,
             "baseValue": 800.0
         },
@@ -144,7 +144,7 @@
             "name": "Panaji",
             "x": 80,
             "y": 700,
-            "playerPosition": "top-left",
+            "playerPosition": "left",
             "sensitivity": 5,
             "baseValue": 950.0
         },
@@ -160,7 +160,7 @@
             "name": "Rajkot",
             "x": -100,
             "y": 480,
-            "playerPosition": "bottom-left",
+            "playerPosition": "left",
             "sensitivity": 5,
             "baseValue": 300.0
         },
@@ -168,7 +168,7 @@
             "name": "Ahmedabad",
             "x": 45,
             "y": 440,
-            "playerPosition": "top-right",
+            "playerPosition": "right",
             "sensitivity": 5,
             "baseValue": 700.0
         },
@@ -184,7 +184,7 @@
             "name": "Prison",
             "x": -100,
             "y": 300,
-            "playerPosition": "bottom-left",
+            "playerPosition": "left",
             "sensitivity": 5,
             "baseValue": 0.0
         }

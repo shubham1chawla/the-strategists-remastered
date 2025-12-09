@@ -1,12 +1,9 @@
 import { Space, Table } from 'antd';
-import {
-  DollarCircleOutlined,
-  HomeOutlined,
-  PercentageOutlined,
-  UserOutlined,
-} from '@ant-design/icons';
+import { DollarCircleOutlined, PercentageOutlined } from '@ant-design/icons';
 import usePortfolioItems from '@game/hooks/usePortfolioItems';
 import { PlayerLand } from '@game/state';
+import LandAvatar from './LandAvatar';
+import PlayerAvatar from './PlayerAvatar';
 
 export interface PortfolioTableProps {
   perspective: 'player' | 'land';
@@ -27,7 +24,11 @@ function PortfolioTable(props: PortfolioTableProps) {
           key: 'name',
           render: (value) => (
             <Space>
-              {perspective === 'player' ? <HomeOutlined /> : <UserOutlined />}
+              {perspective === 'player' ? (
+                <LandAvatar name={value} />
+              ) : (
+                <PlayerAvatar username={value} />
+              )}
               {value}
             </Space>
           ),

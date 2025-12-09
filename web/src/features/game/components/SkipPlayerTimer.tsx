@@ -44,7 +44,7 @@ function SkipPlayerTimer() {
         }
       />
       <Button
-        className="strategists-skip-player-timer-card__close-button ant-notification-notice-close"
+        className="strategists-skip-player-timer-card__close-button"
         type="text"
         shape="square"
         size="small"

@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Button, Modal, Space, Tag } from 'antd';
-import { HomeOutlined } from '@ant-design/icons';
+import { Button, Modal, Space, Typography } from 'antd';
 import useGameState from '@game/hooks/useGameState';
 import useLoginState from '@login/hooks/useLoginState';
+import LandAvatar from './LandAvatar';
 
 function TurnModal() {
   const { player } = useLoginState();
@@ -32,9 +32,8 @@ function TurnModal() {
     >
       <Space>
         You have landed on
-        <Tag icon={<HomeOutlined />} variant="outlined">
-          {lands[player.index].name}
-        </Tag>
+        <LandAvatar name={lands[player.index].name} />
+        <Typography.Text strong>{lands[player.index].name}</Typography.Text>
       </Space>
     </Modal>
   );
