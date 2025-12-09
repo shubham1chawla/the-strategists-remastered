@@ -202,7 +202,7 @@ function CytoscapeProvider({ children }: PropsWithChildren) {
         position: node.position(),
         renderedPosition: node.position(),
         style: {
-          backgroundColor: textColor,
+          color: textColor,
         },
       });
 

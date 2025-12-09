@@ -13,7 +13,6 @@ const useCytoscapeStyles = () => {
           width: 20,
           height: 20,
           color: theme.textColor,
-          label: 'data(name)',
           'text-margin-y': -10,
           'text-halign': 'center',
           'text-valign': 'top',
@@ -23,10 +22,15 @@ const useCytoscapeStyles = () => {
         },
       },
       {
+        selector: 'edge',
+        css: {
+          'target-arrow-shape': 'triangle',
+        },
+      },
+      {
         selector: '.land',
         css: {
-          width: 20,
-          height: 20,
+          label: 'data(name)',
           shape: 'ellipse',
           'pie-size': '100%',
           ...theme.playerColors.reduce(
@@ -49,17 +53,39 @@ const useCytoscapeStyles = () => {
       {
         selector: '.prison',
         css: {
+          label: 'data(name)',
           shape: 'pentagon',
           backgroundColor: theme.accentColor,
         },
       },
       {
-        selector: '.player',
+        selector: '.ungrouped-player',
         css: {
-          shape: 'triangle',
+          label: 'data(name)',
+          shape: 'round-rectangle',
           color: 'data(color)',
-          backgroundColor: 'data(color)',
+          'corner-radius': 2,
+          'background-image': 'data(avatarDataUri)',
+          'background-fit': 'cover',
           'font-weight': 'bold',
+        },
+      },
+      {
+        selector: '.turn-player',
+        css: {
+          label: 'data(name)',
+          color: 'data(color)',
+          'font-weight': 'bold',
+        },
+      },
+      // ungrouped-player (with label) = turn-player (with label) + grouped-player (without label)
+      {
+        selector: '.grouped-player',
+        css: {
+          shape: 'round-rectangle',
+          'corner-radius': 2,
+          'background-image': 'data(avatarDataUri)',
+          'background-fit': 'cover',
         },
       },
       {
@@ -67,16 +93,20 @@ const useCytoscapeStyles = () => {
         css: {
           width: 2,
           'curve-style': 'bezier',
-          'target-arrow-shape': 'triangle',
         },
       },
       {
         selector: '.player-edge',
         css: {
           width: 2,
-          'curve-style': 'unbundled-bezier',
-          'target-arrow-shape': 'triangle',
-          'line-style': 'dashed',
+          'curve-style': 'bezier',
+        },
+      },
+      {
+        selector: ':parent',
+        css: {
+          'background-opacity': 0,
+          'border-opacity': 0,
         },
       },
     ],

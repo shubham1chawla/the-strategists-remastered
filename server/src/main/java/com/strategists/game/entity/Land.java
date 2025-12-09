@@ -46,6 +46,10 @@ public class Land implements Serializable {
 
     @AllArgsConstructor
     public enum PlayerPosition {
+        TOP("top"),
+        BOTTOM("bottom"),
+        LEFT("left"),
+        RIGHT("right"),
         TOP_LEFT("top-left"),
         TOP_RIGHT("top-right"),
         BOTTOM_LEFT("bottom-left"),

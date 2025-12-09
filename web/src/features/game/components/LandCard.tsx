@@ -1,15 +1,15 @@
 import { useMemo } from 'react';
-import { Card, Col, Flex, Row, Space, Statistic, Tag } from 'antd';
+import { Card, Col, Flex, Row, Space, Statistic } from 'antd';
 import {
   StockOutlined,
   DollarOutlined,
-  HomeOutlined,
   PieChartOutlined,
   PercentageOutlined,
   WalletOutlined,
   DollarCircleOutlined,
 } from '@ant-design/icons';
 import { Land } from '@game/state';
+import LandAvatar from './LandAvatar';
 
 interface LandCardProps {
   land: Land;
@@ -43,9 +43,10 @@ function LandCard({
     <Card
       className={className}
       title={
-        <Tag icon={<HomeOutlined />} variant="outlined">
+        <Space align="center">
+          <LandAvatar name={land.name} />
           {land.name}
-        </Tag>
+        </Space>
       }
     >
       <Flex orientation="vertical" gap="large">

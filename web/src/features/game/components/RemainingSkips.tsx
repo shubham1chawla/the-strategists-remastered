@@ -1,4 +1,4 @@
-import { Tag, Tooltip } from 'antd';
+import { Space, Tooltip } from 'antd';
 import { HeartFilled, HeartOutlined } from '@ant-design/icons';
 import useGameState from '@game/hooks/useGameState';
 import { Player } from '@game/state';
@@ -20,7 +20,7 @@ function RemainingSkips({ player }: RemainingSkipsProps) {
     <Tooltip
       title={`Remaining skips allowed before ${player.username} will be declared bankrupt.`}
     >
-      <Tag variant="outlined">
+      <Space>
         {[...Array(remainingSkipsCount)].map((_, i) => (
           // eslint-disable-next-line react/no-array-index-key
           <HeartFilled key={i} />
@@ -29,7 +29,7 @@ function RemainingSkips({ player }: RemainingSkipsProps) {
           // eslint-disable-next-line react/no-array-index-key
           <HeartOutlined key={i} />
         ))}
-      </Tag>
+      </Space>
     </Tooltip>
   );
 }

@@ -52,8 +52,8 @@ function ResetModal(props: ResetModalProps) {
         type="error"
         title="Do you want to reset The Strategists?"
         description="This action will permanently reset the game. Are you sure you want to continue?"
-        showIcon
         icon={<StopOutlined />}
+        showIcon
       />
     </Modal>
   );

@@ -1,7 +1,16 @@
 import { MouseEvent, useCallback, useMemo } from 'react';
-import { Button, Card, Col, Row, Space, Statistic, Tag, Tooltip } from 'antd';
 import {
-  UserOutlined,
+  Button,
+  Card,
+  Col,
+  Divider,
+  Row,
+  Space,
+  Statistic,
+  Tag,
+  Tooltip,
+} from 'antd';
+import {
   WalletOutlined,
   StockOutlined,
   CrownOutlined,
@@ -14,6 +23,7 @@ import axios from 'axios';
 import useGameState from '@game/hooks/useGameState';
 import { Player } from '@game/state';
 import useLoginState from '@login/hooks/useLoginState';
+import PlayerAvatar from './PlayerAvatar';
 import RemainingSkips from './RemainingSkips';
 
 interface PlayerCardProps {
@@ -63,12 +73,18 @@ function PlayerCard({
     <Card
       className={className}
       title={
-        <Space>
-          <Tag icon={<UserOutlined />} variant="outlined">
+        <Row align="middle">
+          <Space align="center">
+            <PlayerAvatar username={player.username} />
             {player.username}
-          </Tag>
-          {showSkips && <RemainingSkips player={player} />}
-        </Space>
+          </Space>
+          {showSkips && (
+            <>
+              <Divider orientation="vertical" size="large" />
+              <RemainingSkips player={player} />
+            </>
+          )}
+        </Row>
       }
       extra={
         <>

@@ -8,9 +8,10 @@ import {
 import { useSelector } from 'react-redux';
 import { ConfigProvider } from 'antd';
 import { scaleOrdinal, schemeSet1 } from 'd3';
+import { identicon, shapes } from '@dicebear/collection';
+import { createAvatar } from '@dicebear/core';
 import { StrategistsState } from '@/store';
 import EmptyContainer from '@shared/components/EmptyContainer';
-import { Player } from '@game/state';
 import useLoginState from '@login/hooks/useLoginState';
 
 /**
@@ -39,7 +40,9 @@ export interface Theme {
   textColor: string;
   accentColor: string;
   playerColors: string[];
-  getPlayerColor: (player: Player) => string;
+  getPlayerColor: (username: string) => string;
+  getPlayerAvatarDataUri: (username: string) => string;
+  getLandAvatarDataUri: (name: string) => string;
 }
 
 export const ThemeContext = createContext<Theme | null>(null);
@@ -61,25 +64,51 @@ function ThemeProvider({ children }: PropsWithChildren) {
   );
 
   const getPlayerColor = useCallback(
-    (player: Player) => {
+    (username: string) => {
       if (!sortedPlayers || !sortedPlayers.length) {
         return DefaultCssVariables['--accent-color'];
       }
       const scale = scaleOrdinal(playerColors).domain(
-        sortedPlayers.map(({ username }) => username),
+        sortedPlayers.map((player) => player.username),
       );
-      return scale(player.username);
+      return scale(username);
     },
     [playerColors, sortedPlayers],
+  );
+
+  const getPlayerAvatarDataUri = useCallback(
+    (username: string) => {
+      const avatar = createAvatar(identicon, {
+        backgroundColor: [getPlayerColor(username).substring(1)],
+        rowColor: [DefaultCssVariables['--text-color'].substring(1)],
+        seed: username,
+        size: 20,
+      });
+      return avatar.toDataUri();
+    },
+    [getPlayerColor],
   );
 
   const accentColor = useMemo(
     () =>
       loggedInPlayer
-        ? getPlayerColor(loggedInPlayer)
+        ? getPlayerColor(loggedInPlayer.username)
         : DefaultCssVariables['--accent-color'],
     [loggedInPlayer, getPlayerColor],
   );
+
+  const getLandAvatarDataUri = useCallback((name: string) => {
+    const colors = allPlayerColors.slice(0, 6).map((hex) => hex.substring(1));
+    const avatar = createAvatar(shapes, {
+      backgroundColor: [DefaultCssVariables['--text-color'].substring(1)],
+      shape1Color: colors,
+      shape2Color: colors,
+      shape3Color: colors,
+      seed: name,
+      size: 20,
+    });
+    return avatar.toDataUri();
+  }, []);
 
   const variables = useMemo(
     () => ({
@@ -104,8 +133,16 @@ function ThemeProvider({ children }: PropsWithChildren) {
       accentColor,
       playerColors,
       getPlayerColor,
+      getPlayerAvatarDataUri,
+      getLandAvatarDataUri,
     }),
-    [accentColor, getPlayerColor, playerColors],
+    [
+      accentColor,
+      playerColors,
+      getPlayerColor,
+      getPlayerAvatarDataUri,
+      getLandAvatarDataUri,
+    ],
   );
 
   return (
