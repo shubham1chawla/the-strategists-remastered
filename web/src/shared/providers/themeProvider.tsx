@@ -25,6 +25,7 @@ const DefaultCssVariables = {
   '--dark-color-rgb': '24, 25, 26',
   '--accent-color': '#eb3b5a',
   '--accent-color-hover': '#f7657b',
+  '--border-color-rgba': 'rgba(245, 246, 250, 0.06)', // text-color-rgb + alpha
 } as const;
 
 /**
@@ -153,7 +154,7 @@ function ThemeProvider({ children }: PropsWithChildren) {
           components: {
             Collapse: {
               headerBg: 'transparent',
-              colorBorder: `rgba(${variables['--text-color-rgb']}, 0.06)`,
+              colorBorder: variables['--border-color-rgba'],
             },
             Select: {
               multipleItemBg: variables['--accent-color'],
@@ -184,7 +185,7 @@ function ThemeProvider({ children }: PropsWithChildren) {
             colorInfo: variables['--accent-color'],
             colorInfoBg: 'transparent',
             colorPrimaryBg: 'transparent',
-            colorBorderSecondary: `rgba(${variables['--text-color-rgb']}, 0.06)`,
+            colorBorderSecondary: variables['--border-color-rgba'],
             colorBgSpotlight: variables['--dark-color'],
             colorBgContainerDisabled: 'transparent',
             fontFamily: variables['--font-family'],
