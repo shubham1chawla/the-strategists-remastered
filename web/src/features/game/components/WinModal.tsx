@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { Button, Card, Flex, Modal, Row, Space, Tabs, Tag } from 'antd';
+import { Badge, Button, Card, Flex, Modal, Row, Space, Tabs } from 'antd';
 import {
-  CrownOutlined,
+  CrownFilled,
   HeartOutlined,
   InfoCircleOutlined,
   LogoutOutlined,
@@ -14,9 +14,10 @@ import useLoginState from '@login/hooks/useLoginState';
 import { loggedOut } from '@login/state';
 import PredictionsChart from '@predictions/components/PredictionsChart';
 import TrendsChart from '@trends/components/TrendsChart';
-import PlayerCard from './PlayerCard';
+import PlayerAvatar from './PlayerAvatar';
 import PortfolioChart from './PortfolioChart';
 import ResetModal from './ResetModal';
+import WinnerPlayerCard from './WinnerPlayerCard';
 
 function WinModal() {
   const { gameCode, player } = useLoginState();
@@ -36,9 +37,15 @@ function WinModal() {
         title={
           <Row justify="space-between" align="middle">
             <StrategistsLogo />
-            <Tag icon={<CrownOutlined />} variant="outlined">
-              Winner
-            </Tag>
+            <Space align="center">
+              <Badge
+                count={<CrownFilled style={{ color: 'goldenrod' }} />}
+                offset={[-12, -6]}
+              >
+                <PlayerAvatar username={winnerPlayer.username} />
+              </Badge>
+              {winnerPlayer.username}
+            </Space>
           </Row>
         }
         footer={
@@ -76,7 +83,7 @@ function WinModal() {
         }
       >
         <Flex orientation="vertical" gap="large">
-          <PlayerCard player={winnerPlayer} />
+          <WinnerPlayerCard />
           <Card className="strategists-win-modal__tabs_card">
             <Tabs
               centered

@@ -216,6 +216,17 @@ function CytoscapeProvider({ children }: PropsWithChildren) {
     callback();
   }, [cy, textColor]);
 
+  // Changing cursor shape
+  useEffect(() => {
+    if (!cy || !cy.container()) return;
+    cy
+      .container()
+      ?.setAttribute(
+        'style',
+        `cursor: ${isTooltipHidden ? 'default' : 'pointer'}`,
+      );
+  }, [cy, isTooltipHidden]);
+
   // Creating provider's value
   const value: CytoscapeProviderValue = useMemo(
     () => ({

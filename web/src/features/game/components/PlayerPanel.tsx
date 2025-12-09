@@ -7,9 +7,9 @@ import useAdvicesState from '@advices/hooks/useAdvicesState';
 import useGameState from '@game/hooks/useGameState';
 import useLoginState from '@login/hooks/useLoginState';
 import Lobby from './Lobby';
+import LobbyPlayerCard from './LobbyPlayerCard';
 import NavigationBar from './NavigationBar';
 import PlayerActionsPanel from './PlayerActionsPanel';
-import PlayerCard from './PlayerCard';
 
 type PlayerPanelTabKey = 'LOBBY' | 'ACTIVITIES' | 'ADVICE';
 
@@ -80,7 +80,7 @@ function PlayerPanel() {
       flex="1 1 auto 1"
     >
       <NavigationBar />
-      <PlayerCard player={player} showSkips />
+      <LobbyPlayerCard player={player} />
       <Tabs
         centered
         defaultActiveKey="LOBBY"

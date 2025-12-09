@@ -1,59 +1,21 @@
-import { MouseEvent, useCallback, useMemo } from 'react';
-import {
-  Button,
-  Card,
-  Col,
-  Divider,
-  Row,
-  Space,
-  Statistic,
-  Tag,
-  Tooltip,
-} from 'antd';
+import { ReactNode, useMemo } from 'react';
+import { Card, Col, Row, Space, Statistic } from 'antd';
 import {
   WalletOutlined,
   StockOutlined,
-  CrownOutlined,
-  StarOutlined,
-  UserDeleteOutlined,
   DollarOutlined,
-  AuditOutlined,
 } from '@ant-design/icons';
-import axios from 'axios';
-import useGameState from '@game/hooks/useGameState';
 import { Player } from '@game/state';
-import useLoginState from '@login/hooks/useLoginState';
 import PlayerAvatar from './PlayerAvatar';
-import RemainingSkips from './RemainingSkips';
 
 interface PlayerCardProps {
   player: Player;
-  rank?: number;
+  title?: ReactNode;
+  extra?: ReactNode;
   highlight?: boolean;
-  showSkips?: boolean;
-  showKickPlayer?: boolean;
 }
 
-function PlayerCard({
-  player,
-  rank,
-  highlight,
-  showSkips,
-  showKickPlayer,
-}: PlayerCardProps) {
-  const { gameCode, player: loggedInPlayer } = useLoginState();
-  const { game } = useGameState();
-
-  const kickPlayer = useCallback(
-    (event: MouseEvent, { id }: Player) => {
-      event.stopPropagation();
-      axios.delete(`/api/games/${gameCode}/players`, {
-        data: { playerId: id },
-      });
-    },
-    [gameCode],
-  );
-
+function PlayerCard({ player, title, extra, highlight }: PlayerCardProps) {
   const className = useMemo(() => {
     const classes = ['strategists-player-card'];
     if (highlight) {
@@ -62,59 +24,18 @@ function PlayerCard({
     return classes.join(' ');
   }, [highlight]);
 
-  // Show Kick Player button to host player
-  const showKickPlayerButton =
-    showKickPlayer &&
-    game.state !== 'ACTIVE' &&
-    loggedInPlayer?.host &&
-    player.id !== loggedInPlayer.id;
-
   return (
     <Card
       className={className}
       title={
-        <Row align="middle">
+        title || (
           <Space align="center">
             <PlayerAvatar username={player.username} />
             {player.username}
           </Space>
-          {showSkips && (
-            <>
-              <Divider orientation="vertical" size="large" />
-              <RemainingSkips player={player} />
-            </>
-          )}
-        </Row>
+        )
       }
-      extra={
-        <>
-          {showKickPlayerButton && (
-            <Tooltip title={`Kick ${player.username} out!`}>
-              <Button
-                type="text"
-                shape="circle"
-                onClick={(event) => kickPlayer(event, player)}
-                icon={<UserDeleteOutlined />}
-              />
-            </Tooltip>
-          )}
-          {game.state !== 'ACTIVE' && player.host && (
-            <Tag icon={<StarOutlined />}>Host</Tag>
-          )}
-          {game.state === 'ACTIVE' && player.state !== 'BANKRUPT' && !!rank && (
-            <Tooltip title={<>{player.username}&apos;s rank</>}>
-              <Tag icon={<CrownOutlined />} variant="outlined">
-                #{rank}
-              </Tag>
-            </Tooltip>
-          )}
-          {game.state === 'ACTIVE' && player.state === 'BANKRUPT' && (
-            <Tag icon={<AuditOutlined />} variant="outlined">
-              Bankrupt
-            </Tag>
-          )}
-        </>
-      }
+      extra={extra}
     >
       <Row>
         <Col span={12}>
