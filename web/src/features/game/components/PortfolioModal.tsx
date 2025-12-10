@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { Card, Flex, Modal, Tabs } from 'antd';
+import usePortfolioModal from '@game/hooks/usePortfolioModal';
 import { Land, Player } from '@game/state';
 import PredictionsChart from '@predictions/components/PredictionsChart';
 import PredictionsChartInterpretationHelp from '@predictions/components/PredictionsChartInterpretationHelp';
+import usePredictionsState from '@predictions/hooks/usePredictionsState';
 import TrendsChart from '@trends/components/TrendsChart';
 import TrendsChartInterpretationHelp from '@trends/components/TrendsChartInterpretationHelp';
 import LandCard from './LandCard';
@@ -13,24 +15,14 @@ import PortfolioChartInterpretationHelp from './PortfolioChartInterpretationHelp
 type PortfolioModalTabKey = 'Trends' | 'Portfolio' | 'Predictions';
 const defaultPortfolioModelTabKey: PortfolioModalTabKey = 'Trends';
 
-export interface PortfolioModalProps {
-  open: boolean;
-  onCancel: () => void;
-  perspective: 'land' | 'player';
-  node: Land | Player;
-}
-
-function PortfolioModal({
-  open,
-  onCancel,
-  perspective,
-  node,
-}: Partial<PortfolioModalProps>) {
+function PortfolioModal() {
+  const { perspective, node, onCancel } = usePortfolioModal();
+  const predictions = usePredictionsState();
   const [tabKey, setTabKey] = useState<PortfolioModalTabKey>(
     defaultPortfolioModelTabKey,
   );
 
-  if (!open || !perspective || !node) {
+  if (!perspective || !node) {
     return null;
   }
 
@@ -52,7 +44,7 @@ function PortfolioModal({
   ];
 
   // Adding predictions tab
-  if (perspective === 'player') {
+  if (perspective === 'player' && predictions.length) {
     tabItems.push({
       key: 'Predictions',
       label: 'Predictions',
@@ -66,7 +58,7 @@ function PortfolioModal({
       title={
         perspective === 'land' ? `Investments' Analysis` : 'Portfolio Analysis'
       }
-      open={open}
+      open={!!node}
       onCancel={onCancel}
       footer={null}
     >

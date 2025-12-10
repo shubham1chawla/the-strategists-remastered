@@ -1,5 +1,6 @@
 import { Col, Row } from 'antd';
 import CytoscapeProvider from '@game/providers/cytoscapeProvider';
+import PortfolioModalProvider from '@game/providers/portfolioModalProvider';
 import GameWrapper from './GameWrapper';
 import MapPanel from './MapPanel';
 import PlayerPanel from './PlayerPanel';
@@ -13,14 +14,16 @@ function GamePage() {
     <GameWrapper>
       <TurnModal />
       <Row className="strategists-dashboard">
-        <Col flex="30%">
-          <PlayerPanel />
-        </Col>
-        <Col flex="70%">
-          <CytoscapeProvider>
-            <MapPanel />
-          </CytoscapeProvider>
-        </Col>
+        <PortfolioModalProvider>
+          <Col flex="30%">
+            <PlayerPanel />
+          </Col>
+          <Col flex="70%">
+            <CytoscapeProvider>
+              <MapPanel />
+            </CytoscapeProvider>
+          </Col>
+        </PortfolioModalProvider>
       </Row>
       <WinnerConfettiBackdrop />
       <WinModal />

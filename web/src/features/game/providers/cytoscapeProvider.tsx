@@ -25,6 +25,7 @@ import useCytoscapeLandNodeDefinitions from '@game/hooks/useCytoscapeLandNodeDef
 import useCytoscapePlayerEdgeDefinitions from '@game/hooks/useCytoscapePlayerEdgeDefinitions';
 import useCytoscapePlayerNodeDefinitions from '@game/hooks/useCytoscapePlayerNodeDefinitions';
 import useCytoscapeStyles from '@game/hooks/useCytoscapeStyles';
+import usePortfolioModal from '@game/hooks/usePortfolioModal';
 import { Land, Player } from '@game/state';
 
 interface ActionableNode {
@@ -37,7 +38,6 @@ interface CytoscapeProviderValue {
   tooltipRef: MutableRefObject<HTMLDivElement | null>;
   clickedNode: ActionableNode | null;
   hoveredNode: ActionableNode | null;
-  clearClickedNode: () => void;
   isTooltipHidden: boolean;
 }
 
@@ -47,6 +47,7 @@ export const CytoscapeContext = createContext<CytoscapeProviderValue | null>(
 
 function CytoscapeProvider({ children }: PropsWithChildren) {
   const { textColor } = useTheme();
+  const { setPortfolioModalProps } = usePortfolioModal();
   const cytoscapeStyles = useCytoscapeStyles();
   const landNodes = useCytoscapeLandNodeDefinitions();
   const landEdges = useCytoscapeLandEdgeDefinitions();
@@ -227,6 +228,17 @@ function CytoscapeProvider({ children }: PropsWithChildren) {
       );
   }, [cy, isTooltipHidden]);
 
+  // Opening Portfolio Model
+  useEffect(() => {
+    if (!clickedNode) return;
+    const { type, value } = clickedNode;
+    setPortfolioModalProps({
+      perspective: type,
+      node: value,
+      onCancel: () => setClickedNode(null),
+    });
+  }, [clickedNode, setPortfolioModalProps]);
+
   // Creating provider's value
   const value: CytoscapeProviderValue = useMemo(
     () => ({
@@ -234,7 +246,6 @@ function CytoscapeProvider({ children }: PropsWithChildren) {
       tooltipRef,
       clickedNode,
       hoveredNode,
-      clearClickedNode: () => setClickedNode(null),
       isTooltipHidden,
     }),
     [clickedNode, cytoscapeContainerRef, hoveredNode, isTooltipHidden],

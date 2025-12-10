@@ -218,6 +218,20 @@ h1.strategists-logo {
   }
 }
 
+// ----- AVATAR COMPONENT'S CSS DEFINED BELOW ----- //
+
+.strategists-player-avatar-title {
+  transition: all 0.2s ease;
+
+  &-clickable {
+    cursor: pointer;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
 // ----- ACTIONS COMPONENT'S CSS DEFINED BELOW ----- //
 
 .strategists-actions {
