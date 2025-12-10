@@ -57,7 +57,22 @@ export interface ActivitiesState {
 }
 
 const initialState: ActivitiesState = {
-  subscribedTypes: [...getSubscribableTypes()],
+  subscribedTypes: [
+    'BANKRUPTCY',
+    'BONUS',
+    'CHEAT',
+    'CREATE',
+    'EVENT',
+    'INVEST',
+    'JOIN',
+    'KICK',
+    'RENT',
+    'RESET',
+    'SKIP',
+    'START',
+    'TRADE',
+    'WIN',
+  ],
   activities: [],
 };
 

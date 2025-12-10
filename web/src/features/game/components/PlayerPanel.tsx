@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Badge, Flex, Space, Tabs, TabsProps } from 'antd';
+import { Badge, Button, Flex, Space, Tabs, TabsProps } from 'antd';
+import { SettingOutlined } from '@ant-design/icons';
 import useNotifications from '@shared/hooks/useNotifications';
 import Activities from '@activities/components/Activities';
 import Advices from '@advices/components/Advices';
@@ -10,6 +11,7 @@ import Lobby from './Lobby';
 import LobbyPlayerCard from './LobbyPlayerCard';
 import NavigationBar from './NavigationBar';
 import PlayerActionsPanel from './PlayerActionsPanel';
+import SettingsModal from './SettingsModal';
 
 type PlayerPanelTabKey = 'LOBBY' | 'ACTIVITIES' | 'ADVICE';
 
@@ -19,6 +21,7 @@ function PlayerPanel() {
   const { playerAdvices, unreadCount, markAdvicesRead } = useAdvicesState();
   const { errorNotification } = useNotifications();
   const [activeKey, setActiveKey] = useState<PlayerPanelTabKey>('LOBBY');
+  const [isSettingsModalOpen, setOpenSettingsModal] = useState(false);
 
   // Switching tabs when game's state changes
   useEffect(() => {
@@ -80,7 +83,17 @@ function PlayerPanel() {
       flex="1 1 auto 1"
     >
       <NavigationBar />
-      <LobbyPlayerCard player={player} />
+      <LobbyPlayerCard
+        player={player}
+        extra={
+          <Button
+            shape="circle"
+            type="text"
+            icon={<SettingOutlined />}
+            onClick={() => setOpenSettingsModal(true)}
+          />
+        }
+      />
       <Tabs
         centered
         defaultActiveKey="LOBBY"
@@ -90,6 +103,10 @@ function PlayerPanel() {
         items={items}
       />
       <PlayerActionsPanel />
+      <SettingsModal
+        open={isSettingsModalOpen}
+        onCancel={() => setOpenSettingsModal(false)}
+      />
     </Flex>
   );
 }

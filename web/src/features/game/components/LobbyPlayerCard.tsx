@@ -1,4 +1,4 @@
-import { useCallback, MouseEvent } from 'react';
+import { useCallback, MouseEvent, ReactNode } from 'react';
 import { Button, Divider, Row, Space, Tag, Tooltip } from 'antd';
 import {
   AuditOutlined,
@@ -14,19 +14,17 @@ import PlayerAvatar from './PlayerAvatar';
 import PlayerCard from './PlayerCard';
 import RemainingSkips from './RemainingSkips';
 
-interface LobbyPlayerCardProps {
+interface DefaultLobbyPlayerCardExtraProps {
   player: Player;
   rank?: number;
-  highlight?: boolean;
   showKickPlayer?: boolean;
 }
 
-function LobbyPlayerCard({
+function DefaultLobbyPlayerCardExtra({
   player,
   rank,
-  highlight,
   showKickPlayer,
-}: LobbyPlayerCardProps) {
+}: DefaultLobbyPlayerCardExtraProps) {
   const { gameCode, player: loggedInPlayer } = useLoginState();
   const { game } = useGameState();
 
@@ -48,6 +46,53 @@ function LobbyPlayerCard({
     player.id !== loggedInPlayer.id;
 
   return (
+    <>
+      {showKickPlayerButton && (
+        <Tooltip title={`Kick ${player.username} out!`}>
+          <Button
+            type="text"
+            shape="circle"
+            onClick={(event) => kickPlayer(event, player)}
+            icon={<UserDeleteOutlined />}
+          />
+        </Tooltip>
+      )}
+      {game.state !== 'ACTIVE' && player.host && (
+        <Tag icon={<StarOutlined />}>Host</Tag>
+      )}
+      {game.state === 'ACTIVE' && player.state !== 'BANKRUPT' && !!rank && (
+        <Tooltip title={<>{player.username}&apos;s rank</>}>
+          <Tag icon={<CrownOutlined />} variant="outlined">
+            #{rank}
+          </Tag>
+        </Tooltip>
+      )}
+      {game.state === 'ACTIVE' && player.state === 'BANKRUPT' && (
+        <Tag icon={<AuditOutlined />} variant="outlined">
+          Bankrupt
+        </Tag>
+      )}
+    </>
+  );
+}
+
+interface LobbyPlayerCardProps {
+  player: Player;
+  rank?: number;
+  highlight?: boolean;
+  showKickPlayer?: boolean;
+  extra?: ReactNode;
+}
+
+function LobbyPlayerCard({
+  player,
+  rank,
+  highlight,
+  showKickPlayer,
+  extra,
+}: LobbyPlayerCardProps) {
+  const { game } = useGameState();
+  return (
     <PlayerCard
       player={player}
       title={
@@ -65,33 +110,13 @@ function LobbyPlayerCard({
         </Row>
       }
       extra={
-        <>
-          {showKickPlayerButton && (
-            <Tooltip title={`Kick ${player.username} out!`}>
-              <Button
-                type="text"
-                shape="circle"
-                onClick={(event) => kickPlayer(event, player)}
-                icon={<UserDeleteOutlined />}
-              />
-            </Tooltip>
-          )}
-          {game.state !== 'ACTIVE' && player.host && (
-            <Tag icon={<StarOutlined />}>Host</Tag>
-          )}
-          {game.state === 'ACTIVE' && player.state !== 'BANKRUPT' && !!rank && (
-            <Tooltip title={<>{player.username}&apos;s rank</>}>
-              <Tag icon={<CrownOutlined />} variant="outlined">
-                #{rank}
-              </Tag>
-            </Tooltip>
-          )}
-          {game.state === 'ACTIVE' && player.state === 'BANKRUPT' && (
-            <Tag icon={<AuditOutlined />} variant="outlined">
-              Bankrupt
-            </Tag>
-          )}
-        </>
+        extra || (
+          <DefaultLobbyPlayerCardExtra
+            player={player}
+            rank={rank}
+            showKickPlayer={showKickPlayer}
+          />
+        )
       }
       highlight={highlight}
     />
