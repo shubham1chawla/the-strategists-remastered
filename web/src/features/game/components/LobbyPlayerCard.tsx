@@ -1,5 +1,5 @@
 import { useCallback, MouseEvent, ReactNode } from 'react';
-import { Button, Divider, Row, Space, Tag, Tooltip } from 'antd';
+import { Button, Divider, Row, Tag, Tooltip } from 'antd';
 import {
   AuditOutlined,
   CrownOutlined,
@@ -10,7 +10,7 @@ import axios from 'axios';
 import useGameState from '@game/hooks/useGameState';
 import { Player } from '@game/state';
 import useLoginState from '@login/hooks/useLoginState';
-import PlayerAvatar from './PlayerAvatar';
+import PlayerAvatarTitle from './PlayerAvatarTitle';
 import PlayerCard from './PlayerCard';
 import RemainingSkips from './RemainingSkips';
 
@@ -62,15 +62,11 @@ function DefaultLobbyPlayerCardExtra({
       )}
       {game.state === 'ACTIVE' && player.state !== 'BANKRUPT' && !!rank && (
         <Tooltip title={<>{player.username}&apos;s rank</>}>
-          <Tag icon={<CrownOutlined />} variant="outlined">
-            #{rank}
-          </Tag>
+          <Tag icon={<CrownOutlined />}>#{rank}</Tag>
         </Tooltip>
       )}
       {game.state === 'ACTIVE' && player.state === 'BANKRUPT' && (
-        <Tag icon={<AuditOutlined />} variant="outlined">
-          Bankrupt
-        </Tag>
+        <Tag icon={<AuditOutlined />}>Bankrupt</Tag>
       )}
     </>
   );
@@ -97,11 +93,11 @@ function LobbyPlayerCard({
       player={player}
       title={
         <Row align="middle">
-          <Space align="center">
-            <PlayerAvatar username={player.username} />
-            {player.username}
-          </Space>
-          {game.allowedSkipsCount && (
+          <PlayerAvatarTitle
+            player={player}
+            clickable={player.state !== 'BANKRUPT'}
+          />
+          {game.allowedSkipsCount && player.state !== 'BANKRUPT' && (
             <>
               <Divider orientation="vertical" size="large" />
               <RemainingSkips player={player} />

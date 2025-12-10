@@ -6,7 +6,7 @@ import {
   DollarOutlined,
 } from '@ant-design/icons';
 import { Player } from '@game/state';
-import PlayerAvatar from './PlayerAvatar';
+import PlayerAvatarTitle from './PlayerAvatarTitle';
 
 interface PlayerCardProps {
   player: Player;
@@ -27,14 +27,7 @@ function PlayerCard({ player, title, extra, highlight }: PlayerCardProps) {
   return (
     <Card
       className={className}
-      title={
-        title || (
-          <Space align="center">
-            <PlayerAvatar username={player.username} />
-            {player.username}
-          </Space>
-        )
-      }
+      title={title || <PlayerAvatarTitle player={player} />}
       extra={extra}
     >
       <Row>
