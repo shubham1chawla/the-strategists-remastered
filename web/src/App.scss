@@ -132,6 +132,11 @@ h1.strategists-logo {
     flex-basis: 100%; // Required for Advice to push content
     overflow-y: auto; // Ensuring tabs respect height constraints
 
+    // Ensuring even vertical and horizontal spacing in tab content
+    .ant-tabs-nav {
+      margin-bottom: var(--ant-padding-lg);
+    }
+
     // Forcing ant-tabs to respect parent's height constraints
     .ant-tabs-content,
     .ant-tabs-tabpane {
@@ -146,9 +151,6 @@ h1.strategists-logo {
   .strategists-advices {
     height: 100%;
     overflow-y: auto;
-
-    // Ensuring even vertical and horizontal spacing in tab content
-    padding-top: calc(var(--ant-padding-lg) / 2);
     box-sizing: border-box;
   }
 
@@ -160,23 +162,11 @@ h1.strategists-logo {
 }
 
 .strategists-activities {
-  &__collapse {
-    margin: 0 var(--ant-padding-lg);
+  padding: 0 var(--ant-padding-lg);
 
-    &__filters {
-      margin-top: var(--base-unit-size);
-      width: 100%;
-    }
-  }
-
-  &__timeline {
-    overflow-y: auto;
-    padding: 0 var(--ant-padding-lg);
-
-    // Fixing height of last activity node
-    .ant-steps-item:last-child {
-      min-height: 0 !important;
-    }
+  // Fixing height of last activity node
+  .ant-steps-item:last-child {
+    min-height: 0 !important;
   }
 }
 

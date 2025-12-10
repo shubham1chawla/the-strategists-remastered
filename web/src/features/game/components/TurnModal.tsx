@@ -21,7 +21,13 @@ function TurnModal() {
       className="strategists-modal"
       open={!!player && open}
       footer={
-        <Button type="primary" onClick={() => setOpen(false)}>
+        <Button
+          role="button"
+          tabIndex={0}
+          type="primary"
+          onClick={() => setOpen(false)}
+          autoFocus
+        >
           Got it!
         </Button>
       }
