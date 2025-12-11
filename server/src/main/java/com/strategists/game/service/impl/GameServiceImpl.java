@@ -1,5 +1,6 @@
 package com.strategists.game.service.impl;
 
+import com.strategists.game.configuration.GameMapConfiguration;
 import com.strategists.game.configuration.properties.CleanUpConfigurationProperties;
 import com.strategists.game.configuration.properties.GameConfigurationProperties;
 import com.strategists.game.configuration.properties.SkipPlayerConfigurationProperties;
@@ -24,6 +25,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -51,6 +53,7 @@ public class GameServiceImpl implements GameService {
     private CleanUpConfigurationProperties cleanUpConfigurationProperties;
 
     @Autowired
+    @Qualifier(GameMapConfiguration.GAME_MAP_FILES)
     private Map<String, File> gameMapFiles;
 
     @Autowired
@@ -91,8 +94,9 @@ public class GameServiceImpl implements GameService {
         Assert.state(!playerService.existsByEmail(email), email + " already part of a game!");
 
         // Preparing game map's instance
-        final var gameMap = GameMap.from(gameMapFiles.get(gameConfigurationProperties.defaultMap()));
-        Assert.notNull(gameMap, gameConfigurationProperties.defaultMap() + " game map doesn't exist!");
+        final var gameMapFile = gameMapFiles.get(gameConfigurationProperties.defaultGameMapFilePath());
+        Assert.isTrue(Objects.nonNull(gameMapFile) && gameMapFile.exists() && gameMapFile.isFile(), "Default game map file doesn't exist or is not valid!");
+        final var gameMap = GameMap.from(gameMapFile);
 
         // Creating game instance
         var game = new Game();
@@ -101,12 +105,14 @@ public class GameServiceImpl implements GameService {
         game.setState(State.LOBBY);
         game.setGameMapId(gameMap.getId());
 
+        // Setting up map specific constraints
+        game.setDiceSize(gameMap.getDiceSize());
+        game.setRentFactor(gameMap.getRentFactor());
+
         // Setting up game's instance with required configurations
         game.setPlayerBaseCash(gameMap.getPlayerBaseCash());
         game.setMinPlayersCount(gameConfigurationProperties.minPlayersCount());
         game.setMaxPlayersCount(gameConfigurationProperties.maxPlayersCount());
-        game.setDiceSize(gameConfigurationProperties.diceSize());
-        game.setRentFactor(gameConfigurationProperties.rentFactor());
 
         // Setting skip-player optional configurations
         if (skipPlayerConfigurationProperties.enabled()) {

@@ -29,9 +29,7 @@ spring:
 strategists:
   # Core game-related configurations
   game:
-    default-map: india
-    dice-size: 6
-    rent-factor: 0.2
+    default-game-map-file-path: india.json
     code-length: 4
     min-players-count: 2
     max-players-count: 6
