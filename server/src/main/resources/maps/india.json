@@ -1,192 +1,194 @@
 {
-    "id": "india",
-    "name": "India",
-    "description": "Incredible India",
-    "playerBaseCash": 1000,
-    "lands": [
-        {
-            "name": "Srinagar",
-            "x": 0,
-            "y": 0,
-            "playerPosition": "top-left",
-            "sensitivity": 5,
-            "baseValue": 475.0
-        },
-        {
-            "name": "Leh",
-            "x": 150,
-            "y": 0,
-            "playerPosition": "top-right",
-            "sensitivity": 5,
-            "baseValue": 475.0
-        },
-        {
-            "name": "Chandigarh",
-            "x": 40,
-            "y": 100,
-            "playerPosition": "right",
-            "sensitivity": 5,
-            "baseValue": 500.0
-        },
-        {
-            "name": "Delhi",
-            "x": 120,
-            "y": 225,
-            "playerPosition": "top-right",
-            "sensitivity": 5,
-            "baseValue": 800.0
-        },
-        {
-            "name": "Lucknow",
-            "x": 250,
-            "y": 300,
-            "playerPosition": "top-right",
-            "sensitivity": 5,
-            "baseValue": 700.0
-        },
-        {
-            "name": "Patna",
-            "x": 400,
-            "y": 350,
-            "playerPosition": "bottom-left",
-            "sensitivity": 5,
-            "baseValue": 250.0
-        },
-        {
-            "name": "Guwahati",
-            "x": 600,
-            "y": 300,
-            "playerPosition": "top",
-            "sensitivity": 5,
-            "baseValue": 350.0
-        },
-        {
-            "name": "Itanagar",
-            "x": 675,
-            "y": 280,
-            "playerPosition": "top-right",
-            "sensitivity": 5,
-            "baseValue": 320.0
-        },
-        {
-            "name": "Imphal",
-            "x": 700,
-            "y": 350,
-            "playerPosition": "right",
-            "sensitivity": 5,
-            "baseValue": 275.0
-        },
-        {
-            "name": "Aizawl",
-            "x": 650,
-            "y": 400,
-            "playerPosition": "bottom-right",
-            "sensitivity": 5,
-            "baseValue": 350.0
-        },
-        {
-            "name": "Kolkata",
-            "x": 500,
-            "y": 450,
-            "playerPosition": "bottom-right",
-            "sensitivity": 5,
-            "baseValue": 825.0
-        },
-        {
-            "name": "Bhubneswar",
-            "x": 420,
-            "y": 500,
-            "playerPosition": "bottom-right",
-            "sensitivity": 5,
-            "baseValue": 375.0
-        },
-        {
-            "name": "Visakhapatnam",
-            "x": 300,
-            "y": 580,
-            "playerPosition": "bottom-right",
-            "sensitivity": 5,
-            "baseValue": 375.0
-        },
-        {
-            "name": "Hyderabad",
-            "x": 180,
-            "y": 600,
-            "playerPosition": "top",
-            "sensitivity": 5,
-            "baseValue": 750.0
-        },
-        {
-            "name": "Chennai",
-            "x": 225,
-            "y": 800,
-            "playerPosition": "right",
-            "sensitivity": 5,
-            "baseValue": 650.0
-        },
-        {
-            "name": "Coimbatore",
-            "x": 120,
-            "y": 875,
-            "playerPosition": "bottom",
-            "sensitivity": 5,
-            "baseValue": 450.0
-        },
-        {
-            "name": "Bengaluru",
-            "x": 150,
-            "y": 800,
-            "playerPosition": "left",
-            "sensitivity": 5,
-            "baseValue": 800.0
-        },
-        {
-            "name": "Panaji",
-            "x": 80,
-            "y": 700,
-            "playerPosition": "left",
-            "sensitivity": 5,
-            "baseValue": 950.0
-        },
-        {
-            "name": "Mumbai",
-            "x": 50,
-            "y": 550,
-            "playerPosition": "bottom-left",
-            "sensitivity": 5,
-            "baseValue": 900.0
-        },
-        {
-            "name": "Rajkot",
-            "x": -100,
-            "y": 480,
-            "playerPosition": "left",
-            "sensitivity": 5,
-            "baseValue": 300.0
-        },
-        {
-            "name": "Ahmedabad",
-            "x": 45,
-            "y": 440,
-            "playerPosition": "right",
-            "sensitivity": 5,
-            "baseValue": 700.0
-        },
-        {
-            "name": "Jaipur",
-            "x": 75,
-            "y": 300,
-            "playerPosition": "bottom-right",
-            "sensitivity": 5,
-            "baseValue": 400.0
-        },
-        {
-            "name": "Prison",
-            "x": -100,
-            "y": 300,
-            "playerPosition": "left",
-            "sensitivity": 5,
-            "baseValue": 0.0
-        }
-    ]
+  "id": "india",
+  "name": "India",
+  "description": "Incredible India",
+  "playerBaseCash": 1000,
+  "diceSize": 6,
+  "rentFactor": 0.2,
+  "lands": [
+    {
+      "name": "Srinagar",
+      "x": 0,
+      "y": 0,
+      "playerPosition": "top-left",
+      "sensitivity": 5,
+      "baseValue": 475.0
+    },
+    {
+      "name": "Leh",
+      "x": 150,
+      "y": 0,
+      "playerPosition": "top-right",
+      "sensitivity": 5,
+      "baseValue": 475.0
+    },
+    {
+      "name": "Chandigarh",
+      "x": 40,
+      "y": 100,
+      "playerPosition": "right",
+      "sensitivity": 5,
+      "baseValue": 500.0
+    },
+    {
+      "name": "Delhi",
+      "x": 120,
+      "y": 225,
+      "playerPosition": "top-right",
+      "sensitivity": 5,
+      "baseValue": 800.0
+    },
+    {
+      "name": "Lucknow",
+      "x": 250,
+      "y": 300,
+      "playerPosition": "top-right",
+      "sensitivity": 5,
+      "baseValue": 700.0
+    },
+    {
+      "name": "Patna",
+      "x": 400,
+      "y": 350,
+      "playerPosition": "bottom-left",
+      "sensitivity": 5,
+      "baseValue": 250.0
+    },
+    {
+      "name": "Guwahati",
+      "x": 600,
+      "y": 300,
+      "playerPosition": "top",
+      "sensitivity": 5,
+      "baseValue": 350.0
+    },
+    {
+      "name": "Itanagar",
+      "x": 675,
+      "y": 280,
+      "playerPosition": "top-right",
+      "sensitivity": 5,
+      "baseValue": 320.0
+    },
+    {
+      "name": "Imphal",
+      "x": 700,
+      "y": 350,
+      "playerPosition": "right",
+      "sensitivity": 5,
+      "baseValue": 275.0
+    },
+    {
+      "name": "Aizawl",
+      "x": 650,
+      "y": 400,
+      "playerPosition": "bottom-right",
+      "sensitivity": 5,
+      "baseValue": 350.0
+    },
+    {
+      "name": "Kolkata",
+      "x": 500,
+      "y": 450,
+      "playerPosition": "bottom-right",
+      "sensitivity": 5,
+      "baseValue": 825.0
+    },
+    {
+      "name": "Bhubneswar",
+      "x": 420,
+      "y": 500,
+      "playerPosition": "bottom-right",
+      "sensitivity": 5,
+      "baseValue": 375.0
+    },
+    {
+      "name": "Visakhapatnam",
+      "x": 300,
+      "y": 580,
+      "playerPosition": "bottom-right",
+      "sensitivity": 5,
+      "baseValue": 375.0
+    },
+    {
+      "name": "Hyderabad",
+      "x": 180,
+      "y": 600,
+      "playerPosition": "top",
+      "sensitivity": 5,
+      "baseValue": 750.0
+    },
+    {
+      "name": "Chennai",
+      "x": 225,
+      "y": 800,
+      "playerPosition": "right",
+      "sensitivity": 5,
+      "baseValue": 650.0
+    },
+    {
+      "name": "Coimbatore",
+      "x": 120,
+      "y": 875,
+      "playerPosition": "bottom",
+      "sensitivity": 5,
+      "baseValue": 450.0
+    },
+    {
+      "name": "Bengaluru",
+      "x": 150,
+      "y": 800,
+      "playerPosition": "left",
+      "sensitivity": 5,
+      "baseValue": 800.0
+    },
+    {
+      "name": "Panaji",
+      "x": 80,
+      "y": 700,
+      "playerPosition": "left",
+      "sensitivity": 5,
+      "baseValue": 950.0
+    },
+    {
+      "name": "Mumbai",
+      "x": 50,
+      "y": 550,
+      "playerPosition": "bottom-left",
+      "sensitivity": 5,
+      "baseValue": 900.0
+    },
+    {
+      "name": "Rajkot",
+      "x": -100,
+      "y": 480,
+      "playerPosition": "left",
+      "sensitivity": 5,
+      "baseValue": 300.0
+    },
+    {
+      "name": "Ahmedabad",
+      "x": 45,
+      "y": 440,
+      "playerPosition": "right",
+      "sensitivity": 5,
+      "baseValue": 700.0
+    },
+    {
+      "name": "Jaipur",
+      "x": 75,
+      "y": 300,
+      "playerPosition": "bottom-right",
+      "sensitivity": 5,
+      "baseValue": 400.0
+    },
+    {
+      "name": "Prison",
+      "x": -100,
+      "y": 300,
+      "playerPosition": "left",
+      "sensitivity": 5,
+      "baseValue": 0.0
+    }
+  ]
 }

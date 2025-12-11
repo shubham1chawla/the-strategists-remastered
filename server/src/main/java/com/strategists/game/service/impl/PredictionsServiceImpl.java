@@ -1,5 +1,6 @@
 package com.strategists.game.service.impl;
 
+import com.strategists.game.configuration.GameMapConfiguration;
 import com.strategists.game.configuration.properties.ExternalAPIEndpointConfigurationProperties;
 import com.strategists.game.configuration.properties.PredictionsConfigurationProperties;
 import com.strategists.game.csv.impl.PredictionsCSV;
@@ -23,6 +24,7 @@ import jakarta.transaction.Transactional;
 import lombok.extern.log4j.Log4j2;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -33,7 +35,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 
 @Log4j2
@@ -48,6 +49,7 @@ public class PredictionsServiceImpl extends AbstractExternalService implements P
     private PlayerPredictionRepository playerPredictionRepository;
 
     @Autowired
+    @Qualifier(GameMapConfiguration.GAME_MAP_FILES)
     private Map<String, File> gameMapFiles;
 
     @Autowired
@@ -154,8 +156,11 @@ public class PredictionsServiceImpl extends AbstractExternalService implements P
 
         log.info("Training predictions model for eligible game maps...");
         for (final var file : gameMapFiles.values()) {
-            final var gameMap = GameMap.from(file);
-            if (Objects.isNull(gameMap)) {
+            GameMap gameMap;
+            try {
+                gameMap = GameMap.from(file);
+            } catch (Exception ex) {
+                log.warn("Skipping training model for game map file at: {}", file.getAbsolutePath());
                 continue;
             }
 
