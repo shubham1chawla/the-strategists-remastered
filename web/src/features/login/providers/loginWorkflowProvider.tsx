@@ -21,6 +21,7 @@ type LoginWorkflow =
 interface LoginWorkflowProviderValue {
   recaptchaSiteKey: string | null;
   googleOAuthClientId: string | null;
+  gameCodeLength: number;
   loginWorkflow: LoginWorkflow;
   setLoginWorkflow: (loginWorkflow: LoginWorkflow) => void;
   googleLoginCredential: string | null;
@@ -47,6 +48,14 @@ function LoginWorkflowProvider({ children }: PropsWithChildren) {
     return !clientId || clientId.startsWith('PLACEHOLDER_') ? null : clientId;
   }, []);
 
+  // Checking Game Code Length from env variable
+  const gameCodeLength = useMemo(() => {
+    const length = (import.meta.env?.VITE_GAME_CODE_LENGTH || '').trim();
+    return !length || length.startsWith('PLACEHOLDER_')
+      ? 4
+      : parseInt(length, 10);
+  }, []);
+
   // Assuming user to be not verified if reCAPTCHA is enabled
   const [loginWorkflow, setLoginWorkflow] = useState<LoginWorkflow>(
     !recaptchaSiteKey ? 'VERIFIED' : 'NOT_VERIFIED',
@@ -64,6 +73,7 @@ function LoginWorkflowProvider({ children }: PropsWithChildren) {
     () => ({
       recaptchaSiteKey,
       googleOAuthClientId,
+      gameCodeLength,
       loginWorkflow,
       setLoginWorkflow,
       googleLoginCredential,
@@ -73,6 +83,7 @@ function LoginWorkflowProvider({ children }: PropsWithChildren) {
       recaptchaSiteKey,
       googleOAuthClientId,
       googleLoginCredential,
+      gameCodeLength,
       loginWorkflow,
     ],
   );
