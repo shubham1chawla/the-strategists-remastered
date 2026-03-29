@@ -444,10 +444,10 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fastapi", extras = ["standard"] },
-    { name = "google-api-python-client" },
-    { name = "google-auth-httplib2" },
-    { name = "google-auth-oauthlib" },
+    { name = "fastapi", extras = ["standard"], specifier = "==0.116.1" },
+    { name = "google-api-python-client", specifier = "==2.176.0" },
+    { name = "google-auth-httplib2", specifier = "==0.2.0" },
+    { name = "google-auth-oauthlib", specifier = "==1.2.2" },
 ]
 
 [[package]]

@@ -5,11 +5,11 @@ description = "The Strategists Predictions API"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "pandas",
-    "scikit-learn",
-    "mlflow",
-    "xgboost",
-    "lightgbm",
-    "catboost",
-    "fastapi[standard]",
+    "pandas==2.3.1",
+    "scikit-learn==1.7.1",
+    "mlflow==3.1.4",
+    "xgboost==3.0.2",
+    "lightgbm==4.6.0",
+    "catboost==1.2.8",
+    "fastapi[standard]==0.116.1",
 ]

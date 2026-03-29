@@ -5,8 +5,8 @@ description = "The Strategists Permissions API"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi[standard]",
-    "google-api-python-client",
-    "google-auth-httplib2",
-    "google-auth-oauthlib",
+    "fastapi[standard]==0.116.1",
+    "google-api-python-client==2.176.0",
+    "google-auth-httplib2==0.2.0",
+    "google-auth-oauthlib==1.2.2",
 ]
