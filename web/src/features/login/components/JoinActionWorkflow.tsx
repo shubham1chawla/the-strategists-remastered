@@ -9,8 +9,12 @@ import useLoginWorkflow from '@login/hooks/useLoginWorkflow';
 import { loggedIn, LoginState } from '@login/state';
 
 function JoinActionWorkflow() {
-  const { loginWorkflow, googleLoginCredential, setLoginWorkflow } =
-    useLoginWorkflow();
+  const {
+    loginWorkflow,
+    googleLoginCredential,
+    gameCodeLength,
+    setLoginWorkflow,
+  } = useLoginWorkflow();
   const { errorNotification } = useNotifications();
   const [form] = Form.useForm<{ code: string }>();
   const [joinButtonDisabled, setJoinButtonDisabled] = useState(true);
@@ -100,7 +104,7 @@ function JoinActionWorkflow() {
                 {
                   required: true,
                   type: 'string',
-                  len: 4,
+                  len: gameCodeLength,
                   whitespace: false,
                   pattern: /[A-Za-z]/,
                   validateTrigger: ['onChange', 'onBlur'],
@@ -112,7 +116,7 @@ function JoinActionWorkflow() {
                 autoFocus
                 formatter={(code) => code.toUpperCase()}
                 separator={<span>/</span>}
-                length={4}
+                length={gameCodeLength}
               />
             </Form.Item>
             <Form.Item>

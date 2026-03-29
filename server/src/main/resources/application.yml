@@ -30,7 +30,7 @@ strategists:
   # Core game-related configurations
   game:
     default-game-map-file-path: india.json
-    code-length: 4
+    code-length: ${GAME_CODE_LENGTH:4}
     min-players-count: 2
     max-players-count: 6
 
